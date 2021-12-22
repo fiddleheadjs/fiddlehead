@@ -1,6 +1,6 @@
 # Hook
 
-A library renders HTML by JS. It replicates some key features of React:
+A lightweight library renders HTML by JS. It replicates some key features of React:
 
 - State management with hooks: useState, useEffect, useRef
 - Reconcilication
