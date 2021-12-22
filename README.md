@@ -62,7 +62,7 @@ module.exports = {
 
 ### Basic usage
 
-```
+```jsx
 import Hook from 'path/to/hook';
 
 export default function HelloWorld() {
@@ -75,7 +75,7 @@ export default function HelloWorld() {
 
 ### State management
 
-```
+```jsx
 import Hook, {useState} from 'path/to/hook';
 
 export default function Counter() {
@@ -95,7 +95,7 @@ export default function Counter() {
 }
 ```
 
-```
+```jsx
 import Hook, {useState, useEffect} from 'path/to/hook';
 
 export default function UserInfo() {
