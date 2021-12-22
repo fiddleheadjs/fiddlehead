@@ -53,9 +53,9 @@ module.exports = {
                 use: getJsLoaders()
             },
             //...
-        ]
+        ],
     },
-    //...
+};
 ```
 
 ## Usage
