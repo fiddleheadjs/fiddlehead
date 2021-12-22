@@ -21,7 +21,7 @@ npm install babel-loader @babel/core @babel/plugin-transform-react-jsx @babel/pr
 
 Webpack config:
 
-```
+```js
 function getJsLoaders() {
     return [
         {
