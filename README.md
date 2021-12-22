@@ -2,6 +2,8 @@
 
 A lightweight library renders HTML by JS. It replicates some key features of React:
 
+- Declarative programming
+- One-way data binding
 - State management with hooks: useState, useEffect, useRef
 - Reconcilication
 
