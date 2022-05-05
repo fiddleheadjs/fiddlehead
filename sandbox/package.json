@@ -1,0 +1,10 @@
+{
+  "name": "sandbox",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@babel/core": "^7.17.10",
+    "@babel/plugin-transform-react-jsx": "^7.17.3",
+    "@babel/preset-env": "^7.17.10",
+    "babel-loader": "^8.2.5"
+  }
+}

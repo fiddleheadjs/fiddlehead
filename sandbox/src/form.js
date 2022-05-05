@@ -1,4 +1,4 @@
-import Hook, {useState, useEffect, useRef} from "./index";
+import Hook, {useState, useEffect, useRef} from "../../index.js";
 
 
 function Cat({text, setText}) {

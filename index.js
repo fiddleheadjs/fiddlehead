@@ -1,4 +1,4 @@
-import Hook from './lib';
+import Hook from './lib.js';
 
 export default Hook;
 
