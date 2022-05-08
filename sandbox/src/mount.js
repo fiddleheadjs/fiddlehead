@@ -1,5 +1,12 @@
 import Hook, {useState, useEffect, useRef} from "../../index.js";
 
+function Wrapper({children}) {
+    return (
+        <span className="Wrapper">
+            {children}
+        </span>
+    );
+}
 
 function DemoWrapperWrapper() {
     const [layout, setLayout] = useState('A');
@@ -13,7 +20,9 @@ function DemoWrapperWrapper() {
             <div style={{marginTop: '100px'}}>
                 <span>Hi,</span>
                 {layout === 'A' && <>
-                    <b>My</b>
+                    <Wrapper>
+                        <b>My</b>
+                    </Wrapper>
                     <>
                         <>
                             <i>name</i>
@@ -25,13 +34,19 @@ function DemoWrapperWrapper() {
                 </>}
                 {layout === 'B' && <>
                     <b>I</b>
-                    <>
-                        <i>
-                            <>am</>
-                        </i>
-                    </>
+                    <Wrapper>
+                        <>
+                            <i>
+                                <>am</>
+                            </i>
+                        </>
+                    </Wrapper>
                 </>}
-                <a>Quyet</a>
+                <Wrapper>
+                    <>
+                        <a>Quyet</a>
+                    </>
+                </Wrapper>
             </div>
         </div>
     );
