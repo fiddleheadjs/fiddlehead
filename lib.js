@@ -768,11 +768,11 @@ function findHtmlHost(virtualNode) {
         return null;
     }
 
-    if (virtualNode.parent.htmlNode !== null) {
-        return virtualNode.parent.htmlNode;
+    if (virtualNode.parent.htmlNode === null) {
+        return findHtmlHost(virtualNode.parent);
     }
-
-    return findHtmlHost(virtualNode.parent);
+    
+    return virtualNode.parent.htmlNode;
 }
 
 function findClosestHtmlNodes(virtualNode) {
