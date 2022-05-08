@@ -768,7 +768,7 @@ function findHtmlHost(virtualNode) {
         return null;
     }
 
-    if (virtualNode.parent.htmlNode) {
+    if (virtualNode.parent.htmlNode !== null) {
         return virtualNode.parent.htmlNode;
     }
 
