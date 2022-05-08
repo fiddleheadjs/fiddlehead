@@ -764,7 +764,7 @@ function removeHtmlNodesOfVirtualNode(virtualNode) {
 }
 
 function findHtmlHost(virtualNode) {
-    if (!virtualNode.parent) {
+    if (virtualNode.parent === null) {
         return null;
     }
 
