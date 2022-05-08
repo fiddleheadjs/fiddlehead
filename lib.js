@@ -678,7 +678,7 @@ function hydrateVirtualNodes(virtualNode) {
 function commitToHTML(oldVirtualNodeMap, newVirtualNodeMap) {
     removeOldHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap);
     updateExistingHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap);
-    appendNewHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap);
+    insertNewHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap);
 }
 
 function removeOldHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap) {
@@ -690,7 +690,7 @@ function removeOldHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap) {
         if (hasOwnProperty(oldVirtualNodeMap, key) && !hasOwnProperty(newVirtualNodeMap, key)) {
             if (!key.startsWith(lastRemovedKey + '/')) {
                 const oldVirtualNode = oldVirtualNodeMap[key];
-                removeHtmlNodesByVirtualNode(oldVirtualNode);
+                removeHtmlNodesOfVirtualNode(oldVirtualNode);
                 lastRemovedKey = key;
             }
         }
@@ -720,41 +720,45 @@ function updateExistingHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap) {
     });
 }
 
-function appendNewHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap) {
+function insertNewHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap) {
+    let pendingVirtualNodes = [];
+    
     for (let key in newVirtualNodeMap) {
-        if (hasOwnProperty(newVirtualNodeMap, key) && !hasOwnProperty(oldVirtualNodeMap, key)) {
-            const newVirtualNode = newVirtualNodeMap[key];
-            appendHtmlNodesByVirtualNode(newVirtualNode);
+        if (hasOwnProperty(newVirtualNodeMap, key)) {
+            if (!hasOwnProperty(oldVirtualNodeMap, key)) {
+                pendingVirtualNodes.push(newVirtualNodeMap[key]);
+            } else {
+                insertClosestHtmlNodesOfVirtualNodes(pendingVirtualNodes, oldVirtualNodeMap[key]);
+                pendingVirtualNodes.length = 0;
+            }
         }
+    }
+
+    if (pendingVirtualNodes.length > 0) {
+        insertClosestHtmlNodesOfVirtualNodes(pendingVirtualNodes, null);
     }
 }
 
-function appendHtmlNodesByVirtualNode(virtualNode) {
-    const walk = (virtualNode) => {
-        const htmlNodes = findClosestHtmlNodes(virtualNode);
-        htmlNodes.forEach(htmlNode => {
-            findHtmlHost(virtualNode).appendChild(htmlNode);
-        });
-
-        virtualNode.children.forEach(childVirtualNode => {
-            walk(childVirtualNode);
-        });
-    };
-
-    walk(virtualNode);
+function insertClosestHtmlNodesOfVirtualNodes(virtualNodes, virtualNodeAfter) {
+    const htmlNodeAfter = virtualNodeAfter && findClosestHtmlNodes(virtualNodeAfter)[0] || null;
+    
+    virtualNodes.forEach(virtualNode => {
+        if (virtualNode.htmlNode !== null) {
+            const htmlHost = findHtmlHost(virtualNode);
+            
+            if (htmlNodeAfter !== null && htmlHost === htmlNodeAfter.parentNode) {
+                htmlHost.insertBefore(virtualNode.htmlNode, htmlNodeAfter);
+            } else {
+                htmlHost.appendChild(virtualNode.htmlNode);
+            }
+        }
+    });
 }
 
-function removeHtmlNodesByVirtualNode(virtualNode) {
-    const htmlNodes = findClosestHtmlNodes(virtualNode);
-    htmlNodes.forEach(htmlNode => {
-        // This should work with out throwing error
-        // But to be safe
-        // And we can see the error log if something went wrong
-        // while keeping the UI to be not crashed
-        try {
-            findHtmlHost(virtualNode).removeChild(htmlNode);
-        } catch (e) {
-            console.error('Unable to remove:', htmlNode, 'from:', htmlNode.parentNode);
+function removeHtmlNodesOfVirtualNode(virtualNode) {
+    findClosestHtmlNodes(virtualNode).forEach(htmlNode => {
+        if (htmlNode.parentNode !== null) {
+            htmlNode.parentNode.removeChild(htmlNode);
         }
     });
 }
@@ -790,9 +794,7 @@ function render(rootVirtualNode, container) {
 
     rootVirtualNode.parent = containerVirtualNode;
 
-    const newRootVirtualNode = updateComponent(rootVirtualNode, true);
-
-    // console.log('RootVirtualNode', newRootVirtualNode);
+    updateComponent(rootVirtualNode, true);
 }
 
 
