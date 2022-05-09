@@ -1,4 +1,4 @@
-import Hook, {useState, useEffect, useRef} from "../../index.js";
+import {h, render, useState, useEffect, useRef} from "../../output/dist/index.min.js";
 
 
 function Cat({text, setText}) {
@@ -262,4 +262,4 @@ function DemoWrapperWrapper() {
     return <><DemoWrapper/></>;
 }
 
-Hook.render(<DemoWrapperWrapper/>, document.getElementById('sandbox-container'));
+render(<DemoWrapperWrapper/>, document.getElementById('sandbox-container'));

@@ -12,7 +12,7 @@ function getJsLoaders() {
                     [
                         "@babel/plugin-transform-react-jsx",
                         {
-                            "pragma": "Hook.$",
+                            "pragma": "h",
                             "pragmaFrag": "null"
                         }
                     ],

@@ -1,4 +1,4 @@
-import Hook, {useState, useEffect, useRef} from "../../index.js";
+import {h, render, useState, useEffect, useRef} from "../../output/dist/index.min.js";
 
 function Wrapper({children}) {
     return (
@@ -52,4 +52,4 @@ function DemoWrapperWrapper() {
     );
 }
 
-Hook.render(<DemoWrapperWrapper />, document.getElementById('sandbox-container'));
+render(<DemoWrapperWrapper />, document.getElementById('sandbox-container'));
