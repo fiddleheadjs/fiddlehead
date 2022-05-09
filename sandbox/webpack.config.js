@@ -24,7 +24,7 @@ function getJsLoaders() {
 
 const configs = [];
 
-['form', 'mount'].map(filename => {
+['form', 'mount', 'svg'].map(filename => {
     configs.push({
         mode: 'development',
         entry: `./src/${filename}.js`,

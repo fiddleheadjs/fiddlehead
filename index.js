@@ -57,6 +57,8 @@ function VirtualNode(type, props, key, ref) {
             this.ref.current = htmlNode;
         }
     };
+
+    this.nsSVG = false;
 }
 
 /**
@@ -662,7 +664,12 @@ function hydrateVirtualNodes(virtualNode) {
             htmlNode = document.createTextNode(virtualNode.text);
         }
         else if (typeof virtualNode.type === 'string') {
-            htmlNode = createHTMLElement(virtualNode.type, virtualNode.props);
+            let ns = null;
+            if (virtualNode.type.toUpperCase() === 'SVG' || virtualNode.parent !== null && virtualNode.parent.nsSVG) {
+                virtualNode.nsSVG = true;
+                ns = 'http://www.w3.org/2000/svg';
+            }
+            htmlNode = createDOMElementNS(ns, virtualNode.type, virtualNode.props);
         }
 
         virtualNode.setHtmlNode(htmlNode);
@@ -722,7 +729,7 @@ function updateExistingHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap) {
 
 function insertNewHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap) {
     let pendingVirtualNodes = [];
-    
+
     for (let key in newVirtualNodeMap) {
         if (hasOwnProperty(newVirtualNodeMap, key)) {
             if (!hasOwnProperty(oldVirtualNodeMap, key)) {
@@ -741,11 +748,11 @@ function insertNewHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap) {
 
 function insertClosestHtmlNodesOfVirtualNodes(virtualNodes, virtualNodeAfter) {
     const htmlNodeAfter = virtualNodeAfter && findClosestHtmlNodes(virtualNodeAfter)[0] || null;
-    
+
     virtualNodes.forEach(virtualNode => {
         if (virtualNode.htmlNode !== null) {
             const htmlHost = findHtmlHost(virtualNode);
-            
+
             if (htmlNodeAfter !== null && htmlHost === htmlNodeAfter.parentNode) {
                 htmlHost.insertBefore(virtualNode.htmlNode, htmlNodeAfter);
             } else {
@@ -771,7 +778,7 @@ function findHtmlHost(virtualNode) {
     if (virtualNode.parent.htmlNode === null) {
         return findHtmlHost(virtualNode.parent);
     }
-    
+
     return virtualNode.parent.htmlNode;
 }
 
@@ -800,23 +807,11 @@ function render(rootVirtualNode, container) {
 
 //============================
 
-
-const SVG_TAGS = [
-    'svg',
-    'g',
-    'circle',
-    'ellipse',
-    'line',
-    'path',
-    'polygon',
-    'polyline',
-    'rect',
-];
-
-function createHTMLElement(type, attributes) {
-    const node = SVG_TAGS.includes(type)
-        ? document.createElementNS("http://www.w3.org/2000/svg", type)
-        : document.createElement(type);
+function createDOMElementNS(ns, type, attributes) {
+    const node = (ns !== null
+        ? document.createElementNS(ns, type)
+        : document.createElement(type)
+    );
 
     setAttributes(node, attributes);
 
