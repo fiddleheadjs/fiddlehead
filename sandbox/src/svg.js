@@ -1,4 +1,4 @@
-import {h, render} from '../../output/dist/index.min.js';
+import {h, render} from '../../index.js';
 
 render(<DemoWrapper />, document.getElementById('sandbox-container'));
 
