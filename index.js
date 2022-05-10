@@ -28,6 +28,7 @@ function VirtualNode(type, props, key, ref) {
     this.props = props;
     this.key = key;
     this.ref = ref;
+    
     this.hooks = [];
 
     this.parent = null;
@@ -35,7 +36,7 @@ function VirtualNode(type, props, key, ref) {
     this.path = [];
 
     this.viewNode = null;
-    this.viewNS = null;
+    this.ns = null;
 }
 
 const NODE_TEXT = '#txt';
@@ -415,75 +416,51 @@ function resolveMountedNodes(oldVirtualNodeMap, newVirtualNodeMap) {
     }
 }
 
-function updateComponent(oldRootVirtualNode, isInit = false) {
-    const walk = (virtualNode, parentVirtualNode = null) => {
-        if (virtualNode.type === NODE_TEXT) {
-            return virtualNode;
-        }
+/**
+ * 
+ * @param {VirtualNode} virtualNode 
+ */
+function updateVirtualTree(virtualNode) {
+    if (virtualNode.type === NODE_TEXT) {
+        return;
+    }
 
-        if (!isFunction(virtualNode.type)) {
-            virtualNode.children.forEach(childVirtualNode => {
-                walk(childVirtualNode, virtualNode);
-            });
+    if (!isFunction(virtualNode.type)) {
+        virtualNode.children.forEach(childVirtualNode => {
+            updateVirtualTree(childVirtualNode);
+        });
+        return;
+    }
 
-            return virtualNode;
-        }
+    {
+        prepareCurrentlyRendering(virtualNode);
+        const newVirtualNode = virtualNode.type(virtualNode.props);
+        flushCurrentlyRendering();
 
-        {
-            // const fiber = virtualNode;
+        resolveTree(newVirtualNode, virtualNode.path);
+        
+        newVirtualNode.parent = virtualNode;
+        virtualNode.children[0] = newVirtualNode;
 
-            prepareCurrentlyRendering(virtualNode);
-            const newVirtualNode = virtualNode.type(virtualNode.props);
-            flushCurrentlyRendering();
+        updateVirtualTree(newVirtualNode);
+    }
+}
 
-            resolveTree(newVirtualNode, virtualNode.path);
-            
-            newVirtualNode.parent = virtualNode;
-            virtualNode.children[0] = newVirtualNode;
-
-            // // TODO: Research more about this
-            // // I don't know why need to check instanceof
-            // // If assign to html node, old ref is set, new ref is NOT set
-            // // But if assign to fiber node, old ref is NOT set, new ref is set
-            // if (virtualNode.ref instanceof RefHook) {
-            //     newVirtualNode.ref = virtualNode.ref;
-            // }
-
-            // if (parentVirtualNode !== null) {
-            //     const index = parentVirtualNode.children.indexOf(virtualNode);
-            //     if (index >= 0) {
-            //         parentVirtualNode.children[index] = newVirtualNode;
-            //     }
-            // }
-
-            // newVirtualNode.children.forEach(childVirtualNode => {
-            //     walk(childVirtualNode, newVirtualNode);
-            // });
-
-            walk(newVirtualNode, virtualNode);
-
-            return newVirtualNode;
-        }
-    };
-
-    const newRootVirtualNode = walk(oldRootVirtualNode, oldRootVirtualNode.parent);
-    // console.log(newRootVirtualNode);
+/**
+ * 
+ * @param {VirtualNode} rootVirtualNode 
+ * @param {boolean} isInit 
+ */
+function updateComponent(rootVirtualNode, isInit = false) {
+    const oldVirtualNodeMap = isInit ? {} : parseTree(rootVirtualNode);
+    updateVirtualTree(rootVirtualNode, rootVirtualNode.parent);
     finishResolveTree();
-
-    const oldVirtualNodeMap = isInit ? {} : parseTree(oldRootVirtualNode);
-    const newVirtualNodeMap = parseTree(newRootVirtualNode);
-
-    // console.log(oldVirtualNodeMap, newVirtualNodeMap);
+    const newVirtualNodeMap = parseTree(rootVirtualNode);
 
     resolveUnmountedNodes(oldVirtualNodeMap, newVirtualNodeMap);
-
-    hydrateVirtualNodes(newRootVirtualNode);
-
+    hydrateVirtualNodes(rootVirtualNode);
     commitToHTML(oldVirtualNodeMap, newVirtualNodeMap);
-
     resolveMountedNodes(oldVirtualNodeMap, newVirtualNodeMap);
-
-    return newRootVirtualNode;
 }
 
 /**
@@ -524,6 +501,16 @@ function createFiberNode(type, attributes, ...content) {
         const existedFiber = findFiber(virtualNode.path);
         if (existedFiber) {
             virtualNode.hooks = existedFiber.hooks;
+
+            // for (let i = virtualNode.hooks.length - 1; i >= 0; i--) {
+            //     const hook = virtualNode.hooks[i];
+            //     const hook2 = existedFiber.hooks[i];
+            //     if (hook instanceof StateHook) {
+            //         hook.value = hook2.value;
+            //     } else if (hook instanceof RefHook) {
+            //         hook.current = hook2.current;
+            //     }
+            // }
         }
 
         //????
@@ -641,12 +628,12 @@ function hydrateVirtualNodes(virtualNode) {
     const walk = (virtualNode) => {
         // Determine the namespace
         if (virtualNode.type === 'svg') {
-            virtualNode.viewNS = NS_SVG;
+            virtualNode.ns = NS_SVG;
         } else {
             if (virtualNode.parent !== null) {
-                virtualNode.viewNS = virtualNode.parent.viewNS;
+                virtualNode.ns = virtualNode.parent.ns;
             } else {
-                virtualNode.viewNS = NS_HTML;
+                virtualNode.ns = NS_HTML;
             }
         }
 
@@ -657,12 +644,13 @@ function hydrateVirtualNodes(virtualNode) {
             viewNode = document.createTextNode(virtualNode.text);
         } else if (virtualNode.type === NODE_FRAGMENT) {
             // Do nothing here
+            // But be careful, removing it changes the condition
         } else if (isString(virtualNode.type)) {
-            let ns = null;
-            if (virtualNode.viewNS === NS_SVG) {
-                ns = 'http://www.w3.org/2000/svg';
+            let viewNS = null;
+            if (virtualNode.ns === NS_SVG) {
+                viewNS = 'http://www.w3.org/2000/svg';
             }
-            viewNode = createDOMElementNS(ns, virtualNode.type, virtualNode.props);
+            viewNode = createDOMElementNS(viewNS, virtualNode.type, virtualNode.props);
 
             // For debug
             viewNode[PROP_VIRTUAL_NODE] = virtualNode;
@@ -680,7 +668,6 @@ function hydrateVirtualNodes(virtualNode) {
 }
 
 function commitToHTML(oldVirtualNodeMap, newVirtualNodeMap) {
-    console.log(JSON.stringify(Object.keys(oldVirtualNodeMap)) === JSON.stringify(Object.keys(newVirtualNodeMap)))
     removeOldViewNodes(oldVirtualNodeMap, newVirtualNodeMap);
     updateExistingViewNodes(oldVirtualNodeMap, newVirtualNodeMap);
     insertNewViewNodes(oldVirtualNodeMap, newVirtualNodeMap);
@@ -749,19 +736,15 @@ function insertClosestViewNodesOfVirtualNodes(virtualNodes, virtualNodeAfter) {
 
     virtualNodes.forEach(virtualNode => {
         if (virtualNode.viewNode !== null) {
-            const htmlHost = findHtmlHost(virtualNode);
+            const viewHost = findViewHost(virtualNode);
 
-            if (htmlHost === null) {
-                console.log('--', virtualNode);
-            } else {
-                console.log('insert', virtualNode.viewNode);
-                if (viewNodeAfter !== null && htmlHost === viewNodeAfter.parentNode) {
-                    htmlHost.insertBefore(virtualNode.viewNode, viewNodeAfter);
+            if (viewHost !== null) {
+                if (viewNodeAfter !== null && viewHost === viewNodeAfter.parentNode) {
+                    viewHost.insertBefore(virtualNode.viewNode, viewNodeAfter);
                 } else {
-                    htmlHost.appendChild(virtualNode.viewNode);
+                    viewHost.appendChild(virtualNode.viewNode);
                 }
             }
-
         }
     });
 }
@@ -769,19 +752,18 @@ function insertClosestViewNodesOfVirtualNodes(virtualNodes, virtualNodeAfter) {
 function removeViewNodesOfVirtualNode(virtualNode) {
     findClosestViewNodes(virtualNode).forEach(viewNode => {
         if (viewNode.parentNode !== null) {
-            console.log('remove', viewNode);
             viewNode.parentNode.removeChild(viewNode);
         }
     });
 }
 
-function findHtmlHost(virtualNode) {
+function findViewHost(virtualNode) {
     if (virtualNode.parent === null) {
         return null;
     }
 
     if (virtualNode.parent.viewNode === null) {
-        return findHtmlHost(virtualNode.parent);
+        return findViewHost(virtualNode.parent);
     }
 
     return virtualNode.parent.viewNode;
@@ -808,9 +790,9 @@ function render(rootVirtualNode, container) {
     rootVirtualNode.parent = containerVirtualNode;
 
     if (container.ownerSVGElement) {
-        containerVirtualNode.viewNS = NS_SVG;
+        containerVirtualNode.ns = NS_SVG;
     } else {
-        containerVirtualNode.viewNS = NS_HTML;
+        containerVirtualNode.ns = NS_HTML;
     }
 
     updateComponent(rootVirtualNode, true);
