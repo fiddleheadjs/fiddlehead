@@ -138,7 +138,7 @@ function YourAd({count, setCount}) {
         };
     }, [layout, name]);
 
-    return <form className="YourAd" style={{padding: '16px', border: '1px solid #ccc',}}>
+    return <form className="YourAd" style={{padding: '16px', border: '1px solid #ccc'}}>
         <div>
             <span>Your Ad: {name}</span>
         </div>

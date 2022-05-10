@@ -833,13 +833,14 @@ function setAttribute(element, attrName, attrValue, oldAttrValue) {
     }
 
     if (name === 'style') {
-        const [, oldValue] = transformAttribute(attrName, oldAttrValue);
-
-        if (!isEmpty(oldValue)) {
-            for (let prop in oldValue) {
-                if (hasOwnProperty(oldValue, prop) && !hasOwnProperty(value, prop)) {
-                    // Delete this style property
-                    element.style[prop] = '';
+        if (!isEmpty(oldAttrValue)) {
+            const [, oldValue] = transformAttribute(attrName, oldAttrValue);
+            if (!isEmpty(oldValue)) {
+                for (let prop in oldValue) {
+                    if (hasOwnProperty(oldValue, prop) && !hasOwnProperty(value, prop)) {
+                        // Delete this style property
+                        element.style[prop] = '';
+                    }
                 }
             }
         }
@@ -889,7 +890,7 @@ function transformAttribute(name, value) {
     
     if (name === 'style') {
         if (!isPlainObject(value)) {
-            console.error('style must be a plain object');
+            console.error('style must be a plain object', value);
             return [name, ];
         }
     }
