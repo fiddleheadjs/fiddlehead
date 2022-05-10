@@ -4,15 +4,15 @@
  */
 const fiberMap = {};
 
+/**
+ * 
+ * @type {Array<AppendInfo>}
+ */
 const normallyEmptyAppendedNodeArray = [];
 
-// window.HookInternals = {
-//     fiberMap,
-//     normallyEmptyAppendedNodeArray,
-// };
-
-const CONTAINER_ID_KEY = 'Hook$ContainerId';
-const COMPONENT_TYPE_KEY = 'Hook$ComponentType';
+const PROP_COMPONENT_TYPE = 'Hook$ComponentType';
+const PROP_CONTAINER_ID = 'Hook$ContainerId';
+const PROP_VIRTUAL_NODE = 'Hook$VirtualNode';
 
 /**
  *
@@ -132,18 +132,18 @@ let currentHookIndex = -1;
 
 let containerIdInc = 0;
 function getContainerId(root) {
-    if (!hasOwnProperty(root, CONTAINER_ID_KEY)) {
-        root[CONTAINER_ID_KEY] = '~' + (++containerIdInc);
+    if (!hasOwnProperty(root, PROP_CONTAINER_ID)) {
+        root[PROP_CONTAINER_ID] = '~' + (++containerIdInc);
     }
-    return root[CONTAINER_ID_KEY];
+    return root[PROP_CONTAINER_ID];
 }
 
 let componentTypeInc = 0;
 function getComponentType(Component) {
-    if (!hasOwnProperty(Component, COMPONENT_TYPE_KEY)) {
-        Component[COMPONENT_TYPE_KEY] = '$' + (++componentTypeInc);
+    if (!hasOwnProperty(Component, PROP_COMPONENT_TYPE)) {
+        Component[PROP_COMPONENT_TYPE] = '$' + (++componentTypeInc);
     }
-    return Component[COMPONENT_TYPE_KEY];
+    return Component[PROP_COMPONENT_TYPE];
 }
 
 let componentTempPathDec = 0;
@@ -666,7 +666,7 @@ function hydrateVirtualNodes(virtualNode) {
 
         // Create the view node
         let viewNode = null;
-        
+
         if (virtualNode.type === NODE_TEXT) {
             viewNode = document.createTextNode(virtualNode.text);
         } else if (virtualNode.type === NODE_FRAGMENT) {
@@ -679,7 +679,7 @@ function hydrateVirtualNodes(virtualNode) {
             viewNode = createDOMElementNS(ns, virtualNode.type, virtualNode.props);
 
             // For debug
-            viewNode.virtualNode = virtualNode;
+            viewNode[PROP_VIRTUAL_NODE] = virtualNode;
         }
 
         linkViewNode(virtualNode, viewNode);
@@ -824,6 +824,8 @@ function render(rootVirtualNode, container) {
 
 
 //============================
+// DOM manipulation
+// ===========================
 
 function createDOMElementNS(ns, type, attributes) {
     const node = (ns !== null
@@ -886,7 +888,9 @@ function transformAttribute(name, value) {
 }
 
 
-// ========================
+//============================
+// Helpers
+// ===========================
 
 
 function hasOwnProperty(obj, propName) {
@@ -914,7 +918,9 @@ function isArray(value) {
 }
 
 
-// ========================
+//============================
+// Exports
+// ===========================
 
 
 export {
