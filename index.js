@@ -691,7 +691,6 @@ function updateExistingViewNodes(oldVirtualNodeMap, newVirtualNodeMap) {
                     newVirtualNode.viewNode.textContent = newVirtualNode.text;
                 }
             } else {
-                console.log(newVirtualNode.props, oldVirtualNode.props);
                 setAttributes(newVirtualNode.viewNode, newVirtualNode.props, oldVirtualNode.props);
             }
         }
