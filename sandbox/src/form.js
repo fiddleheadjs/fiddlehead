@@ -110,6 +110,7 @@ function YourAd({count, setCount}) {
     const [layout, setLayout] = useState('cat');
 
     const [name, setName] = useState('unnamed');
+    console.log('name', name);
 
     const selectRef = useRef(null);
 
@@ -255,7 +256,7 @@ function Demo() {
 }
 
 function DemoWrapper() {
-    return <><Demo/></>;
+    return <Demo/>;
 }
 
 function DemoWrapperWrapper() {

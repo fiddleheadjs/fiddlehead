@@ -16,20 +16,6 @@ const PROP_VIRTUAL_NODE = 'Hook$VirtualNode';
 
 /**
  *
- * @param {function} Component
- * @param {{}} props
- * @returns {Fiber}
- * @constructor
- */
-function Fiber(Component, props) {
-    this.Component = Component;
-    this.props = props;
-    this.hooks = [];
-    this.virtualNode = null;
-}
-
-/**
- *
  * @param {string|function} type
  * @param {{}} props
  * @param {string|null} key
@@ -42,7 +28,7 @@ function VirtualNode(type, props, key, ref) {
     this.props = props;
     this.key = key;
     this.ref = ref;
-    this.fiber = null;
+    this.hooks = [];
 
     this.parent = null;
     this.children = [];
@@ -139,9 +125,14 @@ function getContainerId(root) {
 }
 
 let componentTypeInc = 0;
+/**
+ * 
+ * @param {Function} Component 
+ * @returns {string}
+ */
 function getComponentType(Component) {
     if (!hasOwnProperty(Component, PROP_COMPONENT_TYPE)) {
-        Component[PROP_COMPONENT_TYPE] = '$' + (++componentTypeInc);
+        Component[PROP_COMPONENT_TYPE] = Component.name + '$' + (++componentTypeInc);
     }
     return Component[PROP_COMPONENT_TYPE];
 }
@@ -230,7 +221,7 @@ function useState(initialValue) {
 
             if (newValue !== hook.value) {
                 hook.value = newValue;
-                updateComponent(fiber.virtualNode);
+                updateComponent(fiber);
             }
         }
     );
@@ -399,10 +390,9 @@ function resolveUnmountedNodes(oldVirtualNodeMap, newVirtualNodeMap) {
         if (hasOwnProperty(oldVirtualNodeMap, key)) {
             const unmounted = !hasOwnProperty(newVirtualNodeMap, key);
             const virtualNode = oldVirtualNodeMap[key];
-            const fiber = virtualNode.fiber;
 
-            if (fiber !== null) {
-                destroyEffectsByFiber(fiber, unmounted);
+            if (isFunction(virtualNode.type)) {
+                destroyEffectsByFiber(virtualNode, unmounted);
 
                 if (unmounted) {
                     unlinkFiber(virtualNode.path);
@@ -417,10 +407,9 @@ function resolveMountedNodes(oldVirtualNodeMap, newVirtualNodeMap) {
         if (hasOwnProperty(newVirtualNodeMap, key)) {
             const mounted = !hasOwnProperty(oldVirtualNodeMap, key);
             const virtualNode = newVirtualNodeMap[key];
-            const fiber = virtualNode.fiber;
 
-            if (fiber !== null) {
-                mountEffectsByFiber(fiber, mounted);
+            if (isFunction(virtualNode.type)) {
+                mountEffectsByFiber(virtualNode, mounted);
             }
         }
     }
@@ -432,9 +421,7 @@ function updateComponent(oldRootVirtualNode, isInit = false) {
             return virtualNode;
         }
 
-        const fiber = virtualNode.fiber;
-
-        if (fiber === null) {
+        if (!isFunction(virtualNode.type)) {
             virtualNode.children.forEach(childVirtualNode => {
                 walk(childVirtualNode, virtualNode);
             });
@@ -443,44 +430,50 @@ function updateComponent(oldRootVirtualNode, isInit = false) {
         }
 
         {
-            prepareCurrentlyRendering(fiber);
-            const newVirtualNode = fiber.Component(fiber.props);
+            // const fiber = virtualNode;
+
+            prepareCurrentlyRendering(virtualNode);
+            const newVirtualNode = virtualNode.type(virtualNode.props);
             flushCurrentlyRendering();
 
             resolveTree(newVirtualNode, virtualNode.path);
+            
+            newVirtualNode.parent = virtualNode;
+            virtualNode.children[0] = newVirtualNode;
 
-            fiber.virtualNode = newVirtualNode;
-            newVirtualNode.fiber = fiber;
-            newVirtualNode.parent = parentVirtualNode;
+            // // TODO: Research more about this
+            // // I don't know why need to check instanceof
+            // // If assign to html node, old ref is set, new ref is NOT set
+            // // But if assign to fiber node, old ref is NOT set, new ref is set
+            // if (virtualNode.ref instanceof RefHook) {
+            //     newVirtualNode.ref = virtualNode.ref;
+            // }
 
-            // TODO: Research more about this
-            // I don't know why need to check instanceof
-            // If assign to html node, old ref is set, new ref is NOT set
-            // But if assign to fiber node, old ref is NOT set, new ref is set
-            if (virtualNode.ref instanceof RefHook) {
-                newVirtualNode.ref = virtualNode.ref;
-            }
+            // if (parentVirtualNode !== null) {
+            //     const index = parentVirtualNode.children.indexOf(virtualNode);
+            //     if (index >= 0) {
+            //         parentVirtualNode.children[index] = newVirtualNode;
+            //     }
+            // }
 
-            if (parentVirtualNode !== null) {
-                const index = parentVirtualNode.children.indexOf(virtualNode);
-                if (index >= 0) {
-                    parentVirtualNode.children[index] = newVirtualNode;
-                }
-            }
+            // newVirtualNode.children.forEach(childVirtualNode => {
+            //     walk(childVirtualNode, newVirtualNode);
+            // });
 
-            newVirtualNode.children.forEach(childVirtualNode => {
-                walk(childVirtualNode, newVirtualNode);
-            });
+            walk(newVirtualNode, virtualNode);
 
             return newVirtualNode;
         }
     };
 
     const newRootVirtualNode = walk(oldRootVirtualNode, oldRootVirtualNode.parent);
+    // console.log(newRootVirtualNode);
     finishResolveTree();
 
     const oldVirtualNodeMap = isInit ? {} : parseTree(oldRootVirtualNode);
     const newVirtualNodeMap = parseTree(newRootVirtualNode);
+
+    // console.log(oldVirtualNodeMap, newVirtualNodeMap);
 
     resolveUnmountedNodes(oldVirtualNodeMap, newVirtualNodeMap);
 
@@ -521,28 +514,21 @@ function createFiberNode(type, attributes, ...content) {
 
     const tempPath = generateTemporaryPath();
 
-    const fiber = new Fiber(type, props);
-
-    linkFiber(tempPath, fiber);
-
-    const virtualNode = new VirtualNode(null, props, key, ref);
+    const virtualNode = new VirtualNode(type, props, key, ref);
+    linkFiber(tempPath, virtualNode);
 
     virtualNode.resolvePath = () => {
         unlinkFiber(tempPath);
 
+        //????
         const existedFiber = findFiber(virtualNode.path);
         if (existedFiber) {
-            existedFiber.props = fiber.props;
-            existedFiber.virtualNode = virtualNode;
-            virtualNode.fiber = existedFiber;
-        } else {
-            linkFiber(virtualNode.path, fiber);
+            virtualNode.hooks = existedFiber.hooks;
         }
-    };
 
-    // Associate virtualNode and fiber
-    virtualNode.fiber = fiber;
-    fiber.virtualNode = virtualNode;
+        //????
+        linkFiber(virtualNode.path, virtualNode);
+    };
 
     return virtualNode;
 }
@@ -616,8 +602,8 @@ function resolveTree(rootVirtualNode, basePath = []) {
             }
 
             // Add the component type to the current path
-            if (virtualNode.fiber !== null) {
-                currentPath.push(getComponentType(virtualNode.fiber.Component));
+            if (isFunction(virtualNode.type)) {
+                currentPath.push(getComponentType(virtualNode.type));
             } else {
                 currentPath.push(virtualNode.type);
             }
@@ -694,6 +680,7 @@ function hydrateVirtualNodes(virtualNode) {
 }
 
 function commitToHTML(oldVirtualNodeMap, newVirtualNodeMap) {
+    console.log(JSON.stringify(Object.keys(oldVirtualNodeMap)) === JSON.stringify(Object.keys(newVirtualNodeMap)))
     removeOldViewNodes(oldVirtualNodeMap, newVirtualNodeMap);
     updateExistingViewNodes(oldVirtualNodeMap, newVirtualNodeMap);
     insertNewViewNodes(oldVirtualNodeMap, newVirtualNodeMap);
@@ -764,11 +751,17 @@ function insertClosestViewNodesOfVirtualNodes(virtualNodes, virtualNodeAfter) {
         if (virtualNode.viewNode !== null) {
             const htmlHost = findHtmlHost(virtualNode);
 
-            if (viewNodeAfter !== null && htmlHost === viewNodeAfter.parentNode) {
-                htmlHost.insertBefore(virtualNode.viewNode, viewNodeAfter);
+            if (htmlHost === null) {
+                console.log('--', virtualNode);
             } else {
-                htmlHost.appendChild(virtualNode.viewNode);
+                console.log('insert', virtualNode.viewNode);
+                if (viewNodeAfter !== null && htmlHost === viewNodeAfter.parentNode) {
+                    htmlHost.insertBefore(virtualNode.viewNode, viewNodeAfter);
+                } else {
+                    htmlHost.appendChild(virtualNode.viewNode);
+                }
             }
+
         }
     });
 }
@@ -776,6 +769,7 @@ function insertClosestViewNodesOfVirtualNodes(virtualNodes, virtualNodeAfter) {
 function removeViewNodesOfVirtualNode(virtualNode) {
     findClosestViewNodes(virtualNode).forEach(viewNode => {
         if (viewNode.parentNode !== null) {
+            console.log('remove', viewNode);
             viewNode.parentNode.removeChild(viewNode);
         }
     });

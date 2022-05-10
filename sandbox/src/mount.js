@@ -1,6 +1,6 @@
-import {h, render, useState, useEffect, useRef} from "../../output/dist/index.min.js";
+import {h, render, useState, useEffect, useRef} from "../../index.js";
 
-function Wrapper({children}) {
+function Wrapper2({children}) {
     return (
         <span className="Wrapper">
             {children}
@@ -8,8 +8,13 @@ function Wrapper({children}) {
     );
 }
 
+function Wrapper({children}) {
+    return <Wrapper2>{children}</Wrapper2>;
+}
+
 function DemoWrapperWrapper() {
     const [layout, setLayout] = useState('A');
+    console.log(layout);
 
     return (
         <div className="Root">
