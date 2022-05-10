@@ -17,11 +17,33 @@ function Form({value, setValue}) {
 function DemoWrapperWrapper() {
     const [value, setValue] = useState('');
 
+    const style = (() => {
+        switch (value) {
+            case '1':
+                return {
+                    color: 'red',
+                };
+            case '2':
+                return {
+                    fontWeight: 'bold',
+                };
+            case '3':
+                return {
+                    color: 'red',
+                    fontStyle: 'italic',
+                }
+        }
+        return null;
+    })();
+
     return (
         <main>
             <div key="haha">
                 <Wrapper>
                     <Form value={value} setValue={setValue}/>
+                    <div style={style}>
+                        Hello world!
+                    </div>
                 </Wrapper>
             </div>
         </main>

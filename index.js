@@ -497,23 +497,11 @@ function createFiberNode(type, attributes, ...content) {
     virtualNode.resolvePath = () => {
         unlinkFiber(tempPath);
 
-        //????
-        const existedFiber = findFiber(virtualNode.path);
-        if (existedFiber) {
-            virtualNode.hooks = existedFiber.hooks;
-
-            // for (let i = virtualNode.hooks.length - 1; i >= 0; i--) {
-            //     const hook = virtualNode.hooks[i];
-            //     const hook2 = existedFiber.hooks[i];
-            //     if (hook instanceof StateHook) {
-            //         hook.value = hook2.value;
-            //     } else if (hook instanceof RefHook) {
-            //         hook.current = hook2.current;
-            //     }
-            // }
+        const existing = findFiber(virtualNode.path);
+        if (existing) {
+            virtualNode.hooks = existing.hooks;
         }
 
-        //????
         linkFiber(virtualNode.path, virtualNode);
     };
 
@@ -698,15 +686,13 @@ function updateExistingViewNodes(oldVirtualNodeMap, newVirtualNodeMap) {
 
             linkViewNode(newVirtualNode, oldVirtualNode.viewNode);
 
-            {
-                const {viewNode, props, type} = newVirtualNode;
-                if (type === NODE_TEXT) {
-                    if (newVirtualNode.text !== oldVirtualNode.text) {
-                        viewNode.textContent = newVirtualNode.text;
-                    }
-                } else {
-                    setAttributes(viewNode, props);
+            if (newVirtualNode.type === NODE_TEXT) {
+                if (newVirtualNode.text !== oldVirtualNode.text) {
+                    newVirtualNode.viewNode.textContent = newVirtualNode.text;
                 }
+            } else {
+                console.log(newVirtualNode.props, oldVirtualNode.props);
+                setAttributes(newVirtualNode.viewNode, newVirtualNode.props, oldVirtualNode.props);
             }
         }
     });
@@ -809,41 +795,78 @@ function createDOMElementNS(ns, type, attributes) {
         : document.createElement(type)
     );
 
-    setAttributes(node, attributes);
+    setAttributes(node, attributes, {});
 
     return node;
 }
 
-function setAttributes(element, attributes) {
+function setAttributes(element, attributes, oldAttributes) {
+    for (let attrName in oldAttributes) {
+        if (hasOwnProperty(oldAttributes, attrName)) {
+            if (isEmpty(attributes[attrName])) {
+                removeAttribute(element, attrName, oldAttributes[attrName]);
+            }
+        }
+    }
+
     for (let attrName in attributes) {
         if (hasOwnProperty(attributes, attrName)) {
-            setAttribute(element, attrName, attributes[attrName]);
+            setAttribute(element, attrName, attributes[attrName], oldAttributes[attrName]);
         }
     }
 }
 
-function setAttribute(element, attrName, attrValue) {
+function removeAttribute(element, attrName, attrValue) {
+    const [name, value] = transformAttribute(attrName, attrValue);
+    
+    if (isEmpty(value)) {
+        return;
+    }
+
+    element.removeAttribute(name);
+}
+
+function setAttribute(element, attrName, attrValue, oldAttrValue) {
     const [name, value] = transformAttribute(attrName, attrValue);
 
+    if (isEmpty(value)) {
+        return;
+    }
+
     if (name === 'style') {
-        // TODO: Compare with old style to update exactly what changed
+        const [, oldValue] = transformAttribute(attrName, oldAttrValue);
+
+        if (!isEmpty(oldValue)) {
+            for (let prop in oldValue) {
+                if (hasOwnProperty(oldValue, prop) && !hasOwnProperty(value, prop)) {
+                    // Delete this style property
+                    element.style[prop] = '';
+                }
+            }
+        }
+
         for (let prop in value) {
             if (hasOwnProperty(value, prop)) {
-                if (value[prop] !== undefined) {
+                if (!isEmpty(value[prop])) {
                     element.style[prop] = value[prop];
                 }
             }
         }
+
         return;
     }
 
-    if (isFunction(value) || isBoolean(value)) {
-        element[name] = value;
-        return;
-    }
-
-    if (value !== undefined) {
+    if (isString(value) || isNumber(value)) {
         element.setAttribute(name, value);
+    }
+
+    // For properties, event listeners
+    if (name in element) {
+        try {
+            element[name] = value;
+        } catch (e) {
+            // The property is not wriable
+        }
     }
 }
 
@@ -851,12 +874,24 @@ function transformAttribute(name, value) {
     if (isFunction(value)) {
         return [name.toLowerCase(), value];
     }
-
-    if (name === 'class' || name === 'className') {
+    
+    if (name === 'className') {
         if (isArray(value)) {
             return ['class', value.filter(t => isString(t)).join(' ')];
         } else {
             return ['class', value];
+        }
+    }
+
+    if (name === 'class') {
+        console.error('className instead of class');
+        return [name, ];
+    }
+    
+    if (name === 'style') {
+        if (!isPlainObject(value)) {
+            console.error('style must be a plain object');
+            return [name, ];
         }
     }
 
@@ -891,6 +926,14 @@ function isFunction(value) {
 
 function isArray(value) {
     return value instanceof Array;
+}
+
+function isPlainObject(value) {
+    return (!!value) && (value.constructor === Object);
+}
+
+function isEmpty(value) {
+    return value === undefined || value === null;
 }
 
 
