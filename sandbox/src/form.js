@@ -2,7 +2,7 @@ import {h, render, useState, useEffect, useRef} from "../../index.js";
 
 
 function Cat({text, setText}) {
-    // console.log('run Cat', text);
+    console.log('run Cat', text);
 
     const [] = useState(1);
 
