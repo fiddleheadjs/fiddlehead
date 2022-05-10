@@ -49,17 +49,20 @@ function VirtualNode(type, props, key, ref) {
     this.path = [];
     this.resolvePath = null;
 
-    this.htmlNode = null;
-    this.setHtmlNode = (htmlNode) => {
-        this.htmlNode = htmlNode;
-
-        if (this.ref instanceof RefHook) {
-            this.ref.current = htmlNode;
-        }
-    };
-
-    this.nsSVG = false;
+    this.uiNode = null;
+    this.svgNS = false;
 }
+
+function linkUINode(virtualNode, uiNode) {
+    virtualNode.uiNode = uiNode;
+
+    if (virtualNode.ref instanceof RefHook) {
+        virtualNode.ref.current = uiNode;
+    }
+}
+
+const NODE_TEXT = '#txt';
+const NODE_FRAGMENT = '#frg';
 
 /**
  *
@@ -217,7 +220,7 @@ function useState(initialValue) {
         (value) => {
             let newValue;
 
-            if (typeof value === 'function') {
+            if (isFunction(value)) {
                 newValue = value(hook.value);
             } else {
                 newValue = value;
@@ -250,7 +253,7 @@ function useEffect(callback, deps = null) {
             deps === null && currentHook.deps === null ||
             deps.length === currentHook.deps.length
         )) {
-            throw new Error('useEffect: Dependencies must be size-fixed');
+            throw new Error('Deps must be size-fixed');
         }
 
         const effectTag = getEffectTag(deps, currentHook.deps);
@@ -435,7 +438,7 @@ function resolveMountedNodes(oldVirtualNodeMap, newVirtualNodeMap) {
 
 function updateComponent(oldRootVirtualNode, isInit = false) {
     const walk = (virtualNode, parentVirtualNode = null) => {
-        if (virtualNode.type === '#text') {
+        if (virtualNode.type === NODE_TEXT) {
             return virtualNode;
         }
 
@@ -512,10 +515,10 @@ function createElement(type, attributes, ...content) {
     attributes = attributes || {};
 
     if (type === null) {
-        return createStaticNode('#fragment', attributes, ...content);
+        return createStaticNode(NODE_FRAGMENT, attributes, ...content);
     }
 
-    if (typeof type === 'function') {
+    if (isFunction(type)) {
         return createFiberNode(type, attributes, ...content);
     }
 
@@ -566,10 +569,13 @@ function createStaticNode(type, attributes, ...content) {
 
 function appendVirtualChildren(element, content) {
     const append = function (item, indexes) {
-        let virtualNode = item;
-        if (['string', 'number'].includes(typeof item)) {
-            virtualNode = new VirtualNode('#text', {}, null, null);
-            virtualNode.text = item;
+        let virtualNode;
+
+        if (isString(item) || isNumber(item)) {
+            virtualNode = new VirtualNode(NODE_TEXT, {}, null, null);
+            virtualNode.text = String(item);
+        } else {
+            virtualNode = item;
         }
 
         if (virtualNode instanceof VirtualNode) {
@@ -580,7 +586,7 @@ function appendVirtualChildren(element, content) {
         }
     };
     const appendRecursively = function (content, indexes) {
-        if (content instanceof Array) {
+        if (isArray(content)) {
             content.forEach(function (item, idx) {
                 appendRecursively(item, [...indexes, idx]);
             });
@@ -656,23 +662,23 @@ function finishResolveTree() {
 
 function hydrateVirtualNodes(virtualNode) {
     const walk = (virtualNode) => {
-        let htmlNode = null;
+        let uiNode = null;
 
-        if (virtualNode.type === '#fragment') {
-        }
-        else if (virtualNode.type === '#text') {
-            htmlNode = document.createTextNode(virtualNode.text);
-        }
-        else if (typeof virtualNode.type === 'string') {
+        if (virtualNode.type === NODE_TEXT) {
+            uiNode = document.createTextNode(virtualNode.text);
+        } else if (virtualNode.type === NODE_FRAGMENT) {
+            // Do nothing here
+        } else if (isString(virtualNode.type)) {
             let ns = null;
-            if (virtualNode.type.toUpperCase() === 'SVG' || virtualNode.parent !== null && virtualNode.parent.nsSVG) {
-                virtualNode.nsSVG = true;
+            if (virtualNode.type === 'svg' || virtualNode.parent !== null && virtualNode.parent.svgNS) {
+                virtualNode.svgNS = true;
                 ns = 'http://www.w3.org/2000/svg';
             }
-            htmlNode = createDOMElementNS(ns, virtualNode.type, virtualNode.props);
+            uiNode = createDOMElementNS(ns, virtualNode.type, virtualNode.props);
+            uiNode.virtualNode = virtualNode;
         }
 
-        virtualNode.setHtmlNode(htmlNode);
+        linkUINode(virtualNode, uiNode);
 
         virtualNode.children.forEach(childVirtualNode => {
             walk(childVirtualNode);
@@ -683,12 +689,12 @@ function hydrateVirtualNodes(virtualNode) {
 }
 
 function commitToHTML(oldVirtualNodeMap, newVirtualNodeMap) {
-    removeOldHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap);
-    updateExistingHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap);
-    insertNewHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap);
+    removeOldUINodes(oldVirtualNodeMap, newVirtualNodeMap);
+    updateExistingUINodes(oldVirtualNodeMap, newVirtualNodeMap);
+    insertNewUINodes(oldVirtualNodeMap, newVirtualNodeMap);
 }
 
-function removeOldHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap) {
+function removeOldUINodes(oldVirtualNodeMap, newVirtualNodeMap) {
     // If the current node is under the last removed node
     // So dont need to remove current node anymore
     // Use lastRemovedKey to track
@@ -697,37 +703,37 @@ function removeOldHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap) {
         if (hasOwnProperty(oldVirtualNodeMap, key) && !hasOwnProperty(newVirtualNodeMap, key)) {
             if (!key.startsWith(lastRemovedKey + '/')) {
                 const oldVirtualNode = oldVirtualNodeMap[key];
-                removeHtmlNodesOfVirtualNode(oldVirtualNode);
+                removeUINodesOfVirtualNode(oldVirtualNode);
                 lastRemovedKey = key;
             }
         }
     }
 }
 
-function updateExistingHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap) {
+function updateExistingUINodes(oldVirtualNodeMap, newVirtualNodeMap) {
     const keys = Object.keys({...oldVirtualNodeMap, ...newVirtualNodeMap});
     keys.forEach(key => {
         if (hasOwnProperty(oldVirtualNodeMap, key) && hasOwnProperty(newVirtualNodeMap, key)) {
             const oldVirtualNode = oldVirtualNodeMap[key];
             const newVirtualNode = newVirtualNodeMap[key];
 
-            newVirtualNode.setHtmlNode(oldVirtualNode.htmlNode);
+            linkUINode(newVirtualNode, oldVirtualNode.uiNode);
 
             {
-                const {htmlNode, props, type} = newVirtualNode;
-                if (type === '#text') {
+                const {uiNode, props, type} = newVirtualNode;
+                if (type === NODE_TEXT) {
                     if (newVirtualNode.text !== oldVirtualNode.text) {
-                        htmlNode.textContent = newVirtualNode.text;
+                        uiNode.textContent = newVirtualNode.text;
                     }
                 } else {
-                    setAttributes(htmlNode, props);
+                    setAttributes(uiNode, props);
                 }
             }
         }
     });
 }
 
-function insertNewHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap) {
+function insertNewUINodes(oldVirtualNodeMap, newVirtualNodeMap) {
     let pendingVirtualNodes = [];
 
     for (let key in newVirtualNodeMap) {
@@ -735,37 +741,37 @@ function insertNewHtmlNodes(oldVirtualNodeMap, newVirtualNodeMap) {
             if (!hasOwnProperty(oldVirtualNodeMap, key)) {
                 pendingVirtualNodes.push(newVirtualNodeMap[key]);
             } else {
-                insertClosestHtmlNodesOfVirtualNodes(pendingVirtualNodes, oldVirtualNodeMap[key]);
+                insertClosestUINodesOfVirtualNodes(pendingVirtualNodes, oldVirtualNodeMap[key]);
                 pendingVirtualNodes.length = 0;
             }
         }
     }
 
     if (pendingVirtualNodes.length > 0) {
-        insertClosestHtmlNodesOfVirtualNodes(pendingVirtualNodes, null);
+        insertClosestUINodesOfVirtualNodes(pendingVirtualNodes, null);
     }
 }
 
-function insertClosestHtmlNodesOfVirtualNodes(virtualNodes, virtualNodeAfter) {
-    const htmlNodeAfter = virtualNodeAfter && findClosestHtmlNodes(virtualNodeAfter)[0] || null;
+function insertClosestUINodesOfVirtualNodes(virtualNodes, virtualNodeAfter) {
+    const uiNodeAfter = virtualNodeAfter && findClosestUINodes(virtualNodeAfter)[0] || null;
 
     virtualNodes.forEach(virtualNode => {
-        if (virtualNode.htmlNode !== null) {
+        if (virtualNode.uiNode !== null) {
             const htmlHost = findHtmlHost(virtualNode);
 
-            if (htmlNodeAfter !== null && htmlHost === htmlNodeAfter.parentNode) {
-                htmlHost.insertBefore(virtualNode.htmlNode, htmlNodeAfter);
+            if (uiNodeAfter !== null && htmlHost === uiNodeAfter.parentNode) {
+                htmlHost.insertBefore(virtualNode.uiNode, uiNodeAfter);
             } else {
-                htmlHost.appendChild(virtualNode.htmlNode);
+                htmlHost.appendChild(virtualNode.uiNode);
             }
         }
     });
 }
 
-function removeHtmlNodesOfVirtualNode(virtualNode) {
-    findClosestHtmlNodes(virtualNode).forEach(htmlNode => {
-        if (htmlNode.parentNode !== null) {
-            htmlNode.parentNode.removeChild(htmlNode);
+function removeUINodesOfVirtualNode(virtualNode) {
+    findClosestUINodes(virtualNode).forEach(uiNode => {
+        if (uiNode.parentNode !== null) {
+            uiNode.parentNode.removeChild(uiNode);
         }
     });
 }
@@ -775,19 +781,19 @@ function findHtmlHost(virtualNode) {
         return null;
     }
 
-    if (virtualNode.parent.htmlNode === null) {
+    if (virtualNode.parent.uiNode === null) {
         return findHtmlHost(virtualNode.parent);
     }
 
-    return virtualNode.parent.htmlNode;
+    return virtualNode.parent.uiNode;
 }
 
-function findClosestHtmlNodes(virtualNode) {
-    if (virtualNode.htmlNode !== null) {
-        return [virtualNode.htmlNode];
+function findClosestUINodes(virtualNode) {
+    if (virtualNode.uiNode !== null) {
+        return [virtualNode.uiNode];
     } else {
         return virtualNode.children.reduce((arr, childVirtualNode) => {
-            return arr.concat(findClosestHtmlNodes(childVirtualNode));
+            return arr.concat(findClosestUINodes(childVirtualNode));
         }, []);
     }
 }
@@ -797,7 +803,8 @@ function render(rootVirtualNode, container) {
     finishResolveTree();
 
     const containerVirtualNode = new VirtualNode(container.nodeName.toLowerCase(), {}, null, null);
-    containerVirtualNode.setHtmlNode(container);
+
+    linkUINode(containerVirtualNode, container);
 
     rootVirtualNode.parent = containerVirtualNode;
 
@@ -818,12 +825,6 @@ function createDOMElementNS(ns, type, attributes) {
     return node;
 }
 
-/**
- * sets attributes for a node
- *
- * @param {HTMLElement} element
- * @param {object} attributes
- */
 function setAttributes(element, attributes) {
     for (let attrName in attributes) {
         if (hasOwnProperty(attributes, attrName)) {
@@ -847,7 +848,7 @@ function setAttribute(element, attrName, attrValue) {
         return;
     }
 
-    if (['function', 'boolean'].includes(typeof value)) {
+    if (isFunction(value) || isBoolean(value)) {
         element[name] = value;
         return;
     }
@@ -858,18 +859,15 @@ function setAttribute(element, attrName, attrValue) {
 }
 
 function transformAttribute(name, value) {
-    const valueType = typeof value;
-
-    if (valueType === 'function') {
+    if (isFunction(value)) {
         return [name.toLowerCase(), value];
     }
 
     if (name === 'class' || name === 'className') {
-        if (valueType === 'string') {
-            return ['class', value];
+        if (isArray(value)) {
+            return ['class', value.filter(t => isString(t)).join(' ')];
         } else {
-            // Array of class names
-            return ['class', value.filter(t => typeof t === 'string').join(' ')];
+            return ['class', value];
         }
     }
 
@@ -882,6 +880,26 @@ function transformAttribute(name, value) {
 
 function hasOwnProperty(obj, propName) {
     return Object.prototype.hasOwnProperty.call(obj, propName);
+}
+
+function isString(value) {
+    return typeof value === 'string' || value instanceof String;
+}
+
+function isNumber(value) {
+    return typeof value === 'number' || value instanceof Number;
+}
+
+function isBoolean(value) {
+    return value === true || value === false || value instanceof Boolean;
+}
+
+function isFunction(value) {
+    return value instanceof Function;
+}
+
+function isArray(value) {
+    return value instanceof Array;
 }
 
 
