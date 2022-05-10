@@ -6,9 +6,9 @@ export default {
         file: 'dist/index.min.js',
         format: 'cjs',
         plugins: [terser({
-            mangle: {
-                properties: true,
-            }
+            // mangle: {
+            //     properties: true,
+            // }
         })],
         exports: 'named',
     }
