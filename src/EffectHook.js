@@ -3,8 +3,8 @@ import {resolveCurrentlyProcessing} from './CurrentlyProcessing';
 /**
  *
  * @param {function} callback
- * @param {[]?} deps
- * @param {function?} lastDestroy
+ * @param {[]|null} deps
+ * @param {function} lastDestroy
  * @return {EffectHook}
  * @constructor
  */
@@ -12,7 +12,7 @@ function EffectHook(callback, deps, lastDestroy) {
     this.tag = EFFECT_NONE;
     this.callback = callback;
     this.deps = deps;
-    this.destroy = undefined;
+    this.destroy = null;
     this.lastDestroy = lastDestroy;
 }
 
@@ -59,7 +59,7 @@ export function useEffect(callback, deps = null) {
         return;
     }
 
-    const hook = new EffectHook(callback, deps);
+    const hook = new EffectHook(callback, deps, null);
     hook.tag = _getEffectTag(deps);
 
     functionalVirtualNode.hooks.push(hook);
@@ -71,15 +71,17 @@ export function useEffect(callback, deps = null) {
  * @param {boolean} isNewNodeMounted
  */
 export function mountEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNewNodeMounted) {
-    functionalVirtualNode.hooks.forEach(hook => {
+    for (let i = 0; i < functionalVirtualNode.hooks.length; i++) {
+        const hook = functionalVirtualNode.hooks[i];
+
         if (!(hook instanceof EffectHook)) {
-            return;
+            continue;
         }
 
         if (isNewNodeMounted || hook.tag === EFFECT_ALWAYS || hook.tag === EFFECT_DEPS_CHANGED) {
             _mountEffectHook(hook);
         }
-    });
+    }
 }
 
 /**
@@ -88,18 +90,20 @@ export function mountEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNew
  * @param {boolean} isNodeUnmounted
  */
 export function destroyEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNodeUnmounted) {
-    functionalVirtualNode.hooks.forEach(hook => {
+    for (let i = 0; i < functionalVirtualNode.hooks.length; i++) {
+        const hook = functionalVirtualNode.hooks[i];
+
         if (!(
             hook instanceof EffectHook &&
-            (hook.lastDestroy !== undefined || hook.destroy !== undefined)
+            (hook.lastDestroy !== null || hook.destroy !== null)
         )) {
-            return;
+            continue;
         }
 
         if (isNodeUnmounted || hook.tag === EFFECT_ALWAYS || hook.tag === EFFECT_DEPS_CHANGED) {
             _destroyEffectHook(hook, isNodeUnmounted);
         }
-    });
+    }
 }
 
 function _getEffectTag(deps, lastDeps = false) {
@@ -148,12 +152,12 @@ function _mountEffectHook(effectHook) {
  * @param {boolean} isNodeUnmounted
  */
 function _destroyEffectHook(hook, isNodeUnmounted = false) {
-    if (hook.lastDestroy !== undefined && !isNodeUnmounted) {
+    if (hook.lastDestroy !== null && !isNodeUnmounted) {
         hook.lastDestroy();
         return;
     }
 
-    if (hook.destroy !== undefined) {
+    if (hook.destroy !== null) {
         hook.destroy();
     }
 }

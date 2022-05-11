@@ -64,9 +64,9 @@ function _createStaticVirtualNode(type, attributes, ...content) {
 
 function _appendVirtualChildren(element, content, indexes = []) {
     if (isArray(content)) {
-        content.forEach(function (item, idx) {
-            _appendVirtualChildren(element, item, [...indexes, idx]);
-        });
+        for (let i = 0; i < content.length; i++) {
+            _appendVirtualChildren(element, content[i], [...indexes, i]);
+        }
         return;
     }
 

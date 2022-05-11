@@ -42,9 +42,9 @@ function _updateVirtualNodeRecursive(virtualNode) {
     }
 
     if (!isFunction(virtualNode.type)) {
-        virtualNode.children.forEach(childVirtualNode => {
-            _updateVirtualNodeRecursive(childVirtualNode);
-        });
+        for (let i = 0; i < virtualNode.children.length; i++) {
+            _updateVirtualNodeRecursive(virtualNode.children[i]);
+        }
         return;
     }
 
@@ -99,9 +99,9 @@ function _getVirtualNodeMap(rootVirtualNode) {
     const walk = (virtualNode) => {
         out[stringifyPath(virtualNode.path)] = virtualNode;
 
-        virtualNode.children.forEach(childVirtualNode => {
-            walk(childVirtualNode);
-        });
+        for (let i = 0; i < virtualNode.children.length; i++) {
+            walk(virtualNode.children[i]);
+        }
     };
 
     walk(rootVirtualNode);

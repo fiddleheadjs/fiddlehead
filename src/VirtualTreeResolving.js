@@ -99,7 +99,7 @@ export function hydrateVirtualTree(virtualNode) {
     linkViewNode(virtualNode, viewNode);
 
     // Continue with the children
-    virtualNode.children.forEach(childVirtualNode => {
-        hydrateVirtualTree(childVirtualNode);
-    });
+    for (let i = 0; i < virtualNode.children.length; i++) {
+        hydrateVirtualTree(virtualNode.children[i]);
+    }
 }

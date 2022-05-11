@@ -1,6 +1,6 @@
 const path = require('path');
 
-function getJsLoaders() {
+function getJsLoaders(isReact = false) {
     return [
         {
             loader: 'babel-loader',
@@ -11,7 +11,7 @@ function getJsLoaders() {
                 plugins: [
                     [
                         "@babel/plugin-transform-react-jsx",
-                        {
+                        isReact ? {} : {
                             "pragma": "h",
                             "pragmaFrag": "null"
                         }
@@ -24,9 +24,9 @@ function getJsLoaders() {
 
 const configs = [];
 
-['differ', 'form', 'mount', 'svg'].map(filename => {
+['differ', 'form', 'mount', 'svg', 'mount_react'].map(filename => {
     configs.push({
-        mode: 'development',
+        mode: 'production',
         entry: `./src/${filename}.js`,
         output: {
             path: path.resolve(__dirname, 'public'),
@@ -37,7 +37,7 @@ const configs = [];
             rules: [
                 {
                     test: /\.js$/,
-                    use: getJsLoaders()
+                    use: getJsLoaders(filename.endsWith('_react'))
                 },
             ]
         }

@@ -1,4 +1,5 @@
-import {h, mount, useState, useEffect, useRef} from "../../src/index.js";
+import React, {useRef, useState, useEffect} from 'react';
+import ReactDOM from 'react-dom';
 
 function Wrapper2({children, myRef}) {
     return (
@@ -88,5 +89,5 @@ function DemoFinalWrapper() {
 }
 
 console.time('mount');
-mount(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));
+ReactDOM.render(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));
 console.timeEnd('mount');

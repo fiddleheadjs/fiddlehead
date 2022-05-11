@@ -32,7 +32,9 @@ function _updateExistingViewNodes(oldVirtualNodeMap, newVirtualNodeMap) {
         ...newVirtualNodeMap,
     });
 
-    mergedKeys.forEach(key => {
+    for (let i = 0; i < mergedKeys.length; i++) {
+        const key = mergedKeys[i];
+
         if (hasOwnProperty(oldVirtualNodeMap, key) && hasOwnProperty(newVirtualNodeMap, key)) {
             const newVirtualNode = newVirtualNodeMap[key];
             if (newVirtualNode.viewNode !== null) {
@@ -50,7 +52,7 @@ function _updateExistingViewNodes(oldVirtualNodeMap, newVirtualNodeMap) {
                 }
             }
         }
-    });
+    }
 }
 
 function _insertNewViewNodes(oldVirtualNodeMap, newVirtualNodeMap) {
@@ -78,7 +80,9 @@ function _insertNewViewNodes(oldVirtualNodeMap, newVirtualNodeMap) {
 function _insertClosestViewNodesOfVirtualNodes(virtualNodes, virtualNodeAfter) {
     const viewNodeAfter = virtualNodeAfter && _findClosestViewNodes(virtualNodeAfter)[0] || null;
 
-    virtualNodes.forEach(virtualNode => {
+    for (let i = 0; i < virtualNodes.length; i++) {
+        const virtualNode = virtualNodes[i];
+
         if (virtualNode.viewNode !== null) {
             const viewHost = _findViewHost(virtualNode);
 
@@ -90,15 +94,19 @@ function _insertClosestViewNodesOfVirtualNodes(virtualNodes, virtualNodeAfter) {
                 }
             }
         }
-    });
+    }
 }
 
 function _removeViewNodesOfVirtualNode(virtualNode) {
-    _findClosestViewNodes(virtualNode).forEach(viewNode => {
+    const viewNodes = _findClosestViewNodes(virtualNode);
+
+    for (let i = 0; i < viewNodes.length; i++) {
+        const viewNode = viewNodes[i];
+
         if (viewNode.parentNode !== null) {
             viewNode.parentNode.removeChild(viewNode);
         }
-    });
+    }
 }
 
 function _findViewHost(virtualNode) {
