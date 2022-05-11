@@ -1,11 +1,11 @@
-import {finishResolveVirtualTree, resolveVirtualTree} from "./VirtualTreeResolving";
-import {getContainerId} from "./misc";
+import {didResolveVirtualTree, resolveVirtualTree} from "./VirtualTreeResolving";
 import {linkViewNode, NS_HTML, NS_SVG, VirtualNode} from "./VirtualNode";
 import {updateVirtualTree} from "./VirtualTreeUpdating";
+import {getContainerId} from "./ExternalAttachment";
 
 export function mount(rootVirtualNode, container) {
-    resolveVirtualTree(rootVirtualNode, [getContainerId(container)]);
-    finishResolveVirtualTree();
+    resolveVirtualTree(rootVirtualNode, [getContainerId(container), 0]);
+    didResolveVirtualTree();
 
     const containerVirtualNode = new VirtualNode(container.nodeName.toLowerCase(), {}, null, null);
 

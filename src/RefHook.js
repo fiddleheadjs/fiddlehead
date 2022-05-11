@@ -1,4 +1,4 @@
-import {resolveCurrentlyProcessing} from "./currentlyProcessing";
+import {resolveCurrentlyProcessing} from "./CurrentlyProcessing";
 
 /**
  *

@@ -1,5 +1,8 @@
-import {PROP_CONTAINER_ID, PROP_COMPONENT_TYPE} from './AttachmentProps.js';
-import {hasOwnProperty} from "./utils";
+import {hasOwnProperty} from "./Util";
+
+const PROP_COMPONENT_TYPE = 'Hook$ComponentType';
+const PROP_CONTAINER_ID = 'Hook$ContainerId';
+const PROP_VIRTUAL_NODE = 'Hook$VirtualNode';
 
 let containerIdInc = 0;
 export function getContainerId(root) {
@@ -11,8 +14,8 @@ export function getContainerId(root) {
 
 let componentTypeInc = 0;
 /**
- * 
- * @param {Function} Component 
+ *
+ * @param {Function} Component
  * @returns {string}
  */
 export function getComponentType(Component) {
@@ -22,3 +25,6 @@ export function getComponentType(Component) {
     return Component[PROP_COMPONENT_TYPE];
 }
 
+export function attachVirtualNode(viewNode, virtualNode) {
+    viewNode[PROP_VIRTUAL_NODE] = virtualNode;
+}

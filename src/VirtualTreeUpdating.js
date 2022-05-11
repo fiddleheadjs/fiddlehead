@@ -1,11 +1,11 @@
-import {stringifyPath} from "./path";
-import {hasOwnProperty, isFunction} from "./utils";
-import {unlinkFunctionalVirtualNode} from "./functionalVirtualNodeMap";
-import {finishResolveVirtualTree, hydrateVirtualTree, resolveVirtualTree} from "./VirtualTreeResolving";
-import {flushCurrentlyRendering, prepareCurrentlyRendering} from "./currentlyProcessing";
+import {stringifyPath} from "./Path";
+import {hasOwnProperty, isFunction} from "./Util";
+import {unlinkFunctionalVirtualNode} from "./FunctionalVirtualNodeMapping";
+import {didResolveVirtualTree, hydrateVirtualTree, resolveVirtualTree} from "./VirtualTreeResolving";
+import {flushCurrentlyRendering, prepareCurrentlyRendering} from "./CurrentlyProcessing";
 import {NODE_TEXT} from "./VirtualNode";
 import {commitView} from "./ViewCommitment";
-import {destroyEffectsByFunctionalVirtualNode, mountEffectsByFunctionalVirtualNode} from "./EffectHook";
+import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNode} from "./EffectHook";
 
 /**
  *
@@ -14,14 +14,22 @@ import {destroyEffectsByFunctionalVirtualNode, mountEffectsByFunctionalVirtualNo
  */
 export function updateVirtualTree(rootVirtualNode, isInit = false) {
     const oldVirtualNodeMap = isInit ? {} : _getVirtualNodeMap(rootVirtualNode);
-    _updateVirtualNodeRecursive(rootVirtualNode);
-    finishResolveVirtualTree();
+    _updateVirtualNode(rootVirtualNode);
     const newVirtualNodeMap = _getVirtualNodeMap(rootVirtualNode);
 
     _resolveUnmountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap);
     hydrateVirtualTree(rootVirtualNode);
     commitView(oldVirtualNodeMap, newVirtualNodeMap);
     _resolveMountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap);
+}
+
+/**
+ *
+ * @param {VirtualNode} virtualNode
+ */
+function _updateVirtualNode(virtualNode) {
+    _updateVirtualNodeRecursive(virtualNode);
+    didResolveVirtualTree();
 }
 
 /**
@@ -45,7 +53,8 @@ function _updateVirtualNodeRecursive(virtualNode) {
         const newVirtualNode = virtualNode.type(virtualNode.props);
         flushCurrentlyRendering();
 
-        resolveVirtualTree(newVirtualNode, virtualNode.path);
+        // 0 is the position of the new one
+        resolveVirtualTree(newVirtualNode, [...virtualNode.path, 0]);
 
         newVirtualNode.parent = virtualNode;
         virtualNode.children[0] = newVirtualNode;
@@ -61,7 +70,7 @@ function _resolveUnmountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap) {
             const virtualNode = oldVirtualNodeMap[key];
 
             if (isFunction(virtualNode.type)) {
-                destroyEffectsByFunctionalVirtualNode(virtualNode, unmounted);
+                destroyEffectsOnFunctionalVirtualNode(virtualNode, unmounted);
 
                 if (unmounted) {
                     unlinkFunctionalVirtualNode(virtualNode.path);
@@ -78,7 +87,7 @@ function _resolveMountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap) {
             const virtualNode = newVirtualNodeMap[key];
 
             if (isFunction(virtualNode.type)) {
-                mountEffectsByFunctionalVirtualNode(virtualNode, mounted);
+                mountEffectsOnFunctionalVirtualNode(virtualNode, mounted);
             }
         }
     }

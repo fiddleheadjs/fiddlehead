@@ -1,31 +1,53 @@
 import {h, mount, useState, useEffect, useRef} from "../../src/index.js";
 
-function Wrapper2({children}) {
+function Wrapper2({children, myRef}) {
     return (
-        <span className="Wrapper">
+        <span className="Wrapper" ref={myRef}>
             {children}
         </span>
     );
 }
 
-function Wrapper({children}) {
-    return <Wrapper2>{children}</Wrapper2>;
+function Wrapper({children, myRef}) {
+    return <Wrapper2 myRef={myRef}>{children}</Wrapper2>;
 }
 
 function DemoWrapperWrapper() {
     const [layout, setLayout] = useState('A');
-    console.log(layout);
+    const rootRef = useRef(null);
+    const wrapperRef = useRef(null);
+
+    useEffect(() => {
+        console.log('effect always', rootRef.current, wrapperRef.current);
+        return () => {
+            console.log('unmount always', rootRef.current, wrapperRef.current);
+        };
+    });
+
+    useEffect(() => {
+        console.log('effect deps', rootRef.current, wrapperRef.current);
+        return () => {
+            console.log('unmount deps', rootRef.current, wrapperRef.current);
+        };
+    }, [layout]);
+
+    useEffect(() => {
+        console.log('effect lazy', rootRef.current, wrapperRef.current);
+        return () => {
+            console.log('unmount lazy', rootRef.current, wrapperRef.current);
+        };
+    }, []);
 
     return (
-        <div className="Root">
-            <select onchange={ev => setLayout(ev.target.value)}>
+        <div className="Root" ref={rootRef}>
+            <select onChange={ev => setLayout(ev.target.value)}>
                 <option value="A" selected={layout === 'A'}>Layout A</option>
                 <option value="B" selected={layout === 'B'}>Layout B</option>
             </select>
             <div style={{marginTop: '100px'}}>
                 <span>Hi,</span>
                 {layout === 'A' && <>
-                    <Wrapper>
+                    <Wrapper myRef={wrapperRef}>
                         <b>My</b>
                     </Wrapper>
                     <>
@@ -39,7 +61,7 @@ function DemoWrapperWrapper() {
                 </>}
                 {layout === 'B' && <>
                     <b>I</b>
-                    <Wrapper>
+                    <Wrapper myRef={wrapperRef}>
                         <>
                             <i>
                                 <>am</>
@@ -57,4 +79,8 @@ function DemoWrapperWrapper() {
     );
 }
 
-mount(<DemoWrapperWrapper />, document.getElementById('sandbox-container'));
+function DemoFinalWrapper() {
+    return <DemoWrapperWrapper/>;
+}
+
+mount(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));

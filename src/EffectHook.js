@@ -1,4 +1,4 @@
-import {resolveCurrentlyProcessing} from "./currentlyProcessing";
+import {resolveCurrentlyProcessing} from "./CurrentlyProcessing";
 
 /**
  *
@@ -8,7 +8,7 @@ import {resolveCurrentlyProcessing} from "./currentlyProcessing";
  * @return {EffectHook}
  * @constructor
  */
-export function EffectHook(callback, deps, lastDestroy) {
+function EffectHook(callback, deps, lastDestroy) {
     this.tag = EFFECT_NONE;
     this.callback = callback;
     this.deps = deps;
@@ -16,12 +16,11 @@ export function EffectHook(callback, deps, lastDestroy) {
     this.lastDestroy = lastDestroy;
 }
 
-export const EFFECT_NONE = 0;
-export const EFFECT_ALWAYS = 1;
-export const EFFECT_LAZY = 2;
-export const EFFECT_DEPS = 3;
-export const EFFECT_DEPS_CHANGED = 4;
-
+const EFFECT_NONE = 0;
+const EFFECT_ALWAYS = 1;
+const EFFECT_LAZY = 2;
+const EFFECT_DEPS = 3;
+const EFFECT_DEPS_CHANGED = 4;
 
 export function useEffect(callback, deps = null) {
     const [functionalVirtualNode, hookIndex] = resolveCurrentlyProcessing();
@@ -71,7 +70,7 @@ export function useEffect(callback, deps = null) {
  * @param {VirtualNode} functionalVirtualNode
  * @param {boolean} isNewNodeMounted
  */
-export function mountEffectsByFunctionalVirtualNode(functionalVirtualNode, isNewNodeMounted) {
+export function mountEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNewNodeMounted) {
     functionalVirtualNode.hooks.forEach(hook => {
         if (!(hook instanceof EffectHook)) {
             return;
@@ -88,7 +87,7 @@ export function mountEffectsByFunctionalVirtualNode(functionalVirtualNode, isNew
  * @param {VirtualNode} functionalVirtualNode
  * @param {boolean} isNodeUnmounted
  */
-export function destroyEffectsByFunctionalVirtualNode(functionalVirtualNode, isNodeUnmounted) {
+export function destroyEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNodeUnmounted) {
     functionalVirtualNode.hooks.forEach(hook => {
         if (!(
             hook instanceof EffectHook &&

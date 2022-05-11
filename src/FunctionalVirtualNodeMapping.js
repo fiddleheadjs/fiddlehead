@@ -1,5 +1,5 @@
-import {stringifyPath} from "./path";
-import {hasOwnProperty} from "./utils";
+import {stringifyPath} from "./Path";
+import {hasOwnProperty} from "./Util";
 
 /**
  *

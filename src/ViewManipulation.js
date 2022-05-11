@@ -1,5 +1,4 @@
-import {hasOwnProperty, isArray, isEmpty, isFunction, isNumber, isPlainObject, isString} from "./utils";
-
+import {hasOwnProperty, isArray, isEmpty, isFunction, isNumber, isPlainObject, isString} from "./Util";
 
 export function createViewTextNode(text) {
     return document.createTextNode(text);

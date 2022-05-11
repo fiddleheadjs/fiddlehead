@@ -1,5 +1,5 @@
-import {resolveCurrentlyProcessing} from "./currentlyProcessing";
-import {isFunction} from "./utils";
+import {resolveCurrentlyProcessing} from "./CurrentlyProcessing";
+import {isFunction} from "./Util";
 import {updateVirtualTree} from "./VirtualTreeUpdating";
 
 /**
@@ -9,7 +9,7 @@ import {updateVirtualTree} from "./VirtualTreeUpdating";
  * @return {StateHook}
  * @constructor
  */
-export function StateHook(value, setValue) {
+function StateHook(value, setValue) {
     this.value = value;
     this.setValue = setValue;
 }

@@ -1,10 +1,9 @@
 import {linkViewNode, NODE_FRAGMENT, NODE_TEXT, NS_HTML, NS_SVG} from "./VirtualNode";
-import {PROP_VIRTUAL_NODE} from "./AttachmentProps";
 import {createViewElementWithNS, createViewTextNode} from "./ViewManipulation";
-import {isFunction, isString} from "./utils";
+import {isFunction, isString} from "./Util";
 import {AppendInfo, clearAppendInfoCollection, cloneAppendInfoCollection} from "./AppendInfo";
-import {getComponentType} from "./misc";
-import {escapeKey} from "./path";
+import {escapeKey} from "./Path";
+import {attachVirtualNode, getComponentType} from "./ExternalAttachment";
 
 export function resolveVirtualTree(rootVirtualNode, basePath = []) {
     const rootAppendInfo = new AppendInfo(null, [], rootVirtualNode);
@@ -62,7 +61,7 @@ export function resolveVirtualTree(rootVirtualNode, basePath = []) {
     return rootVirtualNode;
 }
 
-export function finishResolveVirtualTree() {
+export function didResolveVirtualTree() {
     clearAppendInfoCollection();
 }
 
@@ -94,7 +93,7 @@ export function hydrateVirtualTree(virtualNode) {
         viewNode = createViewElementWithNS(viewNS, virtualNode.type, virtualNode.props);
 
         // For debug
-        viewNode[PROP_VIRTUAL_NODE] = virtualNode;
+        attachVirtualNode(viewNode, virtualNode);
     }
 
     linkViewNode(virtualNode, viewNode);

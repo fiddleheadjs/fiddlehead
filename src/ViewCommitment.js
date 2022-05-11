@@ -1,4 +1,4 @@
-import {hasOwnProperty} from "./utils";
+import {hasOwnProperty} from "./Util";
 import {linkViewNode, NODE_TEXT} from "./VirtualNode";
 import {updateViewElementAttributes} from "./ViewManipulation";
 
@@ -17,28 +17,37 @@ function _removeOldViewNodes(oldVirtualNodeMap, newVirtualNodeMap) {
         if (hasOwnProperty(oldVirtualNodeMap, key) && !hasOwnProperty(newVirtualNodeMap, key)) {
             if (!key.startsWith(lastRemovedKey + '/')) {
                 const oldVirtualNode = oldVirtualNodeMap[key];
-                _removeViewNodesOfVirtualNode(oldVirtualNode);
-                lastRemovedKey = key;
+                if (oldVirtualNode.viewNode !== null) {
+                    _removeViewNodesOfVirtualNode(oldVirtualNode);
+                    lastRemovedKey = key;
+                }
             }
         }
     }
 }
 
 function _updateExistingViewNodes(oldVirtualNodeMap, newVirtualNodeMap) {
-    const keys = Object.keys({...oldVirtualNodeMap, ...newVirtualNodeMap});
-    keys.forEach(key => {
+    const mergedKeys = Object.keys({
+        ...oldVirtualNodeMap,
+        ...newVirtualNodeMap,
+    });
+
+    mergedKeys.forEach(key => {
         if (hasOwnProperty(oldVirtualNodeMap, key) && hasOwnProperty(newVirtualNodeMap, key)) {
-            const oldVirtualNode = oldVirtualNodeMap[key];
             const newVirtualNode = newVirtualNodeMap[key];
+            if (newVirtualNode.viewNode !== null) {
+                const oldVirtualNode = oldVirtualNodeMap[key];
 
-            linkViewNode(newVirtualNode, oldVirtualNode.viewNode);
+                // Reuse the existing view node
+                linkViewNode(newVirtualNode, oldVirtualNode.viewNode);
 
-            if (newVirtualNode.type === NODE_TEXT) {
-                if (newVirtualNode.text !== oldVirtualNode.text) {
-                    newVirtualNode.viewNode.textContent = newVirtualNode.text;
+                if (newVirtualNode.type === NODE_TEXT) {
+                    if (newVirtualNode.text !== oldVirtualNode.text) {
+                        newVirtualNode.viewNode.textContent = newVirtualNode.text;
+                    }
+                } else {
+                    updateViewElementAttributes(newVirtualNode.viewNode, newVirtualNode.props, oldVirtualNode.props);
                 }
-            } else {
-                updateViewElementAttributes(newVirtualNode.viewNode, newVirtualNode.props, oldVirtualNode.props);
             }
         }
     });
@@ -50,7 +59,10 @@ function _insertNewViewNodes(oldVirtualNodeMap, newVirtualNodeMap) {
     for (let key in newVirtualNodeMap) {
         if (hasOwnProperty(newVirtualNodeMap, key)) {
             if (!hasOwnProperty(oldVirtualNodeMap, key)) {
-                pendingVirtualNodes.push(newVirtualNodeMap[key]);
+                const newVirtualNode = newVirtualNodeMap[key];
+                if (newVirtualNode.viewNode !== null) {
+                    pendingVirtualNodes.push(newVirtualNode);
+                }
             } else {
                 _insertClosestViewNodesOfVirtualNodes(pendingVirtualNodes, oldVirtualNodeMap[key]);
                 pendingVirtualNodes.length = 0;

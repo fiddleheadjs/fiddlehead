@@ -1,15 +1,14 @@
-import {isArray, isFunction, isNumber, isString} from "./utils";
+import {isArray, isFunction, isNumber, isString} from "./Util";
 import {addAppendInfo, AppendInfo} from "./AppendInfo";
 import {NODE_FRAGMENT, NODE_TEXT, VirtualNode} from "./VirtualNode";
 import {
     findFunctionalVirtualNode,
     linkFunctionalVirtualNode,
     unlinkFunctionalVirtualNode
-} from "./functionalVirtualNodeMap";
-import {generateTemporaryPath} from "./path";
+} from "./FunctionalVirtualNodeMapping";
+import {generateTemporaryPath} from "./Path";
 
 /**
- * creates an element with certain content and attributes
  *
  * @param {string|function} type
  * @param {{}?} attributes
@@ -74,7 +73,7 @@ function _appendVirtualChildren(element, content, indexes = []) {
     _appendVirtualChild(element, content, indexes);
 }
 
-const _appendVirtualChild = function (element, item, indexes) {
+function _appendVirtualChild(element, item, indexes) {
     let virtualNode;
 
     if (isString(item) || isNumber(item)) {
@@ -90,4 +89,4 @@ const _appendVirtualChild = function (element, item, indexes) {
             new AppendInfo(element, indexes, virtualNode)
         );
     }
-};
+}
