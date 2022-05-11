@@ -1,6 +1,6 @@
-import {h, render} from '../../index.js';
+import {h, mount} from '../../index.js';
 
-render(<DemoWrapper />, document.getElementById('sandbox-container'));
+mount(<DemoWrapper />, document.getElementById('sandbox-container'));
 
 function DemoWrapper() {
     return (

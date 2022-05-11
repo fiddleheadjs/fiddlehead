@@ -1,4 +1,4 @@
-import {h, render, useState, useEffect, useRef} from "../../index.js";
+import {h, mount, useState, useEffect, useRef} from "../../index.js";
 
 function Wrapper2({children}) {
     return (
@@ -57,4 +57,4 @@ function DemoWrapperWrapper() {
     );
 }
 
-render(<DemoWrapperWrapper />, document.getElementById('sandbox-container'));
+mount(<DemoWrapperWrapper />, document.getElementById('sandbox-container'));

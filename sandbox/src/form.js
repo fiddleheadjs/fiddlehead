@@ -1,4 +1,4 @@
-import {h, render, useState, useEffect, useRef} from "../../index.js";
+import {h, mount, useState, useEffect, useRef} from "../../index.js";
 
 
 function Cat({text, setText}) {
@@ -263,4 +263,4 @@ function DemoWrapperWrapper() {
     return <><DemoWrapper/></>;
 }
 
-render(<DemoWrapperWrapper/>, document.getElementById('sandbox-container'));
+mount(<DemoWrapperWrapper/>, document.getElementById('sandbox-container'));

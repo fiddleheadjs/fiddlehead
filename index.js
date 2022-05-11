@@ -1,18 +1,8 @@
-/**
- *
- * @type {Object<Fiber>}
- */
-const fiberMap = {};
 
-/**
- * 
- * @type {Array<AppendInfo>}
- */
-const normallyEmptyAppendedNodeArray = [];
+// =======================================
+// Types and Constants
+// =======================================
 
-const PROP_COMPONENT_TYPE = 'Hook$ComponentType';
-const PROP_CONTAINER_ID = 'Hook$ContainerId';
-const PROP_VIRTUAL_NODE = 'Hook$VirtualNode';
 
 /**
  *
@@ -111,11 +101,19 @@ function AppendInfo(parent, routeFromParent, current) {
 }
 
 /**
- *
- * @type {Fiber|null}
+ * 
+ * @type {Array<AppendInfo>}
  */
-let currentlyRenderingFiber = null;
-let currentHookIndex = -1;
+ const NormallyEmptyAppendedNodeArray = [];
+
+ const PROP_COMPONENT_TYPE = 'Hook$ComponentType';
+ const PROP_CONTAINER_ID = 'Hook$ContainerId';
+ const PROP_VIRTUAL_NODE = 'Hook$VirtualNode';
+
+
+// =======================================
+// Utils
+// =======================================
 
 let containerIdInc = 0;
 function getContainerId(root) {
@@ -147,65 +145,102 @@ function stringifyPath(path) {
     return path.join('/');
 }
 
-function prepareCurrentlyRendering(fiber) {
-    currentlyRenderingFiber = fiber;
-    currentHookIndex = -1;
+function escapeKey(key) {
+    return '@' + encodeURIComponent(key);
+}
+
+
+// =======================================
+// Currently Processing Tracking
+// =======================================
+
+
+let currentlyRenderingFunctionalVirtualNode = null;
+let currentlyProcessingHookIndex = -1;
+
+function prepareCurrentlyRendering(functionalVirtualNode) {
+    currentlyRenderingFunctionalVirtualNode = functionalVirtualNode;
+    currentlyProcessingHookIndex = -1;
 }
 
 function flushCurrentlyRendering() {
-    currentlyRenderingFiber = null;
-    currentHookIndex = -1;
+    currentlyRenderingFunctionalVirtualNode = null;
+    currentlyProcessingHookIndex = -1;
 }
 
-function findFiber(path) {
+function resolveCurrentlyRenderingFunctionalVirtualNode() {
+    if (currentlyRenderingFunctionalVirtualNode === null) {
+        throw new Error('Cannot call hooks from outside of the component');
+    }
+    
+    return currentlyRenderingFunctionalVirtualNode;
+}
+
+
+// =======================================
+// Functional Virtual Node Map
+// =======================================
+
+
+/**
+ *
+ * @type {Object<VirtualNode>}
+ */
+ const functionalVirtualNodeMap = {};
+
+function findFunctionalVirtualNode(path) {
     const pathString = stringifyPath(path);
 
-    if (hasOwnProperty(fiberMap, pathString)) {
-        return fiberMap[pathString];
+    if (hasOwnProperty(functionalVirtualNodeMap, pathString)) {
+        return functionalVirtualNodeMap[pathString];
     }
 
     return null;
 }
 
-function linkFiber(path, fiber) {
-    fiberMap[stringifyPath(path)] = fiber;
+function linkFunctionalVirtualNode(path, functionalVirtualNode) {
+    functionalVirtualNodeMap[stringifyPath(path)] = functionalVirtualNode;
 }
 
-function unlinkFiber(path) {
-    delete fiberMap[stringifyPath(path)];
+function unlinkFunctionalVirtualNode(path) {
+    delete functionalVirtualNodeMap[stringifyPath(path)];
 }
 
-function resolveCurrentlyRunningFiber() {
-    if (currentlyRenderingFiber === null) {
-        throw new Error('Cannot call hooks from outside of the component');
-    }
 
-    return currentlyRenderingFiber;
-}
+// =======================================
+// useRef
+// =======================================
+
 
 function useRef(initialValue) {
-    const fiber = resolveCurrentlyRunningFiber();
+    const functionalVitualNode = resolveCurrentlyRenderingFunctionalVirtualNode();
 
-    currentHookIndex++;
+    currentlyProcessingHookIndex++;
 
-    if (fiber.hooks.length > currentHookIndex) {
-        return fiber.hooks[currentHookIndex];
+    if (functionalVitualNode.hooks.length > currentlyProcessingHookIndex) {
+        return functionalVitualNode.hooks[currentlyProcessingHookIndex];
     }
 
     const hook = new RefHook(initialValue);
 
-    fiber.hooks.push(hook);
+    functionalVitualNode.hooks.push(hook);
 
     return hook;
 }
 
+
+// =======================================
+// useState
+// =======================================
+
+
 function useState(initialValue) {
-    const fiber = resolveCurrentlyRunningFiber();
+    const functionalVirtualNode = resolveCurrentlyRenderingFunctionalVirtualNode();
 
-    currentHookIndex++;
+    currentlyProcessingHookIndex++;
 
-    if (fiber.hooks.length > currentHookIndex) {
-        const hook = fiber.hooks[currentHookIndex];
+    if (functionalVirtualNode.hooks.length > currentlyProcessingHookIndex) {
+        const hook = functionalVirtualNode.hooks[currentlyProcessingHookIndex];
         return [hook.value, hook.setValue];
     }
 
@@ -222,26 +257,32 @@ function useState(initialValue) {
 
             if (newValue !== hook.value) {
                 hook.value = newValue;
-                updateComponent(fiber);
+                updateVirtualTree(functionalVirtualNode);
             }
         }
     );
 
-    fiber.hooks.push(hook);
+    functionalVirtualNode.hooks.push(hook);
 
     return [hook.value, hook.setValue];
 }
 
+
+// =======================================
+// useEffect
+// =======================================
+
+
 function useEffect(callback, deps = null) {
-    const fiber = resolveCurrentlyRunningFiber();
+    const functionalVirtualNode = resolveCurrentlyRenderingFunctionalVirtualNode();
 
-    currentHookIndex++;
+    currentlyProcessingHookIndex++;
 
-    if (fiber.hooks.length > currentHookIndex) {
+    if (functionalVirtualNode.hooks.length > currentlyProcessingHookIndex) {
         /**
          * @type {EffectHook}
          */
-        const currentHook = fiber.hooks[currentHookIndex];
+        const currentHook = functionalVirtualNode.hooks[currentlyProcessingHookIndex];
 
         if (!(
             deps === null && currentHook.deps === null ||
@@ -264,7 +305,7 @@ function useEffect(callback, deps = null) {
         if (effectTag === EFFECT_ALWAYS || effectTag === EFFECT_DEPS_CHANGED) {
             const newHook = new EffectHook(callback, deps, currentHook.destroy);
             newHook.tag = effectTag;
-            fiber.hooks[currentHookIndex] = newHook;
+            functionalVirtualNode.hooks[currentlyProcessingHookIndex] = newHook;
             return;
         }
 
@@ -274,7 +315,7 @@ function useEffect(callback, deps = null) {
     const hook = new EffectHook(callback, deps);
     hook.tag = getEffectTag(deps);
 
-    fiber.hooks.push(hook);
+    functionalVirtualNode.hooks.push(hook);
 }
 
 function getEffectTag(deps, lastDeps = false) {
@@ -289,7 +330,7 @@ function getEffectTag(deps, lastDeps = false) {
     }
 
     // Deps
-    if (lastDeps === false || compareArrays(deps, lastDeps)) {
+    if (lastDeps === false || compareSameLengthArrays(deps, lastDeps)) {
         return EFFECT_DEPS;
     }
 
@@ -299,7 +340,7 @@ function getEffectTag(deps, lastDeps = false) {
     }
 }
 
-function compareArrays(a, b) {
+function compareSameLengthArrays(a, b) {
     for (let i = 0; i < a.length; i++) {
         if (a[i] !== b[i]) {
             return false;
@@ -335,11 +376,11 @@ function destroyEffectHook(hook, isNodeUnmounted = false) {
 
 /**
  *
- * @param {Fiber} fiber
+ * @param {VirtualNode} functionalVirtualNode
  * @param {boolean} isNewNodeMounted
  */
-function mountEffectsByFiber(fiber, isNewNodeMounted) {
-    fiber.hooks.forEach(hook => {
+function mountEffectsByFunctionalVirtualNode(functionalVirtualNode, isNewNodeMounted) {
+    functionalVirtualNode.hooks.forEach(hook => {
         if (!(hook instanceof EffectHook)) {
             return;
         }
@@ -352,11 +393,11 @@ function mountEffectsByFiber(fiber, isNewNodeMounted) {
 
 /**
  *
- * @param {Fiber} fiber
+ * @param {VirtualNode} functionalVirtualNode
  * @param {boolean} isNodeUnmounted
  */
-function destroyEffectsByFiber(fiber, isNodeUnmounted) {
-    fiber.hooks.forEach(hook => {
+function destroyEffectsByFunctionalVirtualNode(functionalVirtualNode, isNodeUnmounted) {
+    functionalVirtualNode.hooks.forEach(hook => {
         if (!(
             hook instanceof EffectHook &&
             (hook.lastDestroy !== undefined || hook.destroy !== undefined)
@@ -370,7 +411,90 @@ function destroyEffectsByFiber(fiber, isNodeUnmounted) {
     });
 }
 
-function parseTree(rootVirtualNode) {
+
+// =======================================
+// Update Virtual Tree
+// =======================================
+
+
+/**
+ * 
+ * @param {VirtualNode} rootVirtualNode 
+ * @param {boolean} isInit 
+ */
+function updateVirtualTree(rootVirtualNode, isInit = false) {
+    const oldVirtualNodeMap = isInit ? {} : _getVirtualNodeMap(rootVirtualNode);
+    _updateVirtualNodeRecursive(rootVirtualNode, rootVirtualNode.parent);
+    finishResolveVirtualTree();
+    const newVirtualNodeMap = _getVirtualNodeMap(rootVirtualNode);
+
+    _resolveUnmountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap);
+    hydrateVirtualTree(rootVirtualNode);
+    commitToHTML(oldVirtualNodeMap, newVirtualNodeMap);
+    _resolveMountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap);
+}
+
+/**
+ * 
+ * @param {VirtualNode} virtualNode 
+ */
+ function _updateVirtualNodeRecursive(virtualNode) {
+    if (virtualNode.type === NODE_TEXT) {
+        return;
+    }
+
+    if (!isFunction(virtualNode.type)) {
+        virtualNode.children.forEach(childVirtualNode => {
+            _updateVirtualNodeRecursive(childVirtualNode);
+        });
+        return;
+    }
+
+    {
+        prepareCurrentlyRendering(virtualNode);
+        const newVirtualNode = virtualNode.type(virtualNode.props);
+        flushCurrentlyRendering();
+
+        resolveVirtualTree(newVirtualNode, virtualNode.path);
+        
+        newVirtualNode.parent = virtualNode;
+        virtualNode.children[0] = newVirtualNode;
+
+        _updateVirtualNodeRecursive(newVirtualNode);
+    }
+}
+
+function _resolveUnmountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap) {
+    for (let key in oldVirtualNodeMap) {
+        if (hasOwnProperty(oldVirtualNodeMap, key)) {
+            const unmounted = !hasOwnProperty(newVirtualNodeMap, key);
+            const virtualNode = oldVirtualNodeMap[key];
+
+            if (isFunction(virtualNode.type)) {
+                destroyEffectsByFunctionalVirtualNode(virtualNode, unmounted);
+
+                if (unmounted) {
+                    unlinkFunctionalVirtualNode(virtualNode.path);
+                }
+            }
+        }
+    }
+}
+
+function _resolveMountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap) {
+    for (let key in newVirtualNodeMap) {
+        if (hasOwnProperty(newVirtualNodeMap, key)) {
+            const mounted = !hasOwnProperty(oldVirtualNodeMap, key);
+            const virtualNode = newVirtualNodeMap[key];
+
+            if (isFunction(virtualNode.type)) {
+                mountEffectsByFunctionalVirtualNode(virtualNode, mounted);
+            }
+        }
+    }
+}
+
+function _getVirtualNodeMap(rootVirtualNode) {
     const out = {};
 
     const walk = (virtualNode) => {
@@ -386,82 +510,12 @@ function parseTree(rootVirtualNode) {
     return out;
 }
 
-function resolveUnmountedNodes(oldVirtualNodeMap, newVirtualNodeMap) {
-    for (let key in oldVirtualNodeMap) {
-        if (hasOwnProperty(oldVirtualNodeMap, key)) {
-            const unmounted = !hasOwnProperty(newVirtualNodeMap, key);
-            const virtualNode = oldVirtualNodeMap[key];
 
-            if (isFunction(virtualNode.type)) {
-                destroyEffectsByFiber(virtualNode, unmounted);
 
-                if (unmounted) {
-                    unlinkFiber(virtualNode.path);
-                }
-            }
-        }
-    }
-}
+// =======================================
+// Create Element
+// =======================================
 
-function resolveMountedNodes(oldVirtualNodeMap, newVirtualNodeMap) {
-    for (let key in newVirtualNodeMap) {
-        if (hasOwnProperty(newVirtualNodeMap, key)) {
-            const mounted = !hasOwnProperty(oldVirtualNodeMap, key);
-            const virtualNode = newVirtualNodeMap[key];
-
-            if (isFunction(virtualNode.type)) {
-                mountEffectsByFiber(virtualNode, mounted);
-            }
-        }
-    }
-}
-
-/**
- * 
- * @param {VirtualNode} virtualNode 
- */
-function updateVirtualTree(virtualNode) {
-    if (virtualNode.type === NODE_TEXT) {
-        return;
-    }
-
-    if (!isFunction(virtualNode.type)) {
-        virtualNode.children.forEach(childVirtualNode => {
-            updateVirtualTree(childVirtualNode);
-        });
-        return;
-    }
-
-    {
-        prepareCurrentlyRendering(virtualNode);
-        const newVirtualNode = virtualNode.type(virtualNode.props);
-        flushCurrentlyRendering();
-
-        resolveTree(newVirtualNode, virtualNode.path);
-        
-        newVirtualNode.parent = virtualNode;
-        virtualNode.children[0] = newVirtualNode;
-
-        updateVirtualTree(newVirtualNode);
-    }
-}
-
-/**
- * 
- * @param {VirtualNode} rootVirtualNode 
- * @param {boolean} isInit 
- */
-function updateComponent(rootVirtualNode, isInit = false) {
-    const oldVirtualNodeMap = isInit ? {} : parseTree(rootVirtualNode);
-    updateVirtualTree(rootVirtualNode, rootVirtualNode.parent);
-    finishResolveTree();
-    const newVirtualNodeMap = parseTree(rootVirtualNode);
-
-    resolveUnmountedNodes(oldVirtualNodeMap, newVirtualNodeMap);
-    hydrateVirtualNodes(rootVirtualNode);
-    commitToHTML(oldVirtualNodeMap, newVirtualNodeMap);
-    resolveMountedNodes(oldVirtualNodeMap, newVirtualNodeMap);
-}
 
 /**
  * creates an element with certain content and attributes
@@ -471,54 +525,54 @@ function updateComponent(rootVirtualNode, isInit = false) {
  * @param {[]} content
  * @return {VirtualNode}
  */
-function createElement(type, attributes, ...content) {
+ function createElement(type, attributes, ...content) {
     attributes = attributes || {};
 
     if (type === null) {
-        return createStaticNode(NODE_FRAGMENT, attributes, ...content);
+        return _createStaticVirtualNode(NODE_FRAGMENT, attributes, ...content);
     }
 
     if (isFunction(type)) {
-        return createFiberNode(type, attributes, ...content);
+        return _createFunctionalVirtualNode(type, attributes, ...content);
     }
 
-    return createStaticNode(type, attributes, ...content);
+    return _createStaticVirtualNode(type, attributes, ...content);
 }
 
-function createFiberNode(type, attributes, ...content) {
+function _createFunctionalVirtualNode(type, attributes, ...content) {
     const {key = null, ref = null, ...props} = attributes;
     props.children = content;
 
     const tempPath = generateTemporaryPath();
 
     const virtualNode = new VirtualNode(type, props, key, ref);
-    linkFiber(tempPath, virtualNode);
+    linkFunctionalVirtualNode(tempPath, virtualNode);
 
     virtualNode.resolvePath = () => {
-        unlinkFiber(tempPath);
+        unlinkFunctionalVirtualNode(tempPath);
 
-        const existing = findFiber(virtualNode.path);
+        const existing = findFunctionalVirtualNode(virtualNode.path);
         if (existing) {
             virtualNode.hooks = existing.hooks;
         }
 
-        linkFiber(virtualNode.path, virtualNode);
+        linkFunctionalVirtualNode(virtualNode.path, virtualNode);
     };
 
     return virtualNode;
 }
 
-function createStaticNode(type, attributes, ...content) {
+function _createStaticVirtualNode(type, attributes, ...content) {
     const {key = null, ref = null, ...props} = attributes;
 
     const virtualNode = new VirtualNode(type, props, key, ref);
 
-    appendVirtualChildren(virtualNode, content);
+    _appendVirtualChildren(virtualNode, content);
 
     return virtualNode;
 }
 
-function appendVirtualChildren(element, content) {
+function _appendVirtualChildren(element, content) {
     const append = function (item, indexes) {
         let virtualNode;
 
@@ -531,11 +585,12 @@ function appendVirtualChildren(element, content) {
 
         if (virtualNode instanceof VirtualNode) {
             element.children.push(virtualNode);
-            normallyEmptyAppendedNodeArray.push(
+            NormallyEmptyAppendedNodeArray.push(
                 new AppendInfo(element, indexes, virtualNode)
             );
         }
     };
+
     const appendRecursively = function (content, indexes) {
         if (isArray(content)) {
             content.forEach(function (item, idx) {
@@ -545,16 +600,19 @@ function appendVirtualChildren(element, content) {
             append(content, indexes);
         }
     }
+
     appendRecursively(content, []);
 }
 
-function escapeKey(key) {
-    return '@' + encodeURIComponent(key);
-}
 
-function resolveTree(rootVirtualNode, basePath = []) {
+// =======================================
+// Virtual Tree Manipulation
+// =======================================
+
+
+function resolveVirtualTree(rootVirtualNode, basePath = []) {
     const rootAppendInfo = new AppendInfo(null, [], rootVirtualNode);
-    let arr = normallyEmptyAppendedNodeArray.slice(0);
+    let arr = [...NormallyEmptyAppendedNodeArray];
     let currentPath = [...basePath];
 
     /**
@@ -608,165 +666,56 @@ function resolveTree(rootVirtualNode, basePath = []) {
     return rootVirtualNode;
 }
 
-function finishResolveTree() {
-    normallyEmptyAppendedNodeArray.length = 0;
+function finishResolveVirtualTree() {
+    NormallyEmptyAppendedNodeArray.length = 0;
 }
 
-function hydrateVirtualNodes(virtualNode) {
-    const walk = (virtualNode) => {
-        // Determine the namespace
-        if (virtualNode.type === 'svg') {
-            virtualNode.ns = NS_SVG;
-        } else {
-            if (virtualNode.parent !== null) {
-                virtualNode.ns = virtualNode.parent.ns;
-            } else {
-                virtualNode.ns = NS_HTML;
-            }
-        }
-
-        // Create the view node
-        let viewNode = null;
-
-        if (virtualNode.type === NODE_TEXT) {
-            viewNode = document.createTextNode(virtualNode.text);
-        } else if (virtualNode.type === NODE_FRAGMENT) {
-            // Do nothing here
-            // But be careful, removing it changes the condition
-        } else if (isString(virtualNode.type)) {
-            let viewNS = null;
-            if (virtualNode.ns === NS_SVG) {
-                viewNS = 'http://www.w3.org/2000/svg';
-            }
-            viewNode = createDOMElementNS(viewNS, virtualNode.type, virtualNode.props);
-
-            // For debug
-            viewNode[PROP_VIRTUAL_NODE] = virtualNode;
-        }
-
-        linkViewNode(virtualNode, viewNode);
-
-        // Continue with the children
-        virtualNode.children.forEach(childVirtualNode => {
-            walk(childVirtualNode);
-        });
-    };
-
-    walk(virtualNode);
-}
-
-function commitToHTML(oldVirtualNodeMap, newVirtualNodeMap) {
-    removeOldViewNodes(oldVirtualNodeMap, newVirtualNodeMap);
-    updateExistingViewNodes(oldVirtualNodeMap, newVirtualNodeMap);
-    insertNewViewNodes(oldVirtualNodeMap, newVirtualNodeMap);
-}
-
-function removeOldViewNodes(oldVirtualNodeMap, newVirtualNodeMap) {
-    // If the current node is under the last removed node
-    // So dont need to remove current node anymore
-    // Use lastRemovedKey to track
-    let lastRemovedKey = '';
-    for (let key in oldVirtualNodeMap) {
-        if (hasOwnProperty(oldVirtualNodeMap, key) && !hasOwnProperty(newVirtualNodeMap, key)) {
-            if (!key.startsWith(lastRemovedKey + '/')) {
-                const oldVirtualNode = oldVirtualNodeMap[key];
-                removeViewNodesOfVirtualNode(oldVirtualNode);
-                lastRemovedKey = key;
-            }
-        }
-    }
-}
-
-function updateExistingViewNodes(oldVirtualNodeMap, newVirtualNodeMap) {
-    const keys = Object.keys({...oldVirtualNodeMap, ...newVirtualNodeMap});
-    keys.forEach(key => {
-        if (hasOwnProperty(oldVirtualNodeMap, key) && hasOwnProperty(newVirtualNodeMap, key)) {
-            const oldVirtualNode = oldVirtualNodeMap[key];
-            const newVirtualNode = newVirtualNodeMap[key];
-
-            linkViewNode(newVirtualNode, oldVirtualNode.viewNode);
-
-            if (newVirtualNode.type === NODE_TEXT) {
-                if (newVirtualNode.text !== oldVirtualNode.text) {
-                    newVirtualNode.viewNode.textContent = newVirtualNode.text;
-                }
-            } else {
-                setAttributes(newVirtualNode.viewNode, newVirtualNode.props, oldVirtualNode.props);
-            }
-        }
-    });
-}
-
-function insertNewViewNodes(oldVirtualNodeMap, newVirtualNodeMap) {
-    let pendingVirtualNodes = [];
-
-    for (let key in newVirtualNodeMap) {
-        if (hasOwnProperty(newVirtualNodeMap, key)) {
-            if (!hasOwnProperty(oldVirtualNodeMap, key)) {
-                pendingVirtualNodes.push(newVirtualNodeMap[key]);
-            } else {
-                insertClosestViewNodesOfVirtualNodes(pendingVirtualNodes, oldVirtualNodeMap[key]);
-                pendingVirtualNodes.length = 0;
-            }
-        }
-    }
-
-    if (pendingVirtualNodes.length > 0) {
-        insertClosestViewNodesOfVirtualNodes(pendingVirtualNodes, null);
-    }
-}
-
-function insertClosestViewNodesOfVirtualNodes(virtualNodes, virtualNodeAfter) {
-    const viewNodeAfter = virtualNodeAfter && findClosestViewNodes(virtualNodeAfter)[0] || null;
-
-    virtualNodes.forEach(virtualNode => {
-        if (virtualNode.viewNode !== null) {
-            const viewHost = findViewHost(virtualNode);
-
-            if (viewHost !== null) {
-                if (viewNodeAfter !== null && viewHost === viewNodeAfter.parentNode) {
-                    viewHost.insertBefore(virtualNode.viewNode, viewNodeAfter);
-                } else {
-                    viewHost.appendChild(virtualNode.viewNode);
-                }
-            }
-        }
-    });
-}
-
-function removeViewNodesOfVirtualNode(virtualNode) {
-    findClosestViewNodes(virtualNode).forEach(viewNode => {
-        if (viewNode.parentNode !== null) {
-            viewNode.parentNode.removeChild(viewNode);
-        }
-    });
-}
-
-function findViewHost(virtualNode) {
-    if (virtualNode.parent === null) {
-        return null;
-    }
-
-    if (virtualNode.parent.viewNode === null) {
-        return findViewHost(virtualNode.parent);
-    }
-
-    return virtualNode.parent.viewNode;
-}
-
-function findClosestViewNodes(virtualNode) {
-    if (virtualNode.viewNode !== null) {
-        return [virtualNode.viewNode];
+function hydrateVirtualTree(virtualNode) {
+    // Determine the namespace
+    if (virtualNode.type === 'svg') {
+        virtualNode.ns = NS_SVG;
     } else {
-        return virtualNode.children.reduce((arr, childVirtualNode) => {
-            return arr.concat(findClosestViewNodes(childVirtualNode));
-        }, []);
+        if (virtualNode.parent !== null) {
+            virtualNode.ns = virtualNode.parent.ns;
+        } else {
+            virtualNode.ns = NS_HTML;
+        }
     }
+
+    // Create the view node
+    let viewNode = null;
+
+    if (virtualNode.type === NODE_TEXT) {
+        viewNode = craeteDOMTextNode(virtualNode.text);
+    } else if (virtualNode.type === NODE_FRAGMENT) {
+        // Do nothing here
+        // But be careful, removing it changes the condition
+    } else if (isString(virtualNode.type)) {
+        let viewNS = null;
+        if (virtualNode.ns === NS_SVG) {
+            viewNS = 'http://www.w3.org/2000/svg';
+        }
+        viewNode = createDOMElementWithNS(viewNS, virtualNode.type, virtualNode.props);
+
+        // For debug
+        viewNode[PROP_VIRTUAL_NODE] = virtualNode;
+    }
+
+    linkViewNode(virtualNode, viewNode);
+
+    // Continue with the children
+    virtualNode.children.forEach(childVirtualNode => {
+        hydrateVirtualTree(childVirtualNode);
+    });
 }
 
-function render(rootVirtualNode, container) {
-    resolveTree(rootVirtualNode, [getContainerId(container)]);
-    finishResolveTree();
+// =======================================
+// Mounting
+// =======================================
+
+function mount(rootVirtualNode, container) {
+    resolveVirtualTree(rootVirtualNode, [getContainerId(container)]);
+    finishResolveVirtualTree();
 
     const containerVirtualNode = new VirtualNode(container.nodeName.toLowerCase(), {}, null, null);
 
@@ -780,43 +729,163 @@ function render(rootVirtualNode, container) {
         containerVirtualNode.ns = NS_HTML;
     }
 
-    updateComponent(rootVirtualNode, true);
+    updateVirtualTree(rootVirtualNode, true);
 }
 
 
-//============================
-// DOM manipulation
-// ===========================
+// =======================================
+// Commit to HTML
+// =======================================
 
-function createDOMElementNS(ns, type, attributes) {
+
+function commitToHTML(oldVirtualNodeMap, newVirtualNodeMap) {
+    _removeOldViewNodes(oldVirtualNodeMap, newVirtualNodeMap);
+    _updateExistingViewNodes(oldVirtualNodeMap, newVirtualNodeMap);
+    _insertNewViewNodes(oldVirtualNodeMap, newVirtualNodeMap);
+}
+
+function _removeOldViewNodes(oldVirtualNodeMap, newVirtualNodeMap) {
+    // If the current node is under the last removed node
+    // So dont need to remove current node anymore
+    // Use lastRemovedKey to track
+    let lastRemovedKey = '';
+    for (let key in oldVirtualNodeMap) {
+        if (hasOwnProperty(oldVirtualNodeMap, key) && !hasOwnProperty(newVirtualNodeMap, key)) {
+            if (!key.startsWith(lastRemovedKey + '/')) {
+                const oldVirtualNode = oldVirtualNodeMap[key];
+                _removeViewNodesOfVirtualNode(oldVirtualNode);
+                lastRemovedKey = key;
+            }
+        }
+    }
+}
+
+function _updateExistingViewNodes(oldVirtualNodeMap, newVirtualNodeMap) {
+    const keys = Object.keys({...oldVirtualNodeMap, ...newVirtualNodeMap});
+    keys.forEach(key => {
+        if (hasOwnProperty(oldVirtualNodeMap, key) && hasOwnProperty(newVirtualNodeMap, key)) {
+            const oldVirtualNode = oldVirtualNodeMap[key];
+            const newVirtualNode = newVirtualNodeMap[key];
+
+            linkViewNode(newVirtualNode, oldVirtualNode.viewNode);
+
+            if (newVirtualNode.type === NODE_TEXT) {
+                if (newVirtualNode.text !== oldVirtualNode.text) {
+                    newVirtualNode.viewNode.textContent = newVirtualNode.text;
+                }
+            } else {
+                updateDOMElementAttributes(newVirtualNode.viewNode, newVirtualNode.props, oldVirtualNode.props);
+            }
+        }
+    });
+}
+
+function _insertNewViewNodes(oldVirtualNodeMap, newVirtualNodeMap) {
+    let pendingVirtualNodes = [];
+
+    for (let key in newVirtualNodeMap) {
+        if (hasOwnProperty(newVirtualNodeMap, key)) {
+            if (!hasOwnProperty(oldVirtualNodeMap, key)) {
+                pendingVirtualNodes.push(newVirtualNodeMap[key]);
+            } else {
+                _insertClosestViewNodesOfVirtualNodes(pendingVirtualNodes, oldVirtualNodeMap[key]);
+                pendingVirtualNodes.length = 0;
+            }
+        }
+    }
+
+    if (pendingVirtualNodes.length > 0) {
+        _insertClosestViewNodesOfVirtualNodes(pendingVirtualNodes, null);
+    }
+}
+
+function _insertClosestViewNodesOfVirtualNodes(virtualNodes, virtualNodeAfter) {
+    const viewNodeAfter = virtualNodeAfter && _findClosestViewNodes(virtualNodeAfter)[0] || null;
+
+    virtualNodes.forEach(virtualNode => {
+        if (virtualNode.viewNode !== null) {
+            const viewHost = _findViewHost(virtualNode);
+
+            if (viewHost !== null) {
+                if (viewNodeAfter !== null && viewHost === viewNodeAfter.parentNode) {
+                    viewHost.insertBefore(virtualNode.viewNode, viewNodeAfter);
+                } else {
+                    viewHost.appendChild(virtualNode.viewNode);
+                }
+            }
+        }
+    });
+}
+
+function _removeViewNodesOfVirtualNode(virtualNode) {
+    _findClosestViewNodes(virtualNode).forEach(viewNode => {
+        if (viewNode.parentNode !== null) {
+            viewNode.parentNode.removeChild(viewNode);
+        }
+    });
+}
+
+function _findViewHost(virtualNode) {
+    if (virtualNode.parent === null) {
+        return null;
+    }
+
+    if (virtualNode.parent.viewNode === null) {
+        return _findViewHost(virtualNode.parent);
+    }
+
+    return virtualNode.parent.viewNode;
+}
+
+function _findClosestViewNodes(virtualNode) {
+    if (virtualNode.viewNode !== null) {
+        return [virtualNode.viewNode];
+    } else {
+        return virtualNode.children.reduce((arr, childVirtualNode) => {
+            return arr.concat(_findClosestViewNodes(childVirtualNode));
+        }, []);
+    }
+}
+
+
+// =======================================
+// DOM manipulation
+// =======================================
+
+
+function craeteDOMTextNode(text) {
+    return document.createTextNode(text);
+}
+
+function createDOMElementWithNS(ns, type, attributes) {
     const node = (ns !== null
         ? document.createElementNS(ns, type)
         : document.createElement(type)
     );
 
-    setAttributes(node, attributes, {});
+    updateDOMElementAttributes(node, attributes, {});
 
     return node;
 }
 
-function setAttributes(element, attributes, oldAttributes) {
+function updateDOMElementAttributes(element, newAttributes, oldAttributes) {
     for (let attrName in oldAttributes) {
         if (hasOwnProperty(oldAttributes, attrName)) {
-            if (isEmpty(attributes[attrName])) {
-                removeAttribute(element, attrName, oldAttributes[attrName]);
+            if (isEmpty(newAttributes[attrName])) {
+                _removeDOMElementAttribute(element, attrName, oldAttributes[attrName]);
             }
         }
     }
 
-    for (let attrName in attributes) {
-        if (hasOwnProperty(attributes, attrName)) {
-            setAttribute(element, attrName, attributes[attrName], oldAttributes[attrName]);
+    for (let attrName in newAttributes) {
+        if (hasOwnProperty(newAttributes, attrName)) {
+            _setDOMElementAttribute(element, attrName, newAttributes[attrName], oldAttributes[attrName]);
         }
     }
 }
 
-function removeAttribute(element, attrName, attrValue) {
-    const [name, value] = transformAttribute(attrName, attrValue);
+function _removeDOMElementAttribute(element, attrName, attrValue) {
+    const [name, value] = _transformDOMElementAttribute(attrName, attrValue);
     
     if (isEmpty(value)) {
         return;
@@ -825,8 +894,8 @@ function removeAttribute(element, attrName, attrValue) {
     element.removeAttribute(name);
 }
 
-function setAttribute(element, attrName, attrValue, oldAttrValue) {
-    const [name, value] = transformAttribute(attrName, attrValue);
+function _setDOMElementAttribute(element, attrName, attrValue, oldAttrValue) {
+    const [name, value] = _transformDOMElementAttribute(attrName, attrValue);
 
     if (isEmpty(value)) {
         return;
@@ -834,7 +903,7 @@ function setAttribute(element, attrName, attrValue, oldAttrValue) {
 
     if (name === 'style') {
         if (!isEmpty(oldAttrValue)) {
-            const [, oldValue] = transformAttribute(attrName, oldAttrValue);
+            const [, oldValue] = _transformDOMElementAttribute(attrName, oldAttrValue);
             if (!isEmpty(oldValue)) {
                 for (let prop in oldValue) {
                     if (hasOwnProperty(oldValue, prop) && !hasOwnProperty(value, prop)) {
@@ -870,7 +939,7 @@ function setAttribute(element, attrName, attrValue, oldAttrValue) {
     }
 }
 
-function transformAttribute(name, value) {
+function _transformDOMElementAttribute(name, value) {
     if (isFunction(value)) {
         return [name.toLowerCase(), value];
     }
@@ -889,7 +958,7 @@ function transformAttribute(name, value) {
     }
     
     if (name === 'style') {
-        if (!isPlainObject(value)) {
+        if (!isEmpty(value) && !isPlainObject(value)) {
             console.error('style must be a plain object', value);
             return [name, ];
         }
@@ -899,9 +968,9 @@ function transformAttribute(name, value) {
 }
 
 
-//============================
+// =======================================
 // Helpers
-// ===========================
+// =======================================
 
 
 function hasOwnProperty(obj, propName) {
@@ -937,14 +1006,14 @@ function isEmpty(value) {
 }
 
 
-//============================
+// =======================================
 // Exports
-// ===========================
+// =======================================
 
 
 export {
     createElement as h,
-    render,
+    mount,
     useState,
     useEffect,
     useRef,
