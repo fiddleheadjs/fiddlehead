@@ -430,7 +430,7 @@ function updateVirtualTree(rootVirtualNode, isInit = false) {
 
     _resolveUnmountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap);
     hydrateVirtualTree(rootVirtualNode);
-    commitToHTML(oldVirtualNodeMap, newVirtualNodeMap);
+    commitView(oldVirtualNodeMap, newVirtualNodeMap);
     _resolveMountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap);
 }
 
@@ -686,7 +686,7 @@ function hydrateVirtualTree(virtualNode) {
     let viewNode = null;
 
     if (virtualNode.type === NODE_TEXT) {
-        viewNode = craeteDOMTextNode(virtualNode.text);
+        viewNode = createDOMTextNode(virtualNode.text);
     } else if (virtualNode.type === NODE_FRAGMENT) {
         // Do nothing here
         // But be careful, removing it changes the condition
@@ -738,7 +738,7 @@ function mount(rootVirtualNode, container) {
 // =======================================
 
 
-function commitToHTML(oldVirtualNodeMap, newVirtualNodeMap) {
+function commitView(oldVirtualNodeMap, newVirtualNodeMap) {
     _removeOldViewNodes(oldVirtualNodeMap, newVirtualNodeMap);
     _updateExistingViewNodes(oldVirtualNodeMap, newVirtualNodeMap);
     _insertNewViewNodes(oldVirtualNodeMap, newVirtualNodeMap);
@@ -853,7 +853,7 @@ function _findClosestViewNodes(virtualNode) {
 // =======================================
 
 
-function craeteDOMTextNode(text) {
+function createDOMTextNode(text) {
     return document.createTextNode(text);
 }
 

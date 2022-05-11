@@ -1,4 +1,4 @@
-import {h, mount} from '../../index.js';
+import {h, mount} from '../../src/index.js';
 
 mount(<DemoWrapper />, document.getElementById('sandbox-container'));
 
