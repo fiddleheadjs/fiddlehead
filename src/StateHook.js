@@ -1,6 +1,6 @@
-import {resolveCurrentlyProcessing} from "./CurrentlyProcessing";
-import {isFunction} from "./Util";
-import {updateVirtualTree} from "./VirtualTreeUpdating";
+import {resolveCurrentlyProcessing} from './CurrentlyProcessing';
+import {isFunction} from './Util';
+import {updateVirtualTree} from './VirtualTreeUpdating';
 
 /**
  *

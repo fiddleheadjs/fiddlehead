@@ -1,12 +1,12 @@
-import {isArray, isFunction, isNumber, isString} from "./Util";
-import {addAppendInfo, AppendInfo} from "./AppendInfo";
-import {NODE_FRAGMENT, NODE_TEXT, VirtualNode} from "./VirtualNode";
+import {isArray, isFunction, isNumber, isString} from './Util';
+import {addAppendInfo, AppendInfo} from './AppendInfo';
+import {NODE_FRAGMENT, NODE_TEXT, VirtualNode} from './VirtualNode';
 import {
     findFunctionalVirtualNode,
     linkFunctionalVirtualNode,
     unlinkFunctionalVirtualNode
-} from "./FunctionalVirtualNodeMapping";
-import {generateTemporaryPath} from "./Path";
+} from './FunctionalVirtualNodeMapping';
+import {generateTemporaryPath} from './Path';
 
 /**
  *

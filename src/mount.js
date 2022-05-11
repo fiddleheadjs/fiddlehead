@@ -1,7 +1,7 @@
-import {didResolveVirtualTree, resolveVirtualTree} from "./VirtualTreeResolving";
-import {linkViewNode, NS_HTML, NS_SVG, VirtualNode} from "./VirtualNode";
-import {updateVirtualTree} from "./VirtualTreeUpdating";
-import {getContainerId} from "./ExternalAttachment";
+import {didResolveVirtualTree, resolveVirtualTree} from './VirtualTreeResolving';
+import {linkViewNode, NS_HTML, NS_SVG, VirtualNode} from './VirtualNode';
+import {updateVirtualTree} from './VirtualTreeUpdating';
+import {getContainerId} from './ExternalAttachment';
 
 export function mount(rootVirtualNode, container) {
     resolveVirtualTree(rootVirtualNode, [getContainerId(container), 0]);

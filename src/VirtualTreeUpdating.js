@@ -1,11 +1,11 @@
-import {stringifyPath} from "./Path";
-import {hasOwnProperty, isFunction} from "./Util";
-import {unlinkFunctionalVirtualNode} from "./FunctionalVirtualNodeMapping";
-import {didResolveVirtualTree, hydrateVirtualTree, resolveVirtualTree} from "./VirtualTreeResolving";
-import {flushCurrentlyRendering, prepareCurrentlyRendering} from "./CurrentlyProcessing";
-import {NODE_TEXT} from "./VirtualNode";
-import {commitView} from "./ViewCommitment";
-import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNode} from "./EffectHook";
+import {stringifyPath} from './Path';
+import {hasOwnProperty, isFunction} from './Util';
+import {unlinkFunctionalVirtualNode} from './FunctionalVirtualNodeMapping';
+import {didResolveVirtualTree, hydrateVirtualTree, resolveVirtualTree} from './VirtualTreeResolving';
+import {flushCurrentlyRendering, prepareCurrentlyRendering} from './CurrentlyProcessing';
+import {NODE_TEXT} from './VirtualNode';
+import {commitView} from './ViewCommitment';
+import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNode} from './EffectHook';
 
 /**
  *

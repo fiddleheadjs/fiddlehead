@@ -1,6 +1,6 @@
-import {hasOwnProperty} from "./Util";
-import {linkViewNode, NODE_TEXT} from "./VirtualNode";
-import {updateViewElementAttributes} from "./ViewManipulation";
+import {hasOwnProperty} from './Util';
+import {linkViewNode, NODE_TEXT} from './VirtualNode';
+import {updateViewElementAttributes} from './ViewManipulation';
 
 export function commitView(oldVirtualNodeMap, newVirtualNodeMap) {
     _removeOldViewNodes(oldVirtualNodeMap, newVirtualNodeMap);

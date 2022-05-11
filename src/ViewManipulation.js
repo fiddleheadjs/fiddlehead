@@ -1,4 +1,4 @@
-import {hasOwnProperty, isArray, isEmpty, isFunction, isNumber, isPlainObject, isString} from "./Util";
+import {hasOwnProperty, isArray, isEmpty, isFunction, isNumber, isPlainObject, isString} from './Util';
 
 export function createViewTextNode(text) {
     return document.createTextNode(text);
@@ -101,13 +101,13 @@ function _transformViewElementAttribute(name, value) {
 
     if (name === 'class') {
         console.error('className instead of class');
-        return [name, ];
+        return [name,];
     }
 
     if (name === 'style') {
         if (!isEmpty(value) && !isPlainObject(value)) {
             console.error('style must be a plain object', value);
-            return [name, ];
+            return [name,];
         }
     }
 

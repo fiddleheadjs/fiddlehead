@@ -1,10 +1,11 @@
-import {hasOwnProperty} from "./Util";
+import {hasOwnProperty} from './Util';
 
 const PROP_COMPONENT_TYPE = 'Hook$ComponentType';
 const PROP_CONTAINER_ID = 'Hook$ContainerId';
 const PROP_VIRTUAL_NODE = 'Hook$VirtualNode';
 
 let containerIdInc = 0;
+
 export function getContainerId(root) {
     if (!hasOwnProperty(root, PROP_CONTAINER_ID)) {
         root[PROP_CONTAINER_ID] = '~' + (++containerIdInc);
@@ -13,6 +14,7 @@ export function getContainerId(root) {
 }
 
 let componentTypeInc = 0;
+
 /**
  *
  * @param {Function} Component

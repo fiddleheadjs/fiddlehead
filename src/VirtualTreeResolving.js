@@ -1,9 +1,9 @@
-import {linkViewNode, NODE_FRAGMENT, NODE_TEXT, NS_HTML, NS_SVG} from "./VirtualNode";
-import {createViewElementWithNS, createViewTextNode} from "./ViewManipulation";
-import {isFunction, isString} from "./Util";
-import {AppendInfo, clearAppendInfoCollection, cloneAppendInfoCollection} from "./AppendInfo";
-import {escapeKey} from "./Path";
-import {attachVirtualNode, getComponentType} from "./ExternalAttachment";
+import {linkViewNode, NODE_FRAGMENT, NODE_TEXT, NS_HTML, NS_SVG} from './VirtualNode';
+import {createViewElementWithNS, createViewTextNode} from './ViewManipulation';
+import {isFunction, isString} from './Util';
+import {AppendInfo, clearAppendInfoCollection, cloneAppendInfoCollection} from './AppendInfo';
+import {escapeKey} from './Path';
+import {attachVirtualNode, getComponentType} from './ExternalAttachment';
 
 export function resolveVirtualTree(rootVirtualNode, basePath = []) {
     const rootAppendInfo = new AppendInfo(null, [], rootVirtualNode);
