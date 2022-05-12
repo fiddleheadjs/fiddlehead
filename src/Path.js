@@ -1,13 +1,3 @@
-let temporaryPathDec = 0;
-
-/**
- * 
- * @returns {Array<string|number}
- */
-export function generateTemporaryPath() {
-    return [--temporaryPathDec];
-}
-
 /**
  * 
  * @param {Array<string|number} path 
