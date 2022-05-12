@@ -1,20 +1,20 @@
-let currentlyRenderingFunctionalVirtualNode = null;
+let currentlyProcessingFunctionalVirtualNode = null;
 let currentlyProcessingHookIndex = -1;
 
-export function prepareCurrentlyRendering(functionalVirtualNode) {
-    currentlyRenderingFunctionalVirtualNode = functionalVirtualNode;
+export function prepareCurrentlyProcessing(functionalVirtualNode) {
+    currentlyProcessingFunctionalVirtualNode = functionalVirtualNode;
     currentlyProcessingHookIndex = -1;
 }
 
-export function flushCurrentlyRendering() {
-    currentlyRenderingFunctionalVirtualNode = null;
+export function flushCurrentlyProcessing() {
+    currentlyProcessingFunctionalVirtualNode = null;
     currentlyProcessingHookIndex = -1;
 }
 
 export function resolveCurrentlyProcessing() {
-    if (currentlyRenderingFunctionalVirtualNode === null) {
+    if (currentlyProcessingFunctionalVirtualNode === null) {
         throw new Error('Cannot call hooks from outside of the component');
     }
     
-    return [currentlyRenderingFunctionalVirtualNode, ++currentlyProcessingHookIndex];
+    return [currentlyProcessingFunctionalVirtualNode, ++currentlyProcessingHookIndex];
 }

@@ -1,10 +1,11 @@
-import {stringifyPath} from './Path';
+import {pathToString} from './Path';
 import {hasOwnProperty, isFunction} from './Util';
 import {unlinkMemoizedHooks} from './MemoizedHooks';
-import {hydrateVirtualTree, resolveVirtualTree} from './VirtualTreeResolving';
-import {flushCurrentlyRendering, prepareCurrentlyRendering} from './CurrentlyProcessing';
+import {resolveVirtualTree} from './ResolveVirtualTree';
+import {flushCurrentlyProcessing, prepareCurrentlyProcessing} from './CurrentlyProcessing';
 import {createVirtualNodeFromContent, NODE_TEXT} from './VirtualNode';
-import {commitView} from './ViewCommitment';
+import {hydrateVirtualTree} from './HydrateVirtualTree';
+import {commitView} from './CommitView';
 import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNode} from './EffectHook';
 
 /**
@@ -39,11 +40,11 @@ function _updateVirtualNodeRecursive(virtualNode) {
         return;
     }
 
-    prepareCurrentlyRendering(virtualNode);
+    prepareCurrentlyProcessing(virtualNode);
     const newVirtualNode = createVirtualNodeFromContent(
         virtualNode.type(virtualNode.props)
     );
-    flushCurrentlyRendering();
+    flushCurrentlyProcessing();
 
     if (newVirtualNode !== null) {
         newVirtualNode.parent = virtualNode;
@@ -92,7 +93,7 @@ function _getVirtualNodeMap(rootVirtualNode) {
     const out = Object.create(null);
 
     const walk = (virtualNode) => {
-        out[stringifyPath(virtualNode.path)] = virtualNode;
+        out[pathToString(virtualNode.path)] = virtualNode;
 
         for (let i = 0; i < virtualNode.children.length; i++) {
             walk(virtualNode.children[i]);

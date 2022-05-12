@@ -21,10 +21,11 @@ export function VirtualNode(type, props, key, ref) {
     this.parent = null;
     this.children = [];
     this.path = [];
-    this.posInRow = -1;
+    this.posInRow = null;
 
-    this.viewNode = null;
     this.ns = null;
+    this.nativeNode = null;
+    this.text = null;
 }
 
 export const NODE_TEXT = '#txt';
@@ -34,11 +35,11 @@ export const NODE_FRAGMENT = '#frg';
 export const NS_HTML = 'html';
 export const NS_SVG = 'svg';
 
-export function linkViewNode(virtualNode, viewNode) {
-    virtualNode.viewNode = viewNode;
+export function linkNativeNode(virtualNode, nativeNode) {
+    virtualNode.nativeNode = nativeNode;
 
     if (virtualNode.ref instanceof RefHook) {
-        virtualNode.ref.current = viewNode;
+        virtualNode.ref.current = nativeNode;
     }
 }
 

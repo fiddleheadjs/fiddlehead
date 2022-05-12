@@ -106,6 +106,30 @@ export function destroyEffectsOnFunctionalVirtualNode(functionalVirtualNode, isN
     }
 }
 
+/**
+ *
+ * @param {EffectHook} effectHook
+ */
+function _mountEffectHook(effectHook) {
+    effectHook.destroy = effectHook.callback();
+}
+
+/**
+ *
+ * @param {EffectHook} hook
+ * @param {boolean} isNodeUnmounted
+ */
+function _destroyEffectHook(hook, isNodeUnmounted = false) {
+    if (hook.lastDestroy !== null && !isNodeUnmounted) {
+        hook.lastDestroy();
+        return;
+    }
+
+    if (hook.destroy !== null) {
+        hook.destroy();
+    }
+}
+
 function _getEffectTag(deps, lastDeps = false) {
     // Always
     if (deps === null) {
@@ -136,28 +160,4 @@ function _compareSameLengthArrays(a, b) {
     }
 
     return true;
-}
-
-/**
- *
- * @param {EffectHook} effectHook
- */
-function _mountEffectHook(effectHook) {
-    effectHook.destroy = effectHook.callback();
-}
-
-/**
- *
- * @param {EffectHook} hook
- * @param {boolean} isNodeUnmounted
- */
-function _destroyEffectHook(hook, isNodeUnmounted = false) {
-    if (hook.lastDestroy !== null && !isNodeUnmounted) {
-        hook.lastDestroy();
-        return;
-    }
-
-    if (hook.destroy !== null) {
-        hook.destroy();
-    }
 }

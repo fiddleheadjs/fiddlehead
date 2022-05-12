@@ -1,10 +1,6 @@
 import {isFunction} from './Util';
 import {createVirtualNodeFromContent, NODE_FRAGMENT, VirtualNode} from './VirtualNode';
-import {
-    findMemoizedHooks,
-    linkMemoizedHooks,
-    unlinkMemoizedHooks
-} from './MemoizedHooks';
+import {findMemoizedHooks, linkMemoizedHooks, unlinkMemoizedHooks} from './MemoizedHooks';
 import {generateTemporaryPath} from './Path';
 import {StateHook} from './StateHook';
 
@@ -52,7 +48,7 @@ function _createFunctionalVirtualNode(type, attributes, ...content) {
             for (let i = 0; i < virtualNode.hooks.length; i++) {
                 const hook = virtualNode.hooks[i];
                 if (hook instanceof StateHook) {
-                    hook.virtualNode = virtualNode;
+                    hook.context = virtualNode;
                 }
             }
         }

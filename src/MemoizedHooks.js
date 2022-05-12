@@ -1,4 +1,4 @@
-import {stringifyPath} from './Path';
+import {pathToString} from './Path';
 import {hasOwnProperty} from './Util';
 
 /**
@@ -8,7 +8,7 @@ import {hasOwnProperty} from './Util';
 const memoizedHooksMap = Object.create(null);
 
 export function findMemoizedHooks(path) {
-    const pathString = stringifyPath(path);
+    const pathString = pathToString(path);
 
     if (hasOwnProperty(memoizedHooksMap, pathString)) {
         return memoizedHooksMap[pathString];
@@ -18,9 +18,9 @@ export function findMemoizedHooks(path) {
 }
 
 export function linkMemoizedHooks(path, functionalVirtualNode) {
-    memoizedHooksMap[stringifyPath(path)] = functionalVirtualNode;
+    memoizedHooksMap[pathToString(path)] = functionalVirtualNode;
 }
 
 export function unlinkMemoizedHooks(path) {
-    delete memoizedHooksMap[stringifyPath(path)];
+    delete memoizedHooksMap[pathToString(path)];
 }

@@ -1,38 +1,38 @@
 import {hasOwnProperty, isArray, isEmpty, isFunction, isNumber, isPlainObject, isString} from './Util';
 
-export function createViewTextNode(text) {
+export function createNativeTextNode(text) {
     return document.createTextNode(text);
 }
 
-export function createViewElementWithNS(ns, type, attributes) {
+export function createNativeElementWithNS(ns, type, attributes) {
     const node = (ns !== null
             ? document.createElementNS(ns, type)
             : document.createElement(type)
     );
 
-    updateViewElementAttributes(node, attributes, {});
+    updateNativeElementAttributes(node, attributes, {});
 
     return node;
 }
 
-export function updateViewElementAttributes(element, newAttributes, oldAttributes) {
+export function updateNativeElementAttributes(element, newAttributes, oldAttributes) {
     for (let attrName in oldAttributes) {
         if (hasOwnProperty(oldAttributes, attrName)) {
             if (isEmpty(newAttributes[attrName])) {
-                _removeViewElementAttribute(element, attrName, oldAttributes[attrName]);
+                _removeNativeElementAttribute(element, attrName, oldAttributes[attrName]);
             }
         }
     }
 
     for (let attrName in newAttributes) {
         if (hasOwnProperty(newAttributes, attrName)) {
-            _setViewElementAttribute(element, attrName, newAttributes[attrName], oldAttributes[attrName]);
+            _setNativeElementAttribute(element, attrName, newAttributes[attrName], oldAttributes[attrName]);
         }
     }
 }
 
-function _removeViewElementAttribute(element, attrName, attrValue) {
-    const [name, value] = _transformViewElementAttribute(attrName, attrValue);
+function _removeNativeElementAttribute(element, attrName, attrValue) {
+    const [name, value] = _transformNativeElementAttribute(attrName, attrValue);
 
     if (isEmpty(value)) {
         return;
@@ -41,8 +41,8 @@ function _removeViewElementAttribute(element, attrName, attrValue) {
     element.removeAttribute(name);
 }
 
-function _setViewElementAttribute(element, attrName, attrValue, oldAttrValue) {
-    const [name, value] = _transformViewElementAttribute(attrName, attrValue);
+function _setNativeElementAttribute(element, attrName, attrValue, oldAttrValue) {
+    const [name, value] = _transformNativeElementAttribute(attrName, attrValue);
 
     if (isEmpty(value)) {
         return;
@@ -50,7 +50,7 @@ function _setViewElementAttribute(element, attrName, attrValue, oldAttrValue) {
 
     if (name === 'style') {
         if (!isEmpty(oldAttrValue)) {
-            const [, oldValue] = _transformViewElementAttribute(attrName, oldAttrValue);
+            const [, oldValue] = _transformNativeElementAttribute(attrName, oldAttrValue);
             if (!isEmpty(oldValue)) {
                 for (let prop in oldValue) {
                     if (hasOwnProperty(oldValue, prop) && !hasOwnProperty(value, prop)) {
@@ -86,7 +86,7 @@ function _setViewElementAttribute(element, attrName, attrValue, oldAttrValue) {
     }
 }
 
-function _transformViewElementAttribute(name, value) {
+function _transformNativeElementAttribute(name, value) {
     if (isFunction(value)) {
         return [name.toLowerCase(), value];
     }

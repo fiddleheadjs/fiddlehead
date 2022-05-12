@@ -41,8 +41,8 @@ function DemoWrapperWrapper() {
     return (
         <div className="Root" ref={rootRef}>
             <select onChange={ev => setLayout(ev.target.value)}>
-                <option value="A" selected={layout === 'A'}>Layout A</option>
-                <option value="B" selected={layout === 'B'}>Layout B</option>
+                <option key="HAHAH@#$%#@#@][" value="A" selected={layout === 'A'}>Layout A</option>
+                <option key={1234} value="B" selected={layout === 'B'}>Layout B</option>
             </select>
             <div style={{marginTop: '100px'}}>
                 <span>Hi,</span>

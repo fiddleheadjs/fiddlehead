@@ -1,19 +1,18 @@
 import {resolveCurrentlyProcessing} from './CurrentlyProcessing';
 import {isFunction} from './Util';
-import {updateVirtualTree} from './VirtualTreeUpdating';
+import {updateVirtualTree} from './UpdateVirtualTree';
 
 /**
  *
- * @param {VirtualNode} virtualNode
  * @param {*} initialValue
  * @param {function} setValue
- * @return {StateHook}
+ * @param {VirtualNode} context
  * @constructor
  */
-export function StateHook(virtualNode, initialValue, setValue) {
-    this.virtualNode = virtualNode;
+export function StateHook(initialValue, setValue, context) {
     this.value = initialValue;
     this.setValue = setValue;
+    this.context = context;
 }
 
 export function useState(initialValue) {
@@ -24,23 +23,25 @@ export function useState(initialValue) {
         return [hook.value, hook.setValue];
     }
 
-    const hook = new StateHook(
-        functionalVirtualNode,
-        initialValue,
-        (value) => {
-            let newValue;
-
-            if (isFunction(value)) {
-                newValue = value(hook.value);
-            } else {
-                newValue = value;
-            }
-
-            if (newValue !== hook.value) {
-                hook.value = newValue;
-                updateVirtualTree(hook.virtualNode, false);
-            }
+    const setValue = (value) => {
+        let newValue;
+        
+        if (isFunction(value)) {
+            newValue = value(hook.value);
+        } else {
+            newValue = value;
         }
+        
+        if (newValue !== hook.value) {
+            hook.value = newValue;
+            updateVirtualTree(hook.context, false);
+        }
+    };
+
+    const hook = new StateHook(
+        initialValue,
+        setValue,
+        functionalVirtualNode,
     );
 
     functionalVirtualNode.hooks.push(hook);

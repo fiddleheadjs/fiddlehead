@@ -1,7 +1,7 @@
-import {resolveVirtualTree} from './VirtualTreeResolving';
-import {linkViewNode, NS_HTML, NS_SVG, VirtualNode} from './VirtualNode';
-import {updateVirtualTree} from './VirtualTreeUpdating';
-import {getContainerId} from './ExternalAttachment';
+import {resolveVirtualTree} from './ResolveVirtualTree';
+import {linkNativeNode, NS_HTML, NS_SVG, VirtualNode} from './VirtualNode';
+import {updateVirtualTree} from './UpdateVirtualTree';
+import {attachVirtualNode, getContainerId} from './Externals';
 
 /**
  *
@@ -15,7 +15,8 @@ export function mount(rootVirtualNode, container) {
 
     const containerVirtualNode = new VirtualNode(container.nodeName.toLowerCase(), {}, null, null);
 
-    linkViewNode(containerVirtualNode, container);
+    linkNativeNode(containerVirtualNode, container);
+    attachVirtualNode(container, containerVirtualNode);
 
     if (container.ownerSVGElement) {
         containerVirtualNode.ns = NS_SVG;
