@@ -596,10 +596,15 @@ function _findNativeHost(virtualNode) {
 function _findClosestNativeNodes(virtualNode) {
     if (virtualNode.nativeNode_ !== null) {
         return [virtualNode.nativeNode_];
-    } else {
-        return virtualNode.children_.reduce((arr, childVirtualNode) => {
-            return arr.concat(_findClosestNativeNodes(childVirtualNode));
-        }, []);
+    }
+    
+    {
+        const output = [];
+        for (let i = 0; i < virtualNode.children_.length; i++) {
+            const childVirtualNode = virtualNode.children_[i];
+            output.push(..._findClosestNativeNodes(childVirtualNode));
+        }
+        return output;
     }
 }
 
