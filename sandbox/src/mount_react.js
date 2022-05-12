@@ -80,14 +80,15 @@ function DemoWrapperWrapper() {
     );
 }
 
+function TimeEnd() {
+    console.timeEnd('mount');
+    return <></>;
+}
+
 function DemoFinalWrapper() {
-    try {
-        return <DemoWrapperWrapper/>;
-    } catch (e) {
-        return 'Oops! Something went wrong';
-    }
+    return <><DemoWrapperWrapper/> <TimeEnd/></>;
 }
 
 console.time('mount');
 ReactDOM.render(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));
-console.timeEnd('mount');
+

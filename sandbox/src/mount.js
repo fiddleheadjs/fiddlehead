@@ -1,4 +1,4 @@
-import {h, mount, useState, useEffect, useRef} from "../../src/index.js";
+import {h, mount, useState, useEffect, useRef} from "../../output/dist/index.min.js";
 
 function Wrapper2({children, myRef}) {
     return (
@@ -79,14 +79,14 @@ function DemoWrapperWrapper() {
     );
 }
 
+function TimeEnd() {
+    console.timeEnd('mount');
+    return <></>;
+}
+
 function DemoFinalWrapper() {
-    try {
-        return <DemoWrapperWrapper/>;
-    } catch (e) {
-        return 'Oops! Something went wrong';
-    }
+    return <><DemoWrapperWrapper/> <TimeEnd/></>;
 }
 
 console.time('mount');
 mount(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));
-console.timeEnd('mount');
