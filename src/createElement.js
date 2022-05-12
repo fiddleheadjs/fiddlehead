@@ -1,5 +1,4 @@
 import {isArray, isFunction, isNumber, isString} from './Util';
-import {addAppendInfo, AppendInfo} from './AppendInfo';
 import {NODE_FRAGMENT, NODE_TEXT, VirtualNode} from './VirtualNode';
 import {
     findFunctionalVirtualNode,
@@ -43,7 +42,11 @@ function _createFunctionalVirtualNode(type, attributes, ...content) {
 
         const existing = findFunctionalVirtualNode(virtualNode.path);
         if (existing) {
+            console.log('existing', existing);
             virtualNode.hooks = existing.hooks;
+            if (existing.parent !== null) {
+                existing.parent.children[existing.parent.children.indexOf(existing)] = virtualNode;
+            }
         }
 
         linkFunctionalVirtualNode(virtualNode.path, virtualNode);
@@ -73,20 +76,19 @@ function _appendVirtualChildren(element, content, indexes) {
     _appendVirtualChild(element, content, indexes);
 }
 
-function _appendVirtualChild(element, item, indexes) {
-    let virtualNode;
+function _appendVirtualChild(parentNode, child, indexes) {
+    let childNode;
 
-    if (isString(item) || isNumber(item)) {
-        virtualNode = new VirtualNode(NODE_TEXT, {}, null, null);
-        virtualNode.text = String(item);
+    if (isString(child) || isNumber(child)) {
+        childNode = new VirtualNode(NODE_TEXT, {}, null, null);
+        childNode.text = String(child);
     } else {
-        virtualNode = item;
+        childNode = child;
     }
 
-    if (virtualNode instanceof VirtualNode) {
-        element.children.push(virtualNode);
-        addAppendInfo(
-            new AppendInfo(element, indexes, virtualNode)
-        );
+    if (childNode instanceof VirtualNode) {
+        parentNode.children.push(childNode);
+        childNode.parent = parentNode;
+        childNode.pathFromParent = indexes;
     }
 }

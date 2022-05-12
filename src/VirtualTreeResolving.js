@@ -1,32 +1,25 @@
 import {linkViewNode, NODE_FRAGMENT, NODE_TEXT, NS_HTML, NS_SVG} from './VirtualNode';
 import {createViewElementWithNS, createViewTextNode} from './ViewManipulation';
 import {isFunction, isString} from './Util';
-import {AppendInfo, clearAppendInfoCollection, cloneAppendInfoCollection} from './AppendInfo';
 import {escapeKey} from './Path';
 import {attachVirtualNode, getComponentType} from './ExternalAttachment';
 
-export function resolveVirtualTree(rootVirtualNode, basePath = []) {
-    const rootAppendInfo = new AppendInfo(null, [], rootVirtualNode);
-    let appendInfoCollection = cloneAppendInfoCollection();
-    let currentPath = [...basePath];
+export function resolveVirtualTree(rootVirtualNode) {
+    let currentPath = [...rootVirtualNode.path];
+    // console.log('***', currentPath.join('/'));
 
-    /**
-     *
-     * @param {AppendInfo} appendInfo
-     * @param {VirtualNode} virtualNode
-     */
-    const walk = (appendInfo, virtualNode) => {
+    const walk = (virtualNode) => {
         const pivotPathSize = currentPath.length;
 
         if (virtualNode !== rootVirtualNode) {
-            currentPath.push(...appendInfo.routeFromParent);
+            // console.log('---',currentPath.join('/'));
+            currentPath.push(...virtualNode.pathFromParent);
 
             // If a node has key, replace the index of this node
             // in the children node list of the parent
             // by the key
             if (virtualNode.key !== null) {
-                currentPath.pop();
-                currentPath.push(escapeKey(virtualNode.key));
+                currentPath[currentPath.length - 1] = escapeKey(virtualNode.key);
             }
 
             // Add the component type to the current path
@@ -35,18 +28,14 @@ export function resolveVirtualTree(rootVirtualNode, basePath = []) {
             } else {
                 currentPath.push(virtualNode.type);
             }
+            // console.log('>>>',currentPath.join('/'));
         }
 
-        appendInfoCollection = appendInfoCollection.filter(item => {
-            if (item.parent === appendInfo.current) {
-                walk(item, item.current);
-                return false;
-            }
-            return true;
-        });
+        for (let i = 0; i < virtualNode.children.length; i++) {
+            walk(virtualNode.children[i]);
+        }
 
         virtualNode.path = [...currentPath];
-        // virtualNode.parent = appendInfo.parent;
 
         if (virtualNode.resolvePath !== undefined) {
             virtualNode.resolvePath();
@@ -56,11 +45,11 @@ export function resolveVirtualTree(rootVirtualNode, basePath = []) {
         currentPath.length = pivotPathSize;
     }
 
-    walk(rootAppendInfo, rootVirtualNode);
+    walk(rootVirtualNode);
 }
 
 export function didResolveVirtualTree() {
-    clearAppendInfoCollection();
+
 }
 
 export function hydrateVirtualTree(virtualNode) {

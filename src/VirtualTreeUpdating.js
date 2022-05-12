@@ -6,7 +6,6 @@ import {flushCurrentlyRendering, prepareCurrentlyRendering} from './CurrentlyPro
 import {NODE_TEXT} from './VirtualNode';
 import {commitView} from './ViewCommitment';
 import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNode} from './EffectHook';
-import {addAppendInfo, AppendInfo} from './AppendInfo';
 
 /**
  *
@@ -61,16 +60,10 @@ function _updateVirtualNodeRecursive(virtualNode) {
         flushCurrentlyRendering();
 
         virtualNode.children[0] = newVirtualNode;
-        // newVirtualNode.parent = virtualNode;
-        addAppendInfo(
-            new AppendInfo(virtualNode, [0], newVirtualNode)
-        );
+        newVirtualNode.parent = virtualNode;
+        newVirtualNode.pathFromParent = [0];
 
-        // 0 is the position of the new one
-        resolveVirtualTree(virtualNode, virtualNode.path.slice(0, virtualNode.path.length - 1));
-
-        // newVirtualNode.parent = virtualNode;
-        // virtualNode.children[0] = newVirtualNode;
+        resolveVirtualTree(virtualNode);
 
         _updateVirtualNodeRecursive(newVirtualNode);
     }
