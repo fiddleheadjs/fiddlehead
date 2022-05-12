@@ -846,15 +846,29 @@ function _walkVirtualNode(virtualNode, outputMap) {
 
 /**
  *
- * @param {*} initialValue
- * @param {function} setValue
  * @param {VirtualNode} context
+ * @param {*} initialValue
  * @constructor
  */
-function StateHook(initialValue, setValue, context) {
-    this.value_ = initialValue;
-    this.setValue_ = setValue;
+function StateHook(context, initialValue) {
     this.context_ = context;
+    
+    this.value_ = initialValue;
+
+    this.setValue_ = (value) => {
+        let newValue;
+        
+        if (isFunction(value)) {
+            newValue = value(this.value_);
+        } else {
+            newValue = value;
+        }
+        
+        if (newValue !== this.value_) {
+            this.value_ = newValue;
+            updateVirtualTree(this.context_, false);
+        }
+    };
 }
 
 function useState(initialValue) {
@@ -865,25 +879,9 @@ function useState(initialValue) {
         return [hook.value_, hook.setValue_];
     }
 
-    const setValue = (value) => {
-        let newValue;
-        
-        if (isFunction(value)) {
-            newValue = value(hook.value_);
-        } else {
-            newValue = value;
-        }
-        
-        if (newValue !== hook.value_) {
-            hook.value_ = newValue;
-            updateVirtualTree(hook.context_, false);
-        }
-    };
-
     const hook = new StateHook(
-        initialValue,
-        setValue,
         functionalVirtualNode,
+        initialValue,
     );
 
     functionalVirtualNode.hooks_.push(hook);
