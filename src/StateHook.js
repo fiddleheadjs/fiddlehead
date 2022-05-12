@@ -4,15 +4,16 @@ import {updateVirtualTree} from './VirtualTreeUpdating';
 
 /**
  *
- * @param {*} value
+ * @param {VirtualNode} virtualNode
+ * @param {*} initialValue
  * @param {function} setValue
  * @return {StateHook}
  * @constructor
  */
-export function StateHook(value, setValue, virtualNode) {
-    this.value = value;
-    this.setValue = setValue;
+export function StateHook(virtualNode, initialValue, setValue) {
     this.virtualNode = virtualNode;
+    this.value = initialValue;
+    this.setValue = setValue;
 }
 
 export function useState(initialValue) {
@@ -24,6 +25,7 @@ export function useState(initialValue) {
     }
 
     const hook = new StateHook(
+        functionalVirtualNode,
         initialValue,
         (value) => {
             let newValue;
@@ -38,8 +40,7 @@ export function useState(initialValue) {
                 hook.value = newValue;
                 updateVirtualTree(hook.virtualNode, false);
             }
-        },
-        functionalVirtualNode
+        }
     );
 
     functionalVirtualNode.hooks.push(hook);

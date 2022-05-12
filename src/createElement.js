@@ -1,12 +1,12 @@
-import {isArray, isFunction, isNumber, isString} from './Util';
-import {NODE_FRAGMENT, NODE_TEXT, VirtualNode} from './VirtualNode';
+import {isFunction} from './Util';
+import {createVirtualNodeFromContent, NODE_FRAGMENT, VirtualNode} from './VirtualNode';
 import {
     findMemoizedHooks,
     linkMemoizedHooks,
     unlinkMemoizedHooks
 } from './MemoizedHooks';
 import {generateTemporaryPath} from './Path';
-import { StateHook } from './StateHook';
+import {StateHook} from './StateHook';
 
 /**
  *
@@ -68,35 +68,14 @@ function _createStaticVirtualNode(type, attributes, ...content) {
 
     const virtualNode = new VirtualNode(type, props, key, ref);
 
-    _appendVirtualChildren(virtualNode, content, []);
+    for (let i = 0; i < content.length; i++) {
+        const childNode = createVirtualNodeFromContent(content[i]);
+        if (childNode !== null) {
+            childNode.parent = virtualNode;
+            childNode.posInRow = i;
+            virtualNode.children.push(childNode);
+        }
+    }
 
     return virtualNode;
-}
-
-function _appendVirtualChildren(element, content, indexes) {
-    if (isArray(content)) {
-        for (let i = 0; i < content.length; i++) {
-            _appendVirtualChildren(element, content[i], [...indexes, i]);
-        }
-        return;
-    }
-
-    _appendVirtualChild(element, content, indexes);
-}
-
-function _appendVirtualChild(parentNode, child, indexes) {
-    let childNode;
-
-    if (isString(child) || isNumber(child)) {
-        childNode = new VirtualNode(NODE_TEXT, {}, null, null);
-        childNode.text = String(child);
-    } else {
-        childNode = child;
-    }
-
-    if (childNode instanceof VirtualNode) {
-        parentNode.children.push(childNode);
-        childNode.parent = parentNode;
-        childNode.pathFromParent = indexes;
-    }
 }

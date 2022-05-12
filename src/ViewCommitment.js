@@ -115,7 +115,6 @@ function _removeViewNodesOfVirtualNode(virtualNode) {
 
 function _findViewHost(virtualNode) {
     if (virtualNode.parent === null) {
-        console.log(virtualNode);
         return null;
     }
 

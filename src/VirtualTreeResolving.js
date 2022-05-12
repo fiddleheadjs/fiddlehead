@@ -1,4 +1,4 @@
-import {linkViewNode, NODE_FRAGMENT, NODE_TEXT, NS_HTML, NS_SVG} from './VirtualNode';
+import {linkViewNode, NODE_ARRAY, NODE_FRAGMENT, NODE_TEXT, NS_HTML, NS_SVG} from './VirtualNode';
 import {createViewElementWithNS, createViewTextNode} from './ViewManipulation';
 import {isFunction, isString} from './Util';
 import {escapeKey} from './Path';
@@ -11,13 +11,13 @@ export function resolveVirtualTree(rootVirtualNode) {
         const pivotPathSize = currentPath.length;
 
         if (virtualNode !== rootVirtualNode) {
-            currentPath.push(...virtualNode.pathFromParent);
-
             // If a node has key, replace the index of this node
             // in the children node list of the parent
             // by the key
             if (virtualNode.key !== null) {
-                currentPath[currentPath.length - 1] = escapeKey(virtualNode.key);
+                currentPath.push(escapeKey(virtualNode.key));
+            } else {
+                currentPath.push(virtualNode.posInRow);
             }
 
             // Add the component type to the current path
@@ -62,7 +62,7 @@ export function hydrateVirtualTree(virtualNode) {
 
     if (virtualNode.type === NODE_TEXT) {
         viewNode = createViewTextNode(virtualNode.text);
-    } else if (virtualNode.type === NODE_FRAGMENT) {
+    } else if (virtualNode.type === NODE_FRAGMENT || virtualNode.type === NODE_ARRAY) {
         // Do nothing here
         // But be careful, removing it changes the condition
     } else if (isString(virtualNode.type)) {

@@ -106,7 +106,7 @@ function _transformViewElementAttribute(name, value) {
 
     if (name === 'style') {
         if (!isEmpty(value) && !isPlainObject(value)) {
-            console.error('style must be a plain object', value);
+            console.error('Style must be a plain object', value);
             return [name,];
         }
     }

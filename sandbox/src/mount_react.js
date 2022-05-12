@@ -82,7 +82,7 @@ function DemoWrapperWrapper() {
 
 function TimeEnd() {
     console.timeEnd('mount');
-    return <></>;
+    return 'hahah';
 }
 
 function DemoFinalWrapper() {

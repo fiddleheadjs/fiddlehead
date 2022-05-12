@@ -3,7 +3,7 @@ import {hasOwnProperty, isFunction} from './Util';
 import {unlinkMemoizedHooks} from './MemoizedHooks';
 import {hydrateVirtualTree, resolveVirtualTree} from './VirtualTreeResolving';
 import {flushCurrentlyRendering, prepareCurrentlyRendering} from './CurrentlyProcessing';
-import {NODE_TEXT} from './VirtualNode';
+import {createVirtualNodeFromContent, NODE_TEXT} from './VirtualNode';
 import {commitView} from './ViewCommitment';
 import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNode} from './EffectHook';
 
@@ -39,17 +39,21 @@ function _updateVirtualNodeRecursive(virtualNode) {
         return;
     }
 
-    {
-        prepareCurrentlyRendering(virtualNode);
-        const newVirtualNode = virtualNode.type(virtualNode.props);
-        flushCurrentlyRendering();
+    prepareCurrentlyRendering(virtualNode);
+    const newVirtualNode = createVirtualNodeFromContent(
+        virtualNode.type(virtualNode.props)
+    );
+    flushCurrentlyRendering();
 
-        virtualNode.children[0] = newVirtualNode;
+    if (newVirtualNode !== null) {
         newVirtualNode.parent = virtualNode;
-        newVirtualNode.pathFromParent = [0];
+        newVirtualNode.posInRow = 0;
+        virtualNode.children[0] = newVirtualNode;
 
+        // This step aimed to read memoized hooks and restore them
         resolveVirtualTree(virtualNode);
 
+        // Recursion
         _updateVirtualNodeRecursive(newVirtualNode);
     }
 }
