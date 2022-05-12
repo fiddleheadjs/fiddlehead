@@ -9,11 +9,11 @@ import {resolveCurrentlyProcessing} from './CurrentlyProcessing';
  * @constructor
  */
 export function EffectHook(callback, deps, lastDestroy) {
-    this.tag = EFFECT_NONE;
-    this.callback = callback;
-    this.deps = deps;
-    this.destroy = null;
-    this.lastDestroy = lastDestroy;
+    this.tag_ = EFFECT_NONE;
+    this.callback_ = callback;
+    this.deps_ = deps;
+    this.destroy_ = null;
+    this.lastDestroy_ = lastDestroy;
 }
 
 const EFFECT_NONE = 0;
@@ -25,34 +25,34 @@ const EFFECT_DEPS_CHANGED = 4;
 export function useEffect(callback, deps = null) {
     const [functionalVirtualNode, hookIndex] = resolveCurrentlyProcessing();
 
-    if (functionalVirtualNode.hooks.length > hookIndex) {
+    if (functionalVirtualNode.hooks_.length > hookIndex) {
         /**
          * @type {EffectHook}
          */
-        const currentHook = functionalVirtualNode.hooks[hookIndex];
+        const currentHook = functionalVirtualNode.hooks_[hookIndex];
 
         if (!(
-            deps === null && currentHook.deps === null ||
-            deps.length === currentHook.deps.length
+            deps === null && currentHook.deps_ === null ||
+            deps.length === currentHook.deps_.length
         )) {
             throw new Error('Deps must be size-fixed');
         }
 
-        const effectTag = _getEffectTag(deps, currentHook.deps);
+        const effectTag = _getEffectTag(deps, currentHook.deps_);
 
         if (effectTag === EFFECT_LAZY) {
             return;
         }
 
         if (effectTag === EFFECT_DEPS) {
-            currentHook.tag = effectTag;
+            currentHook.tag_ = effectTag;
             return;
         }
 
         if (effectTag === EFFECT_ALWAYS || effectTag === EFFECT_DEPS_CHANGED) {
-            const newHook = new EffectHook(callback, deps, currentHook.destroy);
-            newHook.tag = effectTag;
-            functionalVirtualNode.hooks[hookIndex] = newHook;
+            const newHook = new EffectHook(callback, deps, currentHook.destroy_);
+            newHook.tag_ = effectTag;
+            functionalVirtualNode.hooks_[hookIndex] = newHook;
             return;
         }
 
@@ -60,9 +60,9 @@ export function useEffect(callback, deps = null) {
     }
 
     const hook = new EffectHook(callback, deps, null);
-    hook.tag = _getEffectTag(deps);
+    hook.tag_ = _getEffectTag(deps);
 
-    functionalVirtualNode.hooks.push(hook);
+    functionalVirtualNode.hooks_.push(hook);
 }
 
 /**
@@ -71,14 +71,14 @@ export function useEffect(callback, deps = null) {
  * @param {boolean} isNewNodeMounted
  */
 export function mountEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNewNodeMounted) {
-    for (let i = 0; i < functionalVirtualNode.hooks.length; i++) {
-        const hook = functionalVirtualNode.hooks[i];
+    for (let i = 0; i < functionalVirtualNode.hooks_.length; i++) {
+        const hook = functionalVirtualNode.hooks_[i];
 
         if (!(hook instanceof EffectHook)) {
             continue;
         }
 
-        if (isNewNodeMounted || hook.tag === EFFECT_ALWAYS || hook.tag === EFFECT_DEPS_CHANGED) {
+        if (isNewNodeMounted || hook.tag_ === EFFECT_ALWAYS || hook.tag_ === EFFECT_DEPS_CHANGED) {
             _mountEffectHook(hook);
         }
     }
@@ -90,17 +90,17 @@ export function mountEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNew
  * @param {boolean} isNodeUnmounted
  */
 export function destroyEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNodeUnmounted) {
-    for (let i = 0; i < functionalVirtualNode.hooks.length; i++) {
-        const hook = functionalVirtualNode.hooks[i];
+    for (let i = 0; i < functionalVirtualNode.hooks_.length; i++) {
+        const hook = functionalVirtualNode.hooks_[i];
 
         if (!(
             hook instanceof EffectHook &&
-            (hook.lastDestroy !== null || hook.destroy !== null)
+            (hook.lastDestroy_ !== null || hook.destroy_ !== null)
         )) {
             continue;
         }
 
-        if (isNodeUnmounted || hook.tag === EFFECT_ALWAYS || hook.tag === EFFECT_DEPS_CHANGED) {
+        if (isNodeUnmounted || hook.tag_ === EFFECT_ALWAYS || hook.tag_ === EFFECT_DEPS_CHANGED) {
             _destroyEffectHook(hook, isNodeUnmounted);
         }
     }
@@ -111,7 +111,7 @@ export function destroyEffectsOnFunctionalVirtualNode(functionalVirtualNode, isN
  * @param {EffectHook} effectHook
  */
 function _mountEffectHook(effectHook) {
-    effectHook.destroy = effectHook.callback();
+    effectHook.destroy_ = effectHook.callback_();
 }
 
 /**
@@ -120,13 +120,13 @@ function _mountEffectHook(effectHook) {
  * @param {boolean} isNodeUnmounted
  */
 function _destroyEffectHook(hook, isNodeUnmounted = false) {
-    if (hook.lastDestroy !== null && !isNodeUnmounted) {
-        hook.lastDestroy();
+    if (hook.lastDestroy_ !== null && !isNodeUnmounted) {
+        hook.lastDestroy_();
         return;
     }
 
-    if (hook.destroy !== null) {
-        hook.destroy();
+    if (hook.destroy_ !== null) {
+        hook.destroy_();
     }
 }
 

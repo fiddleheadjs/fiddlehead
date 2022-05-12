@@ -29,27 +29,27 @@ export function updateVirtualTree(rootVirtualNode, initial) {
  * @param {VirtualNode} virtualNode
  */
 function _updateVirtualNodeRecursive(virtualNode) {
-    if (virtualNode.type === NODE_TEXT) {
+    if (virtualNode.type_ === NODE_TEXT) {
         return;
     }
 
-    if (!isFunction(virtualNode.type)) {
-        for (let i = 0; i < virtualNode.children.length; i++) {
-            _updateVirtualNodeRecursive(virtualNode.children[i]);
+    if (!isFunction(virtualNode.type_)) {
+        for (let i = 0; i < virtualNode.children_.length; i++) {
+            _updateVirtualNodeRecursive(virtualNode.children_[i]);
         }
         return;
     }
 
     prepareCurrentlyProcessing(virtualNode);
     const newVirtualNode = createVirtualNodeFromContent(
-        virtualNode.type(virtualNode.props)
+        virtualNode.type_(virtualNode.props_)
     );
     flushCurrentlyProcessing();
 
     if (newVirtualNode !== null) {
-        newVirtualNode.parent = virtualNode;
-        newVirtualNode.posInRow = 0;
-        virtualNode.children[0] = newVirtualNode;
+        newVirtualNode.parent_ = virtualNode;
+        newVirtualNode.posInRow_ = 0;
+        virtualNode.children_[0] = newVirtualNode;
 
         // This step aimed to read memoized hooks and restore them
         resolveVirtualTree(virtualNode);
@@ -65,11 +65,11 @@ function _resolveUnmountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap) {
             const unmounted = !hasOwnProperty(newVirtualNodeMap, key);
             const virtualNode = oldVirtualNodeMap[key];
 
-            if (isFunction(virtualNode.type)) {
+            if (isFunction(virtualNode.type_)) {
                 destroyEffectsOnFunctionalVirtualNode(virtualNode, unmounted);
 
                 if (unmounted) {
-                    unlinkMemoizedHooks(virtualNode.path);
+                    unlinkMemoizedHooks(virtualNode.path_);
                 }
             }
         }
@@ -82,7 +82,7 @@ function _resolveMountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap) {
             const mounted = !hasOwnProperty(oldVirtualNodeMap, key);
             const virtualNode = newVirtualNodeMap[key];
 
-            if (isFunction(virtualNode.type)) {
+            if (isFunction(virtualNode.type_)) {
                 mountEffectsOnFunctionalVirtualNode(virtualNode, mounted);
             }
         }
@@ -90,17 +90,17 @@ function _resolveMountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap) {
 }
 
 function _getVirtualNodeMap(rootVirtualNode) {
-    const out = Object.create(null);
+    const outputMap = Object.create(null);
 
-    const walk = (virtualNode) => {
-        out[pathToString(virtualNode.path)] = virtualNode;
+    _walkVirtualNode(rootVirtualNode, outputMap);
 
-        for (let i = 0; i < virtualNode.children.length; i++) {
-            walk(virtualNode.children[i]);
-        }
-    };
+    return outputMap;
+}
 
-    walk(rootVirtualNode);
+function _walkVirtualNode(virtualNode, outputMap) {
+    outputMap[pathToString(virtualNode.path_)] = virtualNode;
 
-    return out;
+    for (let i = 0; i < virtualNode.children_.length; i++) {
+        _walkVirtualNode(virtualNode.children_[i], outputMap);
+    }
 }

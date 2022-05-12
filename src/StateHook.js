@@ -10,31 +10,31 @@ import {updateVirtualTree} from './UpdateVirtualTree';
  * @constructor
  */
 export function StateHook(initialValue, setValue, context) {
-    this.value = initialValue;
-    this.setValue = setValue;
-    this.context = context;
+    this.value_ = initialValue;
+    this.setValue_ = setValue;
+    this.context_ = context;
 }
 
 export function useState(initialValue) {
     const [functionalVirtualNode, hookIndex] = resolveCurrentlyProcessing();
 
-    if (functionalVirtualNode.hooks.length > hookIndex) {
-        const hook = functionalVirtualNode.hooks[hookIndex];
-        return [hook.value, hook.setValue];
+    if (functionalVirtualNode.hooks_.length > hookIndex) {
+        const hook = functionalVirtualNode.hooks_[hookIndex];
+        return [hook.value_, hook.setValue_];
     }
 
     const setValue = (value) => {
         let newValue;
         
         if (isFunction(value)) {
-            newValue = value(hook.value);
+            newValue = value(hook.value_);
         } else {
             newValue = value;
         }
         
-        if (newValue !== hook.value) {
-            hook.value = newValue;
-            updateVirtualTree(hook.context, false);
+        if (newValue !== hook.value_) {
+            hook.value_ = newValue;
+            updateVirtualTree(hook.context_, false);
         }
     };
 
@@ -44,7 +44,7 @@ export function useState(initialValue) {
         functionalVirtualNode,
     );
 
-    functionalVirtualNode.hooks.push(hook);
+    functionalVirtualNode.hooks_.push(hook);
 
-    return [hook.value, hook.setValue];
+    return [hook.value_, hook.setValue_];
 }

@@ -25,6 +25,7 @@ export function createElement(type, attributes, ...content) {
 function _createFunctionalVirtualNode(type, attributes, ...content) {
     const {key = null, ref = null, ...props} = attributes;
 
+    // JSX children
     props.children = content;
     
     return new VirtualNode(type, props, key, ref);
@@ -38,9 +39,9 @@ function _createStaticVirtualNode(type, attributes, ...content) {
     for (let i = 0; i < content.length; i++) {
         const childNode = createVirtualNodeFromContent(content[i]);
         if (childNode !== null) {
-            childNode.parent = newNode;
-            childNode.posInRow = i;
-            newNode.children.push(childNode);
+            childNode.parent_ = newNode;
+            childNode.posInRow_ = i;
+            newNode.children_.push(childNode);
         }
     }
 

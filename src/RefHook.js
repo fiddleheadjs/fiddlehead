@@ -12,13 +12,13 @@ export function RefHook(current) {
 export function useRef(initialValue) {
     const [functionalVirtualNode, hookIndex] = resolveCurrentlyProcessing();
 
-    if (functionalVirtualNode.hooks.length > hookIndex) {
-        return functionalVirtualNode.hooks[hookIndex];
+    if (functionalVirtualNode.hooks_.length > hookIndex) {
+        return functionalVirtualNode.hooks_[hookIndex];
     }
 
     const hook = new RefHook(initialValue);
 
-    functionalVirtualNode.hooks.push(hook);
+    functionalVirtualNode.hooks_.push(hook);
 
     return hook;
 }

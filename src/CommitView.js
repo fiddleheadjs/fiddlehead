@@ -17,7 +17,7 @@ function _removeOldNativeNodes(oldVirtualNodeMap, newVirtualNodeMap) {
         if (hasOwnProperty(oldVirtualNodeMap, key) && !hasOwnProperty(newVirtualNodeMap, key)) {
             if (!key.startsWith(lastRemovedKey + '/')) {
                 const oldVirtualNode = oldVirtualNodeMap[key];
-                if (oldVirtualNode.nativeNode !== null) {
+                if (oldVirtualNode.nativeNode_ !== null) {
                     _removeNativeNodesOfVirtualNode(oldVirtualNode);
                     lastRemovedKey = key;
                 }
@@ -37,24 +37,24 @@ function _updateExistingNativeNodes(oldVirtualNodeMap, newVirtualNodeMap) {
 
         if (hasOwnProperty(oldVirtualNodeMap, key) && hasOwnProperty(newVirtualNodeMap, key)) {
             const newVirtualNode = newVirtualNodeMap[key];
-            if (newVirtualNode.nativeNode !== null) {
+            if (newVirtualNode.nativeNode_ !== null) {
                 const oldVirtualNode = oldVirtualNodeMap[key];
 
                 // Reuse the existing native node
-                linkNativeNode(newVirtualNode, oldVirtualNode.nativeNode);
+                linkNativeNode(newVirtualNode, oldVirtualNode.nativeNode_);
 
-                if (newVirtualNode.type === NODE_TEXT) {
-                    if (newVirtualNode.data !== oldVirtualNode.data) {
+                if (newVirtualNode.type_ === NODE_TEXT) {
+                    if (newVirtualNode.data_ !== oldVirtualNode.data_) {
                         updateNativeTextNode(
-                            newVirtualNode.nativeNode,
-                            newVirtualNode.data
+                            newVirtualNode.nativeNode_,
+                            newVirtualNode.data_
                         );
                     }
                 } else {
                     updateNativeElementAttributes(
-                        newVirtualNode.nativeNode,
-                        newVirtualNode.props,
-                        oldVirtualNode.props
+                        newVirtualNode.nativeNode_,
+                        newVirtualNode.props_,
+                        oldVirtualNode.props_
                     );
                 }
             }
@@ -69,7 +69,7 @@ function _insertNewNativeNodes(oldVirtualNodeMap, newVirtualNodeMap) {
         if (hasOwnProperty(newVirtualNodeMap, key)) {
             if (!hasOwnProperty(oldVirtualNodeMap, key)) {
                 const newVirtualNode = newVirtualNodeMap[key];
-                if (newVirtualNode.nativeNode !== null) {
+                if (newVirtualNode.nativeNode_ !== null) {
                     pendingVirtualNodes.push(newVirtualNode);
                 }
             } else {
@@ -90,14 +90,14 @@ function _insertClosestNativeNodesOfVirtualNodes(virtualNodes, virtualNodeAfter)
     for (let i = 0; i < virtualNodes.length; i++) {
         const virtualNode = virtualNodes[i];
         
-        if (virtualNode.nativeNode !== null) {
+        if (virtualNode.nativeNode_ !== null) {
             const nativeHost = _findNativeHost(virtualNode);
 
             if (nativeHost !== null) {
                 if (nativeNodeAfter !== null && nativeHost === nativeNodeAfter.parentNode) {
-                    nativeHost.insertBefore(virtualNode.nativeNode, nativeNodeAfter);
+                    nativeHost.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
                 } else {
-                    nativeHost.appendChild(virtualNode.nativeNode);
+                    nativeHost.appendChild(virtualNode.nativeNode_);
                 }
             }
         }
@@ -117,22 +117,22 @@ function _removeNativeNodesOfVirtualNode(virtualNode) {
 }
 
 function _findNativeHost(virtualNode) {
-    if (virtualNode.parent === null) {
+    if (virtualNode.parent_ === null) {
         return null;
     }
 
-    if (virtualNode.parent.nativeNode === null) {
-        return _findNativeHost(virtualNode.parent);
+    if (virtualNode.parent_.nativeNode_ === null) {
+        return _findNativeHost(virtualNode.parent_);
     }
 
-    return virtualNode.parent.nativeNode;
+    return virtualNode.parent_.nativeNode_;
 }
 
 function _findClosestNativeNodes(virtualNode) {
-    if (virtualNode.nativeNode !== null) {
-        return [virtualNode.nativeNode];
+    if (virtualNode.nativeNode_ !== null) {
+        return [virtualNode.nativeNode_];
     } else {
-        return virtualNode.children.reduce((arr, childVirtualNode) => {
+        return virtualNode.children_.reduce((arr, childVirtualNode) => {
             return arr.concat(_findClosestNativeNodes(childVirtualNode));
         }, []);
     }

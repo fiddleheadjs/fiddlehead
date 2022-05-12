@@ -19,15 +19,15 @@ export function mount(rootVirtualNode, container) {
     attachVirtualNode(container, containerVirtualNode);
 
     if (container.ownerSVGElement) {
-        containerVirtualNode.ns = NS_SVG;
+        containerVirtualNode.ns_ = NS_SVG;
     } else {
-        containerVirtualNode.ns = NS_HTML;
+        containerVirtualNode.ns_ = NS_HTML;
     }
 
-    rootVirtualNode.parent = containerVirtualNode;
-    rootVirtualNode.posInRow = 0;
-    containerVirtualNode.children[0] = rootVirtualNode;
-    containerVirtualNode.path = [getContainerId(container)];
+    rootVirtualNode.parent_ = containerVirtualNode;
+    rootVirtualNode.posInRow_ = 0;
+    containerVirtualNode.children_[0] = rootVirtualNode;
+    containerVirtualNode.path_ = [getContainerId(container)];
 
     resolveVirtualTree(containerVirtualNode);
     

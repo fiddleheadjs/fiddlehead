@@ -1,4 +1,4 @@
-import {h, mount, useState, useEffect, useRef} from "../../src/index.js";
+import {h, mount, useState, useEffect, useRef} from "../../output/dist/index.min.js";
 
 function Wrapper({children}) {
     return (

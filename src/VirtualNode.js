@@ -11,21 +11,21 @@ import {isArray, isNumber, isString} from './Util';
  * @constructor
  */
 export function VirtualNode(type, props, key, ref) {
-    this.type = type;
-    this.props = props;
-    this.key = key;
-    this.ref = ref;
+    this.type_ = type;
+    this.props_ = props;
+    this.key_ = key;
+    this.ref_ = ref;
 
-    this.hooks = [];
+    this.hooks_ = [];
 
-    this.parent = null;
-    this.children = [];
-    this.path = [];
-    this.posInRow = null;
+    this.parent_ = null;
+    this.children_ = [];
+    this.path_ = [];
+    this.posInRow_ = null;
 
-    this.data = null;
-    this.nativeNode = null;
-    this.ns = null;
+    this.data_ = null;
+    this.nativeNode_ = null;
+    this.ns_ = null;
 }
 
 export const NODE_TEXT = '#txt';
@@ -36,10 +36,10 @@ export const NS_HTML = 'html';
 export const NS_SVG = 'svg';
 
 export function linkNativeNode(virtualNode, nativeNode) {
-    virtualNode.nativeNode = nativeNode;
+    virtualNode.nativeNode_ = nativeNode;
 
-    if (virtualNode.ref instanceof RefHook) {
-        virtualNode.ref.current = nativeNode;
+    if (virtualNode.ref_ instanceof RefHook) {
+        virtualNode.ref_.current = nativeNode;
     }
 }
 
@@ -55,7 +55,7 @@ export function createVirtualNodeFromContent(content) {
 
     if (isString(content) || isNumber(content)) {
         const node = new VirtualNode(NODE_TEXT, {}, null, null);
-        node.data = content;
+        node.data_ = content;
         return node;
     }
 
@@ -64,9 +64,9 @@ export function createVirtualNodeFromContent(content) {
         for (let i = 0; i < content.length; i++) {
             const child = createVirtualNodeFromContent(content[i]);
             if (child !== null) {
-                child.parent = node;
-                child.posInRow = i;
-                node.children.push(child);
+                child.parent_ = node;
+                child.posInRow_ = i;
+                node.children_.push(child);
             }
         }
         return node;

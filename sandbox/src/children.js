@@ -1,4 +1,4 @@
-import { h, mount, useState } from "../../src/index.js";
+import { h, mount, useState } from "../../output/dist/index.min.js";
 
 function YourAd({ count, setCount }) {
     const [layout, setLayout] = useState("cat");
