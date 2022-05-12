@@ -2,9 +2,9 @@ import {createContainerId, createFunctionalTypeAlias} from './Path';
 import {hasOwnProperty} from './Util';
 import {VirtualNode} from './VirtualNode';
 
-const PROP_COMPONENT_TYPE = 'Hook$ComponentType';
-const PROP_CONTAINER_ID = 'Hook$ContainerId';
-const PROP_VIRTUAL_NODE = 'Hook$VirtualNode';
+const PROP_TYPE_ALIAS = 'hook_alias';
+const PROP_CONTAINER_ID = 'hook_cid';
+const PROP_VIRTUAL_NODE = 'hook_vnode';
 
 /**
  * 
@@ -24,10 +24,10 @@ export function getContainerId(container) {
  * @returns {string}
  */
 export function getFunctionalTypeAlias(type) {
-    if (!hasOwnProperty(type, PROP_COMPONENT_TYPE)) {
-        type[PROP_COMPONENT_TYPE] = createFunctionalTypeAlias(type);
+    if (!hasOwnProperty(type, PROP_TYPE_ALIAS)) {
+        type[PROP_TYPE_ALIAS] = createFunctionalTypeAlias(type);
     }
-    return type[PROP_COMPONENT_TYPE];
+    return type[PROP_TYPE_ALIAS];
 }
 
 /**
