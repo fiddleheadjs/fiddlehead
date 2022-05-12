@@ -1,9 +1,10 @@
-import {h, mount} from '../../output/dist/index.min.js';
+import React, {useRef, useState, useEffect} from 'react';
+import ReactDOM from 'react-dom';
 
 console.time('stack');
 console.time('mount');
 
-mount([<DemoWrapper/>, <TimeEnd/>], document.getElementById('sandbox-container'));
+ReactDOM.render([<DemoWrapper/>, <TimeEnd/>], document.getElementById('sandbox-container'));
 
 console.timeEnd('stack');
 

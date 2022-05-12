@@ -1,5 +1,5 @@
 import {isFunction} from './Util';
-import {createVirtualNodeFromContent, NODE_FRAGMENT, VirtualNode} from './VirtualNode';
+import {appendChildVirtualNode, createVirtualNodeFromContent, NODE_FRAGMENT, VirtualNode} from './VirtualNode';
 
 /**
  *
@@ -36,12 +36,11 @@ function _createStaticVirtualNode(type, attributes, ...content) {
 
     const newNode = new VirtualNode(type, props, key, ref);
 
+    let posInRow = -1;
     for (let i = 0; i < content.length; i++) {
         const childNode = createVirtualNodeFromContent(content[i]);
         if (childNode !== null) {
-            childNode.parent_ = newNode;
-            childNode.posInRow_ = i;
-            newNode.children_.push(childNode);
+            appendChildVirtualNode(newNode, childNode, ++posInRow);
         }
     }
 

@@ -28,9 +28,10 @@ export function VirtualNode(type, props, key, ref) {
     this.ns_ = null;
 }
 
-export const NODE_TEXT = '#txt';
-export const NODE_ARRAY = '#arr';
-export const NODE_FRAGMENT = '#frg';
+// Use special URI characters
+export const NODE_TEXT = '#';
+export const NODE_ARRAY = '[';
+export const NODE_FRAGMENT = '<';
 
 export const NS_HTML = 'html';
 export const NS_SVG = 'svg';
@@ -55,22 +56,37 @@ export function createVirtualNodeFromContent(content) {
 
     if (isString(content) || isNumber(content)) {
         const node = new VirtualNode(NODE_TEXT, {}, null, null);
+
         node.data_ = content;
+        
         return node;
     }
 
     if (isArray(content)) {
         const node = new VirtualNode(NODE_ARRAY, {}, null, null);
+
+        let posInRow = -1;
         for (let i = 0; i < content.length; i++) {
             const child = createVirtualNodeFromContent(content[i]);
             if (child !== null) {
-                child.parent_ = node;
-                child.posInRow_ = i;
-                node.children_.push(child);
+                appendChildVirtualNode(node, child, ++posInRow);
             }
         }
+
         return node;
     }
 
     return null;
+}
+
+/**
+ * 
+ * @param {VirtualNode} parent 
+ * @param {VirtualNode} child
+ * @param {number} posInRow
+ */
+export function appendChildVirtualNode(parent, child, posInRow) {
+    child.parent_ = parent;
+    child.posInRow_ = posInRow;
+    parent.children_[posInRow] = child;
 }

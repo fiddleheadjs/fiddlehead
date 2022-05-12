@@ -101,9 +101,10 @@ function VirtualNode(type, props, key, ref) {
     this.ns_ = null;
 }
 
-const NODE_TEXT = '#txt';
-const NODE_ARRAY = '#arr';
-const NODE_FRAGMENT = '#frg';
+// Use special URI characters
+const NODE_TEXT = '#';
+const NODE_ARRAY = '[';
+const NODE_FRAGMENT = '<';
 
 const NS_HTML = 'html';
 const NS_SVG = 'svg';
@@ -128,24 +129,39 @@ function createVirtualNodeFromContent(content) {
 
     if (isString(content) || isNumber(content)) {
         const node = new VirtualNode(NODE_TEXT, {}, null, null);
+
         node.data_ = content;
+        
         return node;
     }
 
     if (isArray(content)) {
         const node = new VirtualNode(NODE_ARRAY, {}, null, null);
+
+        let posInRow = -1;
         for (let i = 0; i < content.length; i++) {
             const child = createVirtualNodeFromContent(content[i]);
             if (child !== null) {
-                child.parent_ = node;
-                child.posInRow_ = i;
-                node.children_.push(child);
+                appendChildVirtualNode(node, child, ++posInRow);
             }
         }
+
         return node;
     }
 
     return null;
+}
+
+/**
+ * 
+ * @param {VirtualNode} parent 
+ * @param {VirtualNode} child
+ * @param {number} posInRow
+ */
+function appendChildVirtualNode(parent, child, posInRow) {
+    child.parent_ = parent;
+    child.posInRow_ = posInRow;
+    parent.children_[posInRow] = child;
 }
 
 /**
@@ -183,12 +199,11 @@ function _createStaticVirtualNode(type, attributes, ...content) {
 
     const newNode = new VirtualNode(type, props, key, ref);
 
+    let posInRow = -1;
     for (let i = 0; i < content.length; i++) {
         const childNode = createVirtualNodeFromContent(content[i]);
         if (childNode !== null) {
-            childNode.parent_ = newNode;
-            childNode.posInRow_ = i;
-            newNode.children_.push(childNode);
+            appendChildVirtualNode(newNode, childNode, ++posInRow);
         }
     }
 
@@ -203,6 +218,9 @@ function _createStaticVirtualNode(type, attributes, ...content) {
 function pathToString(path) {
     return path.join('/');
 }
+
+// Note:
+// Use special URI characters as prefixes
 
 /**
  * 
@@ -221,7 +239,7 @@ let functionalTypeInc = 0;
  * @returns {string}
  */
 function createFunctionalTypeAlias(type) {
-    return type.name + ']' + (++functionalTypeInc).toString(36);
+    return /*type.name +*/ '{' + (++functionalTypeInc).toString(36);
 }
 
 let containerIdInc = 0;
@@ -257,7 +275,7 @@ function getContainerId(container) {
  */
 function getFunctionalTypeAlias(type) {
     if (!hasOwnProperty(type, PROP_TYPE_ALIAS)) {
-        type[PROP_TYPE_ALIAS] = createFunctionalTypeAlias(type);
+        type[PROP_TYPE_ALIAS] = createFunctionalTypeAlias();
     }
     return type[PROP_TYPE_ALIAS];
 }
@@ -786,9 +804,7 @@ function _updateVirtualNodeRecursive(virtualNode) {
     flushCurrentlyProcessing();
 
     if (newVirtualNode !== null) {
-        newVirtualNode.parent_ = virtualNode;
-        newVirtualNode.posInRow_ = 0;
-        virtualNode.children_[0] = newVirtualNode;
+        appendChildVirtualNode(virtualNode, newVirtualNode, 0);
 
         // This step aimed to read memoized hooks and restore them
         resolveVirtualTree(virtualNode);
@@ -947,32 +963,25 @@ function _resolveVirtualNodeRecursive(virtualNode, parentPath) {
 
 /**
  *
- * @param {VirtualNode} rootVirtualNode
+ * @param {*} root
  * @param {Element} container
  */
-function mount(rootVirtualNode, container) {
+function mount(root, container) {
     if (container.firstChild) {
         throw new Error('Container must be empty');
     }
 
-    const containerVirtualNode = new VirtualNode(container.nodeName.toLowerCase(), {}, null, null);
+    const rootVirtualNode = createVirtualNodeFromContent(root);
 
+    const containerVirtualNode = new VirtualNode(container.nodeName.toLowerCase(), {}, null, null);
+    containerVirtualNode.path_ = [getContainerId(container)];
+    containerVirtualNode.ns_ = container.ownerSVGElement ? NS_SVG : NS_HTML;
     linkNativeNode(containerVirtualNode, container);
     attachVirtualNode(container, containerVirtualNode);
 
-    if (container.ownerSVGElement) {
-        containerVirtualNode.ns_ = NS_SVG;
-    } else {
-        containerVirtualNode.ns_ = NS_HTML;
-    }
-
-    rootVirtualNode.parent_ = containerVirtualNode;
-    rootVirtualNode.posInRow_ = 0;
-    containerVirtualNode.children_[0] = rootVirtualNode;
-    containerVirtualNode.path_ = [getContainerId(container)];
+    appendChildVirtualNode(containerVirtualNode, rootVirtualNode, 0);
 
     resolveVirtualTree(containerVirtualNode);
-    
     updateVirtualTree(rootVirtualNode, true);
 }
 

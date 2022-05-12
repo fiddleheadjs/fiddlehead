@@ -7,6 +7,9 @@ export function pathToString(path) {
     return path.join('/');
 }
 
+// Note:
+// Use special URI characters as prefixes
+
 /**
  * 
  * @param {*} key 
@@ -24,7 +27,7 @@ let functionalTypeInc = 0;
  * @returns {string}
  */
 export function createFunctionalTypeAlias(type) {
-    return type.name + ']' + (++functionalTypeInc).toString(36);
+    return /*type.name +*/ '{' + (++functionalTypeInc).toString(36);
 }
 
 let containerIdInc = 0;

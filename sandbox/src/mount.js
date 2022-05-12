@@ -88,5 +88,9 @@ function DemoFinalWrapper() {
     return [<DemoWrapperWrapper/>, <TimeEnd/>];
 }
 
+console.time('stack');
 console.time('mount');
+
 mount(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));
+
+console.timeEnd('stack');

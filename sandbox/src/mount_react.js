@@ -82,13 +82,16 @@ function DemoWrapperWrapper() {
 
 function TimeEnd() {
     console.timeEnd('mount');
-    return 'hahah';
+    return null;
 }
 
 function DemoFinalWrapper() {
     return <><DemoWrapperWrapper/> <TimeEnd/></>;
 }
 
+console.time('stack');
 console.time('mount');
+
 ReactDOM.render(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));
 
+console.timeEnd('stack');
