@@ -24,7 +24,7 @@ function getJsLoaders(isReact = false) {
 
 const configs = [];
 
-['differ', 'form', 'mount', 'svg', 'mount_react'].map(filename => {
+['differ', 'form', 'mount', 'children', 'svg', 'mount_react'].map(filename => {
     configs.push({
         mode: 'development',
         entry: `./src/${filename}.js`,

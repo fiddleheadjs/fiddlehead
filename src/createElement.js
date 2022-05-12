@@ -1,11 +1,12 @@
 import {isArray, isFunction, isNumber, isString} from './Util';
 import {NODE_FRAGMENT, NODE_TEXT, VirtualNode} from './VirtualNode';
 import {
-    findFunctionalVirtualNode,
-    linkFunctionalVirtualNode,
-    unlinkFunctionalVirtualNode
-} from './FunctionalVirtualNodeMapping';
+    findMemoizedHooks,
+    linkMemoizedHooks,
+    unlinkMemoizedHooks
+} from './MemoizedHooks';
 import {generateTemporaryPath} from './Path';
+import { StateHook } from './StateHook';
 
 /**
  *
@@ -35,21 +36,28 @@ function _createFunctionalVirtualNode(type, attributes, ...content) {
     const tempPath = generateTemporaryPath();
 
     const virtualNode = new VirtualNode(type, props, key, ref);
-    linkFunctionalVirtualNode(tempPath, virtualNode);
+    linkMemoizedHooks(tempPath, virtualNode.hooks);
 
     virtualNode.resolvePath = () => {
-        unlinkFunctionalVirtualNode(tempPath);
+        unlinkMemoizedHooks(tempPath);
 
-        const existing = findFunctionalVirtualNode(virtualNode.path);
-        if (existing) {
-            console.log('existing', existing);
-            virtualNode.hooks = existing.hooks;
-            if (existing.parent !== null) {
-                existing.parent.children[existing.parent.children.indexOf(existing)] = virtualNode;
+        const memoizedHooks = findMemoizedHooks(virtualNode.path);
+        if (memoizedHooks !== null) {
+            // Here, new node does not have any hooks
+            // because it is in the pending state
+            // After when the tree is established
+            // and then updating, the hooks will be called (or created if it is the first time)
+            virtualNode.hooks = memoizedHooks;
+
+            for (let i = 0; i < virtualNode.hooks.length; i++) {
+                const hook = virtualNode.hooks[i];
+                if (hook instanceof StateHook) {
+                    hook.virtualNode = virtualNode;
+                }
             }
         }
 
-        linkFunctionalVirtualNode(virtualNode.path, virtualNode);
+        linkMemoizedHooks(virtualNode.path, virtualNode.hooks);
     };
 
     return virtualNode;

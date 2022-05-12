@@ -8,7 +8,7 @@ import {resolveCurrentlyProcessing} from './CurrentlyProcessing';
  * @return {EffectHook}
  * @constructor
  */
-function EffectHook(callback, deps, lastDestroy) {
+export function EffectHook(callback, deps, lastDestroy) {
     this.tag = EFFECT_NONE;
     this.callback = callback;
     this.deps = deps;

@@ -6,13 +6,11 @@ import {attachVirtualNode, getComponentType} from './ExternalAttachment';
 
 export function resolveVirtualTree(rootVirtualNode) {
     let currentPath = [...rootVirtualNode.path];
-    // console.log('***', currentPath.join('/'));
 
     const walk = (virtualNode) => {
         const pivotPathSize = currentPath.length;
 
         if (virtualNode !== rootVirtualNode) {
-            // console.log('---',currentPath.join('/'));
             currentPath.push(...virtualNode.pathFromParent);
 
             // If a node has key, replace the index of this node
@@ -28,7 +26,6 @@ export function resolveVirtualTree(rootVirtualNode) {
             } else {
                 currentPath.push(virtualNode.type);
             }
-            // console.log('>>>',currentPath.join('/'));
         }
 
         for (let i = 0; i < virtualNode.children.length; i++) {
@@ -46,10 +43,6 @@ export function resolveVirtualTree(rootVirtualNode) {
     }
 
     walk(rootVirtualNode);
-}
-
-export function didResolveVirtualTree() {
-
 }
 
 export function hydrateVirtualTree(virtualNode) {

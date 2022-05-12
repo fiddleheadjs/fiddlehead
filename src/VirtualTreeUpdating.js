@@ -1,7 +1,7 @@
 import {stringifyPath} from './Path';
 import {hasOwnProperty, isFunction} from './Util';
-import {unlinkFunctionalVirtualNode} from './FunctionalVirtualNodeMapping';
-import {didResolveVirtualTree, hydrateVirtualTree, resolveVirtualTree} from './VirtualTreeResolving';
+import {unlinkMemoizedHooks} from './MemoizedHooks';
+import {hydrateVirtualTree, resolveVirtualTree} from './VirtualTreeResolving';
 import {flushCurrentlyRendering, prepareCurrentlyRendering} from './CurrentlyProcessing';
 import {NODE_TEXT} from './VirtualNode';
 import {commitView} from './ViewCommitment';
@@ -14,28 +14,13 @@ import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNo
  */
 export function updateVirtualTree(rootVirtualNode, initial) {
     const oldVirtualNodeMap = initial ? {} : _getVirtualNodeMap(rootVirtualNode);
-    _updateVirtualNode(rootVirtualNode);
+    _updateVirtualNodeRecursive(rootVirtualNode);
     const newVirtualNodeMap = _getVirtualNodeMap(rootVirtualNode);
-
-    console.log('----');
-    console.log(rootVirtualNode.type.name, rootVirtualNode);
-    console.log({oldVirtualNodeMap, newVirtualNodeMap});
-    console.log(Object.keys(oldVirtualNodeMap).length, Object.keys(newVirtualNodeMap).length);
-    console.log(Object.keys(oldVirtualNodeMap).join('\n') === Object.keys(newVirtualNodeMap).join('\n'));
 
     _resolveUnmountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap);
     hydrateVirtualTree(rootVirtualNode);
     commitView(oldVirtualNodeMap, newVirtualNodeMap);
     _resolveMountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap);
-}
-
-/**
- *
- * @param {VirtualNode} virtualNode
- */
-function _updateVirtualNode(virtualNode) {
-    _updateVirtualNodeRecursive(virtualNode);
-    didResolveVirtualTree();
 }
 
 /**
@@ -79,7 +64,7 @@ function _resolveUnmountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap) {
                 destroyEffectsOnFunctionalVirtualNode(virtualNode, unmounted);
 
                 if (unmounted) {
-                    unlinkFunctionalVirtualNode(virtualNode.path);
+                    unlinkMemoizedHooks(virtualNode.path);
                 }
             }
         }
@@ -114,5 +99,3 @@ function _getVirtualNodeMap(rootVirtualNode) {
 
     return out;
 }
-
-window._getVirtualNodeMap = _getVirtualNodeMap;

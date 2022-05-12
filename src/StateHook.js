@@ -9,9 +9,10 @@ import {updateVirtualTree} from './VirtualTreeUpdating';
  * @return {StateHook}
  * @constructor
  */
-function StateHook(value, setValue) {
+export function StateHook(value, setValue, virtualNode) {
     this.value = value;
     this.setValue = setValue;
+    this.virtualNode = virtualNode;
 }
 
 export function useState(initialValue) {
@@ -35,9 +36,10 @@ export function useState(initialValue) {
 
             if (newValue !== hook.value) {
                 hook.value = newValue;
-                updateVirtualTree(functionalVirtualNode, false);
+                updateVirtualTree(hook.virtualNode, false);
             }
-        }
+        },
+        functionalVirtualNode
     );
 
     functionalVirtualNode.hooks.push(hook);
