@@ -57,12 +57,12 @@ function _createStaticVirtualNode(type, attributes, ...content) {
 
     const virtualNode = new VirtualNode(type, props, key, ref);
 
-    _appendVirtualChildren(virtualNode, content);
+    _appendVirtualChildren(virtualNode, content, []);
 
     return virtualNode;
 }
 
-function _appendVirtualChildren(element, content, indexes = []) {
+function _appendVirtualChildren(element, content, indexes) {
     if (isArray(content)) {
         for (let i = 0; i < content.length; i++) {
             _appendVirtualChildren(element, content[i], [...indexes, i]);

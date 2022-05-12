@@ -48,7 +48,11 @@ function _updateExistingViewNodes(oldVirtualNodeMap, newVirtualNodeMap) {
                         newVirtualNode.viewNode.textContent = newVirtualNode.text;
                     }
                 } else {
-                    updateViewElementAttributes(newVirtualNode.viewNode, newVirtualNode.props, oldVirtualNode.props);
+                    updateViewElementAttributes(
+                        newVirtualNode.viewNode,
+                        newVirtualNode.props,
+                        oldVirtualNode.props
+                    );
                 }
             }
         }
@@ -79,10 +83,10 @@ function _insertNewViewNodes(oldVirtualNodeMap, newVirtualNodeMap) {
 
 function _insertClosestViewNodesOfVirtualNodes(virtualNodes, virtualNodeAfter) {
     const viewNodeAfter = virtualNodeAfter && _findClosestViewNodes(virtualNodeAfter)[0] || null;
-
+    
     for (let i = 0; i < virtualNodes.length; i++) {
         const virtualNode = virtualNodes[i];
-
+        
         if (virtualNode.viewNode !== null) {
             const viewHost = _findViewHost(virtualNode);
 
@@ -111,6 +115,7 @@ function _removeViewNodesOfVirtualNode(virtualNode) {
 
 function _findViewHost(virtualNode) {
     if (virtualNode.parent === null) {
+        console.log(virtualNode);
         return null;
     }
 

@@ -46,7 +46,7 @@ export function resolveVirtualTree(rootVirtualNode, basePath = []) {
         });
 
         virtualNode.path = [...currentPath];
-        virtualNode.parent = appendInfo.parent;
+        // virtualNode.parent = appendInfo.parent;
 
         if (virtualNode.resolvePath !== undefined) {
             virtualNode.resolvePath();
@@ -57,8 +57,6 @@ export function resolveVirtualTree(rootVirtualNode, basePath = []) {
     }
 
     walk(rootAppendInfo, rootVirtualNode);
-
-    return rootVirtualNode;
 }
 
 export function didResolveVirtualTree() {

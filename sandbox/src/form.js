@@ -2,23 +2,23 @@ import {h, mount, useState, useEffect, useRef} from "../../src/index.js";
 
 
 function Cat({text, setText}) {
-    console.log('run Cat', text);
+    //console.log('run Cat', text);
 
     const [] = useState(1);
 
     useEffect(() => {
-        // console.log('mount Lazy effect Cat');
+        // //console.log('mount Lazy effect Cat');
 
         return () => {
-            // console.log('destroy Lazy effect Cat');
+            // //console.log('destroy Lazy effect Cat');
         };
     }, []);
 
     useEffect(() => {
-        console.log('mount Deps effect Cat', text);
+        //console.log('mount Deps effect Cat', text);
 
         return () => {
-            console.log('destroy Deps effect Cat', text);
+            //console.log('destroy Deps effect Cat', text);
         };
     }, [text]);
 
@@ -35,23 +35,23 @@ function Cat({text, setText}) {
 }
 
 function Dog({text, setText}) {
-    // console.log('run Dog', text);
+    // //console.log('run Dog', text);
 
     const [speak, setSpeak] = useState('gruuu');
 
     useEffect(() => {
-        // console.log('mount Lazy effect Dog');
+        // //console.log('mount Lazy effect Dog');
 
         return () => {
-            // console.log('destroy Lazy effect Dog');
+            // //console.log('destroy Lazy effect Dog');
         };
     }, []);
 
     useEffect(() => {
-        // console.log('mount Deps effect Dog', text);
+        // //console.log('mount Deps effect Dog', text);
 
         return () => {
-            // console.log('destroy Deps effect Dog', text);
+            // //console.log('destroy Deps effect Dog', text);
         };
     }, [text]);
 
@@ -79,18 +79,18 @@ function Bird({layout, text, setText}) {
     const [] = useState();
 
     useEffect(() => {
-        console.log('mount Lazy effect Bird');
+        //console.log('mount Lazy effect Bird');
 
         return () => {
-            console.log('destroy Lazy effect Bird');
+            //console.log('destroy Lazy effect Bird');
         };
     }, []);
 
     // useEffect(() => {
-    //     // console.log('mount Always effect Bird');
+    //     // //console.log('mount Always effect Bird');
     //
     //     return () => {
-    //         // console.log('destroy Always effect Bird');
+    //         // //console.log('destroy Always effect Bird');
     //     };
     // });
 
@@ -110,31 +110,31 @@ function YourAd({count, setCount}) {
     const [layout, setLayout] = useState('cat');
 
     const [name, setName] = useState('unnamed');
-    console.log('name', name);
+    //console.log('name', name);
 
     const selectRef = useRef(null);
 
     useEffect(() => {
-        // console.log('mount Lazy effect YourAd');
+        // //console.log('mount Lazy effect YourAd');
 
         return () => {
-            // console.log('destroy Lazy effect YourAd');
+            // //console.log('destroy Lazy effect YourAd');
         };
     }, []);
 
     useEffect(() => {
-        console.log('+ select_element', selectRef.current);
+        //console.log('+ select_element', selectRef.current);
 
         return () => {
-            console.log('- select_element', selectRef.current);
+            //console.log('- select_element', selectRef.current);
         };
     });
 
     useEffect(() => {
-        // console.log('mount Deps effect YourAd', layout, name);
+        // //console.log('mount Deps effect YourAd', layout, name);
 
         return () => {
-            // console.log('destroy Deps effect YourAd', layout, name);
+            // //console.log('destroy Deps effect YourAd', layout, name);
         };
     }, [layout, name]);
 
@@ -206,10 +206,10 @@ function MyAd() {
     const adRef = useRef(null);
 
     useEffect(() => {
-        console.log('+ ad_element', adRef.current);
+        //console.log('+ ad_element', adRef.current);
 
         return () => {
-            console.log('- ad_element', adRef.current);
+            //console.log('- ad_element', adRef.current);
         };
     });
 
@@ -243,7 +243,7 @@ function MyAd() {
 function Demo() {
     const [shows, setShows] = useState(true);
 
-    console.log('shows', shows);
+    //console.log('shows', shows);
     return <><paragraph>
         <input type="checkbox" checked={shows} onchange={ev => setShows(shows => !shows)}/>
         <h2>Demo</h2>
@@ -260,7 +260,7 @@ function DemoWrapper() {
 }
 
 function DemoWrapperWrapper() {
-    return <><DemoWrapper/></>;
+    return <hh-ff><DemoWrapper/></hh-ff>;
 }
 
 mount(<DemoWrapperWrapper/>, document.getElementById('sandbox-container'));

@@ -6,16 +6,23 @@ import {flushCurrentlyRendering, prepareCurrentlyRendering} from './CurrentlyPro
 import {NODE_TEXT} from './VirtualNode';
 import {commitView} from './ViewCommitment';
 import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNode} from './EffectHook';
+import {addAppendInfo, AppendInfo} from './AppendInfo';
 
 /**
  *
  * @param {VirtualNode} rootVirtualNode
- * @param {boolean} isInit
+ * @param {boolean} initial
  */
-export function updateVirtualTree(rootVirtualNode, isInit = false) {
-    const oldVirtualNodeMap = isInit ? {} : _getVirtualNodeMap(rootVirtualNode);
+export function updateVirtualTree(rootVirtualNode, initial) {
+    const oldVirtualNodeMap = initial ? {} : _getVirtualNodeMap(rootVirtualNode);
     _updateVirtualNode(rootVirtualNode);
     const newVirtualNodeMap = _getVirtualNodeMap(rootVirtualNode);
+
+    console.log('----');
+    console.log(rootVirtualNode.type.name, rootVirtualNode);
+    console.log({oldVirtualNodeMap, newVirtualNodeMap});
+    console.log(Object.keys(oldVirtualNodeMap).length, Object.keys(newVirtualNodeMap).length);
+    console.log(Object.keys(oldVirtualNodeMap).join('\n') === Object.keys(newVirtualNodeMap).join('\n'));
 
     _resolveUnmountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap);
     hydrateVirtualTree(rootVirtualNode);
@@ -53,11 +60,17 @@ function _updateVirtualNodeRecursive(virtualNode) {
         const newVirtualNode = virtualNode.type(virtualNode.props);
         flushCurrentlyRendering();
 
-        // 0 is the position of the new one
-        resolveVirtualTree(newVirtualNode, [...virtualNode.path, 0]);
-
-        newVirtualNode.parent = virtualNode;
         virtualNode.children[0] = newVirtualNode;
+        // newVirtualNode.parent = virtualNode;
+        addAppendInfo(
+            new AppendInfo(virtualNode, [0], newVirtualNode)
+        );
+
+        // 0 is the position of the new one
+        resolveVirtualTree(virtualNode, virtualNode.path.slice(0, virtualNode.path.length - 1));
+
+        // newVirtualNode.parent = virtualNode;
+        // virtualNode.children[0] = newVirtualNode;
 
         _updateVirtualNodeRecursive(newVirtualNode);
     }
@@ -94,7 +107,7 @@ function _resolveMountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap) {
 }
 
 function _getVirtualNodeMap(rootVirtualNode) {
-    const out = {};
+    const out = Object.create(null);
 
     const walk = (virtualNode) => {
         out[stringifyPath(virtualNode.path)] = virtualNode;
@@ -108,3 +121,5 @@ function _getVirtualNodeMap(rootVirtualNode) {
 
     return out;
 }
+
+window._getVirtualNodeMap = _getVirtualNodeMap;

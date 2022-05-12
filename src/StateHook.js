@@ -35,7 +35,7 @@ export function useState(initialValue) {
 
             if (newValue !== hook.value) {
                 hook.value = newValue;
-                updateVirtualTree(functionalVirtualNode);
+                updateVirtualTree(functionalVirtualNode, false);
             }
         }
     );

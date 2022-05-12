@@ -5,7 +5,7 @@ import {hasOwnProperty} from './Util';
  *
  * @type {Object<VirtualNode>}
  */
-const functionalVirtualNodeMap = {};
+const functionalVirtualNodeMap = Object.create(null);
 
 export function findFunctionalVirtualNode(path) {
     const pathString = stringifyPath(path);
