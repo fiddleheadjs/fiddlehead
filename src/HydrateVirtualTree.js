@@ -19,7 +19,7 @@ export function hydrateVirtualTree(virtualNode) {
     let nativeNode = null;
 
     if (virtualNode.type === NODE_TEXT) {
-        nativeNode = createNativeTextNode(virtualNode.text);
+        nativeNode = createNativeTextNode(virtualNode.data);
     } else if (virtualNode.type === NODE_FRAGMENT || virtualNode.type === NODE_ARRAY) {
         // Do nothing here
         // But be careful, removing it changes the condition

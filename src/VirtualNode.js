@@ -23,9 +23,9 @@ export function VirtualNode(type, props, key, ref) {
     this.path = [];
     this.posInRow = null;
 
-    this.ns = null;
+    this.data = null;
     this.nativeNode = null;
-    this.text = null;
+    this.ns = null;
 }
 
 export const NODE_TEXT = '#txt';
@@ -55,7 +55,7 @@ export function createVirtualNodeFromContent(content) {
 
     if (isString(content) || isNumber(content)) {
         const node = new VirtualNode(NODE_TEXT, {}, null, null);
-        node.text = String(content);
+        node.data = content;
         return node;
     }
 

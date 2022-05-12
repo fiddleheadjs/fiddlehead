@@ -4,6 +4,10 @@ export function createNativeTextNode(text) {
     return document.createTextNode(text);
 }
 
+export function updateNativeTextNode(node, text) {
+    node.textContent = text;
+}
+
 export function createNativeElementWithNS(ns, type, attributes) {
     const node = (ns !== null
             ? document.createElementNS(ns, type)

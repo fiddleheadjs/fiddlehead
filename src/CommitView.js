@@ -1,6 +1,6 @@
 import {hasOwnProperty} from './Util';
 import {linkNativeNode, NODE_TEXT} from './VirtualNode';
-import {updateNativeElementAttributes} from './NativeDOM';
+import {updateNativeElementAttributes, updateNativeTextNode} from './NativeDOM';
 
 export function commitView(oldVirtualNodeMap, newVirtualNodeMap) {
     _removeOldNativeNodes(oldVirtualNodeMap, newVirtualNodeMap);
@@ -44,8 +44,11 @@ function _updateExistingNativeNodes(oldVirtualNodeMap, newVirtualNodeMap) {
                 linkNativeNode(newVirtualNode, oldVirtualNode.nativeNode);
 
                 if (newVirtualNode.type === NODE_TEXT) {
-                    if (newVirtualNode.text !== oldVirtualNode.text) {
-                        newVirtualNode.nativeNode.textContent = newVirtualNode.text;
+                    if (newVirtualNode.data !== oldVirtualNode.data) {
+                        updateNativeTextNode(
+                            newVirtualNode.nativeNode,
+                            newVirtualNode.data
+                        );
                     }
                 } else {
                     updateNativeElementAttributes(
