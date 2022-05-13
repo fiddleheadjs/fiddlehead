@@ -12,10 +12,13 @@ const PROP_VIRTUAL_NODE = 'hook_vnode';
  * @returns {string}
  */
 export function getContainerId(container) {
-    if (!hasOwnProperty(container, PROP_CONTAINER_ID)) {
-        container[PROP_CONTAINER_ID] = createContainerId();
+    if (hasOwnProperty(container, PROP_CONTAINER_ID)) {
+        return container[PROP_CONTAINER_ID];
     }
-    return container[PROP_CONTAINER_ID];
+    
+    return (
+        container[PROP_CONTAINER_ID] = createContainerId()
+    );
 }
 
 /**
@@ -24,10 +27,13 @@ export function getContainerId(container) {
  * @returns {string}
  */
 export function getFunctionalTypeAlias(type) {
-    if (!hasOwnProperty(type, PROP_TYPE_ALIAS)) {
-        type[PROP_TYPE_ALIAS] = createFunctionalTypeAlias(type);
+    if (hasOwnProperty(type, PROP_TYPE_ALIAS)) {
+        return type[PROP_TYPE_ALIAS];
     }
-    return type[PROP_TYPE_ALIAS];
+
+    return (
+        type[PROP_TYPE_ALIAS] = createFunctionalTypeAlias(type)
+    );
 }
 
 /**

@@ -104,10 +104,10 @@ function VirtualNode(type, props, key, ref) {
 // Use special URI characters
 const NODE_TEXT = '#';
 const NODE_ARRAY = '[';
-const NODE_FRAGMENT = '<';
+const NODE_FRAGMENT = '=';
 
-const NS_HTML = 'html';
-const NS_SVG = 'svg';
+const NS_HTML = 0;
+const NS_SVG = 1;
 
 function linkNativeNode(virtualNode, nativeNode) {
     virtualNode.nativeNode_ = nativeNode;
@@ -172,42 +172,30 @@ function appendChildVirtualNode(parent, child, posInRow) {
  * @return {VirtualNode}
  */
 function createElement(type, attributes, ...content) {
-    attributes = attributes || {};
-
-    if (type === null) {
-        return _createStaticVirtualNode(NODE_FRAGMENT, attributes, ...content);
-    }
-
-    if (isFunction(type)) {
-        return _createFunctionalVirtualNode(type, attributes, ...content);
-    }
-
-    return _createStaticVirtualNode(type, attributes, ...content);
-}
-
-function _createFunctionalVirtualNode(type, attributes, ...content) {
-    const {key = null, ref = null, ...props} = attributes;
-
-    // JSX children
-    props.children = content;
+    const {key = null, ref = null, ...props} = attributes || {};
     
-    return new VirtualNode(type, props, key, ref);
-}
-
-function _createStaticVirtualNode(type, attributes, ...content) {
-    const {key = null, ref = null, ...props} = attributes;
-
-    const newNode = new VirtualNode(type, props, key, ref);
-
-    let posInRow = -1;
-    for (let i = 0; i < content.length; i++) {
-        const childNode = createVirtualNodeFromContent(content[i]);
-        if (childNode !== null) {
-            appendChildVirtualNode(newNode, childNode, ++posInRow);
-        }
+    // Functional virtual node
+    if (isFunction(type)) {
+        // JSX children
+        props.children = content;
+        
+        return new VirtualNode(type, props, key, ref);
     }
 
-    return newNode;
+    // Static virtual node
+    {
+        const newNode = new VirtualNode(type, props, key, ref);
+    
+        let posInRow = -1;
+        for (let i = 0; i < content.length; i++) {
+            const childNode = createVirtualNodeFromContent(content[i]);
+            if (childNode !== null) {
+                appendChildVirtualNode(newNode, childNode, ++posInRow);
+            }
+        }
+    
+        return newNode;
+    }
 }
 
 /**
@@ -262,10 +250,13 @@ const PROP_VIRTUAL_NODE = 'hook_vnode';
  * @returns {string}
  */
 function getContainerId(container) {
-    if (!hasOwnProperty(container, PROP_CONTAINER_ID)) {
-        container[PROP_CONTAINER_ID] = createContainerId();
+    if (hasOwnProperty(container, PROP_CONTAINER_ID)) {
+        return container[PROP_CONTAINER_ID];
     }
-    return container[PROP_CONTAINER_ID];
+    
+    return (
+        container[PROP_CONTAINER_ID] = createContainerId()
+    );
 }
 
 /**
@@ -274,10 +265,13 @@ function getContainerId(container) {
  * @returns {string}
  */
 function getFunctionalTypeAlias(type) {
-    if (!hasOwnProperty(type, PROP_TYPE_ALIAS)) {
-        type[PROP_TYPE_ALIAS] = createFunctionalTypeAlias();
+    if (hasOwnProperty(type, PROP_TYPE_ALIAS)) {
+        return type[PROP_TYPE_ALIAS];
     }
-    return type[PROP_TYPE_ALIAS];
+
+    return (
+        type[PROP_TYPE_ALIAS] = createFunctionalTypeAlias()
+    );
 }
 
 /**

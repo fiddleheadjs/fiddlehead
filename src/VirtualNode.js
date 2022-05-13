@@ -31,10 +31,10 @@ export function VirtualNode(type, props, key, ref) {
 // Use special URI characters
 export const NODE_TEXT = '#';
 export const NODE_ARRAY = '[';
-export const NODE_FRAGMENT = '<';
+export const NODE_FRAGMENT = '=';
 
-export const NS_HTML = 'html';
-export const NS_SVG = 'svg';
+export const NS_HTML = 0;
+export const NS_SVG = 1;
 
 export function linkNativeNode(virtualNode, nativeNode) {
     virtualNode.nativeNode_ = nativeNode;
