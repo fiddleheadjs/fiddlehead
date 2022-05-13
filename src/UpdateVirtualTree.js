@@ -1,4 +1,3 @@
-import {pathToString} from './Path';
 import {isFunction} from './Util';
 import {unlinkMemoizedHooks} from './MemoizedHooks';
 import {resolveVirtualTree} from './ResolveVirtualTree';
@@ -94,9 +93,9 @@ function _getVirtualNodeMaps(rootVirtualNode) {
 
 function _walkVirtualNode(virtualNode, outputFunctionalVirtualMap, outputViewableVirtualMap) {
     if (isFunction(virtualNode.type_)) {
-        outputFunctionalVirtualMap.set(pathToString(virtualNode.path_), virtualNode);
+        outputFunctionalVirtualMap.set(virtualNode.path_, virtualNode);
     } else if (virtualNode.type_ !== NODE_ARRAY && virtualNode.type_ !== NODE_FRAGMENT) {
-        outputViewableVirtualMap.set(pathToString(virtualNode.path_), virtualNode);
+        outputViewableVirtualMap.set(virtualNode.path_, virtualNode);
     }
 
     for (let i = 0; i < virtualNode.children_.length; i++) {

@@ -1,5 +1,5 @@
 import {isFunction} from './Util';
-import {escapeVirtualNodeKey} from './Path';
+import {escapeVirtualNodeKey, PATH_SEP} from './Path';
 import {getFunctionalTypeAlias} from './Externals';
 import {findMemoizedHooks, linkMemoizedHooks} from './MemoizedHooks';
 import {StateHook} from './StateHook';
@@ -13,31 +13,22 @@ export function resolveVirtualTree(rootVirtualNode) {
 /**
  *
  * @param {VirtualNode} virtualNode
- * @param {Array<string|number>} parentPath
+ * @param {string} parentPath
  * @private
  */
 function _resolveVirtualNodeRecursive(virtualNode, parentPath) {
-    // Don't change the passed path
-    const currentPath = [...parentPath];
-
-    // If a node has key, replace the index of this node
-    // in the children node list of the parent
-    // by the key
-    if (virtualNode.key_ !== null) {
-        currentPath.push(escapeVirtualNodeKey(virtualNode.key_));
-    } else {
-        currentPath.push(virtualNode.posInRow_);
-    }
-
-    // Add the component type to the current path
-    if (isFunction(virtualNode.type_)) {
-        currentPath.push(getFunctionalTypeAlias(virtualNode.type_));
-    } else {
-        currentPath.push(virtualNode.type_);
-    }
-
     // Set path
-    virtualNode.path_ = currentPath;
+    virtualNode.path_ = (
+        parentPath
+        + PATH_SEP
+        + (virtualNode.key_ !== null
+            ? escapeVirtualNodeKey(virtualNode.key_)
+            : virtualNode.posInRow_)
+        + PATH_SEP
+        + (isFunction(virtualNode.type_)
+            ? getFunctionalTypeAlias(virtualNode.type_)
+            : virtualNode.type_)
+    );
 
     // Restore memoized states
     if (isFunction(virtualNode.type_)) {
@@ -62,6 +53,6 @@ function _resolveVirtualNodeRecursive(virtualNode, parentPath) {
     
     // Recursion
     for (let i = 0; i < virtualNode.children_.length; i++) {
-        _resolveVirtualNodeRecursive(virtualNode.children_[i], currentPath);
+        _resolveVirtualNodeRecursive(virtualNode.children_[i], virtualNode.path_);
     }
 }

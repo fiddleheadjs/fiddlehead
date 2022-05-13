@@ -93,7 +93,7 @@ function VirtualNode(type, props, key, ref) {
 
     this.parent_ = null;
     this.children_ = [];
-    this.path_ = [];
+    this.path_ = '';
     this.posInRow_ = null;
 
     this.data_ = null;
@@ -198,14 +198,7 @@ function createElement(type, attributes, ...content) {
     }
 }
 
-/**
- * 
- * @param {Array<string|number>} path
- * @returns {string}
- */
-function pathToString(path) {
-    return path.join('/');
-}
+const PATH_SEP = '/';
 
 // Note:
 // Use special URI characters as prefixes
@@ -285,30 +278,34 @@ function attachVirtualNode(nativeNode, virtualNode) {
 
 /**
  *
- * @type {Map<string, VirtualNode>}
+ * @type {Map<string, Array>}
  */
 const memoizedHooksMap = new Map();
 
+/**
+ * 
+ * @param {string} path 
+ * @returns {Array|null}
+ */
 function findMemoizedHooks(path) {
-    const pathString = pathToString(path);
-
-    if (memoizedHooksMap.has(pathString)) {
-        return memoizedHooksMap.get(pathString);
-    }
-
-    return null;
+    return memoizedHooksMap.get(path) || null;
 }
 
+/**
+ * 
+ * @param {string} path 
+ * @param {Array} hooks 
+ */
 function linkMemoizedHooks(path, hooks) {
-    const pathString = pathToString(path);
-
-    memoizedHooksMap.set(pathString, hooks);
+    memoizedHooksMap.set(path, hooks);
 }
 
+/**
+ * 
+ * @param {string} path 
+ */
 function unlinkMemoizedHooks(path) {
-    const pathString = pathToString(path);
-
-    memoizedHooksMap.delete(pathString);
+    memoizedHooksMap.delete(path);
 }
 
 function createNativeTextNode(text) {
@@ -835,9 +832,9 @@ function _getVirtualNodeMaps(rootVirtualNode) {
 
 function _walkVirtualNode(virtualNode, outputFunctionalVirtualMap, outputViewableVirtualMap) {
     if (isFunction(virtualNode.type_)) {
-        outputFunctionalVirtualMap.set(pathToString(virtualNode.path_), virtualNode);
+        outputFunctionalVirtualMap.set(virtualNode.path_, virtualNode);
     } else if (virtualNode.type_ !== NODE_ARRAY && virtualNode.type_ !== NODE_FRAGMENT) {
-        outputViewableVirtualMap.set(pathToString(virtualNode.path_), virtualNode);
+        outputViewableVirtualMap.set(virtualNode.path_, virtualNode);
     }
 
     for (let i = 0; i < virtualNode.children_.length; i++) {
@@ -899,31 +896,22 @@ function resolveVirtualTree(rootVirtualNode) {
 /**
  *
  * @param {VirtualNode} virtualNode
- * @param {Array<string|number>} parentPath
+ * @param {string} parentPath
  * @private
  */
 function _resolveVirtualNodeRecursive(virtualNode, parentPath) {
-    // Don't change the passed path
-    const currentPath = [...parentPath];
-
-    // If a node has key, replace the index of this node
-    // in the children node list of the parent
-    // by the key
-    if (virtualNode.key_ !== null) {
-        currentPath.push(escapeVirtualNodeKey(virtualNode.key_));
-    } else {
-        currentPath.push(virtualNode.posInRow_);
-    }
-
-    // Add the component type to the current path
-    if (isFunction(virtualNode.type_)) {
-        currentPath.push(getFunctionalTypeAlias(virtualNode.type_));
-    } else {
-        currentPath.push(virtualNode.type_);
-    }
-
     // Set path
-    virtualNode.path_ = currentPath;
+    virtualNode.path_ = (
+        parentPath
+        + PATH_SEP
+        + (virtualNode.key_ !== null
+            ? escapeVirtualNodeKey(virtualNode.key_)
+            : virtualNode.posInRow_)
+        + PATH_SEP
+        + (isFunction(virtualNode.type_)
+            ? getFunctionalTypeAlias(virtualNode.type_)
+            : virtualNode.type_)
+    );
 
     // Restore memoized states
     if (isFunction(virtualNode.type_)) {
@@ -948,7 +936,7 @@ function _resolveVirtualNodeRecursive(virtualNode, parentPath) {
     
     // Recursion
     for (let i = 0; i < virtualNode.children_.length; i++) {
-        _resolveVirtualNodeRecursive(virtualNode.children_[i], currentPath);
+        _resolveVirtualNodeRecursive(virtualNode.children_[i], virtualNode.path_);
     }
 }
 
@@ -965,7 +953,7 @@ function mount(root, container) {
     const rootVirtualNode = createVirtualNodeFromContent(root);
 
     const containerVirtualNode = new VirtualNode(container.nodeName.toLowerCase(), {}, null, null);
-    containerVirtualNode.path_ = [getContainerId(container)];
+    containerVirtualNode.path_ = getContainerId(container);
     containerVirtualNode.ns_ = container.ownerSVGElement ? NS_SVG : NS_HTML;
     linkNativeNode(containerVirtualNode, container);
     attachVirtualNode(container, containerVirtualNode);

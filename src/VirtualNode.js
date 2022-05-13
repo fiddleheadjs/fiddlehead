@@ -20,7 +20,7 @@ export function VirtualNode(type, props, key, ref) {
 
     this.parent_ = null;
     this.children_ = [];
-    this.path_ = [];
+    this.path_ = '';
     this.posInRow_ = null;
 
     this.data_ = null;

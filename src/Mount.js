@@ -16,7 +16,7 @@ export function mount(root, container) {
     const rootVirtualNode = createVirtualNodeFromContent(root);
 
     const containerVirtualNode = new VirtualNode(container.nodeName.toLowerCase(), {}, null, null);
-    containerVirtualNode.path_ = [getContainerId(container)];
+    containerVirtualNode.path_ = getContainerId(container);
     containerVirtualNode.ns_ = container.ownerSVGElement ? NS_SVG : NS_HTML;
     linkNativeNode(containerVirtualNode, container);
     attachVirtualNode(container, containerVirtualNode);

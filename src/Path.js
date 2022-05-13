@@ -1,11 +1,4 @@
-/**
- * 
- * @param {Array<string|number>} path
- * @returns {string}
- */
-export function pathToString(path) {
-    return path.join('/');
-}
+export const PATH_SEP = '/';
 
 // Note:
 // Use special URI characters as prefixes

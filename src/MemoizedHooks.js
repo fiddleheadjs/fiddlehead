@@ -1,29 +1,31 @@
-import {pathToString} from './Path';
-
 /**
  *
- * @type {Map<string, VirtualNode>}
+ * @type {Map<string, Array>}
  */
 const memoizedHooksMap = new Map();
 
+/**
+ * 
+ * @param {string} path 
+ * @returns {Array|null}
+ */
 export function findMemoizedHooks(path) {
-    const pathString = pathToString(path);
-
-    if (memoizedHooksMap.has(pathString)) {
-        return memoizedHooksMap.get(pathString);
-    }
-
-    return null;
+    return memoizedHooksMap.get(path) || null;
 }
 
+/**
+ * 
+ * @param {string} path 
+ * @param {Array} hooks 
+ */
 export function linkMemoizedHooks(path, hooks) {
-    const pathString = pathToString(path);
-
-    memoizedHooksMap.set(pathString, hooks);
+    memoizedHooksMap.set(path, hooks);
 }
 
+/**
+ * 
+ * @param {string} path 
+ */
 export function unlinkMemoizedHooks(path) {
-    const pathString = pathToString(path);
-
-    memoizedHooksMap.delete(pathString);
+    memoizedHooksMap.delete(path);
 }
