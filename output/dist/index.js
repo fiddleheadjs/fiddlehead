@@ -767,16 +767,16 @@ function _compareSameLengthArrays(a, b) {
  * @param {boolean} initial
  */
 function updateVirtualTree(rootVirtualNode, initial) {
+    // Update virtual tree and create node maps
     const [oldViewableVirtualNodeMap, oldFunctionalVirtualNodeMap]
-        = initial ? [new Map(), new Map()] : _getVirtualNodeMap(rootVirtualNode);
+        = initial ? [new Map(), new Map()] : _getVirtualNodeMaps(rootVirtualNode);
     _updateVirtualNodeRecursive(rootVirtualNode);
-    const [newViewableVirtualNodeMap, newFunctionalVirtualNodeMap] = _getVirtualNodeMap(rootVirtualNode);
+    const [newViewableVirtualNodeMap, newFunctionalVirtualNodeMap] = _getVirtualNodeMaps(rootVirtualNode);
 
+    // Resolve effects and commit view
     _resolveUnmountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap);
-
     hydrateVirtualTree(rootVirtualNode);
     commitView(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
-
     _resolveMountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap);
 }
 
@@ -832,7 +832,7 @@ function _resolveMountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalV
     });
 }
 
-function _getVirtualNodeMap(rootVirtualNode) {
+function _getVirtualNodeMaps(rootVirtualNode) {
     const [outputViewableVirtualMap, outputFunctionalVirtualMap] = [new Map(), new Map()];
     _walkVirtualNode(rootVirtualNode, outputFunctionalVirtualMap, outputViewableVirtualMap);
     
