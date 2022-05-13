@@ -1,26 +1,29 @@
 import {pathToString} from './Path';
-import {hasOwnProperty} from './Util';
 
 /**
  *
- * @type {Object<VirtualNode>}
+ * @type {Map<string, VirtualNode>}
  */
-const memoizedHooksMap = Object.create(null);
+const memoizedHooksMap = new Map();
 
 export function findMemoizedHooks(path) {
     const pathString = pathToString(path);
 
-    if (hasOwnProperty(memoizedHooksMap, pathString)) {
-        return memoizedHooksMap[pathString];
+    if (memoizedHooksMap.has(pathString)) {
+        return memoizedHooksMap.get(pathString);
     }
 
     return null;
 }
 
-export function linkMemoizedHooks(path, functionalVirtualNode) {
-    memoizedHooksMap[pathToString(path)] = functionalVirtualNode;
+export function linkMemoizedHooks(path, hooks) {
+    const pathString = pathToString(path);
+
+    memoizedHooksMap.set(pathString, hooks);
 }
 
 export function unlinkMemoizedHooks(path) {
-    delete memoizedHooksMap[pathToString(path)];
+    const pathString = pathToString(path);
+
+    memoizedHooksMap.delete(pathString);
 }

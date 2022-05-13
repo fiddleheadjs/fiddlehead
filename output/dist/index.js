@@ -212,7 +212,7 @@ function _createStaticVirtualNode(type, attributes, ...content) {
 
 /**
  * 
- * @param {Array<string|number} path 
+ * @param {Array<string|number>} path
  * @returns {string}
  */
 function pathToString(path) {
@@ -291,26 +291,30 @@ function attachVirtualNode(nativeNode, virtualNode) {
 
 /**
  *
- * @type {Object<VirtualNode>}
+ * @type {Map<string, VirtualNode>}
  */
-const memoizedHooksMap = Object.create(null);
+const memoizedHooksMap = new Map();
 
 function findMemoizedHooks(path) {
     const pathString = pathToString(path);
 
-    if (hasOwnProperty(memoizedHooksMap, pathString)) {
-        return memoizedHooksMap[pathString];
+    if (memoizedHooksMap.has(pathString)) {
+        return memoizedHooksMap.get(pathString);
     }
 
     return null;
 }
 
-function linkMemoizedHooks(path, functionalVirtualNode) {
-    memoizedHooksMap[pathToString(path)] = functionalVirtualNode;
+function linkMemoizedHooks(path, hooks) {
+    const pathString = pathToString(path);
+
+    memoizedHooksMap.set(pathString, hooks);
 }
 
 function unlinkMemoizedHooks(path) {
-    delete memoizedHooksMap[pathToString(path)];
+    const pathString = pathToString(path);
+
+    memoizedHooksMap.delete(pathString);
 }
 
 function createNativeTextNode(text) {
@@ -467,82 +471,69 @@ function hydrateVirtualTree(virtualNode) {
     }
 }
 
-function commitView(oldVirtualNodeMap, newVirtualNodeMap) {
-    _removeOldNativeNodes(oldVirtualNodeMap, newVirtualNodeMap);
-    _updateExistingNativeNodes(oldVirtualNodeMap, newVirtualNodeMap);
-    _insertNewNativeNodes(oldVirtualNodeMap, newVirtualNodeMap);
+function commitView(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
+    // for key in oldMap
+    //     if newMap.has(key)
+    //         updateNativeNodes
+    //     else
+    //         removeNativeNodes
+    //
+    // for key in newMap
+    //     if !oldMap.has(key)
+    //         insertNativeNodes
+    //
+
+    _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
+    _insert(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
 }
 
-function _removeOldNativeNodes(oldVirtualNodeMap, newVirtualNodeMap) {
+function _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
     // If the current node is under the last removed node
     // So dont need to remove current node anymore
     // Use lastRemovedKey to track
     let lastRemovedKey = '';
-    for (let key in oldVirtualNodeMap) {
-        if (hasOwnProperty(oldVirtualNodeMap, key) && !hasOwnProperty(newVirtualNodeMap, key)) {
-            if (!key.startsWith(lastRemovedKey + '/')) {
-                const oldVirtualNode = oldVirtualNodeMap[key];
-                if (oldVirtualNode.nativeNode_ !== null) {
-                    _removeNativeNodesOfVirtualNode(oldVirtualNode);
-                    lastRemovedKey = key;
-                }
-            }
-        }
-    }
-}
 
-function _updateExistingNativeNodes(oldVirtualNodeMap, newVirtualNodeMap) {
-    const mergedKeys = Object.keys({
-        ...oldVirtualNodeMap,
-        ...newVirtualNodeMap,
-    });
+    oldViewableVirtualNodeMap.forEach((oldViewableVirtualNode, key) => {
+        if (newViewableVirtualNodeMap.has(key)) {
+            const newViewableVirtualNode = newViewableVirtualNodeMap.get(key);
 
-    for (let i = 0; i < mergedKeys.length; i++) {
-        const key = mergedKeys[i];
+            // Reuse the existing native node
+            linkNativeNode(newViewableVirtualNode, oldViewableVirtualNode.nativeNode_);
 
-        if (hasOwnProperty(oldVirtualNodeMap, key) && hasOwnProperty(newVirtualNodeMap, key)) {
-            const newVirtualNode = newVirtualNodeMap[key];
-            if (newVirtualNode.nativeNode_ !== null) {
-                const oldVirtualNode = oldVirtualNodeMap[key];
-
-                // Reuse the existing native node
-                linkNativeNode(newVirtualNode, oldVirtualNode.nativeNode_);
-
-                if (newVirtualNode.type_ === NODE_TEXT) {
-                    if (newVirtualNode.data_ !== oldVirtualNode.data_) {
-                        updateNativeTextNode(
-                            newVirtualNode.nativeNode_,
-                            newVirtualNode.data_
-                        );
-                    }
-                } else {
-                    updateNativeElementAttributes(
-                        newVirtualNode.nativeNode_,
-                        newVirtualNode.props_,
-                        oldVirtualNode.props_
+            if (newViewableVirtualNode.type_ === NODE_TEXT) {
+                if (newViewableVirtualNode.data_ !== oldViewableVirtualNode.data_) {
+                    updateNativeTextNode(
+                        newViewableVirtualNode.nativeNode_,
+                        newViewableVirtualNode.data_
                     );
                 }
+            } else {
+                updateNativeElementAttributes(
+                    newViewableVirtualNode.nativeNode_,
+                    newViewableVirtualNode.props_,
+                    oldViewableVirtualNode.props_
+                );
+            }
+        } else {
+            if (!key.startsWith(lastRemovedKey + '/')) {
+                _removeNativeNodesOfVirtualNode(oldViewableVirtualNode);
+                lastRemovedKey = key;
             }
         }
-    }
+    });
 }
 
-function _insertNewNativeNodes(oldVirtualNodeMap, newVirtualNodeMap) {
+function _insert(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
     let pendingVirtualNodes = [];
 
-    for (let key in newVirtualNodeMap) {
-        if (hasOwnProperty(newVirtualNodeMap, key)) {
-            if (!hasOwnProperty(oldVirtualNodeMap, key)) {
-                const newVirtualNode = newVirtualNodeMap[key];
-                if (newVirtualNode.nativeNode_ !== null) {
-                    pendingVirtualNodes.push(newVirtualNode);
-                }
-            } else {
-                _insertClosestNativeNodesOfVirtualNodes(pendingVirtualNodes, oldVirtualNodeMap[key]);
-                pendingVirtualNodes.length = 0;
-            }
+    newViewableVirtualNodeMap.forEach((newViewableVirtualNode, key) => {
+        if (!oldViewableVirtualNodeMap.has(key)) {
+            pendingVirtualNodes.push(newViewableVirtualNode);
+        } else {
+            _insertClosestNativeNodesOfVirtualNodes(pendingVirtualNodes, oldViewableVirtualNodeMap.get(key));
+            pendingVirtualNodes.length = 0;
         }
-    }
+    });
 
     if (pendingVirtualNodes.length > 0) {
         _insertClosestNativeNodesOfVirtualNodes(pendingVirtualNodes, null);
@@ -776,14 +767,17 @@ function _compareSameLengthArrays(a, b) {
  * @param {boolean} initial
  */
 function updateVirtualTree(rootVirtualNode, initial) {
-    const oldVirtualNodeMap = initial ? {} : _getVirtualNodeMap(rootVirtualNode);
+    const [oldViewableVirtualNodeMap, oldFunctionalVirtualNodeMap]
+        = initial ? [new Map(), new Map()] : _getVirtualNodeMap(rootVirtualNode);
     _updateVirtualNodeRecursive(rootVirtualNode);
-    const newVirtualNodeMap = _getVirtualNodeMap(rootVirtualNode);
+    const [newViewableVirtualNodeMap, newFunctionalVirtualNodeMap] = _getVirtualNodeMap(rootVirtualNode);
 
-    _resolveUnmountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap);
+    _resolveUnmountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap);
+
     hydrateVirtualTree(rootVirtualNode);
-    commitView(oldVirtualNodeMap, newVirtualNodeMap);
-    _resolveMountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap);
+    commitView(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
+
+    _resolveMountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap);
 }
 
 /**
@@ -819,49 +813,41 @@ function _updateVirtualNodeRecursive(virtualNode) {
     }
 }
 
-function _resolveUnmountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap) {
-    for (let key in oldVirtualNodeMap) {
-        if (hasOwnProperty(oldVirtualNodeMap, key)) {
-            const unmounted = !hasOwnProperty(newVirtualNodeMap, key);
-            const virtualNode = oldVirtualNodeMap[key];
+function _resolveUnmountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap) {
+    oldFunctionalVirtualNodeMap.forEach((virtualNode, key) => {
+        const unmounted = !newFunctionalVirtualNodeMap.has(key);
 
-            if (isFunction(virtualNode.type_)) {
-                destroyEffectsOnFunctionalVirtualNode(virtualNode, unmounted);
+        destroyEffectsOnFunctionalVirtualNode(virtualNode, unmounted);
 
-                if (unmounted) {
-                    unlinkMemoizedHooks(virtualNode.path_);
-                }
-            }
+        if (unmounted) {
+            unlinkMemoizedHooks(virtualNode.path_);
         }
-    }
+    });
 }
 
-function _resolveMountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap) {
-    for (let key in newVirtualNodeMap) {
-        if (hasOwnProperty(newVirtualNodeMap, key)) {
-            const mounted = !hasOwnProperty(oldVirtualNodeMap, key);
-            const virtualNode = newVirtualNodeMap[key];
-
-            if (isFunction(virtualNode.type_)) {
-                mountEffectsOnFunctionalVirtualNode(virtualNode, mounted);
-            }
-        }
-    }
+function _resolveMountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap) {
+    newFunctionalVirtualNodeMap.forEach((virtualNode, key) => {
+        const mounted = !oldFunctionalVirtualNodeMap.has(key);
+        mountEffectsOnFunctionalVirtualNode(virtualNode, mounted);
+    });
 }
 
 function _getVirtualNodeMap(rootVirtualNode) {
-    const outputMap = Object.create(null);
-
-    _walkVirtualNode(rootVirtualNode, outputMap);
-
-    return outputMap;
+    const [outputViewableVirtualMap, outputFunctionalVirtualMap] = [new Map(), new Map()];
+    _walkVirtualNode(rootVirtualNode, outputFunctionalVirtualMap, outputViewableVirtualMap);
+    
+    return [outputViewableVirtualMap, outputFunctionalVirtualMap];
 }
 
-function _walkVirtualNode(virtualNode, outputMap) {
-    outputMap[pathToString(virtualNode.path_)] = virtualNode;
+function _walkVirtualNode(virtualNode, outputFunctionalVirtualMap, outputViewableVirtualMap) {
+    if (isFunction(virtualNode.type_)) {
+        outputFunctionalVirtualMap.set(pathToString(virtualNode.path_), virtualNode);
+    } else if (virtualNode.type_ !== NODE_ARRAY && virtualNode.type_ !== NODE_FRAGMENT) {
+        outputViewableVirtualMap.set(pathToString(virtualNode.path_), virtualNode);
+    }
 
     for (let i = 0; i < virtualNode.children_.length; i++) {
-        _walkVirtualNode(virtualNode.children_[i], outputMap);
+        _walkVirtualNode(virtualNode.children_[i], outputFunctionalVirtualMap, outputViewableVirtualMap);
     }
 }
 
@@ -916,6 +902,12 @@ function resolveVirtualTree(rootVirtualNode) {
     }
 }
 
+/**
+ *
+ * @param {VirtualNode} virtualNode
+ * @param {Array<string|number>} parentPath
+ * @private
+ */
 function _resolveVirtualNodeRecursive(virtualNode, parentPath) {
     // Don't change the passed path
     const currentPath = [...parentPath];

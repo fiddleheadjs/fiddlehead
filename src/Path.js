@@ -1,6 +1,6 @@
 /**
  * 
- * @param {Array<string|number} path 
+ * @param {Array<string|number>} path
  * @returns {string}
  */
 export function pathToString(path) {

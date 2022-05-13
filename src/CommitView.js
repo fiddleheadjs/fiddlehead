@@ -1,83 +1,69 @@
-import {hasOwnProperty} from './Util';
 import {linkNativeNode, NODE_TEXT} from './VirtualNode';
 import {updateNativeElementAttributes, updateNativeTextNode} from './NativeDOM';
 
-export function commitView(oldVirtualNodeMap, newVirtualNodeMap) {
-    _removeOldNativeNodes(oldVirtualNodeMap, newVirtualNodeMap);
-    _updateExistingNativeNodes(oldVirtualNodeMap, newVirtualNodeMap);
-    _insertNewNativeNodes(oldVirtualNodeMap, newVirtualNodeMap);
+export function commitView(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
+    // for key in oldMap
+    //     if newMap.has(key)
+    //         updateNativeNodes
+    //     else
+    //         removeNativeNodes
+    //
+    // for key in newMap
+    //     if !oldMap.has(key)
+    //         insertNativeNodes
+    //
+
+    _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
+    _insert(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
 }
 
-function _removeOldNativeNodes(oldVirtualNodeMap, newVirtualNodeMap) {
+function _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
     // If the current node is under the last removed node
     // So dont need to remove current node anymore
     // Use lastRemovedKey to track
     let lastRemovedKey = '';
-    for (let key in oldVirtualNodeMap) {
-        if (hasOwnProperty(oldVirtualNodeMap, key) && !hasOwnProperty(newVirtualNodeMap, key)) {
-            if (!key.startsWith(lastRemovedKey + '/')) {
-                const oldVirtualNode = oldVirtualNodeMap[key];
-                if (oldVirtualNode.nativeNode_ !== null) {
-                    _removeNativeNodesOfVirtualNode(oldVirtualNode);
-                    lastRemovedKey = key;
-                }
-            }
-        }
-    }
-}
 
-function _updateExistingNativeNodes(oldVirtualNodeMap, newVirtualNodeMap) {
-    const mergedKeys = Object.keys({
-        ...oldVirtualNodeMap,
-        ...newVirtualNodeMap,
-    });
+    oldViewableVirtualNodeMap.forEach((oldViewableVirtualNode, key) => {
+        if (newViewableVirtualNodeMap.has(key)) {
+            const newViewableVirtualNode = newViewableVirtualNodeMap.get(key);
 
-    for (let i = 0; i < mergedKeys.length; i++) {
-        const key = mergedKeys[i];
+            // Reuse the existing native node
+            linkNativeNode(newViewableVirtualNode, oldViewableVirtualNode.nativeNode_);
 
-        if (hasOwnProperty(oldVirtualNodeMap, key) && hasOwnProperty(newVirtualNodeMap, key)) {
-            const newVirtualNode = newVirtualNodeMap[key];
-            if (newVirtualNode.nativeNode_ !== null) {
-                const oldVirtualNode = oldVirtualNodeMap[key];
-
-                // Reuse the existing native node
-                linkNativeNode(newVirtualNode, oldVirtualNode.nativeNode_);
-
-                if (newVirtualNode.type_ === NODE_TEXT) {
-                    if (newVirtualNode.data_ !== oldVirtualNode.data_) {
-                        updateNativeTextNode(
-                            newVirtualNode.nativeNode_,
-                            newVirtualNode.data_
-                        );
-                    }
-                } else {
-                    updateNativeElementAttributes(
-                        newVirtualNode.nativeNode_,
-                        newVirtualNode.props_,
-                        oldVirtualNode.props_
+            if (newViewableVirtualNode.type_ === NODE_TEXT) {
+                if (newViewableVirtualNode.data_ !== oldViewableVirtualNode.data_) {
+                    updateNativeTextNode(
+                        newViewableVirtualNode.nativeNode_,
+                        newViewableVirtualNode.data_
                     );
                 }
+            } else {
+                updateNativeElementAttributes(
+                    newViewableVirtualNode.nativeNode_,
+                    newViewableVirtualNode.props_,
+                    oldViewableVirtualNode.props_
+                );
+            }
+        } else {
+            if (!key.startsWith(lastRemovedKey + '/')) {
+                _removeNativeNodesOfVirtualNode(oldViewableVirtualNode);
+                lastRemovedKey = key;
             }
         }
-    }
+    });
 }
 
-function _insertNewNativeNodes(oldVirtualNodeMap, newVirtualNodeMap) {
+function _insert(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
     let pendingVirtualNodes = [];
 
-    for (let key in newVirtualNodeMap) {
-        if (hasOwnProperty(newVirtualNodeMap, key)) {
-            if (!hasOwnProperty(oldVirtualNodeMap, key)) {
-                const newVirtualNode = newVirtualNodeMap[key];
-                if (newVirtualNode.nativeNode_ !== null) {
-                    pendingVirtualNodes.push(newVirtualNode);
-                }
-            } else {
-                _insertClosestNativeNodesOfVirtualNodes(pendingVirtualNodes, oldVirtualNodeMap[key]);
-                pendingVirtualNodes.length = 0;
-            }
+    newViewableVirtualNodeMap.forEach((newViewableVirtualNode, key) => {
+        if (!oldViewableVirtualNodeMap.has(key)) {
+            pendingVirtualNodes.push(newViewableVirtualNode);
+        } else {
+            _insertClosestNativeNodesOfVirtualNodes(pendingVirtualNodes, oldViewableVirtualNodeMap.get(key));
+            pendingVirtualNodes.length = 0;
         }
-    }
+    });
 
     if (pendingVirtualNodes.length > 0) {
         _insertClosestNativeNodesOfVirtualNodes(pendingVirtualNodes, null);

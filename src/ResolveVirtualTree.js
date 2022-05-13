@@ -10,6 +10,12 @@ export function resolveVirtualTree(rootVirtualNode) {
     }
 }
 
+/**
+ *
+ * @param {VirtualNode} virtualNode
+ * @param {Array<string|number>} parentPath
+ * @private
+ */
 function _resolveVirtualNodeRecursive(virtualNode, parentPath) {
     // Don't change the passed path
     const currentPath = [...parentPath];

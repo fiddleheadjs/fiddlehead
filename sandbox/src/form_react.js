@@ -1,4 +1,5 @@
-import {h, mount, useState, useEffect, useRef} from "../../output/dist/index.min.js";
+import React, {useRef, useState, useEffect} from 'react';
+import ReactDOM from 'react-dom';
 
 
 function Cat({text, setText}) {
@@ -264,5 +265,5 @@ function DemoWrapperWrapper() {
 }
 
 console.time('stack');
-mount(<DemoWrapperWrapper/>, document.getElementById('sandbox-container'));
+ReactDOM.render(<DemoWrapperWrapper/>, document.getElementById('sandbox-container'));
 console.timeEnd('stack');
