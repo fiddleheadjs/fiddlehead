@@ -14,14 +14,14 @@ import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNo
  * @param {boolean} initial
  */
 export function updateVirtualTree(rootVirtualNode, initial) {
-    const oldVirtualNodeMap = initial ? {} : _getVirtualNodeMap(rootVirtualNode);
+    const [oldStaticVirtualNodeMap, oldFunctionalVirtualNodeMap] = initial ? [{}, {}] : _getVirtualNodeMap(rootVirtualNode);
     _updateVirtualNodeRecursive(rootVirtualNode);
-    const newVirtualNodeMap = _getVirtualNodeMap(rootVirtualNode);
+    const [newStaticVirtualNodeMap, newFunctionalVirtualNodeMap] = _getVirtualNodeMap(rootVirtualNode);
 
-    _resolveUnmountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap);
+    _resolveUnmountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap);
     hydrateVirtualTree(rootVirtualNode);
-    commitView(oldVirtualNodeMap, newVirtualNodeMap);
-    _resolveMountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap);
+    commitView(oldStaticVirtualNodeMap, newStaticVirtualNodeMap);
+    _resolveMountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap);
 }
 
 /**
@@ -88,17 +88,20 @@ function _resolveMountedVirtualNodes(oldVirtualNodeMap, newVirtualNodeMap) {
 }
 
 function _getVirtualNodeMap(rootVirtualNode) {
-    const outputMap = Object.create(null);
-
-    _walkVirtualNode(rootVirtualNode, outputMap);
-
-    return outputMap;
+    const [outputStaticVirtualMap, outputFunctionalVirtualMap] = [Object.create(null), Object.create(null)];
+    _walkVirtualNode(rootVirtualNode, outputFunctionalVirtualMap, outputStaticVirtualMap);
+    
+    return [outputStaticVirtualMap, outputFunctionalVirtualMap];
 }
 
-function _walkVirtualNode(virtualNode, outputMap) {
-    outputMap[pathToString(virtualNode.path_)] = virtualNode;
+function _walkVirtualNode(virtualNode, outputFunctionalVirtualMap, outputStaticVirtualMap) {
+    if(isFunction(virtualNode.type_)) {
+        outputFunctionalVirtualMap[pathToString(virtualNode.path_)] = virtualNode;
+    } else {
+        outputStaticVirtualMap[pathToString(virtualNode.path_)] = virtualNode;
+    }
 
     for (let i = 0; i < virtualNode.children_.length; i++) {
-        _walkVirtualNode(virtualNode.children_[i], outputMap);
+        _walkVirtualNode(virtualNode.children_[i], outputFunctionalVirtualMap, outputStaticVirtualMap);
     }
 }
