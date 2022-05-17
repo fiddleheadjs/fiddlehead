@@ -44,3 +44,12 @@ export function getFunctionalTypeAlias(type) {
 export function attachVirtualNode(nativeNode, virtualNode) {
     nativeNode[PROP_VIRTUAL_NODE] = virtualNode;
 }
+
+/**
+ * 
+ * @param {Node} nativeNode 
+ * @returns {VirtualNode|undefined}
+ */
+export function getAttachedVirtualNode(nativeNode) {
+    return nativeNode[PROP_VIRTUAL_NODE];
+}

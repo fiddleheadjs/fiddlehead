@@ -10,27 +10,26 @@ import {appendChildVirtualNode, createVirtualNodeFromContent, NODE_FRAGMENT, Vir
  */
 export function createElement(type, attributes, ...content) {
     const {key = null, ref = null, ...props} = attributes || {};
+
+    const virtualNode = new VirtualNode(type);
     
-    // Functional virtual node
+    virtualNode.props_ = props;
+    virtualNode.key_ = key;
+    virtualNode.ref_ = ref;
+
     if (isFunction(type)) {
         // JSX children
-        props.children = content;
-        
-        return new VirtualNode(type, props, key, ref);
-    }
-
-    // Static virtual node
-    {
-        const newNode = new VirtualNode(type, props, key, ref);
-    
-        let posInRow = -1;
-        for (let i = 0; i < content.length; i++) {
+        virtualNode.props_.children = content;
+    } else {
+        // Append children directly
+        let i = 0, posInRow = -1;
+        for (i = 0; i < content.length; i++) {
             const childNode = createVirtualNodeFromContent(content[i]);
             if (childNode !== null) {
-                appendChildVirtualNode(newNode, childNode, ++posInRow);
+                appendChildVirtualNode(virtualNode, childNode, ++posInRow);
             }
         }
-    
-        return newNode;
     }
+
+    return virtualNode;
 }

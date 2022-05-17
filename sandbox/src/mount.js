@@ -85,6 +85,9 @@ function TimeEnd() {
 }
 
 function DemoFinalWrapper() {
+    useEffect(() => {
+        console.log('effect root');
+    }, []);
     return [<DemoWrapperWrapper/>, <TimeEnd/>];
 }
 
@@ -92,5 +95,8 @@ console.time('stack');
 console.time('mount');
 
 mount(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));
+setTimeout(() => {
+    mount(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));
+}, 3000);
 
 console.timeEnd('stack');

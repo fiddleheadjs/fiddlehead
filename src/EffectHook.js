@@ -112,6 +112,10 @@ export function destroyEffectsOnFunctionalVirtualNode(functionalVirtualNode, isN
  */
 function _mountEffectHook(effectHook) {
     effectHook.destroy_ = effectHook.callback_();
+    
+    if (effectHook.destroy_ === undefined) {
+        effectHook.destroy_ = null;
+    }
 }
 
 /**

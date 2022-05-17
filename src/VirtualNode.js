@@ -10,15 +10,21 @@ import {isArray, isNumber, isString} from './Util';
  * @return {VirtualNode}
  * @constructor
  */
-export function VirtualNode(type, props, key, ref) {
+export function VirtualNode(type) {
     this.type_ = type;
-    this.props_ = props;
-    this.key_ = key;
-    this.ref_ = ref;
+    this.props_ = {};
+    this.key_ = null;
+    this.ref_ = null;
 
     this.hooks_ = [];
 
+    /**
+     * @type {VirtualNode|null}
+     */
     this.parent_ = null;
+    /**
+     * @type {VirtualNode[]}
+     */
     this.children_ = [];
     this.path_ = '';
     this.posInRow_ = null;
@@ -28,6 +34,7 @@ export function VirtualNode(type, props, key, ref) {
     this.ns_ = null;
 }
 
+// Do not support namespace MathML as almost browsers do not support as well
 export const NS_HTML = 0;
 export const NS_SVG = 1;
 
@@ -94,7 +101,7 @@ export function createVirtualNodeFromContent(content) {
     }
 
     if (isString(content) || isNumber(content)) {
-        const node = new VirtualNode(NODE_TEXT, {}, null, null);
+        const node = new VirtualNode(NODE_TEXT);
 
         node.data_ = content;
         
@@ -102,7 +109,7 @@ export function createVirtualNodeFromContent(content) {
     }
 
     if (isArray(content)) {
-        const node = new VirtualNode(NODE_ARRAY, {}, null, null);
+        const node = new VirtualNode(NODE_ARRAY);
 
         let posInRow = -1;
         for (let i = 0; i < content.length; i++) {

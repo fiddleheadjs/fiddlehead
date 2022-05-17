@@ -2,66 +2,85 @@ import {isFunction} from './Util';
 import {unlinkMemoizedHooks} from './MemoizedHooks';
 import {resolveVirtualTree} from './ResolveVirtualTree';
 import {flushCurrentlyProcessing, prepareCurrentlyProcessing} from './CurrentlyProcessing';
-import {
-    appendChildVirtualNode,
-    createVirtualNodeFromContent,
-    NODE_ARRAY,
-    NODE_FRAGMENT,
-    NODE_TEXT
-} from './VirtualNode';
-import {hydrateVirtualTree} from './HydrateVirtualTree';
+import {appendChildVirtualNode, createVirtualNodeFromContent, NODE_ARRAY, NODE_FRAGMENT} from './VirtualNode';
 import {commitView} from './CommitView';
 import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNode} from './EffectHook';
 
 /**
  *
  * @param {VirtualNode} rootVirtualNode
- * @param {boolean} initial
  */
-export function updateVirtualTree(rootVirtualNode, initial) {
+export function updateVirtualTree(rootVirtualNode) {
     // Update virtual tree and create node maps
-    const [oldViewableVirtualNodeMap, oldFunctionalVirtualNodeMap]
-        = initial ? [new Map(), new Map()] : _getVirtualNodeMaps(rootVirtualNode);
-    _updateVirtualNodeRecursive(rootVirtualNode);
-    const [newViewableVirtualNodeMap, newFunctionalVirtualNodeMap] = _getVirtualNodeMaps(rootVirtualNode);
+    const oldTypedVirtualNodeMaps = _getVirtualNodeMaps(rootVirtualNode);
+    const newTypedVirtualNodeMaps = _updateVirtualTreeImpl(rootVirtualNode);
 
     // Resolve effects and commit view
-    _resolveUnmountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap);
-    hydrateVirtualTree(rootVirtualNode);
-    commitView(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
-    _resolveMountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap);
+    _resolveUnmountedVirtualNodes(oldTypedVirtualNodeMaps.functional_, newTypedVirtualNodeMaps.functional_);
+    commitView(oldTypedVirtualNodeMaps.viewable_, newTypedVirtualNodeMaps.viewable_);
+    _resolveMountedVirtualNodes(oldTypedVirtualNodeMaps.functional_, newTypedVirtualNodeMaps.functional_);
 }
 
-/**
- *
- * @param {VirtualNode} virtualNode
- */
-function _updateVirtualNodeRecursive(virtualNode) {
-    if (virtualNode.type_ === NODE_TEXT) {
-        return;
-    }
+function _updateVirtualTreeImpl(rootVirtualNode) {
+    const typedVirtualNodeMaps = _createEmptyTypedVirtualNodeMaps();
+    _updateVirtualNodeRecursive(rootVirtualNode, typedVirtualNodeMaps);
+    return typedVirtualNodeMaps;
+}
 
-    if (!isFunction(virtualNode.type_)) {
-        for (let i = 0; i < virtualNode.children_.length; i++) {
-            _updateVirtualNodeRecursive(virtualNode.children_[i]);
+function _updateVirtualNodeRecursive(virtualNode, typedVirtualNodeMaps) {
+    if (isFunction(virtualNode.type_)) {
+        typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
+    
+        prepareCurrentlyProcessing(virtualNode);
+        const newVirtualNode = createVirtualNodeFromContent(
+            virtualNode.type_(virtualNode.props_)
+        );
+        flushCurrentlyProcessing();
+    
+        if (newVirtualNode !== null) {
+            appendChildVirtualNode(virtualNode, newVirtualNode, 0);
+    
+            // This step aimed to read memoized hooks and restore them
+            // Memoized data affects the underneath tree,
+            // so don't wait until the recursion finished to do this
+            resolveVirtualTree(virtualNode);
         }
-        return;
+    } else {
+        if (virtualNode.type_ !== NODE_ARRAY && virtualNode.type_ !== NODE_FRAGMENT) {
+            typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
+        }
     }
 
-    prepareCurrentlyProcessing(virtualNode);
-    const newVirtualNode = createVirtualNodeFromContent(
-        virtualNode.type_(virtualNode.props_)
-    );
-    flushCurrentlyProcessing();
+    // Recursion
+    for (let i = 0; i < virtualNode.children_.length; i++) {
+        _updateVirtualNodeRecursive(virtualNode.children_[i], typedVirtualNodeMaps);
+    }
+}
 
-    if (newVirtualNode !== null) {
-        appendChildVirtualNode(virtualNode, newVirtualNode, 0);
+function _createEmptyTypedVirtualNodeMaps() {
+    return {
+        functional_: new Map(),
+        viewable_: new Map(),
+    };
+}
 
-        // This step aimed to read memoized hooks and restore them
-        resolveVirtualTree(virtualNode);
+function _getVirtualNodeMaps(rootVirtualNode) {
+    const typedVirtualNodeMaps = _createEmptyTypedVirtualNodeMaps();
+    _walkVirtualNode(rootVirtualNode, typedVirtualNodeMaps);
+    return typedVirtualNodeMaps;
+}
 
-        // Recursion
-        _updateVirtualNodeRecursive(newVirtualNode);
+function _walkVirtualNode(virtualNode, typedVirtualNodeMaps) {
+    if (isFunction(virtualNode.type_)) {
+        typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
+    } else {
+        if (virtualNode.type_ !== NODE_ARRAY && virtualNode.type_ !== NODE_FRAGMENT) {
+            typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
+        }
+    }
+
+    for (let i = 0; i < virtualNode.children_.length; i++) {
+        _walkVirtualNode(virtualNode.children_[i], typedVirtualNodeMaps);
     }
 }
 
@@ -82,23 +101,4 @@ function _resolveMountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalV
         const mounted = !oldFunctionalVirtualNodeMap.has(key);
         mountEffectsOnFunctionalVirtualNode(virtualNode, mounted);
     });
-}
-
-function _getVirtualNodeMaps(rootVirtualNode) {
-    const [outputViewableVirtualMap, outputFunctionalVirtualMap] = [new Map(), new Map()];
-    _walkVirtualNode(rootVirtualNode, outputFunctionalVirtualMap, outputViewableVirtualMap);
-    
-    return [outputViewableVirtualMap, outputFunctionalVirtualMap];
-}
-
-function _walkVirtualNode(virtualNode, outputFunctionalVirtualMap, outputViewableVirtualMap) {
-    if (isFunction(virtualNode.type_)) {
-        outputFunctionalVirtualMap.set(virtualNode.path_, virtualNode);
-    } else if (virtualNode.type_ !== NODE_ARRAY && virtualNode.type_ !== NODE_FRAGMENT) {
-        outputViewableVirtualMap.set(virtualNode.path_, virtualNode);
-    }
-
-    for (let i = 0; i < virtualNode.children_.length; i++) {
-        _walkVirtualNode(virtualNode.children_[i], outputFunctionalVirtualMap, outputViewableVirtualMap);
-    }
 }

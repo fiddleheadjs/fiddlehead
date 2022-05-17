@@ -24,7 +24,7 @@ export function StateHook(context, initialValue) {
         
         if (newValue !== this.value_) {
             this.value_ = newValue;
-            updateVirtualTree(this.context_, false);
+            updateVirtualTree(this.context_);
         }
     };
 }

@@ -2,6 +2,7 @@ import {linkNativeNode, NODE_TEXT} from './VirtualNode';
 import {updateNativeElementAttributes, updateNativeTextNode} from './NativeDOM';
 import {PATH_SEP} from './VirtualNode';
 import {startsWith} from './Util';
+import {hydrateVirtualNode} from './HydrateVirtualNode';
 
 export function commitView(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
     // for key in oldMap
@@ -77,6 +78,8 @@ function _insertClosestNativeNodesOfVirtualNodes(virtualNodes, virtualNodeAfter)
     
     for (let i = 0; i < virtualNodes.length; i++) {
         const virtualNode = virtualNodes[i];
+
+        hydrateVirtualNode(virtualNode);
         
         if (virtualNode.nativeNode_ !== null) {
             const nativeHost = _findNativeHost(virtualNode);

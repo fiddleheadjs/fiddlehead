@@ -86,6 +86,9 @@ function TimeEnd() {
 }
 
 function DemoFinalWrapper() {
+    useEffect(() => {
+        console.log('effect root');
+    }, []);
     return <><DemoWrapperWrapper/> <TimeEnd/></>;
 }
 
@@ -93,5 +96,8 @@ console.time('stack');
 console.time('mount');
 
 ReactDOM.render(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));
+setTimeout(() => {
+    ReactDOM.render([<DemoFinalWrapper/>], document.getElementById('sandbox-container'));
+}, 3000);
 
 console.timeEnd('stack');
