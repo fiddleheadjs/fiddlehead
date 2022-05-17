@@ -1,4 +1,4 @@
-import {hasOwnProperty, isArray, isEmpty, isFunction, isNumber, isPlainObject, isString} from './Util';
+import {hasOwnProperty, isArray, isEmpty, isFunction, isNumber, isObject, isString} from './Util';
 
 export function createNativeTextNode(text) {
     return document.createTextNode(text);
@@ -109,8 +109,8 @@ function _transformNativeElementAttribute(name, value) {
     }
 
     if (name === 'style') {
-        if (!isEmpty(value) && !isPlainObject(value)) {
-            console.error('Style must be a plain object', value);
+        if (!isEmpty(value) && !isObject(value)) {
+            console.error('Style must be an object', value);
             return [name,];
         }
     }

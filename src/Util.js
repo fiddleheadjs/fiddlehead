@@ -18,10 +18,31 @@ export function isArray(value) {
     return value instanceof Array;
 }
 
-export function isPlainObject(value) {
-    return (!!value) && (value.constructor === Object);
+export function isObject(value) {
+    return value !== null && typeof value === 'object';
 }
 
 export function isEmpty(value) {
     return value === undefined || value === null;
+}
+
+/**
+ * 
+ * @param {Array|string} full 
+ * @param {Array|string} sub 
+ * @returns {boolean}
+ */
+export function startsWith(full, sub) {
+    if (full.length < sub.length) {
+        return false;
+    }
+
+    let i = 0;
+    for (i = sub.length - 1; i >= 0; i--) {
+        if (sub[i] !== full[i]) {
+            return false;
+        }
+    }
+
+    return true;
 }

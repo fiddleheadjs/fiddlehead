@@ -1,4 +1,4 @@
-import {createContainerId, createFunctionalTypeAlias} from './Path';
+import {createContainerId, createFunctionalTypeAlias} from './VirtualNode';
 import {hasOwnProperty} from './Util';
 import {VirtualNode} from './VirtualNode';
 

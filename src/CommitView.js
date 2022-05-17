@@ -1,5 +1,7 @@
 import {linkNativeNode, NODE_TEXT} from './VirtualNode';
 import {updateNativeElementAttributes, updateNativeTextNode} from './NativeDOM';
+import {PATH_SEP} from './VirtualNode';
+import {startsWith} from './Util';
 
 export function commitView(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
     // for key in oldMap
@@ -45,7 +47,7 @@ function _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) 
                 );
             }
         } else {
-            if (!key.startsWith(lastRemovedKey + '/')) {
+            if (!startsWith(key, lastRemovedKey + PATH_SEP)) {
                 _removeNativeNodesOfVirtualNode(oldViewableVirtualNode);
                 lastRemovedKey = key;
             }

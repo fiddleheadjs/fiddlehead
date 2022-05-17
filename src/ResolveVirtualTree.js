@@ -1,5 +1,5 @@
 import {isFunction} from './Util';
-import {escapeVirtualNodeKey, PATH_SEP} from './Path';
+import {escapeVirtualNodeKey, PATH_SEP} from './VirtualNode';
 import {getFunctionalTypeAlias} from './Externals';
 import {findMemoizedHooks, linkMemoizedHooks} from './MemoizedHooks';
 import {StateHook} from './StateHook';

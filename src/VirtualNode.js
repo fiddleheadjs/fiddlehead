@@ -28,14 +28,53 @@ export function VirtualNode(type, props, key, ref) {
     this.ns_ = null;
 }
 
+export const NS_HTML = 0;
+export const NS_SVG = 1;
+
+// Note:
 // Use special URI characters
+
 export const NODE_TEXT = '#';
 export const NODE_ARRAY = '[';
 export const NODE_FRAGMENT = '=';
 
-export const NS_HTML = 0;
-export const NS_SVG = 1;
+export const PATH_SEP = '/';
 
+/**
+ * 
+ * @param {*} key 
+ * @returns {string}
+ */
+export function escapeVirtualNodeKey(key) {
+    return '@' + encodeURIComponent(key);
+}
+
+let functionalTypeInc = 0;
+
+/**
+ * 
+ * @param {Function} type 
+ * @returns {string}
+ */
+export function createFunctionalTypeAlias(type) {
+    return /*type.name +*/ '{' + (++functionalTypeInc).toString(36);
+}
+
+let containerIdInc = 0;
+
+/**
+ * 
+ * @returns {string}
+ */
+export function createContainerId() {
+    return '~' + (++containerIdInc).toString(36);
+}
+
+/**
+ * 
+ * @param {VirtualNode} virtualNode 
+ * @param {Node} nativeNode 
+ */
 export function linkNativeNode(virtualNode, nativeNode) {
     virtualNode.nativeNode_ = nativeNode;
 

@@ -22,12 +22,33 @@ function isArray(value) {
     return value instanceof Array;
 }
 
-function isPlainObject(value) {
-    return (!!value) && (value.constructor === Object);
+function isObject(value) {
+    return value !== null && typeof value === 'object';
 }
 
 function isEmpty(value) {
     return value === undefined || value === null;
+}
+
+/**
+ * 
+ * @param {Array|string} full 
+ * @param {Array|string} sub 
+ * @returns {boolean}
+ */
+function startsWith(full, sub) {
+    if (full.length < sub.length) {
+        return false;
+    }
+
+    let i = 0;
+    for (i = sub.length - 1; i >= 0; i--) {
+        if (sub[i] !== full[i]) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 let currentlyProcessingFunctionalVirtualNode = null;
@@ -101,14 +122,53 @@ function VirtualNode(type, props, key, ref) {
     this.ns_ = null;
 }
 
+const NS_HTML = 0;
+const NS_SVG = 1;
+
+// Note:
 // Use special URI characters
+
 const NODE_TEXT = '#';
 const NODE_ARRAY = '[';
 const NODE_FRAGMENT = '=';
 
-const NS_HTML = 0;
-const NS_SVG = 1;
+const PATH_SEP = '/';
 
+/**
+ * 
+ * @param {*} key 
+ * @returns {string}
+ */
+function escapeVirtualNodeKey(key) {
+    return '@' + encodeURIComponent(key);
+}
+
+let functionalTypeInc = 0;
+
+/**
+ * 
+ * @param {Function} type 
+ * @returns {string}
+ */
+function createFunctionalTypeAlias(type) {
+    return /*type.name +*/ '{' + (++functionalTypeInc).toString(36);
+}
+
+let containerIdInc = 0;
+
+/**
+ * 
+ * @returns {string}
+ */
+function createContainerId() {
+    return '~' + (++containerIdInc).toString(36);
+}
+
+/**
+ * 
+ * @param {VirtualNode} virtualNode 
+ * @param {Node} nativeNode 
+ */
 function linkNativeNode(virtualNode, nativeNode) {
     virtualNode.nativeNode_ = nativeNode;
 
@@ -196,41 +256,6 @@ function createElement(type, attributes, ...content) {
     
         return newNode;
     }
-}
-
-const PATH_SEP = '/';
-
-// Note:
-// Use special URI characters as prefixes
-
-/**
- * 
- * @param {*} key 
- * @returns {string}
- */
-function escapeVirtualNodeKey(key) {
-    return '@' + encodeURIComponent(key);
-}
-
-let functionalTypeInc = 0;
-
-/**
- * 
- * @param {Function} type 
- * @returns {string}
- */
-function createFunctionalTypeAlias(type) {
-    return /*type.name +*/ '{' + (++functionalTypeInc).toString(36);
-}
-
-let containerIdInc = 0;
-
-/**
- * 
- * @returns {string}
- */
-function createContainerId() {
-    return '~' + (++containerIdInc).toString(36);
 }
 
 const PROP_TYPE_ALIAS = 'hook_alias';
@@ -417,8 +442,8 @@ function _transformNativeElementAttribute(name, value) {
     }
 
     if (name === 'style') {
-        if (!isEmpty(value) && !isPlainObject(value)) {
-            console.error('Style must be a plain object', value);
+        if (!isEmpty(value) && !isObject(value)) {
+            console.error('Style must be an object', value);
             return [name,];
         }
     }
@@ -506,7 +531,7 @@ function _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) 
                 );
             }
         } else {
-            if (!key.startsWith(lastRemovedKey + '/')) {
+            if (!startsWith(key, lastRemovedKey + PATH_SEP)) {
                 _removeNativeNodesOfVirtualNode(oldViewableVirtualNode);
                 lastRemovedKey = key;
             }
