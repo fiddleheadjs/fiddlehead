@@ -1,3 +1,4 @@
+import {isPortal} from './Util';
 import {unlinkMemoizedHooks} from './MemoizedHooks';
 import {resolveVirtualTree} from './ResolveVirtualTree';
 import {flushCurrentlyProcessing, prepareCurrentlyProcessing} from './CurrentlyProcessing';
