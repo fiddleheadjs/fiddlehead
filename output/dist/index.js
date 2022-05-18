@@ -165,7 +165,7 @@ let functionalTypeInc = 0;
  * @returns {string}
  */
 function createFunctionalTypeAlias(type) {
-    return /*type.name +*/ '{' + (++functionalTypeInc).toString(36);
+    return type.name + '{' + (++functionalTypeInc).toString(36);
 }
 
 let containerIdInc = 0;
@@ -317,7 +317,7 @@ function getFunctionalTypeAlias(type) {
     }
 
     return (
-        type[PROP_TYPE_ALIAS] = createFunctionalTypeAlias()
+        type[PROP_TYPE_ALIAS] = createFunctionalTypeAlias(type)
     );
 }
 
@@ -711,6 +711,10 @@ function _removeNativeNodesOfVirtualNode(virtualNode) {
 }
 
 function _findNativeHost(virtualNode) {
+    if (virtualNode.type_ === RootType) {
+        return virtualNode.nativeNode_;
+    }
+    
     if (virtualNode.parent_ === null) {
         return null;
     }
@@ -996,33 +1000,40 @@ function _resolveMountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalV
     });
 }
 
-/**
- *
- * @param {*} root
- * @param {Element} container
- */
-function mount(root, container) {
+function RootType({children}) {
+    return children;
+}
+
+function createPortal(children, rootNativeNode) {
     /**
      * @type {VirtualNode}
      */
-    let containerVirtualNode;
+     let rootVirtualNode;
 
-    if (!(containerVirtualNode = getAttachedVirtualNode(container))) {
-        while (container.firstChild) {
-            container.removeChild(container.firstChild);
-        }
-        
-        containerVirtualNode = new VirtualNode(props => props.children);
-        containerVirtualNode.path_ = createContainerId();
-        containerVirtualNode.ns_ = ('ownerSVGElement' in container) ? NS_SVG : NS_HTML;
-        linkNativeNode(containerVirtualNode, container);
-        attachVirtualNode(container, containerVirtualNode);
-    }
-    
-    containerVirtualNode.props_.children = root;
-    updateVirtualTree(containerVirtualNode);
+     if (!(rootVirtualNode = getAttachedVirtualNode(rootNativeNode))) {
+         while (rootNativeNode.firstChild) {
+             rootNativeNode.removeChild(rootNativeNode.firstChild);
+         }
+         
+         rootVirtualNode = new VirtualNode(RootType);
+         rootVirtualNode.ns_ = ('ownerSVGElement' in rootNativeNode) ? NS_SVG : NS_HTML;
+         
+         linkNativeNode(rootVirtualNode, rootNativeNode);
+         attachVirtualNode(rootNativeNode, rootVirtualNode);
+     }
+ 
+     rootVirtualNode.props_.children = children;
+ 
+     return rootVirtualNode;
 }
 
+function mount(children, rootNativeNode) {
+    const rootVirtualNode = createPortal(children, rootNativeNode);
+    rootVirtualNode.path_ = createContainerId();
+    updateVirtualTree(rootVirtualNode);
+}
+
+exports.createPortal = createPortal;
 exports.h = createElement;
 exports.mount = mount;
 exports.useEffect = useEffect;

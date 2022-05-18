@@ -2,29 +2,35 @@ import {VirtualNode, linkNativeNode, NS_HTML, NS_SVG, createContainerId} from '.
 import {updateVirtualTree} from './UpdateVirtualTree';
 import {attachVirtualNode, getAttachedVirtualNode} from './Externals';
 
-/**
- *
- * @param {*} root
- * @param {Element} container
- */
-export function mount(root, container) {
+export function RootType({children}) {
+    return children;
+}
+
+export function createPortal(children, rootNativeNode) {
     /**
      * @type {VirtualNode}
      */
-    let containerVirtualNode;
+     let rootVirtualNode;
 
-    if (!(containerVirtualNode = getAttachedVirtualNode(container))) {
-        while (container.firstChild) {
-            container.removeChild(container.firstChild);
-        }
-        
-        containerVirtualNode = new VirtualNode(props => props.children);
-        containerVirtualNode.path_ = createContainerId();
-        containerVirtualNode.ns_ = ('ownerSVGElement' in container) ? NS_SVG : NS_HTML;
-        linkNativeNode(containerVirtualNode, container);
-        attachVirtualNode(container, containerVirtualNode);
-    }
-    
-    containerVirtualNode.props_.children = root;
-    updateVirtualTree(containerVirtualNode);
+     if (!(rootVirtualNode = getAttachedVirtualNode(rootNativeNode))) {
+         while (rootNativeNode.firstChild) {
+             rootNativeNode.removeChild(rootNativeNode.firstChild);
+         }
+         
+         rootVirtualNode = new VirtualNode(RootType);
+         rootVirtualNode.ns_ = ('ownerSVGElement' in rootNativeNode) ? NS_SVG : NS_HTML;
+         
+         linkNativeNode(rootVirtualNode, rootNativeNode);
+         attachVirtualNode(rootNativeNode, rootVirtualNode);
+     }
+ 
+     rootVirtualNode.props_.children = children;
+ 
+     return rootVirtualNode;
+}
+
+export function mount(children, rootNativeNode) {
+    const rootVirtualNode = createPortal(children, rootNativeNode);
+    rootVirtualNode.path_ = createContainerId();
+    updateVirtualTree(rootVirtualNode);
 }

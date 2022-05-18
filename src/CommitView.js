@@ -3,6 +3,7 @@ import {updateNativeElementAttributes, updateNativeTextNode} from './NativeDOM';
 import {PATH_SEP} from './VirtualNode';
 import {startsWith} from './Util';
 import {hydrateViewableVirtualNode} from './HydrateView';
+import {RootType} from './Mount';
 
 // !!!IMPORTANT
 // Only use this module for viewable nodes
@@ -112,6 +113,10 @@ function _removeNativeNodesOfVirtualNode(virtualNode) {
 }
 
 function _findNativeHost(virtualNode) {
+    if (virtualNode.type_ === RootType) {
+        return virtualNode.nativeNode_;
+    }
+    
     if (virtualNode.parent_ === null) {
         return null;
     }
