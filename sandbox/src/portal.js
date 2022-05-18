@@ -4,15 +4,23 @@ mount(<Root/>, document.getElementById('sandbox-container'));
 
 function Root() {
     const [showsModal, setShowsModal] = useState(false);
+    const [count, setCount] = useState(0);
 
     return (
         <div className="Root">
-            <button onClick={() => setShowsModal(t => !t)}>Click me</button>
+            <button
+                onClick={() => {
+                    setCount(t => t + 1);
+                    setShowsModal(t => !t);
+                }}
+            >
+                Click me {count}
+            </button>
             {
                 showsModal &&
                 <DocumentPortal>
                     <Modal>
-                        Xin chao
+                        Xin chao {count}
                     </Modal>
                 </DocumentPortal>
             }

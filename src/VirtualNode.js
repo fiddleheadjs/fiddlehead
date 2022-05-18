@@ -73,7 +73,10 @@ let functionalTypeInc = 0;
  * @returns {string}
  */
 export function createFunctionalTypeAlias(type) {
-    return type.name + '{' + (++functionalTypeInc).toString(36);
+    return (
+        // type.name +
+        '{' + (++functionalTypeInc).toString(36)
+    );
 }
 
 let rootIdInc = 0;

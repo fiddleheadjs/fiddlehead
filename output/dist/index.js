@@ -167,7 +167,10 @@ let functionalTypeInc = 0;
  * @returns {string}
  */
 function createFunctionalTypeAlias(type) {
-    return type.name + '{' + (++functionalTypeInc).toString(36);
+    return (
+        // type.name +
+        '{' + (++functionalTypeInc).toString(36)
+    );
 }
 
 let rootIdInc = 0;
@@ -319,7 +322,7 @@ function getFunctionalTypeAlias(type) {
     }
 
     return (
-        type[PROP_TYPE_ALIAS] = createFunctionalTypeAlias(type)
+        type[PROP_TYPE_ALIAS] = createFunctionalTypeAlias()
     );
 }
 
