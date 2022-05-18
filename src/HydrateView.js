@@ -1,4 +1,4 @@
-import {linkNativeNode, NODE_TEXT, NS_SVG} from './VirtualNode';
+import {linkNativeNode, NODE_TEXT} from './VirtualNode';
 import {createNativeElementWithNS, createNativeTextNode} from './NativeDOM';
 import {attachVirtualNode} from './Externals';
 
@@ -23,16 +23,8 @@ function _createNativeNode(viewableVirtualNode) {
     }
 
     return createNativeElementWithNS(
-        _toNativeNS(viewableVirtualNode.ns_),
+        viewableVirtualNode.ns_,
         viewableVirtualNode.type_,
         viewableVirtualNode.props_
     );
-}
-
-function _toNativeNS(ns) {
-    if (ns === NS_SVG) {
-        return 'http://www.w3.org/2000/svg';
-    }
-
-    return null;
 }

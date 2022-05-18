@@ -153,8 +153,6 @@ const NS_SVG = 1;
 // Note:
 // Use special URI characters
 
-const RootType = props => props.children;
-
 const NODE_TEXT = '#';
 const NODE_ARRAY = '[';
 const NODE_FRAGMENT = '=';
@@ -164,6 +162,8 @@ const CLASS_FUNCTIONAL = 1;
 const CLASS_COLLECTIVE = 2;
 
 const PATH_SEP = '/';
+
+const RootType = props => props.children;
 
 /**
  * 
@@ -368,9 +368,9 @@ function updateNativeTextNode(node, text) {
 }
 
 function createNativeElementWithNS(ns, type, attributes) {
-    const element = (ns !== null
-            ? document.createElementNS(ns, type)
-            : document.createElement(type)
+    const element = (ns === NS_SVG
+        ? document.createElementNS('http://www.w3.org/2000/svg', type)
+        : document.createElement(type)
     );
 
     updateNativeElementAttributes(element, attributes, {});
@@ -498,18 +498,10 @@ function _createNativeNode(viewableVirtualNode) {
     }
 
     return createNativeElementWithNS(
-        _toNativeNS(viewableVirtualNode.ns_),
+        viewableVirtualNode.ns_,
         viewableVirtualNode.type_,
         viewableVirtualNode.props_
     );
-}
-
-function _toNativeNS(ns) {
-    if (ns === NS_SVG) {
-        return 'http://www.w3.org/2000/svg';
-    }
-
-    return null;
 }
 
 // !!!IMPORTANT

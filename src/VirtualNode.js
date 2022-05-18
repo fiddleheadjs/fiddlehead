@@ -44,8 +44,6 @@ export const NS_SVG = 1;
 // Note:
 // Use special URI characters
 
-export const RootType = props => props.children;
-
 export const NODE_TEXT = '#';
 export const NODE_ARRAY = '[';
 export const NODE_FRAGMENT = '=';
@@ -55,6 +53,8 @@ export const CLASS_FUNCTIONAL = 1;
 export const CLASS_COLLECTIVE = 2;
 
 export const PATH_SEP = '/';
+
+export const RootType = props => props.children;
 
 /**
  * 
