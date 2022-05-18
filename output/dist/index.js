@@ -1006,6 +1006,19 @@ function _resolveMountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalV
  * 
  * @param {*} children 
  * @param {Element} rootNativeNode
+ */
+ function mount(children, rootNativeNode) {
+    const rootVirtualNode = createPortal(children, rootNativeNode);
+
+    rootVirtualNode.path_ = createRootId();
+    
+    updateVirtualTree(rootVirtualNode);
+}
+
+/**
+ * 
+ * @param {*} children 
+ * @param {Element} rootNativeNode
  * @returns {VirtualNode}
  */
 function createPortal(children, rootNativeNode) {
@@ -1029,19 +1042,6 @@ function createPortal(children, rootNativeNode) {
      rootVirtualNode.props_.children = children;
  
      return rootVirtualNode;
-}
-
-/**
- * 
- * @param {*} children 
- * @param {Element} rootNativeNode
- */
-function mount(children, rootNativeNode) {
-    const rootVirtualNode = createPortal(children, rootNativeNode);
-
-    rootVirtualNode.path_ = createRootId();
-    
-    updateVirtualTree(rootVirtualNode);
 }
 
 exports.createPortal = createPortal;

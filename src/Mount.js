@@ -6,6 +6,19 @@ import {attachVirtualNode, getAttachedVirtualNode} from './Externals';
  * 
  * @param {*} children 
  * @param {Element} rootNativeNode
+ */
+ export function mount(children, rootNativeNode) {
+    const rootVirtualNode = createPortal(children, rootNativeNode);
+
+    rootVirtualNode.path_ = createRootId();
+    
+    updateVirtualTree(rootVirtualNode);
+}
+
+/**
+ * 
+ * @param {*} children 
+ * @param {Element} rootNativeNode
  * @returns {VirtualNode}
  */
 export function createPortal(children, rootNativeNode) {
@@ -29,17 +42,4 @@ export function createPortal(children, rootNativeNode) {
      rootVirtualNode.props_.children = children;
  
      return rootVirtualNode;
-}
-
-/**
- * 
- * @param {*} children 
- * @param {Element} rootNativeNode
- */
-export function mount(children, rootNativeNode) {
-    const rootVirtualNode = createPortal(children, rootNativeNode);
-
-    rootVirtualNode.path_ = createRootId();
-    
-    updateVirtualTree(rootVirtualNode);
 }
