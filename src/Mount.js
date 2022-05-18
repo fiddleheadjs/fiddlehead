@@ -1,11 +1,13 @@
-import {VirtualNode, linkNativeNode, NS_HTML, NS_SVG, createContainerId} from './VirtualNode';
+import {VirtualNode, linkNativeNode, NS_HTML, NS_SVG, createRootId, RootType} from './VirtualNode';
 import {updateVirtualTree} from './UpdateVirtualTree';
 import {attachVirtualNode, getAttachedVirtualNode} from './Externals';
 
-export function RootType({children}) {
-    return children;
-}
-
+/**
+ * 
+ * @param {*} children 
+ * @param {Element} rootNativeNode
+ * @returns {VirtualNode}
+ */
 export function createPortal(children, rootNativeNode) {
     /**
      * @type {VirtualNode}
@@ -29,8 +31,15 @@ export function createPortal(children, rootNativeNode) {
      return rootVirtualNode;
 }
 
+/**
+ * 
+ * @param {*} children 
+ * @param {Element} rootNativeNode
+ */
 export function mount(children, rootNativeNode) {
     const rootVirtualNode = createPortal(children, rootNativeNode);
-    rootVirtualNode.path_ = createContainerId();
+
+    rootVirtualNode.path_ = createRootId();
+    
     updateVirtualTree(rootVirtualNode);
 }

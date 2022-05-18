@@ -1,9 +1,8 @@
-import {linkNativeNode, NODE_TEXT} from './VirtualNode';
+import {linkNativeNode, NODE_TEXT, RootType} from './VirtualNode';
 import {updateNativeElementAttributes, updateNativeTextNode} from './NativeDOM';
 import {PATH_SEP} from './VirtualNode';
 import {startsWith} from './Util';
 import {hydrateViewableVirtualNode} from './HydrateView';
-import {RootType} from './Mount';
 
 // !!!IMPORTANT
 // Only use this module for viewable nodes

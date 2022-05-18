@@ -44,6 +44,8 @@ export const NS_SVG = 1;
 // Note:
 // Use special URI characters
 
+export const RootType = props => props.children;
+
 export const NODE_TEXT = '#';
 export const NODE_ARRAY = '[';
 export const NODE_FRAGMENT = '=';
@@ -74,14 +76,14 @@ export function createFunctionalTypeAlias(type) {
     return type.name + '{' + (++functionalTypeInc).toString(36);
 }
 
-let containerIdInc = 0;
+let rootIdInc = 0;
 
 /**
  * 
  * @returns {string}
  */
-export function createContainerId() {
-    return '~' + (++containerIdInc).toString(36);
+export function createRootId() {
+    return '~' + (++rootIdInc).toString(36);
 }
 
 /**

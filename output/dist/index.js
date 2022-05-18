@@ -138,6 +138,8 @@ const NS_SVG = 1;
 // Note:
 // Use special URI characters
 
+const RootType = props => props.children;
+
 const NODE_TEXT = '#';
 const NODE_ARRAY = '[';
 const NODE_FRAGMENT = '=';
@@ -168,14 +170,14 @@ function createFunctionalTypeAlias(type) {
     return type.name + '{' + (++functionalTypeInc).toString(36);
 }
 
-let containerIdInc = 0;
+let rootIdInc = 0;
 
 /**
  * 
  * @returns {string}
  */
-function createContainerId() {
-    return '~' + (++containerIdInc).toString(36);
+function createRootId() {
+    return '~' + (++rootIdInc).toString(36);
 }
 
 /**
@@ -1000,10 +1002,12 @@ function _resolveMountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalV
     });
 }
 
-function RootType({children}) {
-    return children;
-}
-
+/**
+ * 
+ * @param {*} children 
+ * @param {Element} rootNativeNode
+ * @returns {VirtualNode}
+ */
 function createPortal(children, rootNativeNode) {
     /**
      * @type {VirtualNode}
@@ -1027,9 +1031,16 @@ function createPortal(children, rootNativeNode) {
      return rootVirtualNode;
 }
 
+/**
+ * 
+ * @param {*} children 
+ * @param {Element} rootNativeNode
+ */
 function mount(children, rootNativeNode) {
     const rootVirtualNode = createPortal(children, rootNativeNode);
-    rootVirtualNode.path_ = createContainerId();
+
+    rootVirtualNode.path_ = createRootId();
+    
     updateVirtualTree(rootVirtualNode);
 }
 

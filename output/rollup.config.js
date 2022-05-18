@@ -14,7 +14,7 @@ export default {
             plugins: [terser({
                 mangle: {
                     properties: {
-                        regex: /_$/,
+                        regex: /^[^_].*_$/,
                     },
                 }
             })],
