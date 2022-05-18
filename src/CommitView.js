@@ -9,22 +9,29 @@ import {hydrateViewableVirtualNode} from './HydrateView';
 // Passing Functional, Array, Fragment nodes will lead to crash
 
 export function commitView(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
-    // for key in oldMap
-    //     if newMap.has(key)
-    //         updateNativeNodes
-    //     else
-    //         removeNativeNodes
-    //
-    // for key in newMap
-    //     if !oldMap.has(key)
-    //         insertNativeNodes
-    //
-
-    _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
-    _insert(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
+    if (oldViewableVirtualNodeMap.size === 0) {
+        _append(newViewableVirtualNodeMap);
+    } else {
+        /*
+         | for key in oldMap
+         |     if newMap.has(key)
+         |         updateNativeNodes
+         |     else
+         |         removeNativeNodes
+         |
+         | for key in newMap
+         |     if !oldMap.has(key)
+         |         insertNativeNodes
+         */
+        _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
+        _insert(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
+    }
 }
 
 function _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
+    // New node to be inserted
+    let newViewableVirtualNode;
+
     // If the current node is under the last removed node
     // So dont need to remove current node anymore
     // Use lastRemovedKey to track
@@ -32,7 +39,7 @@ function _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) 
 
     oldViewableVirtualNodeMap.forEach((oldViewableVirtualNode, key) => {
         if (newViewableVirtualNodeMap.has(key)) {
-            const newViewableVirtualNode = newViewableVirtualNodeMap.get(key);
+            newViewableVirtualNode = newViewableVirtualNodeMap.get(key);
 
             // Reuse the existing native node
             linkNativeNode(newViewableVirtualNode, oldViewableVirtualNode.nativeNode_);
@@ -60,40 +67,55 @@ function _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) 
     });
 }
 
+function _append(newViewableVirtualNodeMap) {
+    let nativeHost;
+
+    newViewableVirtualNodeMap.forEach((virtualNode) => {
+        nativeHost = _findNativeHost(virtualNode);
+
+        if (nativeHost !== null) {
+            hydrateViewableVirtualNode(virtualNode);
+            nativeHost.appendChild(virtualNode.nativeNode_);
+        }
+    });
+}
+
 function _insert(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
-    let pendingVirtualNodes = [];
+    let pendingViewableVirtualNodes = [];
 
     newViewableVirtualNodeMap.forEach((newViewableVirtualNode, key) => {
         if (!oldViewableVirtualNodeMap.has(key)) {
-            pendingVirtualNodes.push(newViewableVirtualNode);
+            pendingViewableVirtualNodes.push(newViewableVirtualNode);
         } else {
-            _insertClosestNativeNodesOfVirtualNodes(pendingVirtualNodes, oldViewableVirtualNodeMap.get(key));
-            pendingVirtualNodes.length = 0;
+            _insertClosestNativeNodesOfVirtualNodes(pendingViewableVirtualNodes, oldViewableVirtualNodeMap.get(key));
+            pendingViewableVirtualNodes.length = 0;
         }
     });
 
-    if (pendingVirtualNodes.length > 0) {
-        _insertClosestNativeNodesOfVirtualNodes(pendingVirtualNodes, null);
+    if (pendingViewableVirtualNodes.length > 0) {
+        _insertClosestNativeNodesOfVirtualNodes(pendingViewableVirtualNodes, null);
     }
 }
 
 function _insertClosestNativeNodesOfVirtualNodes(virtualNodes, virtualNodeAfter) {
-    const nativeNodeAfter = virtualNodeAfter && _findClosestNativeNodes(virtualNodeAfter)[0] || null;
+    const nativeNodeAfter = virtualNodeAfter && _findFirstNativeNode(virtualNodeAfter) || null;
     
-    for (let i = 0; i < virtualNodes.length; i++) {
-        const virtualNode = virtualNodes[i];
+    for (
+        let virtualNode, nativeHost, i = 0, len = virtualNodes.length
+        ; i < len
+        ; ++i
+    ) {
+        virtualNode = virtualNodes[i];
 
-        hydrateViewableVirtualNode(virtualNode);
+        nativeHost = _findNativeHost(virtualNode);
         
-        if (virtualNode.nativeNode_ !== null) {
-            const nativeHost = _findNativeHost(virtualNode);
+        if (nativeHost !== null) {
+            hydrateViewableVirtualNode(virtualNode);
 
-            if (nativeHost !== null) {
-                if (nativeNodeAfter !== null && nativeHost === nativeNodeAfter.parentNode) {
-                    nativeHost.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
-                } else {
-                    nativeHost.appendChild(virtualNode.nativeNode_);
-                }
+            if (nativeNodeAfter !== null && nativeHost === nativeNodeAfter.parentNode) {
+                nativeHost.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
+            } else {
+                nativeHost.appendChild(virtualNode.nativeNode_);
             }
         }
     }
@@ -102,8 +124,12 @@ function _insertClosestNativeNodesOfVirtualNodes(virtualNodes, virtualNodeAfter)
 function _removeNativeNodesOfVirtualNode(virtualNode) {
     const nativeNodes = _findClosestNativeNodes(virtualNode);
 
-    for (let i = 0; i < nativeNodes.length; i++) {
-        const nativeNode = nativeNodes[i];
+    for (
+        let nativeNode, i = 0, len = nativeNodes.length
+        ; i < len
+        ; ++i
+    ) {
+        nativeNode = nativeNodes[i];
 
         if (nativeNode.parentNode !== null) {
             nativeNode.parentNode.removeChild(nativeNode);
@@ -127,17 +153,38 @@ function _findNativeHost(virtualNode) {
     return virtualNode.parent_.nativeNode_;
 }
 
+function _findFirstNativeNode(virtualNode) {
+    if (virtualNode.nativeNode_ !== null) {
+        return virtualNode.nativeNode_;
+    }
+    
+    let firstNativeNode = null;
+    
+    for (
+        let i = 0, len = virtualNode.children_.length
+        ; i < len && firstNativeNode === null
+        ; ++i
+    ) {
+        firstNativeNode = _findFirstNativeNode(virtualNode.children_[i]);
+    }
+
+    return firstNativeNode;
+}
+
 function _findClosestNativeNodes(virtualNode) {
     if (virtualNode.nativeNode_ !== null) {
         return [virtualNode.nativeNode_];
     }
     
-    {
-        const output = [];
-        for (let i = 0; i < virtualNode.children_.length; i++) {
-            const childVirtualNode = virtualNode.children_[i];
-            output.push(..._findClosestNativeNodes(childVirtualNode));
-        }
-        return output;
+    const closestNativeNodes = [];
+
+    for (
+        let i = 0, len = virtualNode.children_.length
+        ; i < len
+        ; ++i
+    ) {
+        closestNativeNodes.push(..._findClosestNativeNodes(virtualNode.children_[i]));
     }
+
+    return closestNativeNodes;
 }

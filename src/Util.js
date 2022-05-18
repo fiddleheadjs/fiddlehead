@@ -37,9 +37,24 @@ export function startsWith(full, sub) {
         return false;
     }
 
-    let i = 0;
-    for (i = sub.length - 1; i >= 0; i--) {
+    for (let i = sub.length - 1; i >= 0; --i) {
         if (sub[i] !== full[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * 
+ * @param {Array} a 
+ * @param {Array} b 
+ * @returns {boolean}
+ */
+export function compareSameLengthArrays(a, b) {
+    for (let i = a.length - 1; i >= 0; --i) {
+        if (a[i] !== b[i]) {
             return false;
         }
     }

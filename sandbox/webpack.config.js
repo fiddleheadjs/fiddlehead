@@ -26,7 +26,7 @@ const configs = [];
 
 ['differ', 'form', 'form_react', 'mount', 'mount_react', 'children', 'svg', 'svg_react', 'treecall', 'treecall_react', 'portal'].map(filename => {
     configs.push({
-        mode: 'development',
+        mode: 'production',
         entry: `./src/${filename}.js`,
         output: {
             path: path.resolve(__dirname, 'public'),

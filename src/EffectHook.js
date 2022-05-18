@@ -1,4 +1,5 @@
 import {resolveCurrentlyProcessing} from './CurrentlyProcessing';
+import {compareSameLengthArrays} from './Util';
 
 /**
  *
@@ -71,8 +72,12 @@ export function useEffect(callback, deps = null) {
  * @param {boolean} isNewNodeMounted
  */
 export function mountEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNewNodeMounted) {
-    for (let i = 0; i < functionalVirtualNode.hooks_.length; i++) {
-        const hook = functionalVirtualNode.hooks_[i];
+    for (
+        let hook, i = 0, len = functionalVirtualNode.hooks_.length
+        ; i < len
+        ; ++i
+    ) {
+        hook = functionalVirtualNode.hooks_[i];
 
         if (!(hook instanceof EffectHook)) {
             continue;
@@ -90,8 +95,12 @@ export function mountEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNew
  * @param {boolean} isNodeUnmounted
  */
 export function destroyEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNodeUnmounted) {
-    for (let i = 0; i < functionalVirtualNode.hooks_.length; i++) {
-        const hook = functionalVirtualNode.hooks_[i];
+    for (
+        let hook, i = 0, len = functionalVirtualNode.hooks_.length
+        ; i < len
+        ; ++i
+    ) {
+        hook = functionalVirtualNode.hooks_[i];
 
         if (!(
             hook instanceof EffectHook &&
@@ -112,7 +121,7 @@ export function destroyEffectsOnFunctionalVirtualNode(functionalVirtualNode, isN
  */
 function _mountEffectHook(effectHook) {
     effectHook.destroy_ = effectHook.callback_();
-    
+
     if (effectHook.destroy_ === undefined) {
         effectHook.destroy_ = null;
     }
@@ -146,7 +155,7 @@ function _getEffectTag(deps, lastDeps = false) {
     }
 
     // Deps
-    if (lastDeps === false || _compareSameLengthArrays(deps, lastDeps)) {
+    if (lastDeps === false || compareSameLengthArrays(deps, lastDeps)) {
         return EFFECT_DEPS;
     }
 
@@ -154,14 +163,4 @@ function _getEffectTag(deps, lastDeps = false) {
     {
         return EFFECT_DEPS_CHANGED;
     }
-}
-
-function _compareSameLengthArrays(a, b) {
-    for (let i = 0; i < a.length; i++) {
-        if (a[i] !== b[i]) {
-            return false;
-        }
-    }
-
-    return true;
 }

@@ -108,33 +108,21 @@ export function linkNativeNode(virtualNode, nativeNode) {
  * @return {null|VirtualNode}
  */
 export function createVirtualNodeFromContent(content) {
+    let node = null;
+
     if (content instanceof VirtualNode) {
-        return content;
+        node = content;
     }
-
-    if (isString(content) || isNumber(content)) {
-        const node = new VirtualNode(NODE_TEXT);
-
+    else if (isString(content) || isNumber(content)) {
+        node = new VirtualNode(NODE_TEXT);
         node.props_.children = content;
-
-        return node;
+    }
+    else if (isArray(content)) {
+        node = new VirtualNode(NODE_ARRAY);
+        appendChildrenFromContent(node, content);
     }
 
-    if (isArray(content)) {
-        const node = new VirtualNode(NODE_ARRAY);
-
-        let posInRow = -1;
-        for (let i = 0; i < content.length; i++) {
-            const child = createVirtualNodeFromContent(content[i]);
-            if (child !== null) {
-                appendChildVirtualNode(node, child, ++posInRow);
-            }
-        }
-
-        return node;
-    }
-
-    return null;
+    return node;
 }
 
 /**
@@ -147,4 +135,22 @@ export function appendChildVirtualNode(parent, child, posInRow) {
     child.parent_ = parent;
     child.posInRow_ = posInRow;
     parent.children_[posInRow] = child;
+}
+
+/**
+ * 
+ * @param {VirtualNode} virtualNode 
+ * @param {Array} content
+ */
+export function appendChildrenFromContent(virtualNode, content) {
+    for (
+        let childNode, posInRow = -1, i = 0, len = content.length
+        ; i < len
+        ; ++i
+    ) {
+        childNode = createVirtualNodeFromContent(content[i]);
+        if (childNode !== null) {
+            appendChildVirtualNode(virtualNode, childNode, ++posInRow);
+        }
+    }
 }

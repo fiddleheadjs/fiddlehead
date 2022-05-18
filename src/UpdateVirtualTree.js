@@ -49,7 +49,11 @@ function _updateVirtualNodeRecursive(virtualNode, typedVirtualNodeMaps) {
     }
 
     // Recursion
-    for (let i = 0; i < virtualNode.children_.length; i++) {
+    for (
+        let i = 0, len = virtualNode.children_.length
+        ; i < len
+        ; ++i
+    ) {
         _updateVirtualNodeRecursive(virtualNode.children_[i], typedVirtualNodeMaps);
     }
 }
@@ -74,7 +78,11 @@ function _walkVirtualNode(virtualNode, typedVirtualNodeMaps) {
         typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
     }
 
-    for (let i = 0; i < virtualNode.children_.length; i++) {
+    for (
+        let i = 0, len = virtualNode.children_.length
+        ; i < len
+        ; ++i
+    ) {
         _walkVirtualNode(virtualNode.children_[i], typedVirtualNodeMaps);
     }
 }

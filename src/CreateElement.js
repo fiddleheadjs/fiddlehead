@@ -1,4 +1,4 @@
-import {appendChildVirtualNode, CLASS_FUNCTIONAL, createVirtualNodeFromContent, VirtualNode} from './VirtualNode';
+import {appendChildrenFromContent, CLASS_FUNCTIONAL, VirtualNode} from './VirtualNode';
 
 /**
  *
@@ -21,13 +21,7 @@ export function createElement(type, attributes, ...content) {
         virtualNode.props_.children = content.length > 1 ? content : content[0];
     } else {
         // Append children directly
-        let i = 0, posInRow = -1;
-        for (i = 0; i < content.length; i++) {
-            const childNode = createVirtualNodeFromContent(content[i]);
-            if (childNode !== null) {
-                appendChildVirtualNode(virtualNode, childNode, ++posInRow);
-            }
-        }
+        appendChildrenFromContent(virtualNode, content);
     }
 
     return virtualNode;

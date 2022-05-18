@@ -1,10 +1,14 @@
-import {CLASS_FUNCTIONAL, escapeVirtualNodeKey, PATH_SEP} from './VirtualNode';
+import {CLASS_FUNCTIONAL, escapeVirtualNodeKey, NS_HTML, NS_SVG, PATH_SEP} from './VirtualNode';
 import {getFunctionalTypeAlias} from './Externals';
 import {findMemoizedHooks, linkMemoizedHooks} from './MemoizedHooks';
 import {StateHook} from './StateHook';
 
 export function resolveVirtualTree(rootVirtualNode) {
-    for (let i = 0; i < rootVirtualNode.children_.length; i++) {
+    for (
+        let i = 0, len = rootVirtualNode.children_.length
+        ; i < len
+        ; ++i
+    ) {
         _resolveVirtualNodeRecursive(rootVirtualNode.children_[i], rootVirtualNode.path_);
     }
 }
@@ -39,8 +43,13 @@ function _resolveVirtualNodeRecursive(virtualNode, parentPath) {
             // and then updating, the hooks will be called (or created if it is the first time)
             virtualNode.hooks_ = memoizedHooks;
 
-            for (let i = 0; i < virtualNode.hooks_.length; i++) {
-                const hook = virtualNode.hooks_[i];
+            for (
+                let hook, i = 0, len = virtualNode.hooks_.length
+                ; i < len
+                ; ++i
+            ) {
+                hook = virtualNode.hooks_[i];
+
                 if (hook instanceof StateHook) {
                     hook.context_ = virtualNode;
                 }
@@ -49,9 +58,32 @@ function _resolveVirtualNodeRecursive(virtualNode, parentPath) {
 
         linkMemoizedHooks(virtualNode.path_, virtualNode.hooks_);
     }
-    
+
+    // Namespace
+    virtualNode.ns_ = _determineNS(virtualNode);
+
     // Recursion
-    for (let i = 0; i < virtualNode.children_.length; i++) {
+    for (
+        let i = 0, len = virtualNode.children_.length
+        ; i < len
+        ; ++i
+    ) {
         _resolveVirtualNodeRecursive(virtualNode.children_[i], virtualNode.path_);
     }
+}
+
+function _determineNS(virtualNode) {
+    // Intrinsic namespace
+    if (virtualNode.type_ === 'svg') {
+        return NS_SVG;
+    }
+ 
+    // As we never hydrate the container node,
+    // the parent_ never empty here
+    if (virtualNode.parent_.ns_ === NS_SVG && virtualNode.parent_.type_ === 'foreignObject') {
+        return NS_HTML;
+    }
+    
+    // By default, pass namespace below.
+    return virtualNode.parent_.ns_;
 }

@@ -1,4 +1,4 @@
-import {h, mount, useState, useEffect, useRef} from "../../output/dist/index.min.js";
+import {h, mount, useState, useEffect, useRef} from "../../index";
 
 
 function Cat({text, setText}) {
