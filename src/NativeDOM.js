@@ -9,14 +9,14 @@ export function updateNativeTextNode(node, text) {
 }
 
 export function createNativeElementWithNS(ns, type, attributes) {
-    const node = (ns !== null
+    const element = (ns !== null
             ? document.createElementNS(ns, type)
             : document.createElement(type)
     );
 
-    updateNativeElementAttributes(node, attributes, {});
+    updateNativeElementAttributes(element, attributes, {});
 
-    return node;
+    return element;
 }
 
 export function updateNativeElementAttributes(element, newAttributes, oldAttributes) {

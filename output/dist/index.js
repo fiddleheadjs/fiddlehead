@@ -448,14 +448,14 @@ function updateNativeTextNode(node, text) {
 }
 
 function createNativeElementWithNS(ns, type, attributes) {
-    const node = (ns !== null
+    const element = (ns !== null
             ? document.createElementNS(ns, type)
             : document.createElement(type)
     );
 
-    updateNativeElementAttributes(node, attributes, {});
+    updateNativeElementAttributes(element, attributes, {});
 
-    return node;
+    return element;
 }
 
 function updateNativeElementAttributes(element, newAttributes, oldAttributes) {
