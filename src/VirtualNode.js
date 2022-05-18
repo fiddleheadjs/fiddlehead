@@ -1,13 +1,9 @@
 import {RefHook} from './RefHook';
-import {isArray, isNumber, isString} from './Util';
+import {isArray, isFunction, isNumber, isString} from './Util';
 
 /**
  *
  * @param {string|function} type
- * @param {{}} props
- * @param {string|null} key
- * @param {RefHook|null} ref
- * @return {VirtualNode}
  * @constructor
  */
 export function VirtualNode(type) {
@@ -22,16 +18,23 @@ export function VirtualNode(type) {
      * @type {VirtualNode|null}
      */
     this.parent_ = null;
+
     /**
      * @type {VirtualNode[]}
      */
     this.children_ = [];
+
     this.path_ = '';
     this.posInRow_ = null;
 
-    this.data_ = null;
     this.nativeNode_ = null;
     this.ns_ = null;
+
+    this.class_ = (type === NODE_FRAGMENT || type === NODE_ARRAY
+        ? CLASS_COLLECTIVE
+        : (isFunction(type)
+            ? CLASS_FUNCTIONAL
+            : CLASS_VIEWABLE));
 }
 
 // Do not support namespace MathML as almost browsers do not support as well
@@ -44,6 +47,10 @@ export const NS_SVG = 1;
 export const NODE_TEXT = '#';
 export const NODE_ARRAY = '[';
 export const NODE_FRAGMENT = '=';
+
+export const CLASS_VIEWABLE = 0;
+export const CLASS_FUNCTIONAL = 1;
+export const CLASS_COLLECTIVE = 2;
 
 export const PATH_SEP = '/';
 
@@ -103,8 +110,8 @@ export function createVirtualNodeFromContent(content) {
     if (isString(content) || isNumber(content)) {
         const node = new VirtualNode(NODE_TEXT);
 
-        node.data_ = content;
-        
+        node.props_.children = content;
+
         return node;
     }
 

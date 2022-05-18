@@ -32,17 +32,17 @@ export function StateHook(context, initialValue) {
 export function useState(initialValue) {
     const [functionalVirtualNode, hookIndex] = resolveCurrentlyProcessing();
 
+    /**
+     * @type {StateHook}
+     */
+    let hook;
+
     if (functionalVirtualNode.hooks_.length > hookIndex) {
-        const hook = functionalVirtualNode.hooks_[hookIndex];
-        return [hook.value_, hook.setValue_];
+        hook = functionalVirtualNode.hooks_[hookIndex];
+    } else {
+        hook = new StateHook(functionalVirtualNode, initialValue);
+        functionalVirtualNode.hooks_.push(hook);
     }
-
-    const hook = new StateHook(
-        functionalVirtualNode,
-        initialValue,
-    );
-
-    functionalVirtualNode.hooks_.push(hook);
 
     return [hook.value_, hook.setValue_];
 }

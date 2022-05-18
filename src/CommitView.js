@@ -2,7 +2,11 @@ import {linkNativeNode, NODE_TEXT} from './VirtualNode';
 import {updateNativeElementAttributes, updateNativeTextNode} from './NativeDOM';
 import {PATH_SEP} from './VirtualNode';
 import {startsWith} from './Util';
-import {hydrateVirtualNode} from './HydrateVirtualNode';
+import {hydrateViewableVirtualNode} from './HydrateView';
+
+// !!!IMPORTANT
+// Only use this module for viewable nodes
+// Passing Functional, Array, Fragment nodes will lead to crash
 
 export function commitView(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
     // for key in oldMap
@@ -34,10 +38,10 @@ function _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) 
             linkNativeNode(newViewableVirtualNode, oldViewableVirtualNode.nativeNode_);
 
             if (newViewableVirtualNode.type_ === NODE_TEXT) {
-                if (newViewableVirtualNode.data_ !== oldViewableVirtualNode.data_) {
+                if (newViewableVirtualNode.props_.children !== oldViewableVirtualNode.props_.children) {
                     updateNativeTextNode(
                         newViewableVirtualNode.nativeNode_,
-                        newViewableVirtualNode.data_
+                        newViewableVirtualNode.props_.children
                     );
                 }
             } else {
@@ -79,7 +83,7 @@ function _insertClosestNativeNodesOfVirtualNodes(virtualNodes, virtualNodeAfter)
     for (let i = 0; i < virtualNodes.length; i++) {
         const virtualNode = virtualNodes[i];
 
-        hydrateVirtualNode(virtualNode);
+        hydrateViewableVirtualNode(virtualNode);
         
         if (virtualNode.nativeNode_ !== null) {
             const nativeHost = _findNativeHost(virtualNode);

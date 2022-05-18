@@ -9,6 +9,7 @@ function Wrapper2({children, myRef}) {
 }
 
 function Wrapper({children, myRef}) {
+    console.log({children});
     return <Wrapper2 myRef={myRef}>{children}</Wrapper2>;
 }
 
@@ -88,7 +89,7 @@ function DemoFinalWrapper() {
     useEffect(() => {
         console.log('effect root');
     }, []);
-    return [<DemoWrapperWrapper/>, <TimeEnd/>];
+    return [<Wrapper>{['haha']}</Wrapper>, <DemoWrapperWrapper/>, <TimeEnd/>];
 }
 
 console.time('stack');

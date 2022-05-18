@@ -1,8 +1,7 @@
-import {isFunction} from './Util';
 import {unlinkMemoizedHooks} from './MemoizedHooks';
 import {resolveVirtualTree} from './ResolveVirtualTree';
 import {flushCurrentlyProcessing, prepareCurrentlyProcessing} from './CurrentlyProcessing';
-import {appendChildVirtualNode, createVirtualNodeFromContent, NODE_ARRAY, NODE_FRAGMENT} from './VirtualNode';
+import {appendChildVirtualNode, CLASS_FUNCTIONAL, CLASS_VIEWABLE, createVirtualNodeFromContent} from './VirtualNode';
 import {commitView} from './CommitView';
 import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNode} from './EffectHook';
 
@@ -28,7 +27,7 @@ function _updateVirtualTreeImpl(rootVirtualNode) {
 }
 
 function _updateVirtualNodeRecursive(virtualNode, typedVirtualNodeMaps) {
-    if (isFunction(virtualNode.type_)) {
+    if (virtualNode.class_ === CLASS_FUNCTIONAL) {
         typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
     
         prepareCurrentlyProcessing(virtualNode);
@@ -45,10 +44,8 @@ function _updateVirtualNodeRecursive(virtualNode, typedVirtualNodeMaps) {
             // so don't wait until the recursion finished to do this
             resolveVirtualTree(virtualNode);
         }
-    } else {
-        if (virtualNode.type_ !== NODE_ARRAY && virtualNode.type_ !== NODE_FRAGMENT) {
-            typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
-        }
+    } else if (virtualNode.class_ === CLASS_VIEWABLE) {
+        typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
     }
 
     // Recursion
@@ -71,12 +68,10 @@ function _getVirtualNodeMaps(rootVirtualNode) {
 }
 
 function _walkVirtualNode(virtualNode, typedVirtualNodeMaps) {
-    if (isFunction(virtualNode.type_)) {
+    if (virtualNode.class_ === CLASS_FUNCTIONAL) {
         typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
-    } else {
-        if (virtualNode.type_ !== NODE_ARRAY && virtualNode.type_ !== NODE_FRAGMENT) {
-            typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
-        }
+    } else if (virtualNode.class_ === CLASS_VIEWABLE) {
+        typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
     }
 
     for (let i = 0; i < virtualNode.children_.length; i++) {

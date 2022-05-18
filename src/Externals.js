@@ -1,25 +1,9 @@
-import {createContainerId, createFunctionalTypeAlias} from './VirtualNode';
+import {createFunctionalTypeAlias} from './VirtualNode';
 import {hasOwnProperty} from './Util';
 import {VirtualNode} from './VirtualNode';
 
 const PROP_TYPE_ALIAS = 'hook_alias';
-const PROP_CONTAINER_ID = 'hook_cid';
 const PROP_VIRTUAL_NODE = 'hook_vnode';
-
-/**
- * 
- * @param {Element} container 
- * @returns {string}
- */
-export function getContainerId(container) {
-    if (hasOwnProperty(container, PROP_CONTAINER_ID)) {
-        return container[PROP_CONTAINER_ID];
-    }
-    
-    return (
-        container[PROP_CONTAINER_ID] = createContainerId()
-    );
-}
 
 /**
  *

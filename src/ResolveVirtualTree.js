@@ -1,5 +1,4 @@
-import {isFunction} from './Util';
-import {escapeVirtualNodeKey, PATH_SEP} from './VirtualNode';
+import {CLASS_FUNCTIONAL, escapeVirtualNodeKey, PATH_SEP} from './VirtualNode';
 import {getFunctionalTypeAlias} from './Externals';
 import {findMemoizedHooks, linkMemoizedHooks} from './MemoizedHooks';
 import {StateHook} from './StateHook';
@@ -25,13 +24,13 @@ function _resolveVirtualNodeRecursive(virtualNode, parentPath) {
             ? escapeVirtualNodeKey(virtualNode.key_)
             : virtualNode.posInRow_)
         + PATH_SEP
-        + (isFunction(virtualNode.type_)
+        + (virtualNode.class_ === CLASS_FUNCTIONAL
             ? getFunctionalTypeAlias(virtualNode.type_)
             : virtualNode.type_)
     );
 
     // Restore memoized states
-    if (isFunction(virtualNode.type_)) {
+    if (virtualNode.class_ === CLASS_FUNCTIONAL) {
         const memoizedHooks = findMemoizedHooks(virtualNode.path_);
         if (memoizedHooks !== null) {
             // Here, new node does not have any hooks

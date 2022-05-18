@@ -1,5 +1,4 @@
-import {isFunction} from './Util';
-import {appendChildVirtualNode, createVirtualNodeFromContent, NODE_FRAGMENT, VirtualNode} from './VirtualNode';
+import {appendChildVirtualNode, CLASS_FUNCTIONAL, createVirtualNodeFromContent, VirtualNode} from './VirtualNode';
 
 /**
  *
@@ -17,9 +16,9 @@ export function createElement(type, attributes, ...content) {
     virtualNode.key_ = key;
     virtualNode.ref_ = ref;
 
-    if (isFunction(type)) {
+    if (virtualNode.class_ === CLASS_FUNCTIONAL) {
         // JSX children
-        virtualNode.props_.children = content;
+        virtualNode.props_.children = content.length > 1 ? content : content[0];
     } else {
         // Append children directly
         let i = 0, posInRow = -1;
