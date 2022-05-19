@@ -74,7 +74,7 @@ let functionalTypeInc = 0;
  */
 export function createFunctionalTypeAlias(type) {
     return (
-        // type.name +
+        (__DEV__ ? type.name : '') +
         '{' + (++functionalTypeInc).toString(36)
     );
 }

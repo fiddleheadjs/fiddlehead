@@ -1,9 +1,9 @@
-import {createFunctionalTypeAlias} from './VirtualNode';
+import {VirtualNode, createFunctionalTypeAlias, createRootId} from './VirtualNode';
 import {hasOwnProperty} from './Util';
-import {VirtualNode} from './VirtualNode';
 
 const PROP_TYPE_ALIAS = 'hook_alias';
 const PROP_VIRTUAL_NODE = 'hook_vnode';
+const PROP_ROOT_ID = 'hook_rootid';
 
 /**
  *
@@ -17,6 +17,21 @@ export function getFunctionalTypeAlias(type) {
 
     return (
         type[PROP_TYPE_ALIAS] = createFunctionalTypeAlias(type)
+    );
+}
+
+/**
+ * 
+ * @param {Element} root 
+ * @returns {string}
+ */
+export function getRootId(root) {
+    if (hasOwnProperty(root, PROP_ROOT_ID)) {
+        return root[PROP_ROOT_ID];
+    }
+
+    return (
+        root[PROP_ROOT_ID] = createRootId()
     );
 }
 

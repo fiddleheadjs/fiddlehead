@@ -12,8 +12,10 @@ export function hydrateViewableVirtualNode(viewableVirtualNode) {
 
     linkNativeNode(viewableVirtualNode, nativeNode);
     
-    if (nativeNode !== null) {
-        attachVirtualNode(nativeNode, viewableVirtualNode);
+    if (__DEV__) {
+        if (nativeNode !== null) {
+            attachVirtualNode(nativeNode, viewableVirtualNode);
+        }
     }
 }
 

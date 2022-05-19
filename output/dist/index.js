@@ -183,7 +183,7 @@ let functionalTypeInc = 0;
  */
 function createFunctionalTypeAlias(type) {
     return (
-        // type.name +
+        (true ? type.name : '') +
         '{' + (++functionalTypeInc).toString(36)
     );
 }
@@ -293,6 +293,7 @@ function createElement(type, attributes, ...content) {
 
 const PROP_TYPE_ALIAS = 'hook_alias';
 const PROP_VIRTUAL_NODE = 'hook_vnode';
+const PROP_ROOT_ID = 'hook_rootid';
 
 /**
  *
@@ -305,7 +306,22 @@ function getFunctionalTypeAlias(type) {
     }
 
     return (
-        type[PROP_TYPE_ALIAS] = createFunctionalTypeAlias()
+        type[PROP_TYPE_ALIAS] = createFunctionalTypeAlias(type)
+    );
+}
+
+/**
+ * 
+ * @param {Element} root 
+ * @returns {string}
+ */
+function getRootId(root) {
+    if (hasOwnProperty(root, PROP_ROOT_ID)) {
+        return root[PROP_ROOT_ID];
+    }
+
+    return (
+        root[PROP_ROOT_ID] = createRootId()
     );
 }
 
@@ -491,8 +507,10 @@ function hydrateViewableVirtualNode(viewableVirtualNode) {
 
     linkNativeNode(viewableVirtualNode, nativeNode);
     
-    if (nativeNode !== null) {
-        attachVirtualNode(nativeNode, viewableVirtualNode);
+    if (true) {
+        if (nativeNode !== null) {
+            attachVirtualNode(nativeNode, viewableVirtualNode);
+        }
     }
 }
 
@@ -1095,6 +1113,9 @@ function _determineNS(virtualNode) {
  */
  function mount(children, rootNativeNode) {
     const rootVirtualNode = createPortal(children, rootNativeNode);
+
+    // Set an unique path to split tree states between roots
+    rootVirtualNode.path_ = getRootId(rootNativeNode);
     
     resolveVirtualTree(rootVirtualNode);
 
@@ -1122,9 +1143,6 @@ function createPortal(children, rootNativeNode) {
 
         // Determine the namespace (we only support SVG and HTML namespaces)
         rootVirtualNode.ns_ = ('ownerSVGElement' in rootNativeNode) ? NS_SVG : NS_HTML;
-
-        // This path can be changed later (such as in case of portals)
-        rootVirtualNode.path_ = createRootId();
         
         linkNativeNode(rootVirtualNode, rootNativeNode);
         attachVirtualNode(rootNativeNode, rootVirtualNode);
