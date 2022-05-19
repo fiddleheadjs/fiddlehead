@@ -105,13 +105,17 @@ function _transformNativeElementAttribute(name, value) {
     }
 
     if (name === 'class') {
-        console.error('className instead of class');
+        if (__DEV__) {
+            console.error('className instead of class');
+        }
         return [name,];
     }
 
     if (name === 'style') {
         if (!isEmpty(value) && !isObject(value)) {
-            console.error('Style must be an object', value);
+            if (__DEV__) {
+                console.error('Style must be an object', value);
+            }
             return [name,];
         }
     }

@@ -463,13 +463,17 @@ function _transformNativeElementAttribute(name, value) {
     }
 
     if (name === 'class') {
-        console.error('className instead of class');
+        if (true) {
+            console.error('className instead of class');
+        }
         return [name,];
     }
 
     if (name === 'style') {
         if (!isEmpty(value) && !isObject(value)) {
-            console.error('Style must be an object', value);
+            if (true) {
+                console.error('Style must be an object', value);
+            }
             return [name,];
         }
     }
@@ -1091,8 +1095,6 @@ function _determineNS(virtualNode) {
  */
  function mount(children, rootNativeNode) {
     const rootVirtualNode = createPortal(children, rootNativeNode);
-
-    rootVirtualNode.path_ = createRootId();
     
     resolveVirtualTree(rootVirtualNode);
 
@@ -1117,7 +1119,12 @@ function createPortal(children, rootNativeNode) {
         }
         
         rootVirtualNode = new VirtualNode(RootType);
+
+        // Determine the namespace (we only support SVG and HTML namespaces)
         rootVirtualNode.ns_ = ('ownerSVGElement' in rootNativeNode) ? NS_SVG : NS_HTML;
+
+        // This path can be changed later (such as in case of portals)
+        rootVirtualNode.path_ = createRootId();
         
         linkNativeNode(rootVirtualNode, rootNativeNode);
         attachVirtualNode(rootNativeNode, rootVirtualNode);
@@ -1127,6 +1134,8 @@ function createPortal(children, rootNativeNode) {
 
     return rootVirtualNode;
 }
+
+global.true = true;
 
 exports.createPortal = createPortal;
 exports.h = createElement;
