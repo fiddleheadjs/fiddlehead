@@ -10,8 +10,6 @@ import {attachVirtualNode, getAttachedVirtualNode} from './Externals';
  */
  export function mount(children, rootNativeNode) {
     const rootVirtualNode = createPortal(children, rootNativeNode);
-
-    rootVirtualNode.path_ = createRootId();
     
     resolveVirtualTree(rootVirtualNode);
 
@@ -36,7 +34,12 @@ export function createPortal(children, rootNativeNode) {
         }
         
         rootVirtualNode = new VirtualNode(RootType);
+
+        // Determine the namespace (we only support SVG and HTML namespaces)
         rootVirtualNode.ns_ = ('ownerSVGElement' in rootNativeNode) ? NS_SVG : NS_HTML;
+
+        // This path can be changed later (such as in case of portals)
+        rootVirtualNode.path_ = createRootId();
         
         linkNativeNode(rootVirtualNode, rootNativeNode);
         attachVirtualNode(rootNativeNode, rootVirtualNode);
