@@ -19,7 +19,7 @@ function YourAd({ count, setCount }) {
             </main>
             <button
                 type="button"
-                onclick={() => {
+                onClick={() => {
                     setCount((count) => count + 1);
                 }}
             >

@@ -1,4 +1,4 @@
-import {appendChildrenFromContent, CLASS_FUNCTIONAL, VirtualNode} from './VirtualNode';
+import {appendChildrenFromContent, TAG_FUNCTIONAL, VirtualNode} from './VirtualNode';
 
 /**
  *
@@ -16,7 +16,7 @@ export function createElement(type, attributes, ...content) {
     virtualNode.key_ = key;
     virtualNode.ref_ = ref;
 
-    if (virtualNode.class_ === CLASS_FUNCTIONAL) {
+    if (virtualNode.tag_ === TAG_FUNCTIONAL) {
         // JSX children
         virtualNode.props_.children = content.length > 1 ? content : content[0];
     } else {

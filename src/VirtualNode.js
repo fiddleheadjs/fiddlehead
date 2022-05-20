@@ -30,11 +30,11 @@ export function VirtualNode(type) {
     this.nativeNode_ = null;
     this.ns_ = null;
 
-    this.class_ = (type === NODE_FRAGMENT || type === NODE_ARRAY
-        ? CLASS_COLLECTIVE
+    this.tag_ = (type === NODE_FRAGMENT || type === NODE_ARRAY
+        ? TAG_COLLECTIVE
         : (isFunction(type)
-            ? CLASS_FUNCTIONAL
-            : CLASS_VIEWABLE));
+            ? TAG_FUNCTIONAL
+            : TAG_VIEWABLE));
 }
 
 // Do not support namespace MathML as almost browsers do not support as well
@@ -48,9 +48,9 @@ export const NODE_TEXT = '#';
 export const NODE_ARRAY = '[';
 export const NODE_FRAGMENT = '=';
 
-export const CLASS_VIEWABLE = 0;
-export const CLASS_FUNCTIONAL = 1;
-export const CLASS_COLLECTIVE = 2;
+export const TAG_VIEWABLE = 0;
+export const TAG_FUNCTIONAL = 1;
+export const TAG_COLLECTIVE = 2;
 
 export const PATH_SEP = '/';
 

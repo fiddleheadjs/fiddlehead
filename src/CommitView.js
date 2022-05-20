@@ -14,16 +14,16 @@ export function commitView(oldViewableVirtualNodeMap, newViewableVirtualNodeMap)
         _append(newViewableVirtualNodeMap);
     } else {
         /*
-         | for key in oldMap
-         |     if newMap.has(key)
-         |         updateNativeNodes
-         |     else
-         |         removeNativeNodes
-         |
-         | for key in newMap
-         |     if !oldMap.has(key)
-         |         insertNativeNodes
-         */
+        | for key in oldMap
+        |     if newMap.has(key)
+        |         updateNativeNodes
+        |     else
+        |         removeNativeNodes
+        |
+        | for key in newMap
+        |     if !oldMap.has(key)
+        |         insertNativeNodes
+        */
         _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
         _insert(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
     }

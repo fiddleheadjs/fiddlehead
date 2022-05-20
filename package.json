@@ -14,7 +14,6 @@
   "author": "CocCoc Ad Platform",
   "license": "MIT",
   "devDependencies": {
-    "eslint": "^8.15.0",
-    "eslint-plugin-react": "^7.30.0"
+    "eslint": "^8.15.0"
   }
 }

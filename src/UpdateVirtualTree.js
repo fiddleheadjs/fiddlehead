@@ -1,7 +1,7 @@
 import {unlinkMemoizedHooks} from './MemoizedHooks';
 import {resolveVirtualTree} from './ResolveVirtualTree';
 import {flushCurrentlyProcessing, prepareCurrentlyProcessing} from './CurrentlyProcessing';
-import {appendChildVirtualNode, CLASS_FUNCTIONAL, CLASS_VIEWABLE, createVirtualNodeFromContent} from './VirtualNode';
+import {appendChildVirtualNode, TAG_FUNCTIONAL, TAG_VIEWABLE, createVirtualNodeFromContent} from './VirtualNode';
 import {commitView} from './CommitView';
 import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNode} from './EffectHook';
 
@@ -27,7 +27,7 @@ function _updateVirtualTreeImpl(rootVirtualNode) {
 }
 
 function _updateVirtualNodeRecursive(virtualNode, typedVirtualNodeMaps) {
-    if (virtualNode.class_ === CLASS_FUNCTIONAL) {
+    if (virtualNode.tag_ === TAG_FUNCTIONAL) {
         typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
     
         prepareCurrentlyProcessing(virtualNode);
@@ -44,7 +44,7 @@ function _updateVirtualNodeRecursive(virtualNode, typedVirtualNodeMaps) {
             // so don't wait until the recursion finished to do this
             resolveVirtualTree(virtualNode);
         }
-    } else if (virtualNode.class_ === CLASS_VIEWABLE) {
+    } else if (virtualNode.tag_ === TAG_VIEWABLE) {
         typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
     }
 
@@ -72,9 +72,9 @@ function _getVirtualNodeMaps(rootVirtualNode) {
 }
 
 function _walkVirtualNode(virtualNode, typedVirtualNodeMaps) {
-    if (virtualNode.class_ === CLASS_FUNCTIONAL) {
+    if (virtualNode.tag_ === TAG_FUNCTIONAL) {
         typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
-    } else if (virtualNode.class_ === CLASS_VIEWABLE) {
+    } else if (virtualNode.tag_ === TAG_VIEWABLE) {
         typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
     }
 

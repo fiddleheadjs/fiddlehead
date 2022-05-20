@@ -10,18 +10,17 @@ import {compareSameLengthArrays} from './Util';
  * @constructor
  */
 export function EffectHook(callback, deps, lastDestroy) {
-    this.tag_ = EFFECT_NONE;
     this.callback_ = callback;
     this.deps_ = deps;
     this.destroy_ = null;
     this.lastDestroy_ = lastDestroy;
+    this.tag_ = null;
 }
 
-const EFFECT_NONE = 0;
-const EFFECT_ALWAYS = 1;
-const EFFECT_LAZY = 2;
-const EFFECT_DEPS = 3;
-const EFFECT_DEPS_CHANGED = 4;
+const TAG_ALWAYS = 0;
+const TAG_LAZY = 1;
+const TAG_DEPS = 2;
+const TAG_DEPS_CHANGED = 3;
 
 export function useEffect(callback, deps = null) {
     const [functionalVirtualNode, hookIndex] = resolveCurrentlyProcessing();
@@ -41,16 +40,16 @@ export function useEffect(callback, deps = null) {
 
         const effectTag = _getEffectTag(deps, currentHook.deps_);
 
-        if (effectTag === EFFECT_LAZY) {
+        if (effectTag === TAG_LAZY) {
             return;
         }
 
-        if (effectTag === EFFECT_DEPS) {
+        if (effectTag === TAG_DEPS) {
             currentHook.tag_ = effectTag;
             return;
         }
 
-        if (effectTag === EFFECT_ALWAYS || effectTag === EFFECT_DEPS_CHANGED) {
+        if (effectTag === TAG_ALWAYS || effectTag === TAG_DEPS_CHANGED) {
             const newHook = new EffectHook(callback, deps, currentHook.destroy_);
             newHook.tag_ = effectTag;
             functionalVirtualNode.hooks_[hookIndex] = newHook;
@@ -83,7 +82,7 @@ export function mountEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNew
             continue;
         }
 
-        if (isNewNodeMounted || hook.tag_ === EFFECT_ALWAYS || hook.tag_ === EFFECT_DEPS_CHANGED) {
+        if (isNewNodeMounted || hook.tag_ === TAG_ALWAYS || hook.tag_ === TAG_DEPS_CHANGED) {
             _mountEffectHook(hook);
         }
     }
@@ -109,7 +108,7 @@ export function destroyEffectsOnFunctionalVirtualNode(functionalVirtualNode, isN
             continue;
         }
 
-        if (isNodeUnmounted || hook.tag_ === EFFECT_ALWAYS || hook.tag_ === EFFECT_DEPS_CHANGED) {
+        if (isNodeUnmounted || hook.tag_ === TAG_ALWAYS || hook.tag_ === TAG_DEPS_CHANGED) {
             _destroyEffectHook(hook, isNodeUnmounted);
         }
     }
@@ -146,21 +145,21 @@ function _destroyEffectHook(hook, isNodeUnmounted = false) {
 function _getEffectTag(deps, lastDeps = false) {
     // Always
     if (deps === null) {
-        return EFFECT_ALWAYS;
+        return TAG_ALWAYS;
     }
 
     // Lazy
     if (deps.length === 0) {
-        return EFFECT_LAZY;
+        return TAG_LAZY;
     }
 
     // Deps
     if (lastDeps === false || compareSameLengthArrays(deps, lastDeps)) {
-        return EFFECT_DEPS;
+        return TAG_DEPS;
     }
 
     // DepsChanged
     {
-        return EFFECT_DEPS_CHANGED;
+        return TAG_DEPS_CHANGED;
     }
 }
