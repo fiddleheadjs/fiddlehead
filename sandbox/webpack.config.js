@@ -26,7 +26,7 @@ function getJsLoaders(isReact = false) {
 
 const configs = [];
 
-const isDev = true;
+const isDev = false;
 
 fs.readdirSync('./src').map(pathname => {
     const extension = path.extname(pathname);  
@@ -51,7 +51,7 @@ fs.readdirSync('./src').map(pathname => {
         },
         plugins: [
             new webpack.DefinePlugin({
-                '__DEV__': isDev
+                __DEV__: isDev
             })
         ],
     });

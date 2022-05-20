@@ -11,7 +11,7 @@ function Tree() {
         <main>
             <TimeStart/>
             {
-                new Array(5000).fill(1).map((_, index) => (
+                new Array(1000).fill(1).map((_, index) => (
                     <Node name={index} key={index}>
                         <Node name={index + ".1"}>
                             <div>
@@ -21,7 +21,7 @@ function Tree() {
                             </div>
                         </Node>
                         <Node name={index + ".2"}></Node>
-                        <Node name={index + "1.3"}></Node>
+                        <Node name={index + ".3"}></Node>
                     </Node>
                 ))
             }
