@@ -15,7 +15,7 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
     }
 
     if (attrName === 'style') {
-        _updateStyleProperties(element.style, newAttrValue, oldAttrValue);
+        _updateStyleProperties(element.style, newAttrValue, oldAttrValue || {});
         return;
     }
 
@@ -24,15 +24,14 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
         return;
     }
 
-    if (/^on[A-Z]/.test(attrName)) {
-        element.addEventListener()
-    }
-
+    // Cases: properties, event listeners
     if (attrName in element) {
         try {
             element[attrName] = newAttrValue;
-        } catch (e) {
-            // The property is not writable
+        } catch (x) {
+            if (__DEV__) {
+                console.error(`Property \`${attrName}\` is not writable`);
+            }
         }
     }
 }
@@ -49,11 +48,14 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
         return;
     }
 
+    // Cases: properties, event listeners
     if (attrName in element) {
         try {
             element[attrName] = null;
-        } catch (e) {
-            // The property is not writable
+        } catch (x) {
+            if (__DEV__) {
+                console.error(`Property \`${attrName}\` is not writable`);
+            }
         }
     }
 }
@@ -84,28 +86,32 @@ function _updateStyleProperties(style, newProperties, oldProperties) {
     );
 }
 
-function _updateStyleProperty(style, propName, newPropValue, oldPropValue) {
+function _updateStyleProperty(style, propName, newPropValue) {
     style[propName] = newPropValue;
 }
 
-function _removeStyleProperty(style, propName, oldPropValue) {
+function _removeStyleProperty(style, propName) {
     style[propName] = '';
 }
 
 function _updateKeyValues(target, newKeyValues, oldKeyValues, updateFn, removeFn) {
-    let key, normKey;
+    let key;
     
     for (key in oldKeyValues) {
-        if (hasOwnProperty(oldKeyValues, key) && !isEmpty(oldKeyValues[key])) {
-            if (!hasOwnProperty(newKeyValues, key)) {
-                removeFn(target, normKey, oldKeyValues[key]);
+        if (_hasOwnNonEmpty(oldKeyValues, key)) {
+            if (!_hasOwnNonEmpty(newKeyValues, key)) {
+                removeFn(target, key, oldKeyValues[key]);
             }
         }
     }
 
     for (key in newKeyValues) {
-        if (hasOwnProperty(newKeyValues, key) && !isEmpty(newKeyValues[key])) {
-            updateFn(target, normKey, newKeyValues[key], oldKeyValues[key]);
+        if (_hasOwnNonEmpty(newKeyValues, key)) {
+            updateFn(target, key, newKeyValues[key], oldKeyValues[key]);
         }
     }
+}
+
+function _hasOwnNonEmpty(target, prop) {
+    return hasOwnProperty(target, prop) && !isEmpty(target[prop]);
 }
