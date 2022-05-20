@@ -1,9 +1,8 @@
 import React, {useRef, useState, useEffect} from 'react';
-import ReactDOM from 'react-dom/client';
+import ReactDOM from 'react-dom';
 
 console.time('mount');
-const root = ReactDOM.createRoot(document.getElementById('sandbox-container'));
-root.render(<Tree/>, document.getElementById('sandbox-container'));
+ReactDOM.render(<Tree/>, document.getElementById('sandbox-container'));
 console.timeEnd('mount');
 
 function Tree() {
@@ -11,7 +10,7 @@ function Tree() {
         <main>
             <TimeStart/>
             {
-                new Array(2000).fill(1).map((_, index) => (
+                new Array(5000).fill(1).map((_, index) => (
                     <Node name={index} key={index}>
                         <Node name={index + ".1"}>
                             <div>
@@ -39,10 +38,10 @@ function Node({name, children}) {
 
 function TimeStart() {
     console.time('render');
-    return null;
+    return 'START';
 }
 
 function TimeEnd() {
     console.timeEnd('render');
-    return null;
+    return 'END';
 }

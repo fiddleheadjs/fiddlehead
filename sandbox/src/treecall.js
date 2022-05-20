@@ -9,7 +9,7 @@ function Tree() {
         <main>
             <TimeStart/>
             {
-                new Array(2000).fill(1).map((_, index) => (
+                new Array(5000).fill(1).map((_, index) => (
                     <Node name={index} key={index}>
                         <Node name={index + ".1"}>
                             <div>
@@ -37,10 +37,10 @@ function Node({name, children}) {
 
 function TimeStart() {
     console.time('render');
-    return null;
+    return 'START';
 }
 
 function TimeEnd() {
     console.timeEnd('render');
-    return null;
+    return 'END';
 }
