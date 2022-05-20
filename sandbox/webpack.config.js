@@ -40,7 +40,7 @@ fs.readdirSync('./src').map(pathname => {
             path: path.resolve(__dirname, 'public/assets'),
             filename: `${filename}.js`
         },
-        target: 'web',
+        target: ['web', 'es5'],
         module: {
             rules: [
                 {
