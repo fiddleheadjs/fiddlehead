@@ -21,7 +21,7 @@ function Tree() {
                             </div>
                         </Node>
                         <Node name={index + ".2"}></Node>
-                        <Node name={index + "1.3"}></Node>
+                        <Node name={index + ".3"}></Node>
                     </Node>
                 ))
             }
