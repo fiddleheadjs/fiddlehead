@@ -339,7 +339,7 @@ function attachVirtualNode(nativeNode, virtualNode) {
  * @param {Node} nativeNode 
  * @returns {VirtualNode|undefined}
  */
-function getAttachedVirtualNode(nativeNode) {
+function extractVirtualNode(nativeNode) {
     return nativeNode[PROP_VIRTUAL_NODE];
 }
 
@@ -565,6 +565,10 @@ function _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) 
 
             // Reuse the existing native node
             linkNativeNode(newViewableVirtualNode, oldViewableVirtualNode.nativeNode_);
+
+            if (true) {
+                attachVirtualNode(oldViewableVirtualNode.nativeNode_, newViewableVirtualNode);
+            }
 
             if (newViewableVirtualNode.type_ === NODE_TEXT) {
                 if (newViewableVirtualNode.props_.children !== oldViewableVirtualNode.props_.children) {
@@ -1109,13 +1113,13 @@ function _determineNS(virtualNode) {
 /**
  * 
  * @param {*} children 
- * @param {Element} rootNativeNode
+ * @param {Element} targetNativeNode
  */
- function mount(children, rootNativeNode) {
-    const rootVirtualNode = createPortal(children, rootNativeNode);
+ function mount(children, targetNativeNode) {
+    const rootVirtualNode = createPortal(children, targetNativeNode);
 
     // Set an unique path to split tree states between roots
-    rootVirtualNode.path_ = getRootId(rootNativeNode);
+    rootVirtualNode.path_ = getRootId(targetNativeNode);
     
     resolveVirtualTree(rootVirtualNode);
 
@@ -1125,35 +1129,35 @@ function _determineNS(virtualNode) {
 /**
  * 
  * @param {*} children 
- * @param {Element} rootNativeNode
+ * @param {Element} targetNativeNode
  * @returns {VirtualNode}
  */
-function createPortal(children, rootNativeNode) {
+function createPortal(children, targetNativeNode) {
     /**
      * @type {VirtualNode}
      */
     let rootVirtualNode;
 
-    if (!(rootVirtualNode = getAttachedVirtualNode(rootNativeNode))) {
-        while (rootNativeNode.firstChild) {
-            rootNativeNode.removeChild(rootNativeNode.firstChild);
+    if (!(rootVirtualNode = extractVirtualNode(targetNativeNode))) {
+        if (true) {
+            if (targetNativeNode.firstChild) {
+                console.error('Target node must be empty');
+            }
         }
         
         rootVirtualNode = new VirtualNode(RootType);
 
         // Determine the namespace (we only support SVG and HTML namespaces)
-        rootVirtualNode.ns_ = ('ownerSVGElement' in rootNativeNode) ? NS_SVG : NS_HTML;
+        rootVirtualNode.ns_ = ('ownerSVGElement' in targetNativeNode) ? NS_SVG : NS_HTML;
         
-        linkNativeNode(rootVirtualNode, rootNativeNode);
-        attachVirtualNode(rootNativeNode, rootVirtualNode);
+        linkNativeNode(rootVirtualNode, targetNativeNode);
+        attachVirtualNode(targetNativeNode, rootVirtualNode);
     }
 
     rootVirtualNode.props_.children = children;
 
     return rootVirtualNode;
 }
-
-global.true = true;
 
 exports.createPortal = createPortal;
 exports.h = createElement;

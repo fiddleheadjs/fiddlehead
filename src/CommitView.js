@@ -3,6 +3,7 @@ import {updateNativeElementAttributes, updateNativeTextNode} from './NativeDOM';
 import {PATH_SEP} from './VirtualNode';
 import {startsWith} from './Util';
 import {hydrateViewableVirtualNode} from './HydrateView';
+import {attachVirtualNode} from './Externals';
 
 // !!!IMPORTANT
 // Only use this module for viewable nodes
@@ -43,6 +44,10 @@ function _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) 
 
             // Reuse the existing native node
             linkNativeNode(newViewableVirtualNode, oldViewableVirtualNode.nativeNode_);
+
+            if (__DEV__) {
+                attachVirtualNode(oldViewableVirtualNode.nativeNode_, newViewableVirtualNode);
+            }
 
             if (newViewableVirtualNode.type_ === NODE_TEXT) {
                 if (newViewableVirtualNode.props_.children !== oldViewableVirtualNode.props_.children) {

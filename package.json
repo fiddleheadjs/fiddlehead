@@ -1,0 +1,20 @@
+{
+  "name": "hook",
+  "version": "1.0.0",
+  "description": "A lightweight library renders HTML by JS",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint ./src --config .eslintrc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@git.itim.vn:ads-frontend/hook.git"
+  },
+  "author": "CocCoc Ad Platform",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.15.0",
+    "eslint-plugin-react": "^7.30.0"
+  }
+}

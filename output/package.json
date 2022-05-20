@@ -1,8 +1,13 @@
 {
   "name": "output",
   "version": "1.0.0",
+  "scripts": {
+    "build": "rollup -c rollup.config.js",
+    "watch": "rollup -c rollup.config.js -w"
+  },
   "devDependencies": {
     "@rollup/plugin-replace": "^4.0.0",
+    "rollup": "^2.74.1",
     "rollup-plugin-terser": "^7.0.2"
   }
 }

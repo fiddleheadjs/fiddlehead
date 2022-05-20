@@ -1,4 +1,4 @@
-import {VirtualNode, createFunctionalTypeAlias, createRootId} from './VirtualNode';
+import {createFunctionalTypeAlias, createRootId} from './VirtualNode';
 import {hasOwnProperty} from './Util';
 
 const PROP_TYPE_ALIAS = 'hook_alias';
@@ -49,6 +49,6 @@ export function attachVirtualNode(nativeNode, virtualNode) {
  * @param {Node} nativeNode 
  * @returns {VirtualNode|undefined}
  */
-export function getAttachedVirtualNode(nativeNode) {
+export function extractVirtualNode(nativeNode) {
     return nativeNode[PROP_VIRTUAL_NODE];
 }

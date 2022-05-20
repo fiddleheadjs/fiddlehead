@@ -1,5 +1,3 @@
-global.__DEV__ = true;
-
 import {createElement} from './src/CreateElement';
 import {mount, createPortal} from './src/Mount';
 import {useState} from './src/StateHook';
