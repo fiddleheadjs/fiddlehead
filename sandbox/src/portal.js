@@ -1,4 +1,4 @@
-import {h, mount, createPortal, useRef, useEffect, useState} from '../../index.js';
+import {h, mount, createPortal, useRef, useEffect, useState} from '../../output';
 
 mount(<Root/>, document.getElementById('sandbox-container'));
 

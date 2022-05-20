@@ -30,11 +30,9 @@ export function VirtualNode(type) {
     this.nativeNode_ = null;
     this.ns_ = null;
 
-    this.tag_ = (type === NODE_FRAGMENT || type === NODE_ARRAY
-        ? TAG_COLLECTIVE
-        : (isFunction(type)
-            ? TAG_FUNCTIONAL
-            : TAG_VIEWABLE));
+    this.tag_ = (type === NODE_FRAGMENT || type === NODE_ARRAY) ? TAG_COLLECTIVE : (
+        isFunction(type) ? TAG_FUNCTIONAL : TAG_VIEWABLE
+    );
 }
 
 // Do not support namespace MathML as almost browsers do not support as well
@@ -54,38 +52,39 @@ export const TAG_COLLECTIVE = 2;
 
 export const PATH_SEP = '/';
 
-export const RootType = props => props.children;
+export const RootType = (props) => {
+    return props.children;
+}
 
 /**
  * 
  * @param {*} key 
  * @returns {string}
  */
-export function escapeVirtualNodeKey(key) {
+export const escapeVirtualNodeKey = (key) => {
     return '@' + encodeURIComponent(key);
 }
 
 let functionalTypeInc = 0;
+let rootIdInc = 0;
 
 /**
  * 
  * @param {Function} type 
  * @returns {string}
  */
-export function createFunctionalTypeAlias(type) {
+export const createFunctionalTypeAlias = (type) => {
     return (
         (__DEV__ ? type.name : '') +
         '{' + (++functionalTypeInc).toString(36)
     );
 }
 
-let rootIdInc = 0;
-
 /**
  * 
  * @returns {string}
  */
-export function createRootId() {
+export const createRootId = () => {
     return '~' + (++rootIdInc).toString(36);
 }
 
@@ -94,7 +93,7 @@ export function createRootId() {
  * @param {VirtualNode} virtualNode 
  * @param {Node} nativeNode 
  */
-export function linkNativeNode(virtualNode, nativeNode) {
+export const linkNativeNode = (virtualNode, nativeNode) => {
     virtualNode.nativeNode_ = nativeNode;
 
     if (virtualNode.ref_ instanceof RefHook) {
@@ -107,7 +106,7 @@ export function linkNativeNode(virtualNode, nativeNode) {
  * @param {*} content
  * @return {null|VirtualNode}
  */
-export function createVirtualNodeFromContent(content) {
+export const createVirtualNodeFromContent = (content) => {
     let node = null;
 
     if (content instanceof VirtualNode) {
@@ -131,7 +130,7 @@ export function createVirtualNodeFromContent(content) {
  * @param {VirtualNode} child
  * @param {number} posInRow
  */
-export function appendChildVirtualNode(parent, child, posInRow) {
+export const appendChildVirtualNode = (parent, child, posInRow) => {
     child.parent_ = parent;
     child.posInRow_ = posInRow;
     parent.children_[posInRow] = child;
@@ -142,7 +141,7 @@ export function appendChildVirtualNode(parent, child, posInRow) {
  * @param {VirtualNode} virtualNode 
  * @param {Array} content
  */
-export function appendChildrenFromContent(virtualNode, content) {
+export const appendChildrenFromContent = (virtualNode, content) => {
     for (
         let childNode, posInRow = -1, i = 0, len = content.length
         ; i < len

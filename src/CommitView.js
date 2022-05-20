@@ -9,7 +9,7 @@ import {attachVirtualNode} from './Externals';
 // Only use this module for viewable nodes
 // Passing Functional, Array, Fragment nodes will lead to crash
 
-export function commitView(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
+export const commitView = (oldViewableVirtualNodeMap, newViewableVirtualNodeMap) => {
     if (oldViewableVirtualNodeMap.size === 0) {
         _append(newViewableVirtualNodeMap);
     } else {
@@ -29,7 +29,7 @@ export function commitView(oldViewableVirtualNodeMap, newViewableVirtualNodeMap)
     }
 }
 
-function _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
+const _removeAndUpdate = (oldViewableVirtualNodeMap, newViewableVirtualNodeMap) => {
     // New node to be inserted
     let newViewableVirtualNode;
 
@@ -72,7 +72,7 @@ function _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) 
     });
 }
 
-function _append(newViewableVirtualNodeMap) {
+const _append = (newViewableVirtualNodeMap) => {
     let nativeHost;
 
     newViewableVirtualNodeMap.forEach((virtualNode) => {
@@ -85,7 +85,7 @@ function _append(newViewableVirtualNodeMap) {
     });
 }
 
-function _insert(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
+const _insert = (oldViewableVirtualNodeMap, newViewableVirtualNodeMap) => {
     let pendingViewableVirtualNodes = [];
 
     newViewableVirtualNodeMap.forEach((newViewableVirtualNode, key) => {
@@ -102,7 +102,7 @@ function _insert(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
     }
 }
 
-function _insertClosestNativeNodesOfVirtualNodes(virtualNodes, virtualNodeAfter) {
+const _insertClosestNativeNodesOfVirtualNodes = (virtualNodes, virtualNodeAfter) => {
     const nativeNodeAfter = virtualNodeAfter && _findFirstNativeNode(virtualNodeAfter) || null;
     
     for (
@@ -126,7 +126,7 @@ function _insertClosestNativeNodesOfVirtualNodes(virtualNodes, virtualNodeAfter)
     }
 }
 
-function _removeNativeNodesOfVirtualNode(virtualNode) {
+const _removeNativeNodesOfVirtualNode = (virtualNode) => {
     const nativeNodes = _findClosestNativeNodes(virtualNode);
 
     for (
@@ -142,7 +142,7 @@ function _removeNativeNodesOfVirtualNode(virtualNode) {
     }
 }
 
-function _findNativeHost(virtualNode) {
+const _findNativeHost = (virtualNode) => {
     if (virtualNode.type_ === RootType) {
         return virtualNode.nativeNode_;
     }
@@ -158,7 +158,7 @@ function _findNativeHost(virtualNode) {
     return virtualNode.parent_.nativeNode_;
 }
 
-function _findFirstNativeNode(virtualNode) {
+const _findFirstNativeNode = (virtualNode) => {
     if (virtualNode.nativeNode_ !== null) {
         return virtualNode.nativeNode_;
     }
@@ -176,7 +176,7 @@ function _findFirstNativeNode(virtualNode) {
     return firstNativeNode;
 }
 
-function _findClosestNativeNodes(virtualNode) {
+const _findClosestNativeNodes = (virtualNode) => {
     if (virtualNode.nativeNode_ !== null) {
         return [virtualNode.nativeNode_];
     }

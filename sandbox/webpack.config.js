@@ -26,7 +26,7 @@ function getJsLoaders(isReact = false) {
 
 const configs = [];
 
-const isDev = true;
+const isDev = false;
 
 fs.readdirSync('./src').map(pathname => {
     const extension = path.extname(pathname);  

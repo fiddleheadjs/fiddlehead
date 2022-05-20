@@ -8,7 +8,7 @@ import {attachVirtualNode, extractVirtualNode, getRootId} from './Externals';
  * @param {*} children 
  * @param {Element} targetNativeNode
  */
- export function mount(children, targetNativeNode) {
+ export const mount = (children, targetNativeNode) => {
     const rootVirtualNode = createPortal(children, targetNativeNode);
 
     // Set an unique path to split tree states between roots
@@ -25,7 +25,7 @@ import {attachVirtualNode, extractVirtualNode, getRootId} from './Externals';
  * @param {Element} targetNativeNode
  * @returns {VirtualNode}
  */
-export function createPortal(children, targetNativeNode) {
+export const createPortal = (children, targetNativeNode) => {
     /**
      * @type {VirtualNode}
      */

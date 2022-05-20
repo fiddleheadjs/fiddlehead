@@ -3,7 +3,7 @@ import {getFunctionalTypeAlias} from './Externals';
 import {findMemoizedHooks, linkMemoizedHooks} from './MemoizedHooks';
 import {StateHook} from './StateHook';
 
-export function resolveVirtualTree(rootVirtualNode) {
+export const resolveVirtualTree = (rootVirtualNode) => {
     for (
         let i = 0, len = rootVirtualNode.children_.length
         ; i < len
@@ -19,7 +19,7 @@ export function resolveVirtualTree(rootVirtualNode) {
  * @param {string} parentPath
  * @private
  */
-function _resolveVirtualNodeRecursive(virtualNode, parentPath) {
+const _resolveVirtualNodeRecursive = (virtualNode, parentPath) => {
     // Set path
     virtualNode.path_ = (
         parentPath
@@ -72,7 +72,7 @@ function _resolveVirtualNodeRecursive(virtualNode, parentPath) {
     }
 }
 
-function _determineNS(virtualNode) {
+const _determineNS = (virtualNode) => {
     // Intrinsic namespace
     if (virtualNode.type_ === 'svg') {
         return NS_SVG;

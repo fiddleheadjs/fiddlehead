@@ -1,28 +1,28 @@
-export function hasOwnProperty(obj, propName) {
+export const hasOwnProperty = (obj, propName) => {
     return Object.prototype.hasOwnProperty.call(obj, propName);
 }
 
-export function isString(value) {
+export const isString = (value) => {
     return typeof value === 'string' || value instanceof String;
 }
 
-export function isNumber(value) {
+export const isNumber = (value) => {
     return typeof value === 'number' || value instanceof Number;
 }
 
-export function isFunction(value) {
+export const isFunction = (value) => {
     return value instanceof Function;
 }
 
-export function isArray(value) {
+export const isArray = (value) => {
     return value instanceof Array;
 }
 
-export function isObject(value) {
+export const isObject = (value) => {
     return value !== null && typeof value === 'object';
 }
 
-export function isEmpty(value) {
+export const isEmpty = (value) => {
     return value === undefined || value === null;
 }
 
@@ -32,7 +32,7 @@ export function isEmpty(value) {
  * @param {Array|string} sub 
  * @returns {boolean}
  */
-export function startsWith(full, sub) {
+export const startsWith = (full, sub) => {
     if (full.length < sub.length) {
         return false;
     }
@@ -52,7 +52,7 @@ export function startsWith(full, sub) {
  * @param {Array} b 
  * @returns {boolean}
  */
-export function compareSameLengthArrays(a, b) {
+export const compareSameLengthArrays = (a, b) => {
     for (let i = a.length - 1; i >= 0; --i) {
         if (a[i] !== b[i]) {
             return false;

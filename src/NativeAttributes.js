@@ -1,13 +1,13 @@
 import {hasOwnProperty, isEmpty, isNumber, isString} from './Util';
 
-export function updateNativeElementAttributes(element, newAttributes, oldAttributes) {
+export const updateNativeElementAttributes = (element, newAttributes, oldAttributes) => {
     _updateKeyValues(
         element, newAttributes, oldAttributes,
         _updateElementAttribute, _removeElementAttribute
     );
 }
 
-function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) {
+const _updateElementAttribute = (element, attrName, newAttrValue, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(attrName);
 
     if (attrName === '') {
@@ -36,7 +36,7 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
     }
 }
 
-function _removeElementAttribute(element, attrName, oldAttrValue) {
+const _removeElementAttribute = (element, attrName, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(attrName);
 
     if (attrName === '') {
@@ -60,7 +60,7 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
     }
 }
 
-function _normalizeElementAttributeName(attrName) {
+const _normalizeElementAttributeName = (attrName) => {
     if (attrName === 'class') {
         if (__DEV__) {
             console.error('Use `className` instead of `class`');
@@ -79,22 +79,22 @@ function _normalizeElementAttributeName(attrName) {
     return attrName;
 }
 
-function _updateStyleProperties(style, newProperties, oldProperties) {
+const _updateStyleProperties = (style, newProperties, oldProperties) => {
     _updateKeyValues(
         style, newProperties, oldProperties,
         _updateStyleProperty, _removeStyleProperty
     );
 }
 
-function _updateStyleProperty(style, propName, newPropValue) {
+const _updateStyleProperty = (style, propName, newPropValue) => {
     style[propName] = newPropValue;
 }
 
-function _removeStyleProperty(style, propName) {
+const _removeStyleProperty = (style, propName) => {
     style[propName] = '';
 }
 
-function _updateKeyValues(target, newKeyValues, oldKeyValues, updateFn, removeFn) {
+const _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn) => {
     let key;
     
     for (key in oldKeyValues) {
@@ -112,6 +112,6 @@ function _updateKeyValues(target, newKeyValues, oldKeyValues, updateFn, removeFn
     }
 }
 
-function _hasOwnNonEmpty(target, prop) {
+const _hasOwnNonEmpty = (target, prop) => {
     return hasOwnProperty(target, prop) && !isEmpty(target[prop]);
 }

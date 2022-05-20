@@ -1,4 +1,4 @@
-import {h, mount, useState, useEffect} from '../../output/dist/index.min.js'; 
+import {h, mount, useState, useEffect} from '../../output'; 
 
 console.time('mount');
 mount(<Tree/>, document.getElementById('sandbox-container'));
@@ -9,7 +9,7 @@ function Tree() {
         <main>
             <TimeStart/>
             {
-                new Array(1000).fill(1).map((_, index) => (
+                new Array(2000).fill(1).map((_, index) => (
                     <Node name={index} key={index}>
                         <Node name={index + ".1"}>
                             <div>
@@ -29,7 +29,9 @@ function Tree() {
 }
 
 function Node({name, children}) {
-    // return children;
+    const [value, setValue] = useState(1);
+
+    return children;
     return <div>{name} {children}</div>;
 }
 

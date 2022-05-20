@@ -5,7 +5,7 @@ export default {
     input: '../index.js',
     output: [
         {
-            file: 'dist/index.js',
+            file: 'dist/index.development.js',
             format: 'cjs',
             exports: 'named',
             plugins: [
@@ -15,7 +15,7 @@ export default {
             ]
         },
         {
-            file: 'dist/index.min.js',
+            file: 'dist/index.production.js',
             format: 'cjs',
             exports: 'named',
             plugins: [

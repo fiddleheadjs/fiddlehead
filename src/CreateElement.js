@@ -7,7 +7,7 @@ import {appendChildrenFromContent, TAG_FUNCTIONAL, VirtualNode} from './VirtualN
  * @param {[]} content
  * @return {VirtualNode}
  */
-export function createElement(type, attributes, ...content) {
+export const createElement = (type, attributes, ...content) => {
     const {key = null, ref = null, ...props} = attributes || {};
 
     const virtualNode = new VirtualNode(type);

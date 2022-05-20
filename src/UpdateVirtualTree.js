@@ -9,7 +9,7 @@ import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNo
  *
  * @param {VirtualNode} rootVirtualNode
  */
-export function updateVirtualTree(rootVirtualNode) {
+export const updateVirtualTree = (rootVirtualNode) => {
     // Update virtual tree and create node maps
     const oldTypedVirtualNodeMaps = _getVirtualNodeMaps(rootVirtualNode);
     const newTypedVirtualNodeMaps = _updateVirtualTreeImpl(rootVirtualNode);
@@ -20,13 +20,13 @@ export function updateVirtualTree(rootVirtualNode) {
     _resolveMountedVirtualNodes(oldTypedVirtualNodeMaps.functional_, newTypedVirtualNodeMaps.functional_);
 }
 
-function _updateVirtualTreeImpl(rootVirtualNode) {
+const _updateVirtualTreeImpl = (rootVirtualNode) => {
     const typedVirtualNodeMaps = _createEmptyTypedVirtualNodeMaps();
     _updateVirtualNodeRecursive(rootVirtualNode, typedVirtualNodeMaps);
     return typedVirtualNodeMaps;
 }
 
-function _updateVirtualNodeRecursive(virtualNode, typedVirtualNodeMaps) {
+const _updateVirtualNodeRecursive = (virtualNode, typedVirtualNodeMaps) => {
     if (virtualNode.tag_ === TAG_FUNCTIONAL) {
         typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
     
@@ -58,20 +58,20 @@ function _updateVirtualNodeRecursive(virtualNode, typedVirtualNodeMaps) {
     }
 }
 
-function _createEmptyTypedVirtualNodeMaps() {
+const _createEmptyTypedVirtualNodeMaps = () => {
     return {
         functional_: new Map(),
         viewable_: new Map(),
     };
 }
 
-function _getVirtualNodeMaps(rootVirtualNode) {
+const _getVirtualNodeMaps = (rootVirtualNode) => {
     const typedVirtualNodeMaps = _createEmptyTypedVirtualNodeMaps();
     _walkVirtualNode(rootVirtualNode, typedVirtualNodeMaps);
     return typedVirtualNodeMaps;
 }
 
-function _walkVirtualNode(virtualNode, typedVirtualNodeMaps) {
+const _walkVirtualNode = (virtualNode, typedVirtualNodeMaps) => {
     if (virtualNode.tag_ === TAG_FUNCTIONAL) {
         typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
     } else if (virtualNode.tag_ === TAG_VIEWABLE) {
@@ -87,7 +87,7 @@ function _walkVirtualNode(virtualNode, typedVirtualNodeMaps) {
     }
 }
 
-function _resolveUnmountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap) {
+const _resolveUnmountedVirtualNodes = (oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap) => {
     oldFunctionalVirtualNodeMap.forEach((virtualNode, key) => {
         const unmounted = !newFunctionalVirtualNodeMap.has(key);
 
@@ -99,7 +99,7 @@ function _resolveUnmountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctiona
     });
 }
 
-function _resolveMountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap) {
+const _resolveMountedVirtualNodes = (oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap) => {
     newFunctionalVirtualNodeMap.forEach((virtualNode, key) => {
         const mounted = !oldFunctionalVirtualNodeMap.has(key);
         mountEffectsOnFunctionalVirtualNode(virtualNode, mounted);

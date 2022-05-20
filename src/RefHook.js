@@ -9,7 +9,7 @@ export function RefHook(current) {
     this.current = current;
 }
 
-export function useRef(initialValue) {
+export const useRef = (initialValue) => {
     const [functionalVirtualNode, hookIndex] = resolveCurrentlyProcessing();
 
     if (functionalVirtualNode.hooks_.length > hookIndex) {

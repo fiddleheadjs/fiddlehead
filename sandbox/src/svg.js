@@ -1,4 +1,4 @@
-import {h, mount} from '../../output/dist/index.min.js';
+import {h, mount} from '../../output';
 
 console.time('stack');
 console.time('mount');

@@ -22,7 +22,7 @@ const TAG_LAZY = 1;
 const TAG_DEPS = 2;
 const TAG_DEPS_CHANGED = 3;
 
-export function useEffect(callback, deps = null) {
+export const useEffect = (callback, deps = null) => {
     const [functionalVirtualNode, hookIndex] = resolveCurrentlyProcessing();
 
     if (functionalVirtualNode.hooks_.length > hookIndex) {
@@ -70,7 +70,7 @@ export function useEffect(callback, deps = null) {
  * @param {VirtualNode} functionalVirtualNode
  * @param {boolean} isNewNodeMounted
  */
-export function mountEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNewNodeMounted) {
+export const mountEffectsOnFunctionalVirtualNode = (functionalVirtualNode, isNewNodeMounted) => {
     for (
         let hook, i = 0, len = functionalVirtualNode.hooks_.length
         ; i < len
@@ -93,7 +93,7 @@ export function mountEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNew
  * @param {VirtualNode} functionalVirtualNode
  * @param {boolean} isNodeUnmounted
  */
-export function destroyEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNodeUnmounted) {
+export const destroyEffectsOnFunctionalVirtualNode = (functionalVirtualNode, isNodeUnmounted) => {
     for (
         let hook, i = 0, len = functionalVirtualNode.hooks_.length
         ; i < len
@@ -118,7 +118,7 @@ export function destroyEffectsOnFunctionalVirtualNode(functionalVirtualNode, isN
  *
  * @param {EffectHook} effectHook
  */
-function _mountEffectHook(effectHook) {
+const _mountEffectHook = (effectHook) => {
     effectHook.destroy_ = effectHook.callback_();
 
     if (effectHook.destroy_ === undefined) {
@@ -131,7 +131,7 @@ function _mountEffectHook(effectHook) {
  * @param {EffectHook} hook
  * @param {boolean} isNodeUnmounted
  */
-function _destroyEffectHook(hook, isNodeUnmounted = false) {
+const _destroyEffectHook = (hook, isNodeUnmounted = false) => {
     if (hook.lastDestroy_ !== null && !isNodeUnmounted) {
         hook.lastDestroy_();
         return;
@@ -142,7 +142,7 @@ function _destroyEffectHook(hook, isNodeUnmounted = false) {
     }
 }
 
-function _getEffectTag(deps, lastDeps = false) {
+const _getEffectTag = (deps, lastDeps = false) => {
     // Always
     if (deps === null) {
         return TAG_ALWAYS;

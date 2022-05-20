@@ -5,23 +5,23 @@ Object.defineProperty(exports, '__esModule', { value: true });
 let currentlyProcessingFunctionalVirtualNode = null;
 let currentlyProcessingHookIndex = -1;
 
-function prepareCurrentlyProcessing(functionalVirtualNode) {
+const prepareCurrentlyProcessing = (functionalVirtualNode) => {
     currentlyProcessingFunctionalVirtualNode = functionalVirtualNode;
     currentlyProcessingHookIndex = -1;
-}
+};
 
-function flushCurrentlyProcessing() {
+const flushCurrentlyProcessing = () => {
     currentlyProcessingFunctionalVirtualNode = null;
     currentlyProcessingHookIndex = -1;
-}
+};
 
-function resolveCurrentlyProcessing() {
+const resolveCurrentlyProcessing = () => {
     if (currentlyProcessingFunctionalVirtualNode === null) {
         throw new Error('Cannot call hooks from outside of the component');
     }
     
     return [currentlyProcessingFunctionalVirtualNode, ++currentlyProcessingHookIndex];
-}
+};
 
 /**
  *
@@ -32,7 +32,7 @@ function RefHook(current) {
     this.current = current;
 }
 
-function useRef(initialValue) {
+const useRef = (initialValue) => {
     const [functionalVirtualNode, hookIndex] = resolveCurrentlyProcessing();
 
     if (functionalVirtualNode.hooks_.length > hookIndex) {
@@ -44,31 +44,31 @@ function useRef(initialValue) {
     functionalVirtualNode.hooks_.push(hook);
 
     return hook;
-}
+};
 
-function hasOwnProperty(obj, propName) {
+const hasOwnProperty = (obj, propName) => {
     return Object.prototype.hasOwnProperty.call(obj, propName);
-}
+};
 
-function isString(value) {
+const isString = (value) => {
     return typeof value === 'string' || value instanceof String;
-}
+};
 
-function isNumber(value) {
+const isNumber = (value) => {
     return typeof value === 'number' || value instanceof Number;
-}
+};
 
-function isFunction(value) {
+const isFunction = (value) => {
     return value instanceof Function;
-}
+};
 
-function isArray(value) {
+const isArray = (value) => {
     return value instanceof Array;
-}
+};
 
-function isEmpty(value) {
+const isEmpty = (value) => {
     return value === undefined || value === null;
-}
+};
 
 /**
  * 
@@ -76,7 +76,7 @@ function isEmpty(value) {
  * @param {Array|string} sub 
  * @returns {boolean}
  */
-function startsWith(full, sub) {
+const startsWith = (full, sub) => {
     if (full.length < sub.length) {
         return false;
     }
@@ -88,7 +88,7 @@ function startsWith(full, sub) {
     }
 
     return true;
-}
+};
 
 /**
  * 
@@ -96,7 +96,7 @@ function startsWith(full, sub) {
  * @param {Array} b 
  * @returns {boolean}
  */
-function compareSameLengthArrays(a, b) {
+const compareSameLengthArrays = (a, b) => {
     for (let i = a.length - 1; i >= 0; --i) {
         if (a[i] !== b[i]) {
             return false;
@@ -104,7 +104,7 @@ function compareSameLengthArrays(a, b) {
     }
 
     return true;
-}
+};
 
 /**
  *
@@ -135,11 +135,9 @@ function VirtualNode(type) {
     this.nativeNode_ = null;
     this.ns_ = null;
 
-    this.tag_ = (type === NODE_FRAGMENT || type === NODE_ARRAY
-        ? TAG_COLLECTIVE
-        : (isFunction(type)
-            ? TAG_FUNCTIONAL
-            : TAG_VIEWABLE));
+    this.tag_ = (type === NODE_FRAGMENT || type === NODE_ARRAY) ? TAG_COLLECTIVE : (
+        isFunction(type) ? TAG_FUNCTIONAL : TAG_VIEWABLE
+    );
 }
 
 // Do not support namespace MathML as almost browsers do not support as well
@@ -159,60 +157,61 @@ const TAG_COLLECTIVE = 2;
 
 const PATH_SEP = '/';
 
-const RootType = props => props.children;
+const RootType = (props) => {
+    return props.children;
+};
 
 /**
  * 
  * @param {*} key 
  * @returns {string}
  */
-function escapeVirtualNodeKey(key) {
+const escapeVirtualNodeKey = (key) => {
     return '@' + encodeURIComponent(key);
-}
+};
 
 let functionalTypeInc = 0;
+let rootIdInc = 0;
 
 /**
  * 
  * @param {Function} type 
  * @returns {string}
  */
-function createFunctionalTypeAlias(type) {
+const createFunctionalTypeAlias = (type) => {
     return (
         (true ? type.name : '') +
         '{' + (++functionalTypeInc).toString(36)
     );
-}
-
-let rootIdInc = 0;
+};
 
 /**
  * 
  * @returns {string}
  */
-function createRootId() {
+const createRootId = () => {
     return '~' + (++rootIdInc).toString(36);
-}
+};
 
 /**
  * 
  * @param {VirtualNode} virtualNode 
  * @param {Node} nativeNode 
  */
-function linkNativeNode(virtualNode, nativeNode) {
+const linkNativeNode = (virtualNode, nativeNode) => {
     virtualNode.nativeNode_ = nativeNode;
 
     if (virtualNode.ref_ instanceof RefHook) {
         virtualNode.ref_.current = nativeNode;
     }
-}
+};
 
 /**
  *
  * @param {*} content
  * @return {null|VirtualNode}
  */
-function createVirtualNodeFromContent(content) {
+const createVirtualNodeFromContent = (content) => {
     let node = null;
 
     if (content instanceof VirtualNode) {
@@ -228,7 +227,7 @@ function createVirtualNodeFromContent(content) {
     }
 
     return node;
-}
+};
 
 /**
  * 
@@ -236,18 +235,18 @@ function createVirtualNodeFromContent(content) {
  * @param {VirtualNode} child
  * @param {number} posInRow
  */
-function appendChildVirtualNode(parent, child, posInRow) {
+const appendChildVirtualNode = (parent, child, posInRow) => {
     child.parent_ = parent;
     child.posInRow_ = posInRow;
     parent.children_[posInRow] = child;
-}
+};
 
 /**
  * 
  * @param {VirtualNode} virtualNode 
  * @param {Array} content
  */
-function appendChildrenFromContent(virtualNode, content) {
+const appendChildrenFromContent = (virtualNode, content) => {
     for (
         let childNode, posInRow = -1, i = 0, len = content.length
         ; i < len
@@ -258,7 +257,7 @@ function appendChildrenFromContent(virtualNode, content) {
             appendChildVirtualNode(virtualNode, childNode, ++posInRow);
         }
     }
-}
+};
 
 /**
  *
@@ -267,7 +266,7 @@ function appendChildrenFromContent(virtualNode, content) {
  * @param {[]} content
  * @return {VirtualNode}
  */
-function createElement(type, attributes, ...content) {
+const createElement = (type, attributes, ...content) => {
     const {key = null, ref = null, ...props} = attributes || {};
 
     const virtualNode = new VirtualNode(type);
@@ -285,7 +284,7 @@ function createElement(type, attributes, ...content) {
     }
 
     return virtualNode;
-}
+};
 
 const PROP_TYPE_ALIAS = 'hook_alias';
 const PROP_VIRTUAL_NODE = 'hook_vnode';
@@ -296,7 +295,7 @@ const PROP_ROOT_ID = 'hook_rootid';
  * @param {Function} type
  * @returns {string}
  */
-function getFunctionalTypeAlias(type) {
+const getFunctionalTypeAlias = (type) => {
     if (hasOwnProperty(type, PROP_TYPE_ALIAS)) {
         return type[PROP_TYPE_ALIAS];
     }
@@ -304,14 +303,14 @@ function getFunctionalTypeAlias(type) {
     return (
         type[PROP_TYPE_ALIAS] = createFunctionalTypeAlias(type)
     );
-}
+};
 
 /**
  * 
  * @param {Element} root 
  * @returns {string}
  */
-function getRootId(root) {
+const getRootId = (root) => {
     if (hasOwnProperty(root, PROP_ROOT_ID)) {
         return root[PROP_ROOT_ID];
     }
@@ -319,25 +318,25 @@ function getRootId(root) {
     return (
         root[PROP_ROOT_ID] = createRootId()
     );
-}
+};
 
 /**
  * 
  * @param {Node} nativeNode 
  * @param {VirtualNode} virtualNode 
  */
-function attachVirtualNode(nativeNode, virtualNode) {
+const attachVirtualNode = (nativeNode, virtualNode) => {
     nativeNode[PROP_VIRTUAL_NODE] = virtualNode;
-}
+};
 
 /**
  * 
  * @param {Node} nativeNode 
  * @returns {VirtualNode|undefined}
  */
-function extractVirtualNode(nativeNode) {
+const extractVirtualNode = (nativeNode) => {
     return nativeNode[PROP_VIRTUAL_NODE];
-}
+};
 
 /**
  *
@@ -350,35 +349,35 @@ const memoizedHooksMap = new Map();
  * @param {string} path 
  * @returns {Array|null}
  */
-function findMemoizedHooks(path) {
+const findMemoizedHooks = (path) => {
     return memoizedHooksMap.get(path) || null;
-}
+};
 
 /**
  * 
  * @param {string} path 
  * @param {Array} hooks 
  */
-function linkMemoizedHooks(path, hooks) {
+const linkMemoizedHooks = (path, hooks) => {
     memoizedHooksMap.set(path, hooks);
-}
+};
 
 /**
  * 
  * @param {string} path 
  */
-function unlinkMemoizedHooks(path) {
+const unlinkMemoizedHooks = (path) => {
     memoizedHooksMap.delete(path);
-}
+};
 
-function updateNativeElementAttributes(element, newAttributes, oldAttributes) {
+const updateNativeElementAttributes = (element, newAttributes, oldAttributes) => {
     _updateKeyValues(
         element, newAttributes, oldAttributes,
         _updateElementAttribute, _removeElementAttribute
     );
-}
+};
 
-function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) {
+const _updateElementAttribute = (element, attrName, newAttrValue, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(attrName);
 
     if (attrName === '') {
@@ -405,9 +404,9 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
             }
         }
     }
-}
+};
 
-function _removeElementAttribute(element, attrName, oldAttrValue) {
+const _removeElementAttribute = (element, attrName, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(attrName);
 
     if (attrName === '') {
@@ -429,9 +428,9 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
             }
         }
     }
-}
+};
 
-function _normalizeElementAttributeName(attrName) {
+const _normalizeElementAttributeName = (attrName) => {
     if (attrName === 'class') {
         if (true) {
             console.error('Use `className` instead of `class`');
@@ -448,24 +447,24 @@ function _normalizeElementAttributeName(attrName) {
     }
 
     return attrName;
-}
+};
 
-function _updateStyleProperties(style, newProperties, oldProperties) {
+const _updateStyleProperties = (style, newProperties, oldProperties) => {
     _updateKeyValues(
         style, newProperties, oldProperties,
         _updateStyleProperty, _removeStyleProperty
     );
-}
+};
 
-function _updateStyleProperty(style, propName, newPropValue) {
+const _updateStyleProperty = (style, propName, newPropValue) => {
     style[propName] = newPropValue;
-}
+};
 
-function _removeStyleProperty(style, propName) {
+const _removeStyleProperty = (style, propName) => {
     style[propName] = '';
-}
+};
 
-function _updateKeyValues(target, newKeyValues, oldKeyValues, updateFn, removeFn) {
+const _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn) => {
     let key;
     
     for (key in oldKeyValues) {
@@ -481,21 +480,21 @@ function _updateKeyValues(target, newKeyValues, oldKeyValues, updateFn, removeFn
             updateFn(target, key, newKeyValues[key], oldKeyValues[key]);
         }
     }
-}
+};
 
-function _hasOwnNonEmpty(target, prop) {
+const _hasOwnNonEmpty = (target, prop) => {
     return hasOwnProperty(target, prop) && !isEmpty(target[prop]);
-}
+};
 
-function createNativeTextNode(text) {
+const createNativeTextNode = (text) => {
     return document.createTextNode(text);
-}
+};
 
-function updateNativeTextNode(node, text) {
+const updateNativeTextNode = (node, text) => {
     node.textContent = text;
-}
+};
 
-function createNativeElementWithNS(ns, type, attributes) {
+const createNativeElementWithNS = (ns, type, attributes) => {
     const element = (ns === NS_SVG
         ? document.createElementNS('http://www.w3.org/2000/svg', type)
         : document.createElement(type)
@@ -504,13 +503,13 @@ function createNativeElementWithNS(ns, type, attributes) {
     updateNativeElementAttributes(element, attributes, {});
 
     return element;
-}
+};
 
 // !!!IMPORTANT
 // Only use this module for viewable nodes
 // Passing Functional, Array, Fragment nodes will lead to crash
 
-function hydrateViewableVirtualNode(viewableVirtualNode) {
+const hydrateViewableVirtualNode = (viewableVirtualNode) => {
     // Create the native node
     const nativeNode = _createNativeNode(viewableVirtualNode);
 
@@ -521,9 +520,9 @@ function hydrateViewableVirtualNode(viewableVirtualNode) {
             attachVirtualNode(nativeNode, viewableVirtualNode);
         }
     }
-}
+};
 
-function _createNativeNode(viewableVirtualNode) {
+const _createNativeNode = (viewableVirtualNode) => {
     if (viewableVirtualNode.type_ === NODE_TEXT) {
         return createNativeTextNode(viewableVirtualNode.props_.children);
     }
@@ -533,13 +532,13 @@ function _createNativeNode(viewableVirtualNode) {
         viewableVirtualNode.type_,
         viewableVirtualNode.props_
     );
-}
+};
 
 // !!!IMPORTANT
 // Only use this module for viewable nodes
 // Passing Functional, Array, Fragment nodes will lead to crash
 
-function commitView(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
+const commitView = (oldViewableVirtualNodeMap, newViewableVirtualNodeMap) => {
     if (oldViewableVirtualNodeMap.size === 0) {
         _append(newViewableVirtualNodeMap);
     } else {
@@ -557,9 +556,9 @@ function commitView(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
         _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
         _insert(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
     }
-}
+};
 
-function _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
+const _removeAndUpdate = (oldViewableVirtualNodeMap, newViewableVirtualNodeMap) => {
     // New node to be inserted
     let newViewableVirtualNode;
 
@@ -600,9 +599,9 @@ function _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) 
             }
         }
     });
-}
+};
 
-function _append(newViewableVirtualNodeMap) {
+const _append = (newViewableVirtualNodeMap) => {
     let nativeHost;
 
     newViewableVirtualNodeMap.forEach((virtualNode) => {
@@ -613,9 +612,9 @@ function _append(newViewableVirtualNodeMap) {
             nativeHost.appendChild(virtualNode.nativeNode_);
         }
     });
-}
+};
 
-function _insert(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
+const _insert = (oldViewableVirtualNodeMap, newViewableVirtualNodeMap) => {
     let pendingViewableVirtualNodes = [];
 
     newViewableVirtualNodeMap.forEach((newViewableVirtualNode, key) => {
@@ -630,9 +629,9 @@ function _insert(oldViewableVirtualNodeMap, newViewableVirtualNodeMap) {
     if (pendingViewableVirtualNodes.length > 0) {
         _insertClosestNativeNodesOfVirtualNodes(pendingViewableVirtualNodes, null);
     }
-}
+};
 
-function _insertClosestNativeNodesOfVirtualNodes(virtualNodes, virtualNodeAfter) {
+const _insertClosestNativeNodesOfVirtualNodes = (virtualNodes, virtualNodeAfter) => {
     const nativeNodeAfter = virtualNodeAfter && _findFirstNativeNode(virtualNodeAfter) || null;
     
     for (
@@ -654,9 +653,9 @@ function _insertClosestNativeNodesOfVirtualNodes(virtualNodes, virtualNodeAfter)
             }
         }
     }
-}
+};
 
-function _removeNativeNodesOfVirtualNode(virtualNode) {
+const _removeNativeNodesOfVirtualNode = (virtualNode) => {
     const nativeNodes = _findClosestNativeNodes(virtualNode);
 
     for (
@@ -670,9 +669,9 @@ function _removeNativeNodesOfVirtualNode(virtualNode) {
             nativeNode.parentNode.removeChild(nativeNode);
         }
     }
-}
+};
 
-function _findNativeHost(virtualNode) {
+const _findNativeHost = (virtualNode) => {
     if (virtualNode.type_ === RootType) {
         return virtualNode.nativeNode_;
     }
@@ -686,9 +685,9 @@ function _findNativeHost(virtualNode) {
     }
 
     return virtualNode.parent_.nativeNode_;
-}
+};
 
-function _findFirstNativeNode(virtualNode) {
+const _findFirstNativeNode = (virtualNode) => {
     if (virtualNode.nativeNode_ !== null) {
         return virtualNode.nativeNode_;
     }
@@ -704,9 +703,9 @@ function _findFirstNativeNode(virtualNode) {
     }
 
     return firstNativeNode;
-}
+};
 
-function _findClosestNativeNodes(virtualNode) {
+const _findClosestNativeNodes = (virtualNode) => {
     if (virtualNode.nativeNode_ !== null) {
         return [virtualNode.nativeNode_];
     }
@@ -722,7 +721,7 @@ function _findClosestNativeNodes(virtualNode) {
     }
 
     return closestNativeNodes;
-}
+};
 
 /**
  *
@@ -745,7 +744,7 @@ const TAG_LAZY = 1;
 const TAG_DEPS = 2;
 const TAG_DEPS_CHANGED = 3;
 
-function useEffect(callback, deps = null) {
+const useEffect = (callback, deps = null) => {
     const [functionalVirtualNode, hookIndex] = resolveCurrentlyProcessing();
 
     if (functionalVirtualNode.hooks_.length > hookIndex) {
@@ -786,14 +785,14 @@ function useEffect(callback, deps = null) {
     hook.tag_ = _getEffectTag(deps);
 
     functionalVirtualNode.hooks_.push(hook);
-}
+};
 
 /**
  *
  * @param {VirtualNode} functionalVirtualNode
  * @param {boolean} isNewNodeMounted
  */
-function mountEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNewNodeMounted) {
+const mountEffectsOnFunctionalVirtualNode = (functionalVirtualNode, isNewNodeMounted) => {
     for (
         let hook, i = 0, len = functionalVirtualNode.hooks_.length
         ; i < len
@@ -809,14 +808,14 @@ function mountEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNewNodeMou
             _mountEffectHook(hook);
         }
     }
-}
+};
 
 /**
  *
  * @param {VirtualNode} functionalVirtualNode
  * @param {boolean} isNodeUnmounted
  */
-function destroyEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNodeUnmounted) {
+const destroyEffectsOnFunctionalVirtualNode = (functionalVirtualNode, isNodeUnmounted) => {
     for (
         let hook, i = 0, len = functionalVirtualNode.hooks_.length
         ; i < len
@@ -835,26 +834,26 @@ function destroyEffectsOnFunctionalVirtualNode(functionalVirtualNode, isNodeUnmo
             _destroyEffectHook(hook, isNodeUnmounted);
         }
     }
-}
+};
 
 /**
  *
  * @param {EffectHook} effectHook
  */
-function _mountEffectHook(effectHook) {
+const _mountEffectHook = (effectHook) => {
     effectHook.destroy_ = effectHook.callback_();
 
     if (effectHook.destroy_ === undefined) {
         effectHook.destroy_ = null;
     }
-}
+};
 
 /**
  *
  * @param {EffectHook} hook
  * @param {boolean} isNodeUnmounted
  */
-function _destroyEffectHook(hook, isNodeUnmounted = false) {
+const _destroyEffectHook = (hook, isNodeUnmounted = false) => {
     if (hook.lastDestroy_ !== null && !isNodeUnmounted) {
         hook.lastDestroy_();
         return;
@@ -863,9 +862,9 @@ function _destroyEffectHook(hook, isNodeUnmounted = false) {
     if (hook.destroy_ !== null) {
         hook.destroy_();
     }
-}
+};
 
-function _getEffectTag(deps, lastDeps = false) {
+const _getEffectTag = (deps, lastDeps = false) => {
     // Always
     if (deps === null) {
         return TAG_ALWAYS;
@@ -885,13 +884,13 @@ function _getEffectTag(deps, lastDeps = false) {
     {
         return TAG_DEPS_CHANGED;
     }
-}
+};
 
 /**
  *
  * @param {VirtualNode} rootVirtualNode
  */
-function updateVirtualTree(rootVirtualNode) {
+const updateVirtualTree = (rootVirtualNode) => {
     // Update virtual tree and create node maps
     const oldTypedVirtualNodeMaps = _getVirtualNodeMaps(rootVirtualNode);
     const newTypedVirtualNodeMaps = _updateVirtualTreeImpl(rootVirtualNode);
@@ -900,15 +899,15 @@ function updateVirtualTree(rootVirtualNode) {
     _resolveUnmountedVirtualNodes(oldTypedVirtualNodeMaps.functional_, newTypedVirtualNodeMaps.functional_);
     commitView(oldTypedVirtualNodeMaps.viewable_, newTypedVirtualNodeMaps.viewable_);
     _resolveMountedVirtualNodes(oldTypedVirtualNodeMaps.functional_, newTypedVirtualNodeMaps.functional_);
-}
+};
 
-function _updateVirtualTreeImpl(rootVirtualNode) {
+const _updateVirtualTreeImpl = (rootVirtualNode) => {
     const typedVirtualNodeMaps = _createEmptyTypedVirtualNodeMaps();
     _updateVirtualNodeRecursive(rootVirtualNode, typedVirtualNodeMaps);
     return typedVirtualNodeMaps;
-}
+};
 
-function _updateVirtualNodeRecursive(virtualNode, typedVirtualNodeMaps) {
+const _updateVirtualNodeRecursive = (virtualNode, typedVirtualNodeMaps) => {
     if (virtualNode.tag_ === TAG_FUNCTIONAL) {
         typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
     
@@ -938,22 +937,22 @@ function _updateVirtualNodeRecursive(virtualNode, typedVirtualNodeMaps) {
     ) {
         _updateVirtualNodeRecursive(virtualNode.children_[i], typedVirtualNodeMaps);
     }
-}
+};
 
-function _createEmptyTypedVirtualNodeMaps() {
+const _createEmptyTypedVirtualNodeMaps = () => {
     return {
         functional_: new Map(),
         viewable_: new Map(),
     };
-}
+};
 
-function _getVirtualNodeMaps(rootVirtualNode) {
+const _getVirtualNodeMaps = (rootVirtualNode) => {
     const typedVirtualNodeMaps = _createEmptyTypedVirtualNodeMaps();
     _walkVirtualNode(rootVirtualNode, typedVirtualNodeMaps);
     return typedVirtualNodeMaps;
-}
+};
 
-function _walkVirtualNode(virtualNode, typedVirtualNodeMaps) {
+const _walkVirtualNode = (virtualNode, typedVirtualNodeMaps) => {
     if (virtualNode.tag_ === TAG_FUNCTIONAL) {
         typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
     } else if (virtualNode.tag_ === TAG_VIEWABLE) {
@@ -967,9 +966,9 @@ function _walkVirtualNode(virtualNode, typedVirtualNodeMaps) {
     ) {
         _walkVirtualNode(virtualNode.children_[i], typedVirtualNodeMaps);
     }
-}
+};
 
-function _resolveUnmountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap) {
+const _resolveUnmountedVirtualNodes = (oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap) => {
     oldFunctionalVirtualNodeMap.forEach((virtualNode, key) => {
         const unmounted = !newFunctionalVirtualNodeMap.has(key);
 
@@ -979,14 +978,14 @@ function _resolveUnmountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctiona
             unlinkMemoizedHooks(virtualNode.path_);
         }
     });
-}
+};
 
-function _resolveMountedVirtualNodes(oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap) {
+const _resolveMountedVirtualNodes = (oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap) => {
     newFunctionalVirtualNodeMap.forEach((virtualNode, key) => {
         const mounted = !oldFunctionalVirtualNodeMap.has(key);
         mountEffectsOnFunctionalVirtualNode(virtualNode, mounted);
     });
-}
+};
 
 /**
  *
@@ -1015,7 +1014,7 @@ function StateHook(context, initialValue) {
     };
 }
 
-function useState(initialValue) {
+const useState = (initialValue) => {
     const [functionalVirtualNode, hookIndex] = resolveCurrentlyProcessing();
 
     /**
@@ -1031,9 +1030,9 @@ function useState(initialValue) {
     }
 
     return [hook.value_, hook.setValue_];
-}
+};
 
-function resolveVirtualTree(rootVirtualNode) {
+const resolveVirtualTree = (rootVirtualNode) => {
     for (
         let i = 0, len = rootVirtualNode.children_.length
         ; i < len
@@ -1041,7 +1040,7 @@ function resolveVirtualTree(rootVirtualNode) {
     ) {
         _resolveVirtualNodeRecursive(rootVirtualNode.children_[i], rootVirtualNode.path_);
     }
-}
+};
 
 /**
  *
@@ -1049,7 +1048,7 @@ function resolveVirtualTree(rootVirtualNode) {
  * @param {string} parentPath
  * @private
  */
-function _resolveVirtualNodeRecursive(virtualNode, parentPath) {
+const _resolveVirtualNodeRecursive = (virtualNode, parentPath) => {
     // Set path
     virtualNode.path_ = (
         parentPath
@@ -1100,9 +1099,9 @@ function _resolveVirtualNodeRecursive(virtualNode, parentPath) {
     ) {
         _resolveVirtualNodeRecursive(virtualNode.children_[i], virtualNode.path_);
     }
-}
+};
 
-function _determineNS(virtualNode) {
+const _determineNS = (virtualNode) => {
     // Intrinsic namespace
     if (virtualNode.type_ === 'svg') {
         return NS_SVG;
@@ -1116,14 +1115,14 @@ function _determineNS(virtualNode) {
     
     // By default, pass namespace below.
     return virtualNode.parent_.ns_;
-}
+};
 
 /**
  * 
  * @param {*} children 
  * @param {Element} targetNativeNode
  */
- function mount(children, targetNativeNode) {
+ const mount = (children, targetNativeNode) => {
     const rootVirtualNode = createPortal(children, targetNativeNode);
 
     // Set an unique path to split tree states between roots
@@ -1132,7 +1131,7 @@ function _determineNS(virtualNode) {
     resolveVirtualTree(rootVirtualNode);
 
     updateVirtualTree(rootVirtualNode);
-}
+};
 
 /**
  * 
@@ -1140,7 +1139,7 @@ function _determineNS(virtualNode) {
  * @param {Element} targetNativeNode
  * @returns {VirtualNode}
  */
-function createPortal(children, targetNativeNode) {
+const createPortal = (children, targetNativeNode) => {
     /**
      * @type {VirtualNode}
      */
@@ -1165,7 +1164,7 @@ function createPortal(children, targetNativeNode) {
     rootVirtualNode.props_.children = children;
 
     return rootVirtualNode;
-}
+};
 
 exports.createPortal = createPortal;
 exports.h = createElement;

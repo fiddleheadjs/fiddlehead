@@ -29,7 +29,7 @@ export function StateHook(context, initialValue) {
     };
 }
 
-export function useState(initialValue) {
+export const useState = (initialValue) => {
     const [functionalVirtualNode, hookIndex] = resolveCurrentlyProcessing();
 
     /**

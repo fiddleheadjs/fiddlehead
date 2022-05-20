@@ -257,7 +257,7 @@ function Demo() {
 }
 
 function DemoWrapper() {
-    return <Demo/>;
+    return new Array(1000).fill(1).map((_, i) => <Demo key={i}/>);
 }
 
 function DemoWrapperWrapper() {

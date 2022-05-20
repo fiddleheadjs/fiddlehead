@@ -9,7 +9,7 @@ const memoizedHooksMap = new Map();
  * @param {string} path 
  * @returns {Array|null}
  */
-export function findMemoizedHooks(path) {
+export const findMemoizedHooks = (path) => {
     return memoizedHooksMap.get(path) || null;
 }
 
@@ -18,7 +18,7 @@ export function findMemoizedHooks(path) {
  * @param {string} path 
  * @param {Array} hooks 
  */
-export function linkMemoizedHooks(path, hooks) {
+export const linkMemoizedHooks = (path, hooks) => {
     memoizedHooksMap.set(path, hooks);
 }
 
@@ -26,6 +26,6 @@ export function linkMemoizedHooks(path, hooks) {
  * 
  * @param {string} path 
  */
-export function unlinkMemoizedHooks(path) {
+export const unlinkMemoizedHooks = (path) => {
     memoizedHooksMap.delete(path);
 }

@@ -6,7 +6,7 @@ import {attachVirtualNode} from './Externals';
 // Only use this module for viewable nodes
 // Passing Functional, Array, Fragment nodes will lead to crash
 
-export function hydrateViewableVirtualNode(viewableVirtualNode) {
+export const hydrateViewableVirtualNode = (viewableVirtualNode) => {
     // Create the native node
     const nativeNode = _createNativeNode(viewableVirtualNode);
 
@@ -19,7 +19,7 @@ export function hydrateViewableVirtualNode(viewableVirtualNode) {
     }
 }
 
-function _createNativeNode(viewableVirtualNode) {
+const _createNativeNode = (viewableVirtualNode) => {
     if (viewableVirtualNode.type_ === NODE_TEXT) {
         return createNativeTextNode(viewableVirtualNode.props_.children);
     }

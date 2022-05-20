@@ -10,7 +10,7 @@ const PROP_ROOT_ID = 'hook_rootid';
  * @param {Function} type
  * @returns {string}
  */
-export function getFunctionalTypeAlias(type) {
+export const getFunctionalTypeAlias = (type) => {
     if (hasOwnProperty(type, PROP_TYPE_ALIAS)) {
         return type[PROP_TYPE_ALIAS];
     }
@@ -25,7 +25,7 @@ export function getFunctionalTypeAlias(type) {
  * @param {Element} root 
  * @returns {string}
  */
-export function getRootId(root) {
+export const getRootId = (root) => {
     if (hasOwnProperty(root, PROP_ROOT_ID)) {
         return root[PROP_ROOT_ID];
     }
@@ -40,7 +40,7 @@ export function getRootId(root) {
  * @param {Node} nativeNode 
  * @param {VirtualNode} virtualNode 
  */
-export function attachVirtualNode(nativeNode, virtualNode) {
+export const attachVirtualNode = (nativeNode, virtualNode) => {
     nativeNode[PROP_VIRTUAL_NODE] = virtualNode;
 }
 
@@ -49,6 +49,6 @@ export function attachVirtualNode(nativeNode, virtualNode) {
  * @param {Node} nativeNode 
  * @returns {VirtualNode|undefined}
  */
-export function extractVirtualNode(nativeNode) {
+export const extractVirtualNode = (nativeNode) => {
     return nativeNode[PROP_VIRTUAL_NODE];
 }
