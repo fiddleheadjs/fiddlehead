@@ -9,7 +9,7 @@ export const resolveVirtualTree = (rootVirtualNode) => {
         ; i < len
         ; ++i
     ) {
-        _resolveVirtualNodeRecursive(rootVirtualNode.children_[i], rootVirtualNode.path_);
+        _resolveVirtualNodeRecursive(rootVirtualNode.children_[i], rootVirtualNode.path_, i);
     }
 }
 
@@ -19,14 +19,14 @@ export const resolveVirtualTree = (rootVirtualNode) => {
  * @param {string} parentPath
  * @private
  */
-const _resolveVirtualNodeRecursive = (virtualNode, parentPath) => {
+const _resolveVirtualNodeRecursive = (virtualNode, parentPath, posInRow) => {
     // Set path
     virtualNode.path_ = (
         parentPath
         + PATH_SEP
         + (virtualNode.key_ !== null
             ? escapeVirtualNodeKey(virtualNode.key_)
-            : virtualNode.posInRow_)
+            : posInRow)
         + PATH_SEP
         + (virtualNode.tag_ === TAG_FUNCTIONAL
             ? getFunctionalTypeAlias(virtualNode.type_)
@@ -68,7 +68,7 @@ const _resolveVirtualNodeRecursive = (virtualNode, parentPath) => {
         ; i < len
         ; ++i
     ) {
-        _resolveVirtualNodeRecursive(virtualNode.children_[i], virtualNode.path_);
+        _resolveVirtualNodeRecursive(virtualNode.children_[i], virtualNode.path_, i);
     }
 }
 

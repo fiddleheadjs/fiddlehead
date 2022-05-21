@@ -16,7 +16,7 @@ export const createNativeElementWithNS = (ns, type, attributes) => {
     );
 
     updateNativeElementAttributes(element, attributes, {});
-
+    
     return element;
 }
 

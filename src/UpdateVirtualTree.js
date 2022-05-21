@@ -1,7 +1,7 @@
 import {unlinkMemoizedHooks} from './MemoizedHooks';
 import {resolveVirtualTree} from './ResolveVirtualTree';
 import {flushCurrentlyProcessing, prepareCurrentlyProcessing} from './CurrentlyProcessing';
-import {appendChildVirtualNode, TAG_FUNCTIONAL, TAG_VIEWABLE, createVirtualNodeFromContent} from './VirtualNode';
+import {TAG_FUNCTIONAL, TAG_VIEWABLE, createVirtualNodeFromContent} from './VirtualNode';
 import {commitView} from './CommitView';
 import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNode} from './EffectHook';
 
@@ -37,7 +37,8 @@ const _updateVirtualNodeRecursive = (virtualNode, typedVirtualNodeMaps) => {
         flushCurrentlyProcessing();
     
         if (newVirtualNode !== null) {
-            appendChildVirtualNode(virtualNode, newVirtualNode, 0);
+            virtualNode.children_[0] = newVirtualNode;
+            newVirtualNode.parent_ = virtualNode;
     
             // This step aimed to read memoized hooks and restore them
             // Memoized data affects the underneath tree,
@@ -102,6 +103,7 @@ const _resolveUnmountedVirtualNodes = (oldFunctionalVirtualNodeMap, newFunctiona
 const _resolveMountedVirtualNodes = (oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap) => {
     newFunctionalVirtualNodeMap.forEach((virtualNode, key) => {
         const mounted = !oldFunctionalVirtualNodeMap.has(key);
+
         mountEffectsOnFunctionalVirtualNode(virtualNode, mounted);
     });
 }

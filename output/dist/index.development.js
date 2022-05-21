@@ -130,7 +130,6 @@ function VirtualNode(type) {
     this.children_ = [];
 
     this.path_ = '';
-    this.posInRow_ = null;
 
     this.nativeNode_ = null;
     this.ns_ = null;
@@ -231,30 +230,19 @@ const createVirtualNodeFromContent = (content) => {
 
 /**
  * 
- * @param {VirtualNode} parent 
- * @param {VirtualNode} child
- * @param {number} posInRow
- */
-const appendChildVirtualNode = (parent, child, posInRow) => {
-    child.parent_ = parent;
-    child.posInRow_ = posInRow;
-    parent.children_[posInRow] = child;
-};
-
-/**
- * 
- * @param {VirtualNode} virtualNode 
+ * @param {VirtualNode} parentNode 
  * @param {Array} content
  */
-const appendChildrenFromContent = (virtualNode, content) => {
+const appendChildrenFromContent = (parentNode, content) => {
     for (
-        let childNode, posInRow = -1, i = 0, len = content.length
+        let childNode, i = 0, len = content.length
         ; i < len
         ; ++i
     ) {
         childNode = createVirtualNodeFromContent(content[i]);
         if (childNode !== null) {
-            appendChildVirtualNode(virtualNode, childNode, ++posInRow);
+            parentNode.children_.push(childNode);
+            childNode.parent_ = parentNode;
         }
     }
 };
@@ -501,7 +489,7 @@ const createNativeElementWithNS = (ns, type, attributes) => {
     );
 
     updateNativeElementAttributes(element, attributes, {});
-
+    
     return element;
 };
 
@@ -918,7 +906,8 @@ const _updateVirtualNodeRecursive = (virtualNode, typedVirtualNodeMaps) => {
         flushCurrentlyProcessing();
     
         if (newVirtualNode !== null) {
-            appendChildVirtualNode(virtualNode, newVirtualNode, 0);
+            virtualNode.children_[0] = newVirtualNode;
+            newVirtualNode.parent_ = virtualNode;
     
             // This step aimed to read memoized hooks and restore them
             // Memoized data affects the underneath tree,
@@ -983,6 +972,7 @@ const _resolveUnmountedVirtualNodes = (oldFunctionalVirtualNodeMap, newFunctiona
 const _resolveMountedVirtualNodes = (oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap) => {
     newFunctionalVirtualNodeMap.forEach((virtualNode, key) => {
         const mounted = !oldFunctionalVirtualNodeMap.has(key);
+
         mountEffectsOnFunctionalVirtualNode(virtualNode, mounted);
     });
 };
@@ -1038,7 +1028,7 @@ const resolveVirtualTree = (rootVirtualNode) => {
         ; i < len
         ; ++i
     ) {
-        _resolveVirtualNodeRecursive(rootVirtualNode.children_[i], rootVirtualNode.path_);
+        _resolveVirtualNodeRecursive(rootVirtualNode.children_[i], rootVirtualNode.path_, i);
     }
 };
 
@@ -1048,14 +1038,14 @@ const resolveVirtualTree = (rootVirtualNode) => {
  * @param {string} parentPath
  * @private
  */
-const _resolveVirtualNodeRecursive = (virtualNode, parentPath) => {
+const _resolveVirtualNodeRecursive = (virtualNode, parentPath, posInRow) => {
     // Set path
     virtualNode.path_ = (
         parentPath
         + PATH_SEP
         + (virtualNode.key_ !== null
             ? escapeVirtualNodeKey(virtualNode.key_)
-            : virtualNode.posInRow_)
+            : posInRow)
         + PATH_SEP
         + (virtualNode.tag_ === TAG_FUNCTIONAL
             ? getFunctionalTypeAlias(virtualNode.type_)
@@ -1097,7 +1087,7 @@ const _resolveVirtualNodeRecursive = (virtualNode, parentPath) => {
         ; i < len
         ; ++i
     ) {
-        _resolveVirtualNodeRecursive(virtualNode.children_[i], virtualNode.path_);
+        _resolveVirtualNodeRecursive(virtualNode.children_[i], virtualNode.path_, i);
     }
 };
 

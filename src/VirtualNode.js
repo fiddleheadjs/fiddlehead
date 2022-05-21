@@ -25,7 +25,6 @@ export function VirtualNode(type) {
     this.children_ = [];
 
     this.path_ = '';
-    this.posInRow_ = null;
 
     this.nativeNode_ = null;
     this.ns_ = null;
@@ -126,30 +125,19 @@ export const createVirtualNodeFromContent = (content) => {
 
 /**
  * 
- * @param {VirtualNode} parent 
- * @param {VirtualNode} child
- * @param {number} posInRow
- */
-export const appendChildVirtualNode = (parent, child, posInRow) => {
-    child.parent_ = parent;
-    child.posInRow_ = posInRow;
-    parent.children_[posInRow] = child;
-}
-
-/**
- * 
- * @param {VirtualNode} virtualNode 
+ * @param {VirtualNode} parentNode 
  * @param {Array} content
  */
-export const appendChildrenFromContent = (virtualNode, content) => {
+export const appendChildrenFromContent = (parentNode, content) => {
     for (
-        let childNode, posInRow = -1, i = 0, len = content.length
+        let childNode, i = 0, len = content.length
         ; i < len
         ; ++i
     ) {
         childNode = createVirtualNodeFromContent(content[i]);
         if (childNode !== null) {
-            appendChildVirtualNode(virtualNode, childNode, ++posInRow);
+            parentNode.children_.push(childNode);
+            childNode.parent_ = parentNode;
         }
     }
 }
