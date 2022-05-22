@@ -116,6 +116,8 @@ const useRef = (initialValue) => {
 function VirtualNode(type, props = {}, key = null, ref = null) {
     this.type_ = type;
 
+    this.key_ = key;
+
     this.parent_ = null;
 
     this.path_ = '';
@@ -125,20 +127,16 @@ function VirtualNode(type, props = {}, key = null, ref = null) {
     if (type !== NODE_TEXT) {
         this.children_ = [];
     }
-
-    if (type !== NODE_ARRAY) {
-        this.key_ = key;
-        
-        if (type !== NODE_FRAGMENT) {
-            this.props_ = props;
-
-            this.ref_ = ref;
-        
-            this.nativeNode_ = null;
     
-            if (isFunction(type)) {
-                this.hooks_ = [];
-            }
+    if (type !== NODE_FRAGMENT) {
+        this.props_ = props;
+
+        this.ref_ = ref;
+    
+        this.nativeNode_ = null;
+
+        if (isFunction(type)) {
+            this.hooks_ = [];
         }
     }
 }
@@ -151,8 +149,7 @@ const NS_SVG = 1;
 // Use special URI characters
 
 const NODE_TEXT = '#';
-const NODE_ARRAY = '[';
-const NODE_FRAGMENT = '=';
+const NODE_FRAGMENT = '[';
 
 const PATH_SEP = '/';
 
@@ -220,7 +217,7 @@ const createVirtualNodeFromContent = (content) => {
         node = new VirtualNode(NODE_TEXT, {children: content});
     }
     else if (isArray(content)) {
-        node = new VirtualNode(NODE_ARRAY);
+        node = new VirtualNode(NODE_FRAGMENT);
         appendChildrenFromContent(node, content);
     }
 
