@@ -2,6 +2,66 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+const hasOwnProperty = (obj, propName) => {
+    return Object.prototype.hasOwnProperty.call(obj, propName);
+};
+
+const isString = (value) => {
+    return typeof value === 'string'/* || value instanceof String*/;
+};
+
+const isNumber = (value) => {
+    return typeof value === 'number'/* || value instanceof Number*/;
+};
+
+const isFunction = (value) => {
+    return typeof value === 'function';
+};
+
+const isArray = (value) => {
+    return value instanceof Array;
+};
+
+const isNullish = (value) => {
+    return value === null || value === undefined;
+};
+
+/**
+ * 
+ * @param {Array|string} full 
+ * @param {Array|string} sub 
+ * @returns {boolean}
+ */
+const startsWith = (full, sub) => {
+    if (full.length < sub.length) {
+        return false;
+    }
+
+    for (let i = sub.length - 1; i >= 0; --i) {
+        if (sub[i] !== full[i]) {
+            return false;
+        }
+    }
+
+    return true;
+};
+
+/**
+ * 
+ * @param {Array} a 
+ * @param {Array} b 
+ * @returns {boolean}
+ */
+const compareSameLengthArrays = (a, b) => {
+    for (let i = a.length - 1; i >= 0; --i) {
+        if (a[i] !== b[i]) {
+            return false;
+        }
+    }
+
+    return true;
+};
+
 let currentlyProcessingFunctionalVirtualNode = null;
 let currentlyProcessingHookIndex = -1;
 
@@ -46,97 +106,41 @@ const useRef = (initialValue) => {
     return hook;
 };
 
-const hasOwnProperty = (obj, propName) => {
-    return Object.prototype.hasOwnProperty.call(obj, propName);
-};
-
-const isString = (value) => {
-    return typeof value === 'string' || value instanceof String;
-};
-
-const isNumber = (value) => {
-    return typeof value === 'number' || value instanceof Number;
-};
-
-const isFunction = (value) => {
-    return value instanceof Function;
-};
-
-const isArray = (value) => {
-    return value instanceof Array;
-};
-
-const isEmpty = (value) => {
-    return value === undefined || value === null;
-};
-
 /**
  * 
- * @param {Array|string} full 
- * @param {Array|string} sub 
- * @returns {boolean}
+ * @param {function|string} type 
+ * @param {{}?} props 
+ * @param {string|number?} key 
+ * @param {RefHook?} ref 
  */
-const startsWith = (full, sub) => {
-    if (full.length < sub.length) {
-        return false;
-    }
-
-    for (let i = sub.length - 1; i >= 0; --i) {
-        if (sub[i] !== full[i]) {
-            return false;
-        }
-    }
-
-    return true;
-};
-
-/**
- * 
- * @param {Array} a 
- * @param {Array} b 
- * @returns {boolean}
- */
-const compareSameLengthArrays = (a, b) => {
-    for (let i = a.length - 1; i >= 0; --i) {
-        if (a[i] !== b[i]) {
-            return false;
-        }
-    }
-
-    return true;
-};
-
-/**
- *
- * @param {string|function} type
- * @constructor
- */
-function VirtualNode(type) {
+function VirtualNode(type, props = {}, key = null, ref = null) {
     this.type_ = type;
-    this.props_ = {};
-    this.key_ = null;
-    this.ref_ = null;
 
-    this.hooks_ = [];
-
-    /**
-     * @type {VirtualNode|null}
-     */
     this.parent_ = null;
-
-    /**
-     * @type {VirtualNode[]}
-     */
-    this.children_ = [];
 
     this.path_ = '';
 
-    this.nativeNode_ = null;
     this.ns_ = null;
+    
+    if (type !== NODE_TEXT) {
+        this.children_ = [];
+    }
 
-    this.tag_ = (type === NODE_FRAGMENT || type === NODE_ARRAY) ? TAG_COLLECTIVE : (
-        isFunction(type) ? TAG_FUNCTIONAL : TAG_VIEWABLE
-    );
+    if (type !== NODE_ARRAY) {
+        this.key_ = key;
+        
+        if (type !== NODE_FRAGMENT) {
+            this.props_ = props;
+
+            this.ref_ = ref;
+        
+            this.nativeNode_ = null;
+    
+            if (isFunction(type)) {
+                this.hooks_ = [];
+            }
+        }
+    }
 }
 
 // Do not support namespace MathML as almost browsers do not support as well
@@ -150,10 +154,6 @@ const NODE_TEXT = '#';
 const NODE_ARRAY = '[';
 const NODE_FRAGMENT = '=';
 
-const TAG_VIEWABLE = 0;
-const TAG_FUNCTIONAL = 1;
-const TAG_COLLECTIVE = 2;
-
 const PATH_SEP = '/';
 
 const RootType = (props) => {
@@ -162,7 +162,7 @@ const RootType = (props) => {
 
 /**
  * 
- * @param {*} key 
+ * @param {string|number} key 
  * @returns {string}
  */
 const escapeVirtualNodeKey = (key) => {
@@ -217,8 +217,7 @@ const createVirtualNodeFromContent = (content) => {
         node = content;
     }
     else if (isString(content) || isNumber(content)) {
-        node = new VirtualNode(NODE_TEXT);
-        node.props_.children = content;
+        node = new VirtualNode(NODE_TEXT, {children: content});
     }
     else if (isArray(content)) {
         node = new VirtualNode(NODE_ARRAY);
@@ -250,22 +249,20 @@ const appendChildrenFromContent = (parentNode, content) => {
 /**
  *
  * @param {string|function} type
- * @param {{}?} attributes
+ * @param {{}|null} attributes
  * @param {[]} content
  * @return {VirtualNode}
  */
 const createElement = (type, attributes, ...content) => {
-    const {key = null, ref = null, ...props} = attributes || {};
+    const {key, ref, ...props} = attributes || {};
 
-    const virtualNode = new VirtualNode(type);
-    
-    virtualNode.props_ = props;
-    virtualNode.key_ = key;
-    virtualNode.ref_ = ref;
+    const virtualNode = new VirtualNode(type, props, key, ref);
 
-    if (virtualNode.tag_ === TAG_FUNCTIONAL) {
+    if (isFunction(type)) {
         // JSX children
-        virtualNode.props_.children = content.length > 1 ? content : content[0];
+        if (content.length > 0) {
+            virtualNode.props_.children = content.length > 1 ? content : content[0];
+        }
     } else {
         // Append children directly
         appendChildrenFromContent(virtualNode, content);
@@ -471,7 +468,7 @@ const _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn
 };
 
 const _hasOwnNonEmpty = (target, prop) => {
-    return hasOwnProperty(target, prop) && !isEmpty(target[prop]);
+    return hasOwnProperty(target, prop) && !isNullish(target[prop]);
 };
 
 const createNativeTextNode = (text) => {
@@ -668,44 +665,48 @@ const _findNativeHost = (virtualNode) => {
         return null;
     }
 
-    if (virtualNode.parent_.nativeNode_ === null) {
-        return _findNativeHost(virtualNode.parent_);
+    if (!isNullish(virtualNode.parent_.nativeNode_)) {
+        return virtualNode.parent_.nativeNode_;
     }
-
-    return virtualNode.parent_.nativeNode_;
+    
+    return _findNativeHost(virtualNode.parent_);
 };
 
 const _findFirstNativeNode = (virtualNode) => {
-    if (virtualNode.nativeNode_ !== null) {
+    if (!isNullish(virtualNode.nativeNode_)) {
         return virtualNode.nativeNode_;
     }
     
     let firstNativeNode = null;
     
-    for (
-        let i = 0, len = virtualNode.children_.length
-        ; i < len && firstNativeNode === null
-        ; ++i
-    ) {
-        firstNativeNode = _findFirstNativeNode(virtualNode.children_[i]);
+    if (virtualNode.children_ !== undefined) {
+        for (
+            let i = 0, len = virtualNode.children_.length
+            ; i < len && firstNativeNode === null
+            ; ++i
+        ) {
+            firstNativeNode = _findFirstNativeNode(virtualNode.children_[i]);
+        }
     }
 
     return firstNativeNode;
 };
 
 const _findClosestNativeNodes = (virtualNode) => {
-    if (virtualNode.nativeNode_ !== null) {
+    if (!isNullish(virtualNode.nativeNode_)) {
         return [virtualNode.nativeNode_];
     }
     
     const closestNativeNodes = [];
 
-    for (
-        let i = 0, len = virtualNode.children_.length
-        ; i < len
-        ; ++i
-    ) {
-        closestNativeNodes.push(..._findClosestNativeNodes(virtualNode.children_[i]));
+    if (virtualNode.children_ !== undefined) {
+        for (
+            let i = 0, len = virtualNode.children_.length
+            ; i < len
+            ; ++i
+        ) {
+            closestNativeNodes.push(..._findClosestNativeNodes(virtualNode.children_[i]));
+        }
     }
 
     return closestNativeNodes;
@@ -741,11 +742,13 @@ const useEffect = (callback, deps = null) => {
          */
         const currentHook = functionalVirtualNode.hooks_[hookIndex];
 
-        if (!(
-            deps === null && currentHook.deps_ === null ||
-            deps.length === currentHook.deps_.length
-        )) {
-            throw new Error('Deps must be size-fixed');
+        if (true) {
+            if (!(
+                deps === null && currentHook.deps_ === null ||
+                deps.length === currentHook.deps_.length
+            )) {
+                throw new Error('Deps must be size-fixed');
+            }
         }
 
         const effectTag = _getEffectTag(deps, currentHook.deps_);
@@ -770,7 +773,7 @@ const useEffect = (callback, deps = null) => {
     }
 
     const hook = new EffectHook(callback, deps, null);
-    hook.tag_ = _getEffectTag(deps);
+    hook.tag_ = _getEffectTag(deps, null);
 
     functionalVirtualNode.hooks_.push(hook);
 };
@@ -841,7 +844,7 @@ const _mountEffectHook = (effectHook) => {
  * @param {EffectHook} hook
  * @param {boolean} isNodeUnmounted
  */
-const _destroyEffectHook = (hook, isNodeUnmounted = false) => {
+const _destroyEffectHook = (hook, isNodeUnmounted) => {
     if (hook.lastDestroy_ !== null && !isNodeUnmounted) {
         hook.lastDestroy_();
         return;
@@ -852,7 +855,7 @@ const _destroyEffectHook = (hook, isNodeUnmounted = false) => {
     }
 };
 
-const _getEffectTag = (deps, lastDeps = false) => {
+const _getEffectTag = (deps, lastDeps) => {
     // Always
     if (deps === null) {
         return TAG_ALWAYS;
@@ -864,7 +867,12 @@ const _getEffectTag = (deps, lastDeps = false) => {
     }
 
     // Deps
-    if (lastDeps === false || compareSameLengthArrays(deps, lastDeps)) {
+    // 1. When init effect
+    if (lastDeps === null) {
+        return TAG_DEPS;
+    }
+    // 2. Two arrays are equal
+    if (compareSameLengthArrays(deps, lastDeps)) {
         return TAG_DEPS;
     }
 
@@ -896,7 +904,7 @@ const _updateVirtualTreeImpl = (rootVirtualNode) => {
 };
 
 const _updateVirtualNodeRecursive = (virtualNode, typedVirtualNodeMaps) => {
-    if (virtualNode.tag_ === TAG_FUNCTIONAL) {
+    if (isFunction(virtualNode.type_)) {
         typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
     
         prepareCurrentlyProcessing(virtualNode);
@@ -914,17 +922,19 @@ const _updateVirtualNodeRecursive = (virtualNode, typedVirtualNodeMaps) => {
             // so don't wait until the recursion finished to do this
             resolveVirtualTree(virtualNode);
         }
-    } else if (virtualNode.tag_ === TAG_VIEWABLE) {
+    } else if (virtualNode.nativeNode_ !== undefined) {
         typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
     }
 
-    // Recursion
-    for (
-        let i = 0, len = virtualNode.children_.length
-        ; i < len
-        ; ++i
-    ) {
-        _updateVirtualNodeRecursive(virtualNode.children_[i], typedVirtualNodeMaps);
+    if (virtualNode.children_ !== undefined) {
+        // Recursion
+        for (
+            let i = 0, len = virtualNode.children_.length
+            ; i < len
+            ; ++i
+        ) {
+            _updateVirtualNodeRecursive(virtualNode.children_[i], typedVirtualNodeMaps);
+        }
     }
 };
 
@@ -942,18 +952,20 @@ const _getVirtualNodeMaps = (rootVirtualNode) => {
 };
 
 const _walkVirtualNode = (virtualNode, typedVirtualNodeMaps) => {
-    if (virtualNode.tag_ === TAG_FUNCTIONAL) {
+    if (isFunction(virtualNode.type_)) {
         typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
-    } else if (virtualNode.tag_ === TAG_VIEWABLE) {
+    } else if (virtualNode.nativeNode_ !== undefined) {
         typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
     }
 
-    for (
-        let i = 0, len = virtualNode.children_.length
-        ; i < len
-        ; ++i
-    ) {
-        _walkVirtualNode(virtualNode.children_[i], typedVirtualNodeMaps);
+    if (virtualNode.children_ !== undefined) {
+        for (
+            let i = 0, len = virtualNode.children_.length
+            ; i < len
+            ; ++i
+        ) {
+            _walkVirtualNode(virtualNode.children_[i], typedVirtualNodeMaps);
+        }
     }
 };
 
@@ -1022,13 +1034,15 @@ const useState = (initialValue) => {
     return [hook.value_, hook.setValue_];
 };
 
-const resolveVirtualTree = (rootVirtualNode) => {
+const resolveVirtualTree = (functionalVirtualNode) => {
+    // Functional nodes always have children
+    // so, don't need to check if children_ !== undefined
     for (
-        let i = 0, len = rootVirtualNode.children_.length
+        let i = 0, len = functionalVirtualNode.children_.length
         ; i < len
         ; ++i
     ) {
-        _resolveVirtualNodeRecursive(rootVirtualNode.children_[i], rootVirtualNode.path_, i);
+        _resolveVirtualNodeRecursive(functionalVirtualNode.children_[i], functionalVirtualNode.path_, i);
     }
 };
 
@@ -1039,21 +1053,23 @@ const resolveVirtualTree = (rootVirtualNode) => {
  * @private
  */
 const _resolveVirtualNodeRecursive = (virtualNode, parentPath, posInRow) => {
+    const functional = isFunction(virtualNode.type_);
+
     // Set path
     virtualNode.path_ = (
         parentPath
         + PATH_SEP
-        + (virtualNode.key_ !== null
+        + (!isNullish(virtualNode.key_)
             ? escapeVirtualNodeKey(virtualNode.key_)
             : posInRow)
         + PATH_SEP
-        + (virtualNode.tag_ === TAG_FUNCTIONAL
+        + (functional
             ? getFunctionalTypeAlias(virtualNode.type_)
             : virtualNode.type_)
     );
 
     // Restore memoized states
-    if (virtualNode.tag_ === TAG_FUNCTIONAL) {
+    if (functional) {
         const memoizedHooks = findMemoizedHooks(virtualNode.path_);
         if (memoizedHooks !== null) {
             // Here, new node does not have any hooks
@@ -1081,13 +1097,15 @@ const _resolveVirtualNodeRecursive = (virtualNode, parentPath, posInRow) => {
     // Namespace
     virtualNode.ns_ = _determineNS(virtualNode);
 
-    // Recursion
-    for (
-        let i = 0, len = virtualNode.children_.length
-        ; i < len
-        ; ++i
-    ) {
-        _resolveVirtualNodeRecursive(virtualNode.children_[i], virtualNode.path_, i);
+    if (virtualNode.children_ !== undefined) {
+        // Recursion
+        for (
+            let i = 0, len = virtualNode.children_.length
+            ; i < len
+            ; ++i
+        ) {
+            _resolveVirtualNodeRecursive(virtualNode.children_[i], virtualNode.path_, i);
+        }
     }
 };
 

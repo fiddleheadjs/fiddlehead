@@ -1,9 +1,10 @@
 import {unlinkMemoizedHooks} from './MemoizedHooks';
 import {resolveVirtualTree} from './ResolveVirtualTree';
 import {flushCurrentlyProcessing, prepareCurrentlyProcessing} from './CurrentlyProcessing';
-import {TAG_FUNCTIONAL, TAG_VIEWABLE, createVirtualNodeFromContent} from './VirtualNode';
+import {createVirtualNodeFromContent} from './VirtualNode';
 import {commitView} from './CommitView';
 import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNode} from './EffectHook';
+import {isFunction} from './Util';
 
 /**
  *
@@ -27,7 +28,7 @@ const _updateVirtualTreeImpl = (rootVirtualNode) => {
 }
 
 const _updateVirtualNodeRecursive = (virtualNode, typedVirtualNodeMaps) => {
-    if (virtualNode.tag_ === TAG_FUNCTIONAL) {
+    if (isFunction(virtualNode.type_)) {
         typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
     
         prepareCurrentlyProcessing(virtualNode);
@@ -45,17 +46,19 @@ const _updateVirtualNodeRecursive = (virtualNode, typedVirtualNodeMaps) => {
             // so don't wait until the recursion finished to do this
             resolveVirtualTree(virtualNode);
         }
-    } else if (virtualNode.tag_ === TAG_VIEWABLE) {
+    } else if (virtualNode.nativeNode_ !== undefined) {
         typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
     }
 
-    // Recursion
-    for (
-        let i = 0, len = virtualNode.children_.length
-        ; i < len
-        ; ++i
-    ) {
-        _updateVirtualNodeRecursive(virtualNode.children_[i], typedVirtualNodeMaps);
+    if (virtualNode.children_ !== undefined) {
+        // Recursion
+        for (
+            let i = 0, len = virtualNode.children_.length
+            ; i < len
+            ; ++i
+        ) {
+            _updateVirtualNodeRecursive(virtualNode.children_[i], typedVirtualNodeMaps);
+        }
     }
 }
 
@@ -73,18 +76,20 @@ const _getVirtualNodeMaps = (rootVirtualNode) => {
 }
 
 const _walkVirtualNode = (virtualNode, typedVirtualNodeMaps) => {
-    if (virtualNode.tag_ === TAG_FUNCTIONAL) {
+    if (isFunction(virtualNode.type_)) {
         typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
-    } else if (virtualNode.tag_ === TAG_VIEWABLE) {
+    } else if (virtualNode.nativeNode_ !== undefined) {
         typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
     }
 
-    for (
-        let i = 0, len = virtualNode.children_.length
-        ; i < len
-        ; ++i
-    ) {
-        _walkVirtualNode(virtualNode.children_[i], typedVirtualNodeMaps);
+    if (virtualNode.children_ !== undefined) {
+        for (
+            let i = 0, len = virtualNode.children_.length
+            ; i < len
+            ; ++i
+        ) {
+            _walkVirtualNode(virtualNode.children_[i], typedVirtualNodeMaps);
+        }
     }
 }
 

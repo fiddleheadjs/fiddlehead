@@ -1,4 +1,4 @@
-import {hasOwnProperty, isEmpty, isNumber, isString} from './Util';
+import {hasOwnProperty, isNullish, isNumber, isString} from './Util';
 
 export const updateNativeElementAttributes = (element, newAttributes, oldAttributes) => {
     _updateKeyValues(
@@ -113,5 +113,5 @@ const _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn
 }
 
 const _hasOwnNonEmpty = (target, prop) => {
-    return hasOwnProperty(target, prop) && !isEmpty(target[prop]);
+    return hasOwnProperty(target, prop) && !isNullish(target[prop]);
 }

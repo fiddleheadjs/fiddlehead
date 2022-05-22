@@ -3,15 +3,15 @@ export const hasOwnProperty = (obj, propName) => {
 }
 
 export const isString = (value) => {
-    return typeof value === 'string' || value instanceof String;
+    return typeof value === 'string'/* || value instanceof String*/;
 }
 
 export const isNumber = (value) => {
-    return typeof value === 'number' || value instanceof Number;
+    return typeof value === 'number'/* || value instanceof Number*/;
 }
 
 export const isFunction = (value) => {
-    return value instanceof Function;
+    return typeof value === 'function';
 }
 
 export const isArray = (value) => {
@@ -22,8 +22,8 @@ export const isObject = (value) => {
     return value !== null && typeof value === 'object';
 }
 
-export const isEmpty = (value) => {
-    return value === undefined || value === null;
+export const isNullish = (value) => {
+    return value === null || value === undefined;
 }
 
 /**

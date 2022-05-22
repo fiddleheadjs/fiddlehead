@@ -1,7 +1,7 @@
 import {linkNativeNode, NODE_TEXT, RootType} from './VirtualNode';
 import {updateNativeElementAttributes, updateNativeTextNode} from './NativeDOM';
 import {PATH_SEP} from './VirtualNode';
-import {startsWith} from './Util';
+import { startsWith, isNullish } from './Util';
 import {hydrateViewableVirtualNode} from './HydrateView';
 import {attachVirtualNode} from './Externals';
 
@@ -151,44 +151,48 @@ const _findNativeHost = (virtualNode) => {
         return null;
     }
 
-    if (virtualNode.parent_.nativeNode_ === null) {
-        return _findNativeHost(virtualNode.parent_);
+    if (!isNullish(virtualNode.parent_.nativeNode_)) {
+        return virtualNode.parent_.nativeNode_;
     }
-
-    return virtualNode.parent_.nativeNode_;
+    
+    return _findNativeHost(virtualNode.parent_);
 }
 
 const _findFirstNativeNode = (virtualNode) => {
-    if (virtualNode.nativeNode_ !== null) {
+    if (!isNullish(virtualNode.nativeNode_)) {
         return virtualNode.nativeNode_;
     }
     
     let firstNativeNode = null;
     
-    for (
-        let i = 0, len = virtualNode.children_.length
-        ; i < len && firstNativeNode === null
-        ; ++i
-    ) {
-        firstNativeNode = _findFirstNativeNode(virtualNode.children_[i]);
+    if (virtualNode.children_ !== undefined) {
+        for (
+            let i = 0, len = virtualNode.children_.length
+            ; i < len && firstNativeNode === null
+            ; ++i
+        ) {
+            firstNativeNode = _findFirstNativeNode(virtualNode.children_[i]);
+        }
     }
 
     return firstNativeNode;
 }
 
 const _findClosestNativeNodes = (virtualNode) => {
-    if (virtualNode.nativeNode_ !== null) {
+    if (!isNullish(virtualNode.nativeNode_)) {
         return [virtualNode.nativeNode_];
     }
     
     const closestNativeNodes = [];
 
-    for (
-        let i = 0, len = virtualNode.children_.length
-        ; i < len
-        ; ++i
-    ) {
-        closestNativeNodes.push(..._findClosestNativeNodes(virtualNode.children_[i]));
+    if (virtualNode.children_ !== undefined) {
+        for (
+            let i = 0, len = virtualNode.children_.length
+            ; i < len
+            ; ++i
+        ) {
+            closestNativeNodes.push(..._findClosestNativeNodes(virtualNode.children_[i]));
+        }
     }
 
     return closestNativeNodes;

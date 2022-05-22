@@ -2,36 +2,40 @@ import {RefHook} from './RefHook';
 import {isArray, isFunction, isNumber, isString} from './Util';
 
 /**
- *
- * @param {string|function} type
- * @constructor
+ * 
+ * @param {function|string} type 
+ * @param {{}?} props 
+ * @param {string|number?} key 
+ * @param {RefHook?} ref 
  */
-export function VirtualNode(type) {
+export function VirtualNode(type, props = {}, key = null, ref = null) {
     this.type_ = type;
-    this.props_ = {};
-    this.key_ = null;
-    this.ref_ = null;
 
-    this.hooks_ = [];
-
-    /**
-     * @type {VirtualNode|null}
-     */
     this.parent_ = null;
-
-    /**
-     * @type {VirtualNode[]}
-     */
-    this.children_ = [];
 
     this.path_ = '';
 
-    this.nativeNode_ = null;
     this.ns_ = null;
+    
+    if (type !== NODE_TEXT) {
+        this.children_ = [];
+    }
 
-    this.tag_ = (type === NODE_FRAGMENT || type === NODE_ARRAY) ? TAG_COLLECTIVE : (
-        isFunction(type) ? TAG_FUNCTIONAL : TAG_VIEWABLE
-    );
+    if (type !== NODE_ARRAY) {
+        this.key_ = key;
+        
+        if (type !== NODE_FRAGMENT) {
+            this.props_ = props;
+
+            this.ref_ = ref;
+        
+            this.nativeNode_ = null;
+    
+            if (isFunction(type)) {
+                this.hooks_ = [];
+            }
+        }
+    }
 }
 
 // Do not support namespace MathML as almost browsers do not support as well
@@ -45,10 +49,6 @@ export const NODE_TEXT = '#';
 export const NODE_ARRAY = '[';
 export const NODE_FRAGMENT = '=';
 
-export const TAG_VIEWABLE = 0;
-export const TAG_FUNCTIONAL = 1;
-export const TAG_COLLECTIVE = 2;
-
 export const PATH_SEP = '/';
 
 export const RootType = (props) => {
@@ -57,7 +57,7 @@ export const RootType = (props) => {
 
 /**
  * 
- * @param {*} key 
+ * @param {string|number} key 
  * @returns {string}
  */
 export const escapeVirtualNodeKey = (key) => {
@@ -112,8 +112,7 @@ export const createVirtualNodeFromContent = (content) => {
         node = content;
     }
     else if (isString(content) || isNumber(content)) {
-        node = new VirtualNode(NODE_TEXT);
-        node.props_.children = content;
+        node = new VirtualNode(NODE_TEXT, {children: content});
     }
     else if (isArray(content)) {
         node = new VirtualNode(NODE_ARRAY);

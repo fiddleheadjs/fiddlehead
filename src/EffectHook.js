@@ -31,11 +31,13 @@ export const useEffect = (callback, deps = null) => {
          */
         const currentHook = functionalVirtualNode.hooks_[hookIndex];
 
-        if (!(
-            deps === null && currentHook.deps_ === null ||
-            deps.length === currentHook.deps_.length
-        )) {
-            throw new Error('Deps must be size-fixed');
+        if (__DEV__) {
+            if (!(
+                deps === null && currentHook.deps_ === null ||
+                deps.length === currentHook.deps_.length
+            )) {
+                throw new Error('Deps must be size-fixed');
+            }
         }
 
         const effectTag = _getEffectTag(deps, currentHook.deps_);
@@ -60,7 +62,7 @@ export const useEffect = (callback, deps = null) => {
     }
 
     const hook = new EffectHook(callback, deps, null);
-    hook.tag_ = _getEffectTag(deps);
+    hook.tag_ = _getEffectTag(deps, null);
 
     functionalVirtualNode.hooks_.push(hook);
 }
@@ -131,7 +133,7 @@ const _mountEffectHook = (effectHook) => {
  * @param {EffectHook} hook
  * @param {boolean} isNodeUnmounted
  */
-const _destroyEffectHook = (hook, isNodeUnmounted = false) => {
+const _destroyEffectHook = (hook, isNodeUnmounted) => {
     if (hook.lastDestroy_ !== null && !isNodeUnmounted) {
         hook.lastDestroy_();
         return;
@@ -142,7 +144,7 @@ const _destroyEffectHook = (hook, isNodeUnmounted = false) => {
     }
 }
 
-const _getEffectTag = (deps, lastDeps = false) => {
+const _getEffectTag = (deps, lastDeps) => {
     // Always
     if (deps === null) {
         return TAG_ALWAYS;
@@ -154,7 +156,12 @@ const _getEffectTag = (deps, lastDeps = false) => {
     }
 
     // Deps
-    if (lastDeps === false || compareSameLengthArrays(deps, lastDeps)) {
+    // 1. When init effect
+    if (lastDeps === null) {
+        return TAG_DEPS;
+    }
+    // 2. Two arrays are equal
+    if (compareSameLengthArrays(deps, lastDeps)) {
         return TAG_DEPS;
     }
 
