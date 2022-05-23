@@ -918,6 +918,8 @@ const _updateVirtualNodeRecursive = (virtualNode, typedVirtualNodeMaps) => {
             // Memoized data affects the underneath tree,
             // so don't wait until the recursion finished to do this
             resolveVirtualTree(virtualNode);
+        } else {
+            virtualNode.children_.length = 0;
         }
     } else if (virtualNode.nativeNode_ !== undefined) {
         typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);

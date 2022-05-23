@@ -243,6 +243,8 @@ function MyAd() {
 function Demo() {
     const [shows, setShows] = useState(true);
 
+    if (!shows) return null;
+
     //console.log('shows', shows);
     return <><paragraph>
         <input type="checkbox" checked={shows} onChange={ev => setShows(shows => !shows)}/>
@@ -256,7 +258,8 @@ function Demo() {
 }
 
 function DemoWrapper() {
-    return new Array(100).fill(1).map((_, i) => <Demo key={i}/>);
+    return <Demo/>;
+    // return new Array(100).fill(1).map((_, i) => <Demo key={i}/>);
 }
 
 function DemoWrapperWrapper() {

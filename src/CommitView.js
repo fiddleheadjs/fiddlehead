@@ -1,7 +1,7 @@
 import {linkNativeNode, NODE_TEXT, RootType} from './VirtualNode';
 import {updateNativeElementAttributes, updateNativeTextNode} from './NativeDOM';
 import {PATH_SEP} from './VirtualNode';
-import { startsWith, isNullish } from './Util';
+import {startsWith, isNullish} from './Util';
 import {hydrateViewableVirtualNode} from './HydrateView';
 import {attachVirtualNode} from './Externals';
 
