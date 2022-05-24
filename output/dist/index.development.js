@@ -117,16 +117,16 @@ function VirtualNode(type, props = {}, key = null, ref = null) {
     this.type_ = type;
 
     this.key_ = key;
+    
+    this.path_ = '';
+    
+    this.ns_ = null;
 
     this.parent_ = null;
-
-    this.path_ = '';
-
-    this.ns_ = null;
     
-    if (type !== NODE_TEXT) {
-        this.children_ = [];
-    }
+    this.child_ = null;
+
+    this.sibling_ = null;
     
     if (type !== NODE_FRAGMENT) {
         this.props_ = props;
@@ -231,14 +231,22 @@ const createVirtualNodeFromContent = (content) => {
  */
 const appendChildrenFromContent = (parentNode, content) => {
     for (
-        let childNode, i = 0, len = content.length
+        let childNode, prevChildNode = null, i = 0, len = content.length
         ; i < len
         ; ++i
     ) {
         childNode = createVirtualNodeFromContent(content[i]);
+        
         if (childNode !== null) {
-            parentNode.children_.push(childNode);
             childNode.parent_ = parentNode;
+            
+            if (prevChildNode !== null) {
+                prevChildNode.sibling_ = childNode;
+            } else {
+                parentNode.child_ = childNode;
+            }
+
+            prevChildNode = childNode;
         }
     }
 };
@@ -673,17 +681,13 @@ const _findFirstNativeNode = (virtualNode) => {
     if (!isNullish(virtualNode.nativeNode_)) {
         return virtualNode.nativeNode_;
     }
-    
+
     let firstNativeNode = null;
-    
-    if (virtualNode.children_ !== undefined) {
-        for (
-            let i = 0, len = virtualNode.children_.length
-            ; i < len && firstNativeNode === null
-            ; ++i
-        ) {
-            firstNativeNode = _findFirstNativeNode(virtualNode.children_[i]);
-        }
+    let childNode = virtualNode.child_;
+
+    while (firstNativeNode === null && childNode !== null) {
+        firstNativeNode = _findFirstNativeNode(childNode);
+        childNode = childNode.sibling_;
     }
 
     return firstNativeNode;
@@ -695,15 +699,11 @@ const _findClosestNativeNodes = (virtualNode) => {
     }
     
     const closestNativeNodes = [];
+    let childNode = virtualNode.child_;
 
-    if (virtualNode.children_ !== undefined) {
-        for (
-            let i = 0, len = virtualNode.children_.length
-            ; i < len
-            ; ++i
-        ) {
-            closestNativeNodes.push(..._findClosestNativeNodes(virtualNode.children_[i]));
-        }
+    while (childNode !== null) {
+        closestNativeNodes.push(..._findClosestNativeNodes(childNode));
+        childNode = childNode.sibling_;
     }
 
     return closestNativeNodes;
@@ -905,35 +905,28 @@ const _updateVirtualNodeRecursive = (virtualNode, typedVirtualNodeMaps) => {
         typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
     
         prepareCurrentlyProcessing(virtualNode);
-        const newVirtualNode = createVirtualNodeFromContent(
+        virtualNode.child_ = createVirtualNodeFromContent(
             virtualNode.type_(virtualNode.props_)
         );
         flushCurrentlyProcessing();
-    
-        if (newVirtualNode !== null) {
-            virtualNode.children_[0] = newVirtualNode;
-            newVirtualNode.parent_ = virtualNode;
+
+        if (virtualNode.child_ !== null) {
+            virtualNode.child_.parent_ = virtualNode;
     
             // This step aimed to read memoized hooks and restore them
             // Memoized data affects the underneath tree,
             // so don't wait until the recursion finished to do this
             resolveVirtualTree(virtualNode);
-        } else {
-            virtualNode.children_.length = 0;
         }
     } else if (virtualNode.nativeNode_ !== undefined) {
         typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
     }
 
-    if (virtualNode.children_ !== undefined) {
-        // Recursion
-        for (
-            let i = 0, len = virtualNode.children_.length
-            ; i < len
-            ; ++i
-        ) {
-            _updateVirtualNodeRecursive(virtualNode.children_[i], typedVirtualNodeMaps);
-        }
+    let childNode = virtualNode.child_;
+
+    while (childNode !== null) {
+        _updateVirtualNodeRecursive(childNode, typedVirtualNodeMaps);
+        childNode = childNode.sibling_;
     }
 };
 
@@ -957,14 +950,11 @@ const _walkVirtualNode = (virtualNode, typedVirtualNodeMaps) => {
         typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
     }
 
-    if (virtualNode.children_ !== undefined) {
-        for (
-            let i = 0, len = virtualNode.children_.length
-            ; i < len
-            ; ++i
-        ) {
-            _walkVirtualNode(virtualNode.children_[i], typedVirtualNodeMaps);
-        }
+    let childNode = virtualNode.child_;
+    
+    while (childNode !== null) {
+        _walkVirtualNode(childNode, typedVirtualNodeMaps);
+        childNode = childNode.sibling_;
     }
 };
 
@@ -1033,15 +1023,14 @@ const useState = (initialValue) => {
     return [hook.value_, hook.setValue_];
 };
 
-const resolveVirtualTree = (functionalVirtualNode) => {
-    // Functional nodes always have children
-    // so, don't need to check if children_ !== undefined
-    for (
-        let i = 0, len = functionalVirtualNode.children_.length
-        ; i < len
-        ; ++i
-    ) {
-        _resolveVirtualNodeRecursive(functionalVirtualNode.children_[i], functionalVirtualNode.path_, i);
+const resolveVirtualTree = (virtualNode) => {
+    let index = 0;
+    let childNode = virtualNode.child_;
+    
+    while (childNode !== null) {
+        _resolveVirtualNodeRecursive(childNode, virtualNode.path_, index);
+        index++;
+        childNode = childNode.sibling_;
     }
 };
 
@@ -1096,16 +1085,8 @@ const _resolveVirtualNodeRecursive = (virtualNode, parentPath, posInRow) => {
     // Namespace
     virtualNode.ns_ = _determineNS(virtualNode);
 
-    if (virtualNode.children_ !== undefined) {
-        // Recursion
-        for (
-            let i = 0, len = virtualNode.children_.length
-            ; i < len
-            ; ++i
-        ) {
-            _resolveVirtualNodeRecursive(virtualNode.children_[i], virtualNode.path_, i);
-        }
-    }
+    // Repeat with children
+    resolveVirtualTree(virtualNode);
 };
 
 const _determineNS = (virtualNode) => {

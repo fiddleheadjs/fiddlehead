@@ -162,17 +162,13 @@ const _findFirstNativeNode = (virtualNode) => {
     if (!isNullish(virtualNode.nativeNode_)) {
         return virtualNode.nativeNode_;
     }
-    
+
     let firstNativeNode = null;
-    
-    if (virtualNode.children_ !== undefined) {
-        for (
-            let i = 0, len = virtualNode.children_.length
-            ; i < len && firstNativeNode === null
-            ; ++i
-        ) {
-            firstNativeNode = _findFirstNativeNode(virtualNode.children_[i]);
-        }
+    let childNode = virtualNode.child_;
+
+    while (firstNativeNode === null && childNode !== null) {
+        firstNativeNode = _findFirstNativeNode(childNode);
+        childNode = childNode.sibling_;
     }
 
     return firstNativeNode;
@@ -184,15 +180,11 @@ const _findClosestNativeNodes = (virtualNode) => {
     }
     
     const closestNativeNodes = [];
+    let childNode = virtualNode.child_;
 
-    if (virtualNode.children_ !== undefined) {
-        for (
-            let i = 0, len = virtualNode.children_.length
-            ; i < len
-            ; ++i
-        ) {
-            closestNativeNodes.push(..._findClosestNativeNodes(virtualNode.children_[i]));
-        }
+    while (childNode !== null) {
+        closestNativeNodes.push(..._findClosestNativeNodes(childNode));
+        childNode = childNode.sibling_;
     }
 
     return closestNativeNodes;

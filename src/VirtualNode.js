@@ -12,16 +12,16 @@ export function VirtualNode(type, props = {}, key = null, ref = null) {
     this.type_ = type;
 
     this.key_ = key;
+    
+    this.path_ = '';
+    
+    this.ns_ = null;
 
     this.parent_ = null;
-
-    this.path_ = '';
-
-    this.ns_ = null;
     
-    if (type !== NODE_TEXT) {
-        this.children_ = [];
-    }
+    this.child_ = null;
+
+    this.sibling_ = null;
     
     if (type !== NODE_FRAGMENT) {
         this.props_ = props;
@@ -126,14 +126,22 @@ export const createVirtualNodeFromContent = (content) => {
  */
 export const appendChildrenFromContent = (parentNode, content) => {
     for (
-        let childNode, i = 0, len = content.length
+        let childNode, prevChildNode = null, i = 0, len = content.length
         ; i < len
         ; ++i
     ) {
         childNode = createVirtualNodeFromContent(content[i]);
+        
         if (childNode !== null) {
-            parentNode.children_.push(childNode);
             childNode.parent_ = parentNode;
+            
+            if (prevChildNode !== null) {
+                prevChildNode.sibling_ = childNode;
+            } else {
+                parentNode.child_ = childNode;
+            }
+
+            prevChildNode = childNode;
         }
     }
 }

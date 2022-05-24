@@ -2,17 +2,16 @@ import {escapeVirtualNodeKey, NS_HTML, NS_SVG, PATH_SEP} from './VirtualNode';
 import {getFunctionalTypeAlias} from './Externals';
 import {findMemoizedHooks, linkMemoizedHooks} from './MemoizedHooks';
 import {StateHook} from './StateHook';
-import { isFunction, isNullish } from './Util';
+import {isFunction, isNullish} from './Util';
 
-export const resolveVirtualTree = (functionalVirtualNode) => {
-    // Functional nodes always have children
-    // so, don't need to check if children_ !== undefined
-    for (
-        let i = 0, len = functionalVirtualNode.children_.length
-        ; i < len
-        ; ++i
-    ) {
-        _resolveVirtualNodeRecursive(functionalVirtualNode.children_[i], functionalVirtualNode.path_, i);
+export const resolveVirtualTree = (virtualNode) => {
+    let index = 0;
+    let childNode = virtualNode.child_;
+    
+    while (childNode !== null) {
+        _resolveVirtualNodeRecursive(childNode, virtualNode.path_, index);
+        index++;
+        childNode = childNode.sibling_;
     }
 }
 
@@ -67,16 +66,8 @@ const _resolveVirtualNodeRecursive = (virtualNode, parentPath, posInRow) => {
     // Namespace
     virtualNode.ns_ = _determineNS(virtualNode);
 
-    if (virtualNode.children_ !== undefined) {
-        // Recursion
-        for (
-            let i = 0, len = virtualNode.children_.length
-            ; i < len
-            ; ++i
-        ) {
-            _resolveVirtualNodeRecursive(virtualNode.children_[i], virtualNode.path_, i);
-        }
-    }
+    // Repeat with children
+    resolveVirtualTree(virtualNode);
 }
 
 const _determineNS = (virtualNode) => {

@@ -32,35 +32,28 @@ const _updateVirtualNodeRecursive = (virtualNode, typedVirtualNodeMaps) => {
         typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
     
         prepareCurrentlyProcessing(virtualNode);
-        const newVirtualNode = createVirtualNodeFromContent(
+        virtualNode.child_ = createVirtualNodeFromContent(
             virtualNode.type_(virtualNode.props_)
         );
         flushCurrentlyProcessing();
-    
-        if (newVirtualNode !== null) {
-            virtualNode.children_[0] = newVirtualNode;
-            newVirtualNode.parent_ = virtualNode;
+
+        if (virtualNode.child_ !== null) {
+            virtualNode.child_.parent_ = virtualNode;
     
             // This step aimed to read memoized hooks and restore them
             // Memoized data affects the underneath tree,
             // so don't wait until the recursion finished to do this
             resolveVirtualTree(virtualNode);
-        } else {
-            virtualNode.children_.length = 0;
         }
     } else if (virtualNode.nativeNode_ !== undefined) {
         typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
     }
 
-    if (virtualNode.children_ !== undefined) {
-        // Recursion
-        for (
-            let i = 0, len = virtualNode.children_.length
-            ; i < len
-            ; ++i
-        ) {
-            _updateVirtualNodeRecursive(virtualNode.children_[i], typedVirtualNodeMaps);
-        }
+    let childNode = virtualNode.child_;
+
+    while (childNode !== null) {
+        _updateVirtualNodeRecursive(childNode, typedVirtualNodeMaps);
+        childNode = childNode.sibling_;
     }
 }
 
@@ -84,14 +77,11 @@ const _walkVirtualNode = (virtualNode, typedVirtualNodeMaps) => {
         typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
     }
 
-    if (virtualNode.children_ !== undefined) {
-        for (
-            let i = 0, len = virtualNode.children_.length
-            ; i < len
-            ; ++i
-        ) {
-            _walkVirtualNode(virtualNode.children_[i], typedVirtualNodeMaps);
-        }
+    let childNode = virtualNode.child_;
+    
+    while (childNode !== null) {
+        _walkVirtualNode(childNode, typedVirtualNodeMaps);
+        childNode = childNode.sibling_;
     }
 }
 
