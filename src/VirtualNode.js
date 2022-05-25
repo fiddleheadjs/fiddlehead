@@ -170,3 +170,22 @@ export const appendChildrenFromContent = (parentNode, content) => {
 //                                       same parent -> {old} === {new} ? YES -> reuse old state
 //                                                                        NO  -> new node
 //
+/*
+
+performUnit(current)
+    if current is Function
+        newChild = current.render()
+        newChild.alternative = current.child
+        current.child = newChild
+
+    
+    if current.child
+        performUnit(current.child)
+
+    if current.sibling
+        performUnit(current.sibling)
+
+    if current.parent.sibling
+        performUnit(current.parent.sibling)
+
+*/

@@ -255,6 +255,13 @@ const appendChildrenFromContent = (parentNode, content) => {
 //                                       same parent -> {old} === {new} ? YES -> reuse old state
 //                                                                        NO  -> new node
 //
+/*
+
+performUnitOfWork(currentNode, )
+    if currentNode is Function
+        
+
+*/
 
 /**
  *
