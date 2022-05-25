@@ -28,26 +28,6 @@ const isNullish = (value) => {
 
 /**
  * 
- * @param {Array|string} full 
- * @param {Array|string} sub 
- * @returns {boolean}
- */
-const startsWith = (full, sub) => {
-    if (full.length < sub.length) {
-        return false;
-    }
-
-    for (let i = sub.length - 1; i >= 0; --i) {
-        if (sub[i] !== full[i]) {
-            return false;
-        }
-    }
-
-    return true;
-};
-
-/**
- * 
  * @param {Array} a 
  * @param {Array} b 
  * @returns {boolean}
@@ -239,6 +219,7 @@ const appendChildrenFromContent = (parentNode, content) => {
         
         if (childNode !== null) {
             childNode.parent_ = parentNode;
+            childNode.posInRow_ = i;
 
             if (prevChildNode !== null) {
                 prevChildNode.sibling_ = childNode;
@@ -377,363 +358,6 @@ const linkMemoizedHooks = (path, hooks) => {
 };
 
 /**
- * 
- * @param {string} path 
- */
-const unlinkMemoizedHooks = (path) => {
-    memoizedHooksMap.delete(path);
-};
-
-const updateNativeElementAttributes = (element, newAttributes, oldAttributes) => {
-    _updateKeyValues(
-        element, newAttributes, oldAttributes,
-        _updateElementAttribute, _removeElementAttribute
-    );
-};
-
-const _updateElementAttribute = (element, attrName, newAttrValue, oldAttrValue) => {
-    attrName = _normalizeElementAttributeName(attrName);
-
-    if (attrName === '') {
-        return;
-    }
-
-    if (attrName === 'style') {
-        _updateStyleProperties(element.style, newAttrValue, oldAttrValue || {});
-        return;
-    }
-
-    if (isString(newAttrValue) || isNumber(newAttrValue)) {
-        element.setAttribute(attrName, newAttrValue);
-        return;
-    }
-
-    // Cases: properties, event listeners
-    if (attrName in element) {
-        try {
-            element[attrName] = newAttrValue;
-        } catch (x) {
-            if (true) {
-                console.error(`Property \`${attrName}\` is not writable`);
-            }
-        }
-    }
-};
-
-const _removeElementAttribute = (element, attrName, oldAttrValue) => {
-    attrName = _normalizeElementAttributeName(attrName);
-
-    if (attrName === '') {
-        return;
-    }
-
-    if (isString(oldAttrValue) || isNumber(oldAttrValue)) {
-        element.removeAttribute(attrName);
-        return;
-    }
-
-    // Cases: properties, event listeners
-    if (attrName in element) {
-        try {
-            element[attrName] = null;
-        } catch (x) {
-            if (true) {
-                console.error(`Property \`${attrName}\` is not writable`);
-            }
-        }
-    }
-};
-
-const _normalizeElementAttributeName = (attrName) => {
-    if (attrName === 'class') {
-        if (true) {
-            console.error('Use `className` instead of `class`');
-        }
-        return '';
-    }
-
-    if (attrName === 'className') {
-        return 'class';
-    }
-
-    if (/^on[A-Z]/.test(attrName)) {
-        return attrName.toLowerCase();
-    }
-
-    return attrName;
-};
-
-const _updateStyleProperties = (style, newProperties, oldProperties) => {
-    _updateKeyValues(
-        style, newProperties, oldProperties,
-        _updateStyleProperty, _removeStyleProperty
-    );
-};
-
-const _updateStyleProperty = (style, propName, newPropValue) => {
-    style[propName] = newPropValue;
-};
-
-const _removeStyleProperty = (style, propName) => {
-    style[propName] = '';
-};
-
-const _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn) => {
-    let key;
-    
-    for (key in oldKeyValues) {
-        if (_hasOwnNonEmpty(oldKeyValues, key)) {
-            if (!_hasOwnNonEmpty(newKeyValues, key)) {
-                removeFn(target, key, oldKeyValues[key]);
-            }
-        }
-    }
-
-    for (key in newKeyValues) {
-        if (_hasOwnNonEmpty(newKeyValues, key)) {
-            updateFn(target, key, newKeyValues[key], oldKeyValues[key]);
-        }
-    }
-};
-
-const _hasOwnNonEmpty = (target, prop) => {
-    return hasOwnProperty(target, prop) && !isNullish(target[prop]);
-};
-
-const createNativeTextNode = (text) => {
-    return document.createTextNode(text);
-};
-
-const updateNativeTextNode = (node, text) => {
-    node.textContent = text;
-};
-
-const createNativeElementWithNS = (ns, type, attributes) => {
-    const element = (ns === NS_SVG
-        ? document.createElementNS('http://www.w3.org/2000/svg', type)
-        : document.createElement(type)
-    );
-
-    updateNativeElementAttributes(element, attributes, {});
-    
-    return element;
-};
-
-// !!!IMPORTANT
-// Only use this module for viewable nodes
-// Passing Functional, Array, Fragment nodes will lead to crash
-
-const hydrateViewableVirtualNode = (viewableVirtualNode) => {
-    // Create the native node
-    const nativeNode = _createNativeNode(viewableVirtualNode);
-
-    linkNativeNode(viewableVirtualNode, nativeNode);
-    
-    if (true) {
-        if (nativeNode !== null) {
-            attachVirtualNode(nativeNode, viewableVirtualNode);
-        }
-    }
-};
-
-const _createNativeNode = (viewableVirtualNode) => {
-    if (viewableVirtualNode.type_ === NODE_TEXT) {
-        return createNativeTextNode(viewableVirtualNode.props_.children);
-    }
-
-    return createNativeElementWithNS(
-        viewableVirtualNode.ns_,
-        viewableVirtualNode.type_,
-        viewableVirtualNode.props_
-    );
-};
-
-// !!!IMPORTANT
-// Only use this module for viewable nodes
-// Passing Functional, Array, Fragment nodes will lead to crash
-
-const commitView = (oldViewableVirtualNodeMap, newViewableVirtualNodeMap) => {
-    if (oldViewableVirtualNodeMap.size === 0) {
-        _append(newViewableVirtualNodeMap);
-    } else {
-        /*
-        | for key in oldMap
-        |     if newMap.has(key)
-        |         updateNativeNodes
-        |     else
-        |         removeNativeNodes
-        |
-        | for key in newMap
-        |     if !oldMap.has(key)
-        |         insertNativeNodes
-        */
-        _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
-        _insert(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
-    }
-};
-
-const _removeAndUpdate = (oldViewableVirtualNodeMap, newViewableVirtualNodeMap) => {
-    // New node to be inserted
-    let newViewableVirtualNode;
-
-    // If the current node is under the last removed node
-    // So dont need to remove current node anymore
-    // Use lastRemovedKey to track
-    let lastRemovedKey = '';
-
-    oldViewableVirtualNodeMap.forEach((oldViewableVirtualNode, key) => {
-        if (newViewableVirtualNodeMap.has(key)) {
-            newViewableVirtualNode = newViewableVirtualNodeMap.get(key);
-
-            // Reuse the existing native node
-            linkNativeNode(newViewableVirtualNode, oldViewableVirtualNode.nativeNode_);
-
-            if (true) {
-                attachVirtualNode(oldViewableVirtualNode.nativeNode_, newViewableVirtualNode);
-            }
-
-            if (newViewableVirtualNode.type_ === NODE_TEXT) {
-                if (newViewableVirtualNode.props_.children !== oldViewableVirtualNode.props_.children) {
-                    updateNativeTextNode(
-                        newViewableVirtualNode.nativeNode_,
-                        newViewableVirtualNode.props_.children
-                    );
-                }
-            } else {
-                updateNativeElementAttributes(
-                    newViewableVirtualNode.nativeNode_,
-                    newViewableVirtualNode.props_,
-                    oldViewableVirtualNode.props_
-                );
-            }
-        } else {
-            if (!startsWith(key, lastRemovedKey + PATH_SEP)) {
-                _removeNativeNodesOfVirtualNode(oldViewableVirtualNode);
-                lastRemovedKey = key;
-            }
-        }
-    });
-};
-
-const _append = (newViewableVirtualNodeMap) => {
-    let nativeHost;
-
-    newViewableVirtualNodeMap.forEach((virtualNode) => {
-        nativeHost = _findNativeHost(virtualNode);
-
-        if (nativeHost !== null) {
-            hydrateViewableVirtualNode(virtualNode);
-            nativeHost.appendChild(virtualNode.nativeNode_);
-        }
-    });
-};
-
-const _insert = (oldViewableVirtualNodeMap, newViewableVirtualNodeMap) => {
-    let pendingViewableVirtualNodes = [];
-
-    newViewableVirtualNodeMap.forEach((newViewableVirtualNode, key) => {
-        if (!oldViewableVirtualNodeMap.has(key)) {
-            pendingViewableVirtualNodes.push(newViewableVirtualNode);
-        } else {
-            _insertClosestNativeNodesOfVirtualNodes(pendingViewableVirtualNodes, oldViewableVirtualNodeMap.get(key));
-            pendingViewableVirtualNodes.length = 0;
-        }
-    });
-
-    if (pendingViewableVirtualNodes.length > 0) {
-        _insertClosestNativeNodesOfVirtualNodes(pendingViewableVirtualNodes, null);
-    }
-};
-
-const _insertClosestNativeNodesOfVirtualNodes = (virtualNodes, virtualNodeAfter) => {
-    const nativeNodeAfter = virtualNodeAfter && _findFirstNativeNode(virtualNodeAfter) || null;
-    
-    for (
-        let virtualNode, nativeHost, i = 0, len = virtualNodes.length
-        ; i < len
-        ; ++i
-    ) {
-        virtualNode = virtualNodes[i];
-
-        nativeHost = _findNativeHost(virtualNode);
-        
-        if (nativeHost !== null) {
-            hydrateViewableVirtualNode(virtualNode);
-
-            if (nativeNodeAfter !== null && nativeHost === nativeNodeAfter.parentNode) {
-                nativeHost.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
-            } else {
-                nativeHost.appendChild(virtualNode.nativeNode_);
-            }
-        }
-    }
-};
-
-const _removeNativeNodesOfVirtualNode = (virtualNode) => {
-    const nativeNodes = _findClosestNativeNodes(virtualNode);
-
-    for (
-        let nativeNode, i = 0, len = nativeNodes.length
-        ; i < len
-        ; ++i
-    ) {
-        nativeNode = nativeNodes[i];
-
-        if (nativeNode.parentNode !== null) {
-            nativeNode.parentNode.removeChild(nativeNode);
-        }
-    }
-};
-
-const _findNativeHost = (virtualNode) => {
-    if (virtualNode.type_ === RootType) {
-        return virtualNode.nativeNode_;
-    }
-    
-    if (virtualNode.parent_ === null) {
-        return null;
-    }
-
-    if (!isNullish(virtualNode.parent_.nativeNode_)) {
-        return virtualNode.parent_.nativeNode_;
-    }
-    
-    return _findNativeHost(virtualNode.parent_);
-};
-
-const _findFirstNativeNode = (virtualNode) => {
-    if (!isNullish(virtualNode.nativeNode_)) {
-        return virtualNode.nativeNode_;
-    }
-
-    let firstNativeNode = null;
-    let childNode = virtualNode.child_;
-
-    while (firstNativeNode === null && childNode !== null) {
-        firstNativeNode = _findFirstNativeNode(childNode);
-        childNode = childNode.sibling_;
-    }
-
-    return firstNativeNode;
-};
-
-const _findClosestNativeNodes = (virtualNode) => {
-    if (!isNullish(virtualNode.nativeNode_)) {
-        return [virtualNode.nativeNode_];
-    }
-    
-    const closestNativeNodes = [];
-    let childNode = virtualNode.child_;
-
-    while (childNode !== null) {
-        closestNativeNodes.push(..._findClosestNativeNodes(childNode));
-        childNode = childNode.sibling_;
-    }
-
-    return closestNativeNodes;
-};
-
-/**
  *
  * @param {function} callback
  * @param {[]|null} deps
@@ -799,83 +423,6 @@ const useEffect = (callback, deps = null) => {
     functionalVirtualNode.hooks_.push(hook);
 };
 
-/**
- *
- * @param {VirtualNode} functionalVirtualNode
- * @param {boolean} isNewNodeMounted
- */
-const mountEffectsOnFunctionalVirtualNode = (functionalVirtualNode, isNewNodeMounted) => {
-    for (
-        let hook, i = 0, len = functionalVirtualNode.hooks_.length
-        ; i < len
-        ; ++i
-    ) {
-        hook = functionalVirtualNode.hooks_[i];
-
-        if (!(hook instanceof EffectHook)) {
-            continue;
-        }
-
-        if (isNewNodeMounted || hook.tag_ === TAG_ALWAYS || hook.tag_ === TAG_DEPS_CHANGED) {
-            _mountEffectHook(hook);
-        }
-    }
-};
-
-/**
- *
- * @param {VirtualNode} functionalVirtualNode
- * @param {boolean} isNodeUnmounted
- */
-const destroyEffectsOnFunctionalVirtualNode = (functionalVirtualNode, isNodeUnmounted) => {
-    for (
-        let hook, i = 0, len = functionalVirtualNode.hooks_.length
-        ; i < len
-        ; ++i
-    ) {
-        hook = functionalVirtualNode.hooks_[i];
-
-        if (!(
-            hook instanceof EffectHook &&
-            (hook.lastDestroy_ !== null || hook.destroy_ !== null)
-        )) {
-            continue;
-        }
-
-        if (isNodeUnmounted || hook.tag_ === TAG_ALWAYS || hook.tag_ === TAG_DEPS_CHANGED) {
-            _destroyEffectHook(hook, isNodeUnmounted);
-        }
-    }
-};
-
-/**
- *
- * @param {EffectHook} effectHook
- */
-const _mountEffectHook = (effectHook) => {
-    effectHook.destroy_ = effectHook.callback_();
-
-    if (effectHook.destroy_ === undefined) {
-        effectHook.destroy_ = null;
-    }
-};
-
-/**
- *
- * @param {EffectHook} hook
- * @param {boolean} isNodeUnmounted
- */
-const _destroyEffectHook = (hook, isNodeUnmounted) => {
-    if (hook.lastDestroy_ !== null && !isNodeUnmounted) {
-        hook.lastDestroy_();
-        return;
-    }
-
-    if (hook.destroy_ !== null) {
-        hook.destroy_();
-    }
-};
-
 const _getEffectTag = (deps, lastDeps) => {
     // Always
     if (deps === null) {
@@ -908,98 +455,58 @@ const _getEffectTag = (deps, lastDeps) => {
  * @param {VirtualNode} rootVirtualNode
  */
 const updateVirtualTree = (rootVirtualNode) => {
-    // Update virtual tree and create node maps
-    const oldTypedVirtualNodeMaps = _getVirtualNodeMaps(rootVirtualNode);
-    const newTypedVirtualNodeMaps = _updateVirtualTreeImpl(rootVirtualNode);
-
-    // Resolve effects and commit view
-    _resolveUnmountedVirtualNodes(oldTypedVirtualNodeMaps.functional_, newTypedVirtualNodeMaps.functional_);
-    commitView(oldTypedVirtualNodeMaps.viewable_, newTypedVirtualNodeMaps.viewable_);
-    _resolveMountedVirtualNodes(oldTypedVirtualNodeMaps.functional_, newTypedVirtualNodeMaps.functional_);
+    _walk(rootVirtualNode);
 };
 
-const _updateVirtualTreeImpl = (rootVirtualNode) => {
-    const typedVirtualNodeMaps = _createEmptyTypedVirtualNodeMaps();
-    _updateVirtualNodeRecursive(rootVirtualNode, typedVirtualNodeMaps);
-    return typedVirtualNodeMaps;
-};
+const _walk = (currentNode, oldNode, parentNode) => {
+    if (parentNode.flag_ === 'UPDATE') {
+        if (isFunction(currentNode.type_)) {
+            // Find corresponding old node
+            let oldNode = parentNode.old_.child_;
+            while (oldNode !== null) {
+                if (currentNode.key_ !== null && currentNode.key_ === oldNode.key_) {
+                    break;
+                }
+                if (currentNode.posInRow_ === oldNode.posInRow_) {
+                    break;
+                }
+                oldNode = oldNode.sibling_;
+            }
 
-const _updateVirtualNodeRecursive = (virtualNode, typedVirtualNodeMaps) => {
-    if (isFunction(virtualNode.type_)) {
-        typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
+            // Transfer memoized hooks
+            if (oldNode !== null) {
+                currentNode.hooks_ = oldNode.hooks_;
+                for (
+                    let hook, i = 0, len = currentNode.hooks_.length
+                    ; i < len
+                    ; ++i
+                ) {
+                    hook = currentNode.hooks_[i];
     
-        prepareCurrentlyProcessing(virtualNode);
-        virtualNode.child_ = createVirtualNodeFromContent(
-            virtualNode.type_(virtualNode.props_)
-        );
-        flushCurrentlyProcessing();
+                    if (hook instanceof StateHook) {
+                        hook.context_ = currentNode;
+                    }
+                }
+            }
 
-        if (virtualNode.child_ !== null) {
-            virtualNode.child_.parent_ = virtualNode;
+            // Render
+            prepareCurrentlyProcessing(currentNode);
+            const newChildNode = currentNode.type_(currentNode.props_);
+            flushCurrentlyProcessing();
     
-            // This step aimed to read memoized hooks and restore them
-            // Memoized data affects the underneath tree,
-            // so don't wait until the recursion finished to do this
-            resolveVirtualTree(virtualNode);
+            if (newChildNode !== null) {
+                newChildNode.parent_ = currentNode;
+                newChildNode.old_ = currentNode.child_;
+                newChildNode.flag_ = 'UPDATE';
+                newChildNode.posInRow_ = 0;
+                currentNode.child_ = newChildNode;
+            } else {
+                if (currentNode.child_ !== null) {
+                    currentNode.child_.flag_ = 'DELETE';
+                }
+            }
         }
-    } else if (virtualNode.nativeNode_ !== undefined) {
-        typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
     }
-
-    let childNode = virtualNode.child_;
-
-    while (childNode !== null) {
-        _updateVirtualNodeRecursive(childNode, typedVirtualNodeMaps);
-        childNode = childNode.sibling_;
-    }
-};
-
-const _createEmptyTypedVirtualNodeMaps = () => {
-    return {
-        functional_: new Map(),
-        viewable_: new Map(),
-    };
-};
-
-const _getVirtualNodeMaps = (rootVirtualNode) => {
-    const typedVirtualNodeMaps = _createEmptyTypedVirtualNodeMaps();
-    _walkVirtualNode(rootVirtualNode, typedVirtualNodeMaps);
-    return typedVirtualNodeMaps;
-};
-
-const _walkVirtualNode = (virtualNode, typedVirtualNodeMaps) => {
-    if (isFunction(virtualNode.type_)) {
-        typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
-    } else if (virtualNode.nativeNode_ !== undefined) {
-        typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
-    }
-
-    let childNode = virtualNode.child_;
-    
-    while (childNode !== null) {
-        _walkVirtualNode(childNode, typedVirtualNodeMaps);
-        childNode = childNode.sibling_;
-    }
-};
-
-const _resolveUnmountedVirtualNodes = (oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap) => {
-    oldFunctionalVirtualNodeMap.forEach((virtualNode, key) => {
-        const unmounted = !newFunctionalVirtualNodeMap.has(key);
-
-        destroyEffectsOnFunctionalVirtualNode(virtualNode, unmounted);
-
-        if (unmounted) {
-            unlinkMemoizedHooks(virtualNode.path_);
-        }
-    });
-};
-
-const _resolveMountedVirtualNodes = (oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap) => {
-    newFunctionalVirtualNodeMap.forEach((virtualNode, key) => {
-        const mounted = !oldFunctionalVirtualNodeMap.has(key);
-
-        mountEffectsOnFunctionalVirtualNode(virtualNode, mounted);
-    });
 };
 
 /**
@@ -1008,7 +515,7 @@ const _resolveMountedVirtualNodes = (oldFunctionalVirtualNodeMap, newFunctionalV
  * @param {*} initialValue
  * @constructor
  */
-function StateHook(context, initialValue) {
+function StateHook$1(context, initialValue) {
     this.context_ = context;
     
     this.value_ = initialValue;
@@ -1040,7 +547,7 @@ const useState = (initialValue) => {
     if (functionalVirtualNode.hooks_.length > hookIndex) {
         hook = functionalVirtualNode.hooks_[hookIndex];
     } else {
-        hook = new StateHook(functionalVirtualNode, initialValue);
+        hook = new StateHook$1(functionalVirtualNode, initialValue);
         functionalVirtualNode.hooks_.push(hook);
     }
 
@@ -1097,7 +604,7 @@ const _resolveVirtualNodeRecursive = (virtualNode, parentPath, posInRow) => {
             ) {
                 hook = virtualNode.hooks_[i];
 
-                if (hook instanceof StateHook) {
+                if (hook instanceof StateHook$1) {
                     hook.context_ = virtualNode;
                 }
             }

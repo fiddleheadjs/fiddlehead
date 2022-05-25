@@ -134,6 +134,7 @@ export const appendChildrenFromContent = (parentNode, content) => {
         
         if (childNode !== null) {
             childNode.parent_ = parentNode;
+            childNode.posInRow_ = i;
 
             if (prevChildNode !== null) {
                 prevChildNode.sibling_ = childNode;
