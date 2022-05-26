@@ -114,9 +114,16 @@ E1 E2 E3 E4___ E5
 ==== B2.child ; B2.sibling ; B2.parent -> A1
 ^^^^ A1.sibling ; A1.parent ; (END)
 
-```
+UPDATE
 
-```
+A1_____________________
+B1__________________ B2
+C2__________________
+D4 D5______ D6___ D7
+   E6___ E7 E8 E9
+   F3 F4
+
+LOGIC
 
 walk(current, direction)
     if direction is ChildrenDirection
