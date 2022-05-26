@@ -8,6 +8,7 @@ function Fiber(name, type) {
     this.parent_ = null;
     this.child_ = null;
     this.sibling_ = null;
+    this.alter_ = null;
     this.tag_ = null;
 }
 
@@ -108,21 +109,45 @@ F4.parent_ = E6;
 const ChildrenDirection = 1;
 const UncleDirection = 2;
 
-function render(fiber) {
+function renderDynamicFiber(fiber) {
+    const newChild = fiber.type_();
+    const oldChild = fiber.child_;
+
+    fiber.child_ = newChild;
+
+    if (newChild !== null) {
+        newChild.parent_ = fiber;
+
+        if (oldChild !== null) {
+            newChild.tag_ = TAG_UPDATE;
+            newChild.alter_ = oldChild;
+        } else {
+            newChild.tag_ = TAG_CREATE;
+        }
+    } else {
+        if (oldChild !== null) {
+            fiber.deletion_ = oldChild;
+        }
+    }
+}
+
+function renderStaticFiber(fiber) {
+    
+}
+
+function performUnitOfWork(fiber) {
     console.log(fiber.name_ + ' | ' + fiber.tag_);
     
     if (typeof fiber.type_ === 'function') {
-        const newChild = fiber.type_();
-        fiber.child_ = newChild;
-        if (newChild !== null) {
-            newChild.parent_ = fiber;
-        }
+        renderDynamicFiber(fiber);
+    } else {
+        renderStaticFiber(fiber);
     }
 }
 
 function beginWork(current, direction) {
     if (direction === ChildrenDirection) {
-        render(current);
+        performUnitOfWork(current);
 
         if (current.child_ !== null) {
             beginWork(current.child_, ChildrenDirection);

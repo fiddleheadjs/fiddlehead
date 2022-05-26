@@ -11,58 +11,96 @@ import {isFunction} from './Util';
  * @param {VirtualNode} rootVirtualNode
  */
 export const updateVirtualTree = (rootVirtualNode) => {
-    _walk(rootVirtualNode);
+    // Update virtual tree and create node maps
+    const oldTypedVirtualNodeMaps = _getTypedVirtualNodeMaps(rootVirtualNode);
+    const newTypedVirtualNodeMaps = _updateVirtualTreeImpl(rootVirtualNode);
+
+    // Resolve effects and commit view
+    _resolveUnmountedVirtualNodes(oldTypedVirtualNodeMaps.functional_, newTypedVirtualNodeMaps.functional_);
+    commitView(oldTypedVirtualNodeMaps.viewable_, newTypedVirtualNodeMaps.viewable_);
+    _resolveMountedVirtualNodes(oldTypedVirtualNodeMaps.functional_, newTypedVirtualNodeMaps.functional_);
 }
 
-const _walk = (currentNode, oldNode, parentNode) => {
-    if (parentNode.flag_ === 'UPDATE') {
-        if (isFunction(currentNode.type_)) {
-            // Find corresponding old node
-            let oldNode = parentNode.old_.child_;
-            while (oldNode !== null) {
-                if (currentNode.key_ !== null && currentNode.key_ === oldNode.key_) {
-                    break;
-                }
-                if (currentNode.posInRow_ === oldNode.posInRow_) {
-                    break;
-                }
-                oldNode = oldNode.sibling_;
-            }
+const _updateVirtualTreeImpl = (rootVirtualNode) => {
+    const typedVirtualNodeMaps = _createEmptyTypedVirtualNodeMaps();
+    _updateVirtualNodeRecursive(rootVirtualNode, typedVirtualNodeMaps);
+    return typedVirtualNodeMaps;
+}
 
-            // Transfer memoized hooks
-            if (oldNode !== null) {
-                currentNode.hooks_ = oldNode.hooks_;
-                for (
-                    let hook, i = 0, len = currentNode.hooks_.length
-                    ; i < len
-                    ; ++i
-                ) {
-                    hook = currentNode.hooks_[i];
+const _updateVirtualNodeRecursive = (virtualNode, typedVirtualNodeMaps) => {
+    if (isFunction(virtualNode.type_)) {
+        typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
     
-                    if (hook instanceof StateHook) {
-                        hook.context_ = currentNode;
-                    }
-                }
-            }
+        prepareCurrentlyProcessing(virtualNode);
+        virtualNode.child_ = createVirtualNodeFromContent(
+            virtualNode.type_(virtualNode.props_)
+        );
+        flushCurrentlyProcessing();
 
-            // Render
-            prepareCurrentlyProcessing(currentNode);
-            const newChildNode = currentNode.type_(currentNode.props_);
-            flushCurrentlyProcessing();
+        if (virtualNode.child_ !== null) {
+            virtualNode.child_.parent_ = virtualNode;
     
-            if (newChildNode !== null) {
-                newChildNode.parent_ = currentNode;
-                newChildNode.old_ = currentNode.child_;
-                newChildNode.flag_ = 'UPDATE';
-                newChildNode.posInRow_ = 0;
-                currentNode.child_ = newChildNode;
-            } else {
-                if (currentNode.child_ !== null) {
-                    currentNode.child_.flag_ = 'DELETE';
-                }
-            }
-        } else {
-            
+            // This step aimed to read memoized hooks and restore them
+            // Memoized data affects the underneath tree,
+            // so don't wait until the recursion finished to do this
+            resolveVirtualTree(virtualNode);
         }
+    } else if (virtualNode.nativeNode_ !== undefined) {
+        typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
     }
+
+    let childNode = virtualNode.child_;
+
+    while (childNode !== null) {
+        _updateVirtualNodeRecursive(childNode, typedVirtualNodeMaps);
+        childNode = childNode.sibling_;
+    }
+}
+
+const _createEmptyTypedVirtualNodeMaps = () => {
+    return {
+        functional_: new Map(),
+        viewable_: new Map(),
+    };
+}
+
+const _getTypedVirtualNodeMaps = (rootVirtualNode) => {
+    const typedVirtualNodeMaps = _createEmptyTypedVirtualNodeMaps();
+    _walkVirtualNode(rootVirtualNode, typedVirtualNodeMaps);
+    return typedVirtualNodeMaps;
+}
+
+const _walkVirtualNode = (virtualNode, typedVirtualNodeMaps) => {
+    if (isFunction(virtualNode.type_)) {
+        typedVirtualNodeMaps.functional_.set(virtualNode.path_, virtualNode);
+    } else if (virtualNode.nativeNode_ !== undefined) {
+        typedVirtualNodeMaps.viewable_.set(virtualNode.path_, virtualNode);
+    }
+
+    let childNode = virtualNode.child_;
+    
+    while (childNode !== null) {
+        _walkVirtualNode(childNode, typedVirtualNodeMaps);
+        childNode = childNode.sibling_;
+    }
+}
+
+const _resolveUnmountedVirtualNodes = (oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap) => {
+    oldFunctionalVirtualNodeMap.forEach((virtualNode, key) => {
+        const unmounted = !newFunctionalVirtualNodeMap.has(key);
+
+        destroyEffectsOnFunctionalVirtualNode(virtualNode, unmounted);
+
+        if (unmounted) {
+            unlinkMemoizedHooks(virtualNode.path_);
+        }
+    });
+}
+
+const _resolveMountedVirtualNodes = (oldFunctionalVirtualNodeMap, newFunctionalVirtualNodeMap) => {
+    newFunctionalVirtualNodeMap.forEach((virtualNode, key) => {
+        const mounted = !oldFunctionalVirtualNodeMap.has(key);
+
+        mountEffectsOnFunctionalVirtualNode(virtualNode, mounted);
+    });
 }

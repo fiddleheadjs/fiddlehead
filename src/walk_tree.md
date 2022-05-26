@@ -144,3 +144,27 @@ walk(current, direction)
             walk(current.parent, UncleDirection)
 
 ```
+
+// {root} -> (old) -> ... -> {old} -> (old) -> ...
+// {root} -> (new) -> ... -> {new}
+// {root} -> (new) -> ... -> {new} -> (new) -> ...
+// 
+
+// {root} -> (old) -> div -> p -> ... -> {old} -> (old) -> ...
+//
+// {root} -> (new) -> div -> span -> ... -> {new}
+// U         U        U      C              C
+//                        ~> p -> ... -> {old} -> (old) -> ...
+//                           D           D        D
+//
+// {root} -> (new) -> div -> p -> ... -> {new}
+// U         U        U      U           U (reuse old state)
+//
+// {root} -> (new) -> div -> p -> ... -> div -> {new}
+// U         U        U      U           U      
+//        ~> (old) ~> div ~> p ~> ... ~> div ~> {old} ~> (old) ~> ...
+//           U        U      D           D      D
+//                                       |
+//                                       same parent -> {old} === {new} ? YES -> reuse old state
+//                                                                        NO  -> new node
+//
