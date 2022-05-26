@@ -168,3 +168,42 @@ walk(current, direction)
 //                                       same parent -> {old} === {new} ? YES -> reuse old state
 //                                                                        NO  -> new node
 //
+---
+A1
+B1 B2 __ B4
+---
+A1
+__ B2 B3 C4
+---
+
+Update: A1, B2, 
+Delete: B1, B4
+Create: B3, C4
+
+```
+
+if parent is Update {
+    oldChildren = parent.alternative.child->...
+    newChildren = parent.child->...
+
+    oldMap, newMap = (
+        for each _child of _children
+            map.set(_child.key or _child.index, _child)
+    )
+
+    compare(oldMap, newMap) => (
+        Update: newChild.alternative = oldChild
+        Delete: parent.deletions.push(oldChild)
+        Create:
+    )
+}
+
+if parent is Delete {
+    each child is Delete
+}
+
+if parent is Create {
+    each child is Create
+}
+
+```
