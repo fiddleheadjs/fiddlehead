@@ -1,14 +1,14 @@
 ```
 
 reconcileChildren(current)
-    if current is a FunctionNode
-        reconcileChildOfFunctionNode(current)
-    if current is a StaticNode
+    if current is a DynamicNode
+        reconcileChildOfDynamicNode(current)
+    else
         reconcileChildrenOfStaticNode(current)
 
-reconcileChildOfFunctionNode(current)
+reconcileChildOfDynamicNode(current)
     newChild = current.render();
-    oldChild = current.alternative.child;
+    oldChild = current.alternative ? current.alternative.child : current.child;
 
     current.child = newChild;
 
@@ -19,7 +19,7 @@ reconcileChildOfFunctionNode(current)
     if (newChild !== null && oldChild !== null)
         if is_same(newChild, oldChild)
             newChild.alternative = oldChild
-            if newChild is a FunctionNode
+            if newChild is a DynamicNode
                 newChild.state = oldChild.state
         else
             current.deletions = [oldChild]
@@ -34,14 +34,49 @@ reconcileChildrenOfStaticNode(current)
     )
 
     compare(oldMap, newMap) => (
-        Update:
-            if newChild is a FunctionNode
-                newChild.alternative = oldChild
-            if newChild is a StaticNode
-                newChild.alternative = oldChild
         Delete:
             current.deletions.push(oldChild)
         Create:
+            // do nothing here
+        Update:
+            newChild.alternative = oldChild;
+            if newChild is a DynamicNode
+                newChild.state = oldChild.state
     )
+
+```
+```
+
+A1
+
+reconcileChildren(A1)
+    reconcileChildOfDynamicnNode(A1)
+
+A1
+B1
+
+reconcileChildren(B1)
+    reconcileChildOfDynamicNode(B1)
+
+A1_________
+B1_________
+c1_________
+d1______ d2
+e1 e2 e3 e4
+
+reconcileChildren(C1)
+    reconcileChildrenOfStaticNode(C1)
+reconcileChildren(D1)
+    reconcileChildrenOfStaticNode(D1)
+reconcileChildren(E1)
+    reconcileChildrenOfStaticNode(E1)
+reconcileChildren(E2)
+    reconcileChildrenOfStaticNode(E2)
+reconcileChildren(E3)
+    reconcileChildrenOfStaticNode(E3)
+reconcileChildren(D2)
+    reconcileChildrenOfStaticNode(D2)
+reconcileChildren(E4)
+    reconcileChildrenOfStaticNode(E4)
 
 ```
