@@ -8,4 +8,5 @@ export function Node(name, type, key = null) {
     this.sibling_ = null;
     this.alternative_ = null;
     this.deletions_ = null;
+    this.previousSiblingNativeNode_ = null;
 }
