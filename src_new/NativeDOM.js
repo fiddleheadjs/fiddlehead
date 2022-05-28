@@ -20,12 +20,6 @@ export const createNativeElementWithNS = (ns, type, attributes) => {
     return element;
 }
 
-export const createNativeFragment = () => {
-    const el = document.createElement('div');
-    el.style.display = 'contents';
-    return el;
-}
-
 export {
     updateNativeElementAttributes
 }

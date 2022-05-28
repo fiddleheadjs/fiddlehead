@@ -5,7 +5,7 @@ import {isFunction} from './Util';
 
 export const updateTree = (current) => {
     const mountNodesMap = new Map();
-    _walk(_performUnitOfWork, _mountEffects, mountNodesMap, current, current);
+    _workLoop(_performUnitOfWork, _mountEffects, mountNodesMap, current, current);
 }
 
 const _performUnitOfWork = (current, root, mountNodesMap) => {
@@ -32,7 +32,7 @@ const _performUnitOfWork = (current, root, mountNodesMap) => {
     
     if (current.deletions_ !== null) {
         current.deletions_.forEach(subtree => {
-            _walk((deletedNode) => {
+            _workLoop((deletedNode) => {
                 if (isFunction(deletedNode.type_)) {
                     destroyEffectsOnFunctionalVirtualNode(deletedNode, true);
                 }
@@ -50,22 +50,22 @@ const _mountEffects = (mountNodesMap) => {
     });
 };
 
-const _walk = (performUnit, onFinish, data, root, current, isUncleOfLastPerformedUnit = false) => {
+const _workLoop = (performUnit, onFinish, data, root, current, isUncleOfLastPerformedUnit = false) => {
     if (!isUncleOfLastPerformedUnit) {
         performUnit(current, root, data);
 
         if (current.child_ !== null) {
-            _walk(performUnit, onFinish, data, root, current.child_);
+            _workLoop(performUnit, onFinish, data, root, current.child_);
             return;
         }
         
         if (current.sibling_ !== null) {
-            _walk(performUnit, onFinish, data, root, current.sibling_);
+            _workLoop(performUnit, onFinish, data, root, current.sibling_);
             return;
         }
     } else {
         if (current.sibling_ !== null) {
-            _walk(performUnit, onFinish, data, root, current.sibling_);
+            _workLoop(performUnit, onFinish, data, root, current.sibling_);
             return;
         }
     }
@@ -75,7 +75,7 @@ const _walk = (performUnit, onFinish, data, root, current, isUncleOfLastPerforme
     if (current !== root) {
         // Stop if the parent is the root
         if (current.parent_ !== root) {
-            _walk(performUnit, onFinish, data, root, current.parent_, true);
+            _workLoop(performUnit, onFinish, data, root, current.parent_, true);
             return;
         }
     }

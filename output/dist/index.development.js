@@ -390,13 +390,7 @@ const createNativeElementWithNS = (ns, type, attributes) => {
     return element;
 };
 
-const createNativeFragment = () => {
-    const el = document.createElement('div');
-    el.style.display = 'contents';
-    return el;
-};
-
-const hydrateVirtualNode = (virtualNode) => {
+const hydrateView = (virtualNode) => {
     if (virtualNode.type_ === RootType) {
         // Root nodes always have apredefined native nodes and namespaces
         return;
@@ -404,10 +398,14 @@ const hydrateVirtualNode = (virtualNode) => {
 
     virtualNode.ns_ = _determineNS(virtualNode);
 
+    if (virtualNode.type_ === NODE_FRAGMENT || isFunction(virtualNode.type_)) {
+        // Do nothing with fragments
+        return;
+    }
+
     const nativeNode = _createNativeNode(virtualNode);
 
     linkNativeNode(virtualNode, nativeNode);
-    
     if (true) {
         if (nativeNode !== null) {
             attachVirtualNode(nativeNode, virtualNode);
@@ -415,13 +413,44 @@ const hydrateVirtualNode = (virtualNode) => {
     }
 };
 
+const rehydrateView = (newVirtualNode, oldVirtualNode) => {
+    if (newVirtualNode.type_ === RootType) {
+        // Root nodes always have apredefined native nodes and namespaces
+        return;
+    }
+
+    newVirtualNode.ns_ = _determineNS(newVirtualNode);
+
+    if (newVirtualNode.type_ === NODE_FRAGMENT || isFunction(newVirtualNode.type_)) {
+        // Do nothing with fragments
+        return;
+    }
+
+    // Reuse the existing native node
+    linkNativeNode(newVirtualNode, oldVirtualNode.nativeNode_);
+    if (true) {
+        attachVirtualNode(oldVirtualNode.nativeNode_, newVirtualNode);
+    }
+
+    if (newVirtualNode.type_ === NODE_TEXT) {
+        if (newVirtualNode.props_.children !== oldVirtualNode.props_.children) {
+            updateNativeTextNode(
+                newVirtualNode.nativeNode_,
+                newVirtualNode.props_.children
+            );
+        }
+    } else {
+        updateNativeElementAttributes(
+            newVirtualNode.nativeNode_,
+            newVirtualNode.props_,
+            oldVirtualNode.props_
+        );
+    }
+};
+
 const _createNativeNode = (node) => {
     if (node.type_ === NODE_TEXT) {
         return createNativeTextNode(node.props_.children);
-    }
-
-    if (node.type_ === NODE_FRAGMENT || isFunction(node.type_)) {
-        return createNativeFragment();
     }
 
     return createNativeElementWithNS(
@@ -436,51 +465,30 @@ const _determineNS = (virtualNode) => {
     if (virtualNode.type_ === 'svg') {
         return NS_SVG;
     }
- 
+
     // As we never hydrate the container node,
     // the parent_ never empty here
     if (virtualNode.parent_.ns_ === NS_SVG && virtualNode.parent_.type_ === 'foreignObject') {
         return NS_HTML;
     }
-    
+
     // By default, pass namespace below.
     return virtualNode.parent_.ns_;
 };
 
 const updateView = (newVirtualNode, oldVirtualNode) => {
-    // Reuse the existing native node
-    linkNativeNode(newVirtualNode, oldVirtualNode.nativeNode_);
-
-    if (true) {
-        attachVirtualNode(oldVirtualNode.nativeNode_, newVirtualNode);
-    }
-
-    if (newVirtualNode.type_ === NODE_TEXT) {
-        if (newVirtualNode.props_.children !== oldVirtualNode.props_.children) {
-            updateNativeTextNode(
-                newVirtualNode.nativeNode_,
-                newVirtualNode.props_.children
-            );
-        }
-    } else if (newVirtualNode.type_ === NODE_FRAGMENT || isFunction(newVirtualNode.type_)) ; else {
-        updateNativeElementAttributes(
-            newVirtualNode.nativeNode_,
-            newVirtualNode.props_,
-            oldVirtualNode.props_
-        );
-    }
+    rehydrateView(newVirtualNode, oldVirtualNode);
 };
 
 const insertView = (node) => {
-    hydrateVirtualNode(node);
+    hydrateView(node);
 
-    const nativeParent = node.parent_.nativeNode_;
-    
-    const nativeAfter = node.prevSibling_ !== null
-        ? node.prevSibling_.nativeNode_.nextSibling
-        : nativeParent.firstChild;
+    const nativeHost = _findNativeHost(node);
 
-    nativeParent.insertBefore(node.nativeNode_, nativeAfter);
+    if (nativeHost !== null) {
+        if (node.nativeNode_)
+        nativeHost.appendChild(node.nativeNode_);
+    }
 };
 
 const deleteView = (subtree) => {
@@ -489,6 +497,22 @@ const deleteView = (subtree) => {
             nativeNode.parentNode.removeChild(nativeNode);
         }
     });
+};
+
+const _findNativeHost = (virtualNode) => {
+    if (virtualNode.type_ === RootType) {
+        return virtualNode.nativeNode_;
+    }
+    
+    if (virtualNode.parent_ === null) {
+        return null;
+    }
+
+    if (virtualNode.parent_.nativeNode_ !== null) {
+        return virtualNode.parent_.nativeNode_;
+    }
+    
+    return _findNativeHost(virtualNode.parent_);
 };
 
 const _loopClosestNativeNodes = (virtualNode, callback) => {
@@ -822,7 +846,7 @@ const _mapChildren = (node) => {
 
 const updateTree = (current) => {
     const mountNodesMap = new Map();
-    _walk(_performUnitOfWork, _mountEffects, mountNodesMap, current, current);
+    _workLoop(_performUnitOfWork, _mountEffects, mountNodesMap, current, current);
 };
 
 const _performUnitOfWork = (current, root, mountNodesMap) => {
@@ -849,7 +873,7 @@ const _performUnitOfWork = (current, root, mountNodesMap) => {
     
     if (current.deletions_ !== null) {
         current.deletions_.forEach(subtree => {
-            _walk((deletedNode) => {
+            _workLoop((deletedNode) => {
                 if (isFunction(deletedNode.type_)) {
                     destroyEffectsOnFunctionalVirtualNode(deletedNode, true);
                 }
@@ -867,22 +891,22 @@ const _mountEffects = (mountNodesMap) => {
     });
 };
 
-const _walk = (performUnit, onFinish, data, root, current, isUncleOfLastPerformedUnit = false) => {
+const _workLoop = (performUnit, onFinish, data, root, current, isUncleOfLastPerformedUnit = false) => {
     if (!isUncleOfLastPerformedUnit) {
         performUnit(current, root, data);
 
         if (current.child_ !== null) {
-            _walk(performUnit, onFinish, data, root, current.child_);
+            _workLoop(performUnit, onFinish, data, root, current.child_);
             return;
         }
         
         if (current.sibling_ !== null) {
-            _walk(performUnit, onFinish, data, root, current.sibling_);
+            _workLoop(performUnit, onFinish, data, root, current.sibling_);
             return;
         }
     } else {
         if (current.sibling_ !== null) {
-            _walk(performUnit, onFinish, data, root, current.sibling_);
+            _workLoop(performUnit, onFinish, data, root, current.sibling_);
             return;
         }
     }
@@ -892,7 +916,7 @@ const _walk = (performUnit, onFinish, data, root, current, isUncleOfLastPerforme
     if (current !== root) {
         // Stop if the parent is the root
         if (current.parent_ !== root) {
-            _walk(performUnit, onFinish, data, root, current.parent_, true);
+            _workLoop(performUnit, onFinish, data, root, current.parent_, true);
             return;
         }
     }

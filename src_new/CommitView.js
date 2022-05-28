@@ -1,45 +1,19 @@
-import {hydrateVirtualNode} from './HydrateView';
-import {linkNativeNode, RootType, NODE_FRAGMENT, NODE_TEXT} from './VirtualNode';
-import {attachVirtualNode} from './Externals';
-import {isFunction} from './Util';
-import {updateNativeTextNode, updateNativeElementAttributes} from './NativeDOM';
+import {hydrateView, rehydrateView} from './HydrateView';
+import {RootType} from './VirtualNode';
 
 export const updateView = (newVirtualNode, oldVirtualNode) => {
-    // Reuse the existing native node
-    linkNativeNode(newVirtualNode, oldVirtualNode.nativeNode_);
-
-    if (__DEV__) {
-        attachVirtualNode(oldVirtualNode.nativeNode_, newVirtualNode);
-    }
-
-    if (newVirtualNode.type_ === NODE_TEXT) {
-        if (newVirtualNode.props_.children !== oldVirtualNode.props_.children) {
-            updateNativeTextNode(
-                newVirtualNode.nativeNode_,
-                newVirtualNode.props_.children
-            );
-        }
-    } else if (newVirtualNode.type_ === NODE_FRAGMENT || isFunction(newVirtualNode.type_)) {
-        // Do nothing with fragments
-    } else {
-        updateNativeElementAttributes(
-            newVirtualNode.nativeNode_,
-            newVirtualNode.props_,
-            oldVirtualNode.props_
-        );
-    }
+    rehydrateView(newVirtualNode, oldVirtualNode);
 }
 
 export const insertView = (node) => {
-    hydrateVirtualNode(node);
+    hydrateView(node);
 
-    const nativeParent = node.parent_.nativeNode_;
-    
-    const nativeAfter = node.prevSibling_ !== null
-        ? node.prevSibling_.nativeNode_.nextSibling
-        : nativeParent.firstChild;
+    const nativeHost = _findNativeHost(node);
 
-    nativeParent.insertBefore(node.nativeNode_, nativeAfter);
+    if (nativeHost !== null) {
+        if (node.nativeNode_)
+        nativeHost.appendChild(node.nativeNode_);
+    }
 }
 
 export const deleteView = (subtree) => {
