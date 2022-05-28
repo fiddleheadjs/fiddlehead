@@ -11,8 +11,6 @@ import {updateSubtree} from './WorkLoop';
     const rootVirtualNode = createPortal(children, targetNativeNode);
 
     updateSubtree(rootVirtualNode);
-
-    // console.log(rootVirtualNode);
 }
 
 /**

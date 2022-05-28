@@ -22,7 +22,6 @@ export const updateView = (newVirtualNode, oldVirtualNode) => {
     } else if (newVirtualNode.type_ === NODE_FRAGMENT || isFunction(newVirtualNode.type_)) {
         // Do nothing with fragments
     } else {
-        console.log(newVirtualNode)
         updateNativeElementAttributes(
             newVirtualNode.nativeNode_,
             newVirtualNode.props_,
