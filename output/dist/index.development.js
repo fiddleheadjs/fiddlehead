@@ -484,8 +484,24 @@ const insertView = (node) => {
 };
 
 const deleteView = (subtree) => {
-    const nativeParent = subtree.parent_.nativeNode_;
-    nativeParent.removeChild(subtree.nativeNode_);
+    _loopClosestNativeNodes(subtree, (nativeNode) => {
+        if (nativeNode.parentNode !== null) {
+            nativeNode.parentNode.removeChild(nativeNode);
+        }
+    });
+};
+
+const _loopClosestNativeNodes = (virtualNode, callback) => {
+    if (virtualNode.nativeNode_ !== null) {
+        callback(virtualNode.nativeNode_);
+        return;
+    }
+    
+    let childNode = virtualNode.child_;
+    while (childNode !== null) {
+        _loopClosestNativeNodes(childNode, callback);
+        childNode = childNode.sibling_;
+    }
 };
 
 /**
