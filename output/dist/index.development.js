@@ -98,7 +98,7 @@ function VirtualNode(type, props = {}, key = null, ref = null) {
 
     this.key_ = key;
     
-    this.path_ = '';
+    this.slot_ = null;
     
     this.ns_ = null;
 
@@ -107,13 +107,23 @@ function VirtualNode(type, props = {}, key = null, ref = null) {
     this.child_ = null;
 
     this.sibling_ = null;
+
+    this.prevSibling_ = null;
+
+    this.alternative_ = null;
+
+    this.deletions_ = null;
+
+    this.nativeNode_ = null;
     
+    if (ref instanceof RefHook) {
+        this.ref_ = ref;
+    } else {
+        this.ref_ = null;
+    }
+
     if (type !== NODE_FRAGMENT) {
         this.props_ = props;
-
-        this.ref_ = ref;
-    
-        this.nativeNode_ = null;
 
         if (isFunction(type)) {
             this.hooks_ = [];
@@ -131,42 +141,8 @@ const NS_SVG = 1;
 const NODE_TEXT = '#';
 const NODE_FRAGMENT = '[';
 
-const PATH_SEP = '/';
-
 const RootType = (props) => {
     return props.children;
-};
-
-/**
- * 
- * @param {string|number} key 
- * @returns {string}
- */
-const escapeVirtualNodeKey = (key) => {
-    return '@' + encodeURIComponent(key);
-};
-
-let functionalTypeInc = 0;
-let rootIdInc = 0;
-
-/**
- * 
- * @param {Function} type 
- * @returns {string}
- */
-const createFunctionalTypeAlias = (type) => {
-    return (
-        (true ? type.name : '') +
-        '{' + (++functionalTypeInc).toString(36)
-    );
-};
-
-/**
- * 
- * @returns {string}
- */
-const createRootId = () => {
-    return '~' + (++rootIdInc).toString(36);
 };
 
 /**
@@ -177,7 +153,7 @@ const createRootId = () => {
 const linkNativeNode = (virtualNode, nativeNode) => {
     virtualNode.nativeNode_ = nativeNode;
 
-    if (virtualNode.ref_ instanceof RefHook) {
+    if (virtualNode.ref_ !== null) {
         virtualNode.ref_.current = nativeNode;
     }
 };
@@ -219,7 +195,7 @@ const appendChildrenFromContent = (parentNode, content) => {
         
         if (childNode !== null) {
             childNode.parent_ = parentNode;
-            childNode.posInRow_ = i;
+            childNode.slot_ = i;
 
             if (prevChildNode !== null) {
                 prevChildNode.sibling_ = childNode;
@@ -227,41 +203,12 @@ const appendChildrenFromContent = (parentNode, content) => {
                 parentNode.child_ = childNode;
             }
 
+            childNode.prevSibling_ = prevChildNode;
+
             prevChildNode = childNode;
         }
     }
 };
-
-// {root} -> (old) -> ... -> {old} -> (old) -> ...
-// {root} -> (new) -> ... -> {new}
-// {root} -> (new) -> ... -> {new} -> (new) -> ...
-// 
-
-// {root} -> (old) -> div -> p -> ... -> {old} -> (old) -> ...
-//
-// {root} -> (new) -> div -> span -> ... -> {new}
-// U         U        U      C              C
-//                        ~> p -> ... -> {old} -> (old) -> ...
-//                           D           D        D
-//
-// {root} -> (new) -> div -> p -> ... -> {new}
-// U         U        U      U           U (reuse old state)
-//
-// {root} -> (new) -> div -> p -> ... -> div -> {new}
-// U         U        U      U           U      
-//        ~> (old) ~> div ~> p ~> ... ~> div ~> {old} ~> (old) ~> ...
-//           U        U      D           D      D
-//                                       |
-//                                       same parent -> {old} === {new} ? YES -> reuse old state
-//                                                                        NO  -> new node
-//
-/*
-
-performUnitOfWork(currentNode, )
-    if currentNode is Function
-        
-
-*/
 
 /**
  *
@@ -288,39 +235,7 @@ const createElement = (type, attributes, ...content) => {
     return virtualNode;
 };
 
-const PROP_TYPE_ALIAS = 'hook_alias';
 const PROP_VIRTUAL_NODE = 'hook_vnode';
-const PROP_ROOT_ID = 'hook_rootid';
-
-/**
- *
- * @param {Function} type
- * @returns {string}
- */
-const getFunctionalTypeAlias = (type) => {
-    if (hasOwnProperty(type, PROP_TYPE_ALIAS)) {
-        return type[PROP_TYPE_ALIAS];
-    }
-
-    return (
-        type[PROP_TYPE_ALIAS] = createFunctionalTypeAlias(type)
-    );
-};
-
-/**
- * 
- * @param {Element} root 
- * @returns {string}
- */
-const getRootId = (root) => {
-    if (hasOwnProperty(root, PROP_ROOT_ID)) {
-        return root[PROP_ROOT_ID];
-    }
-
-    return (
-        root[PROP_ROOT_ID] = createRootId()
-    );
-};
 
 /**
  * 
@@ -340,28 +255,483 @@ const extractVirtualNode = (nativeNode) => {
     return nativeNode[PROP_VIRTUAL_NODE];
 };
 
-/**
- *
- * @type {Map<string, Array>}
- */
-const memoizedHooksMap = new Map();
+const updateNativeElementAttributes = (element, newAttributes, oldAttributes) => {
+    _updateKeyValues(
+        element, newAttributes, oldAttributes,
+        _updateElementAttribute, _removeElementAttribute
+    );
+};
+
+const _updateElementAttribute = (element, attrName, newAttrValue, oldAttrValue) => {
+    attrName = _normalizeElementAttributeName(attrName);
+
+    if (attrName === '') {
+        return;
+    }
+
+    if (attrName === 'style') {
+        _updateStyleProperties(element.style, newAttrValue, oldAttrValue || {});
+        return;
+    }
+
+    if (isString(newAttrValue) || isNumber(newAttrValue)) {
+        element.setAttribute(attrName, newAttrValue);
+        return;
+    }
+
+    // Cases: properties, event listeners
+    if (attrName in element) {
+        try {
+            element[attrName] = newAttrValue;
+        } catch (x) {
+            if (true) {
+                console.error(`Property \`${attrName}\` is not writable`);
+            }
+        }
+    }
+};
+
+const _removeElementAttribute = (element, attrName, oldAttrValue) => {
+    attrName = _normalizeElementAttributeName(attrName);
+
+    if (attrName === '') {
+        return;
+    }
+
+    if (isString(oldAttrValue) || isNumber(oldAttrValue)) {
+        element.removeAttribute(attrName);
+        return;
+    }
+
+    // Cases: properties, event listeners
+    if (attrName in element) {
+        try {
+            element[attrName] = null;
+        } catch (x) {
+            if (true) {
+                console.error(`Property \`${attrName}\` is not writable`);
+            }
+        }
+    }
+};
+
+const _normalizeElementAttributeName = (attrName) => {
+    if (attrName === 'class') {
+        if (true) {
+            console.error('Use `className` instead of `class`');
+        }
+        return '';
+    }
+
+    if (attrName === 'className') {
+        return 'class';
+    }
+
+    if (/^on[A-Z]/.test(attrName)) {
+        return attrName.toLowerCase();
+    }
+
+    return attrName;
+};
+
+const _updateStyleProperties = (style, newProperties, oldProperties) => {
+    _updateKeyValues(
+        style, newProperties, oldProperties,
+        _updateStyleProperty, _removeStyleProperty
+    );
+};
+
+const _updateStyleProperty = (style, propName, newPropValue) => {
+    style[propName] = newPropValue;
+};
+
+const _removeStyleProperty = (style, propName) => {
+    style[propName] = '';
+};
+
+const _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn) => {
+    let key;
+    
+    for (key in oldKeyValues) {
+        if (_hasOwnNonEmpty(oldKeyValues, key)) {
+            if (!_hasOwnNonEmpty(newKeyValues, key)) {
+                removeFn(target, key, oldKeyValues[key]);
+            }
+        }
+    }
+
+    for (key in newKeyValues) {
+        if (_hasOwnNonEmpty(newKeyValues, key)) {
+            updateFn(target, key, newKeyValues[key], oldKeyValues[key]);
+        }
+    }
+};
+
+const _hasOwnNonEmpty = (target, prop) => {
+    return hasOwnProperty(target, prop) && !isNullish(target[prop]);
+};
+
+const createNativeTextNode = (text) => {
+    return document.createTextNode(text);
+};
+
+const updateNativeTextNode = (node, text) => {
+    node.textContent = text;
+};
+
+const createNativeElementWithNS = (ns, type, attributes) => {
+    const element = (ns === NS_SVG
+        ? document.createElementNS('http://www.w3.org/2000/svg', type)
+        : document.createElement(type)
+    );
+
+    updateNativeElementAttributes(element, attributes, {});
+    
+    return element;
+};
+
+const createNativeFragment = () => {
+    const el = document.createElement('div');
+    el.style.display = 'contents';
+    return el;
+};
+
+const hydrateVirtualNode = (virtualNode) => {
+    if (virtualNode.type_ === RootType) {
+        // Root nodes always have apredefined native nodes and namespaces
+        return;
+    }
+
+    virtualNode.ns_ = _determineNS(virtualNode);
+
+    const nativeNode = _createNativeNode(virtualNode);
+
+    linkNativeNode(virtualNode, nativeNode);
+    
+    if (true) {
+        if (nativeNode !== null) {
+            attachVirtualNode(nativeNode, virtualNode);
+        }
+    }
+};
+
+const _createNativeNode = (node) => {
+    if (node.type_ === NODE_TEXT) {
+        return createNativeTextNode(node.props_.children);
+    }
+
+    if (node.type_ === NODE_FRAGMENT || isFunction(node.type_)) {
+        return createNativeFragment();
+    }
+
+    return createNativeElementWithNS(
+        node.ns_,
+        node.type_,
+        node.props_
+    );
+};
+
+const _determineNS = (virtualNode) => {
+    // Intrinsic namespace
+    if (virtualNode.type_ === 'svg') {
+        return NS_SVG;
+    }
+ 
+    // As we never hydrate the container node,
+    // the parent_ never empty here
+    if (virtualNode.parent_.ns_ === NS_SVG && virtualNode.parent_.type_ === 'foreignObject') {
+        return NS_HTML;
+    }
+    
+    // By default, pass namespace below.
+    return virtualNode.parent_.ns_;
+};
+
+const updateView = (newVirtualNode, oldVirtualNode) => {
+    // Reuse the existing native node
+    linkNativeNode(newVirtualNode, oldVirtualNode.nativeNode_);
+
+    if (true) {
+        attachVirtualNode(oldVirtualNode.nativeNode_, newVirtualNode);
+    }
+
+    if (newVirtualNode.type_ === NODE_TEXT) {
+        if (newVirtualNode.props_.children !== oldVirtualNode.props_.children) {
+            updateNativeTextNode(
+                newVirtualNode.nativeNode_,
+                newVirtualNode.props_.children
+            );
+        }
+    } else if (newVirtualNode.type_ === NODE_FRAGMENT || isFunction(newVirtualNode.type_)) ; else {
+        console.log(newVirtualNode);
+        updateNativeElementAttributes(
+            newVirtualNode.nativeNode_,
+            newVirtualNode.props_,
+            oldVirtualNode.props_
+        );
+    }
+};
+
+const insertView = (node) => {
+    hydrateVirtualNode(node);
+
+    const nativeParent = node.parent_.nativeNode_;
+    
+    const nativeAfter = node.prevSibling_ !== null
+        ? node.prevSibling_.nativeNode_.nextSibling
+        : nativeParent.firstChild;
+
+    nativeParent.insertBefore(node.nativeNode_, nativeAfter);
+};
+
+const deleteView = (subtree) => {
+    const nativeParent = subtree.parent_.nativeNode_;
+    nativeParent.removeChild(subtree.nativeNode_);
+};
 
 /**
- * 
- * @param {string} path 
- * @returns {Array|null}
+ *
+ * @param {VirtualNode} context
+ * @param {*} initialValue
+ * @constructor
  */
-const findMemoizedHooks = (path) => {
-    return memoizedHooksMap.get(path) || null;
+function StateHook(context, initialValue) {
+    this.context_ = context;
+    
+    this.value_ = initialValue;
+
+    this.setValue_ = (value) => {
+        let newValue;
+        
+        if (isFunction(value)) {
+            newValue = value(this.value_);
+        } else {
+            newValue = value;
+        }
+        
+        if (newValue !== this.value_) {
+            this.value_ = newValue;
+            updateSubtree(this.context_);
+        }
+    };
+}
+
+const useState = (initialValue) => {
+    const [functionalVirtualNode, hookIndex] = resolveCurrentlyProcessing();
+
+    /**
+     * @type {StateHook}
+     */
+    let hook;
+
+    if (functionalVirtualNode.hooks_.length > hookIndex) {
+        hook = functionalVirtualNode.hooks_[hookIndex];
+    } else {
+        hook = new StateHook(functionalVirtualNode, initialValue);
+        functionalVirtualNode.hooks_.push(hook);
+    }
+
+    return [hook.value_, hook.setValue_];
+};
+
+const reconcileChildren = (current) => {
+    if (isFunction(current.type_)) {
+        _reconcileChildOfDynamicNode(current);
+    } else {
+        _reconcileChildrenOfStaticNode(current);
+    }
+};
+
+const _reconcileChildOfDynamicNode = (current) => {
+    const oldChild = (
+        current.alternative_ !== null
+            ? current.alternative_.child_
+            : current.child_
+    );
+
+    prepareCurrentlyProcessing(current);
+    const newChild = createVirtualNodeFromContent(
+        current.type_(current.props_)
+    );
+    flushCurrentlyProcessing();
+
+    current.child_ = newChild;
+
+    if (newChild !== null) {
+        newChild.parent_ = current;
+    }
+
+    if (newChild === null && oldChild !== null) {
+        _addDeletion(current, oldChild);
+    }
+    else if (newChild !== null && oldChild !== null) {
+        // If the same
+        if (newChild.type_ === oldChild.type_ && newChild.key_ === oldChild.key_) {
+            _makeAlternative(newChild, oldChild);
+        } else {
+            _addDeletion(current, oldChild);
+        }
+    }
+};
+
+const _reconcileChildrenOfStaticNode = (current) => {
+    if (current.alternative_ === null) {
+        return;
+    }
+
+    const oldChildren = _mapChildren(current.alternative_);
+    const newChildren = _mapChildren(current);
+
+    let newChild;
+    oldChildren.forEach((oldChild, mapKey) => {
+        newChild = newChildren.get(mapKey);
+        if (newChild !== undefined && newChild.type_ === oldChild.type_) {
+            _makeAlternative(newChild, oldChild);
+        } else {
+            _addDeletion(current, oldChild);
+        }
+    });
+};
+
+const _makeAlternative = (newChild, oldChild) => {
+    newChild.alternative_ = oldChild;
+
+    if (isFunction(newChild.type_)) {
+        newChild.hooks_ = oldChild.hooks_;
+
+        for (
+            let hook, i = 0, len = newChild.hooks_.length
+            ; i < len
+            ; ++i
+        ) {
+            hook = newChild.hooks_[i];
+
+            if (hook instanceof StateHook) {
+                hook.context_ = newChild;
+            }
+        }
+    }
+};
+
+const _addDeletion = (current, deletedChild) => {
+    if (current.deletions_ === null) {
+        current.deletions_ = [deletedChild];
+    } else {
+        current.deletions_.push(deletedChild);
+    }
+};
+
+const _mapChildren = (node) => {
+    const map = new Map();
+    let child = node.child_;
+    while (child !== null) {
+        if (child.key_ !== null) {
+            map.set(child.key_, child);
+        } else {
+            map.set(child.slot_, child);
+        }
+        child = child.sibling_;
+    }
+    return map;
+};
+
+const SubtreeRoot = 0;
+const ChildrenDirection = 1;
+const UncleDirection = 2;
+
+const updateSubtree = (current, direction = SubtreeRoot) => {
+    requestAnimationFrame(() => {
+        if (direction === SubtreeRoot || direction === ChildrenDirection) {
+            _performUnitOfWork(current, direction);
+    
+            if (current.child_ !== null) {
+                updateSubtree(current.child_, ChildrenDirection);
+                return;
+            }
+    
+            if (current.sibling_ !== null) {
+                updateSubtree(current.sibling_, ChildrenDirection);
+                return;
+            }
+        } else if (direction === UncleDirection) {
+            if (current.sibling_ !== null) {
+                updateSubtree(current.sibling_, ChildrenDirection);
+                return;
+            }
+        }
+    
+        if (current.parent_ !== null) {
+            updateSubtree(current.parent_, UncleDirection);
+        }
+    });
+};
+
+const _performUnitOfWork = (current, direction) => {
+    reconcileChildren(current);
+
+    if (direction !== SubtreeRoot) {
+        if (current.alternative_ !== null) {
+            updateView(current, current.alternative_);
+            current.alternative_ = null;
+        } else {
+            insertView(current);
+            // mountEffects(current);
+        }
+    }
+    
+    if (current.deletions_ !== null) {
+        current.deletions_.forEach(subtree => {
+            // unmountEffects(subtree);
+            deleteView(subtree);
+        });
+        current.deletions_ = null;
+    }
 };
 
 /**
  * 
- * @param {string} path 
- * @param {Array} hooks 
+ * @param {*} children 
+ * @param {Element} targetNativeNode
  */
-const linkMemoizedHooks = (path, hooks) => {
-    memoizedHooksMap.set(path, hooks);
+ const mount = (children, targetNativeNode) => {
+    const rootVirtualNode = createPortal(children, targetNativeNode);
+
+    updateSubtree(rootVirtualNode);
+
+    // console.log(rootVirtualNode);
+};
+
+/**
+ * 
+ * @param {*} children 
+ * @param {Element} targetNativeNode
+ * @returns {VirtualNode}
+ */
+const createPortal = (children, targetNativeNode) => {
+    /**
+     * @type {VirtualNode}
+     */
+    let rootVirtualNode;
+
+    if (!(rootVirtualNode = extractVirtualNode(targetNativeNode))) {
+        if (true) {
+            if (targetNativeNode.firstChild) {
+                console.error('Target node must be empty');
+            }
+        }
+        
+        rootVirtualNode = new VirtualNode(RootType);
+
+        // Determine the namespace (we only support SVG and HTML namespaces)
+        rootVirtualNode.ns_ = ('ownerSVGElement' in targetNativeNode) ? NS_SVG : NS_HTML;
+        
+        linkNativeNode(rootVirtualNode, targetNativeNode);
+        attachVirtualNode(targetNativeNode, rootVirtualNode);
+    }
+
+    rootVirtualNode.props_.children = children;
+
+    return rootVirtualNode;
 };
 
 /**
@@ -455,241 +825,6 @@ const _getEffectTag = (deps, lastDeps) => {
     {
         return TAG_DEPS_CHANGED;
     }
-};
-
-/**
- *
- * @param {VirtualNode} rootVirtualNode
- */
-const updateVirtualTree = (rootVirtualNode) => {
-    _walk(rootVirtualNode);
-};
-
-const _walk = (currentNode, oldNode, parentNode) => {
-    if (parentNode.flag_ === 'UPDATE') {
-        if (isFunction(currentNode.type_)) {
-            // Find corresponding old node
-            let oldNode = parentNode.old_.child_;
-            while (oldNode !== null) {
-                if (currentNode.key_ !== null && currentNode.key_ === oldNode.key_) {
-                    break;
-                }
-                if (currentNode.posInRow_ === oldNode.posInRow_) {
-                    break;
-                }
-                oldNode = oldNode.sibling_;
-            }
-
-            // Transfer memoized hooks
-            if (oldNode !== null) {
-                currentNode.hooks_ = oldNode.hooks_;
-                for (
-                    let hook, i = 0, len = currentNode.hooks_.length
-                    ; i < len
-                    ; ++i
-                ) {
-                    hook = currentNode.hooks_[i];
-    
-                    if (hook instanceof StateHook) {
-                        hook.context_ = currentNode;
-                    }
-                }
-            }
-
-            // Render
-            prepareCurrentlyProcessing(currentNode);
-            const newChildNode = currentNode.type_(currentNode.props_);
-            flushCurrentlyProcessing();
-    
-            if (newChildNode !== null) {
-                newChildNode.parent_ = currentNode;
-                newChildNode.old_ = currentNode.child_;
-                newChildNode.flag_ = 'UPDATE';
-                newChildNode.posInRow_ = 0;
-                currentNode.child_ = newChildNode;
-            } else {
-                if (currentNode.child_ !== null) {
-                    currentNode.child_.flag_ = 'DELETE';
-                }
-            }
-        }
-    }
-};
-
-/**
- *
- * @param {VirtualNode} context
- * @param {*} initialValue
- * @constructor
- */
-function StateHook$1(context, initialValue) {
-    this.context_ = context;
-    
-    this.value_ = initialValue;
-
-    this.setValue_ = (value) => {
-        let newValue;
-        
-        if (isFunction(value)) {
-            newValue = value(this.value_);
-        } else {
-            newValue = value;
-        }
-        
-        if (newValue !== this.value_) {
-            this.value_ = newValue;
-            updateVirtualTree(this.context_);
-        }
-    };
-}
-
-const useState = (initialValue) => {
-    const [functionalVirtualNode, hookIndex] = resolveCurrentlyProcessing();
-
-    /**
-     * @type {StateHook}
-     */
-    let hook;
-
-    if (functionalVirtualNode.hooks_.length > hookIndex) {
-        hook = functionalVirtualNode.hooks_[hookIndex];
-    } else {
-        hook = new StateHook$1(functionalVirtualNode, initialValue);
-        functionalVirtualNode.hooks_.push(hook);
-    }
-
-    return [hook.value_, hook.setValue_];
-};
-
-const resolveVirtualTree = (virtualNode) => {
-    let index = 0;
-    let childNode = virtualNode.child_;
-    
-    while (childNode !== null) {
-        _resolveVirtualNodeRecursive(childNode, virtualNode.path_, index);
-        index++;
-        childNode = childNode.sibling_;
-    }
-};
-
-/**
- *
- * @param {VirtualNode} virtualNode
- * @param {string} parentPath
- * @private
- */
-const _resolveVirtualNodeRecursive = (virtualNode, parentPath, posInRow) => {
-    const functional = isFunction(virtualNode.type_);
-
-    // Set path
-    virtualNode.path_ = (
-        parentPath
-        + PATH_SEP
-        + (!isNullish(virtualNode.key_)
-            ? escapeVirtualNodeKey(virtualNode.key_)
-            : posInRow)
-        + PATH_SEP
-        + (functional
-            ? getFunctionalTypeAlias(virtualNode.type_)
-            : virtualNode.type_)
-    );
-
-    // Restore memoized states
-    if (functional) {
-        const memoizedHooks = findMemoizedHooks(virtualNode.path_);
-        if (memoizedHooks !== null) {
-            // Here, new node does not have any hooks
-            // because it is in the pending state
-            // After when the tree is established
-            // and then updating, the hooks will be called (or created if it is the first time)
-            virtualNode.hooks_ = memoizedHooks;
-
-            for (
-                let hook, i = 0, len = virtualNode.hooks_.length
-                ; i < len
-                ; ++i
-            ) {
-                hook = virtualNode.hooks_[i];
-
-                if (hook instanceof StateHook$1) {
-                    hook.context_ = virtualNode;
-                }
-            }
-        }
-
-        linkMemoizedHooks(virtualNode.path_, virtualNode.hooks_);
-    }
-
-    // Namespace
-    virtualNode.ns_ = _determineNS(virtualNode);
-
-    // Repeat with children
-    resolveVirtualTree(virtualNode);
-};
-
-const _determineNS = (virtualNode) => {
-    // Intrinsic namespace
-    if (virtualNode.type_ === 'svg') {
-        return NS_SVG;
-    }
- 
-    // As we never hydrate the container node,
-    // the parent_ never empty here
-    if (virtualNode.parent_.ns_ === NS_SVG && virtualNode.parent_.type_ === 'foreignObject') {
-        return NS_HTML;
-    }
-    
-    // By default, pass namespace below.
-    return virtualNode.parent_.ns_;
-};
-
-/**
- * 
- * @param {*} children 
- * @param {Element} targetNativeNode
- */
- const mount = (children, targetNativeNode) => {
-    const rootVirtualNode = createPortal(children, targetNativeNode);
-
-    // Set an unique path to split tree states between roots
-    rootVirtualNode.path_ = getRootId(targetNativeNode);
-    
-    resolveVirtualTree(rootVirtualNode);
-
-    updateVirtualTree(rootVirtualNode);
-};
-
-/**
- * 
- * @param {*} children 
- * @param {Element} targetNativeNode
- * @returns {VirtualNode}
- */
-const createPortal = (children, targetNativeNode) => {
-    /**
-     * @type {VirtualNode}
-     */
-    let rootVirtualNode;
-
-    if (!(rootVirtualNode = extractVirtualNode(targetNativeNode))) {
-        if (true) {
-            if (targetNativeNode.firstChild) {
-                console.error('Target node must be empty');
-            }
-        }
-        
-        rootVirtualNode = new VirtualNode(RootType);
-
-        // Determine the namespace (we only support SVG and HTML namespaces)
-        rootVirtualNode.ns_ = ('ownerSVGElement' in targetNativeNode) ? NS_SVG : NS_HTML;
-        
-        linkNativeNode(rootVirtualNode, targetNativeNode);
-        attachVirtualNode(targetNativeNode, rootVirtualNode);
-    }
-
-    rootVirtualNode.props_.children = children;
-
-    return rootVirtualNode;
 };
 
 exports.createPortal = createPortal;

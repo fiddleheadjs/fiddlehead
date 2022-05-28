@@ -1,4 +1,8 @@
 {
     "autoimport.spaceBetweenBraces": false,
-    "javascript.suggestionActions.enabled": false
+    "javascript.suggestionActions.enabled": false,
+    "javascript.format.insertSpaceAfterOpeningAndBeforeClosingEmptyBraces": false,
+    "javascript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": false,
+    "typescript.format.insertSpaceAfterOpeningAndBeforeClosingEmptyBraces": false,
+    "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": false
 }
