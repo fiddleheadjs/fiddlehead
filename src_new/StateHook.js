@@ -1,6 +1,6 @@
 import {resolveCurrentlyProcessing} from './CurrentlyProcessing';
 import {isFunction} from './Util';
-import {updateSubtree} from './WorkLoop';
+import {updateTree} from './UpdateTree';
 
 /**
  *
@@ -24,7 +24,7 @@ export function StateHook(context, initialValue) {
         
         if (newValue !== this.value_) {
             this.value_ = newValue;
-            updateSubtree(this.context_);
+            updateTree(this.context_);
         }
     };
 }

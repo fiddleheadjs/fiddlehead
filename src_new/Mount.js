@@ -1,6 +1,6 @@
 import {VirtualNode, linkNativeNode, NS_HTML, NS_SVG, RootType} from './VirtualNode';
 import {attachVirtualNode, extractVirtualNode} from './Externals';
-import {updateSubtree} from './WorkLoop';
+import {updateTree} from './UpdateTree';
 
 /**
  * 
@@ -10,7 +10,7 @@ import {updateSubtree} from './WorkLoop';
  export const mount = (children, targetNativeNode) => {
     const rootVirtualNode = createPortal(children, targetNativeNode);
 
-    updateSubtree(rootVirtualNode);
+    updateTree(rootVirtualNode);
 }
 
 /**

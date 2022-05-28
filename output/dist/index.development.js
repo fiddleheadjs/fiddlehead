@@ -680,7 +680,7 @@ function StateHook(context, initialValue) {
         
         if (newValue !== this.value_) {
             this.value_ = newValue;
-            updateSubtree(this.context_);
+            updateTree(this.context_);
         }
     };
 }
@@ -804,7 +804,7 @@ const _mapChildren = (node) => {
     return map;
 };
 
-const updateSubtree = (current) => {
+const updateTree = (current) => {
     const mountNodesMap = new Map();
     _walk(_performUnitOfWork, _mountEffects, mountNodesMap, current, current);
 };
@@ -815,18 +815,17 @@ const _performUnitOfWork = (current, root, mountNodesMap) => {
     if (current === root) {
         destroyEffectsOnFunctionalVirtualNode(current, false);
         mountNodesMap.set(current, false);
+
     } else if (current.alternative_ !== null) {
         updateView(current, current.alternative_);
-
         if (isFunction(current.type_)) {
             destroyEffectsOnFunctionalVirtualNode(current.alternative_, false);
             mountNodesMap.set(current, false);
         }
-
         current.alternative_ = null;
+        
     } else {
         insertView(current);
-        
         if (isFunction(current.type_)) {
             mountNodesMap.set(current, true);
         }
@@ -896,7 +895,7 @@ const _walk = (performUnit, onFinish, data, root, current, isUncleOfLastPerforme
  const mount = (children, targetNativeNode) => {
     const rootVirtualNode = createPortal(children, targetNativeNode);
 
-    updateSubtree(rootVirtualNode);
+    updateTree(rootVirtualNode);
 };
 
 /**
