@@ -9,7 +9,6 @@ function Wrapper2({children, myRef}) {
 }
 
 function Wrapper({children, myRef}) {
-    console.log({children});
     return <Wrapper2 myRef={myRef}>{children}</Wrapper2>;
 }
 
@@ -98,6 +97,6 @@ console.time('mount');
 mount(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));
 setTimeout(() => {
     mount(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));
-}, 3000);
+}, 6000);
 
 console.timeEnd('stack');
