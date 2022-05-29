@@ -1,5 +1,7 @@
 import {hydrateView, rehydrateView} from './HydrateView';
-import {RootType} from './VirtualNode';
+
+// Important Note
+// This module does not handle RootType
 
 export const updateView = (newVirtualNode, oldVirtualNode) => {
     rehydrateView(newVirtualNode, oldVirtualNode);
@@ -25,31 +27,41 @@ export const deleteView = (subtree) => {
     });
 }
 
-const _findNativeHost = (virtualNode) => {
-    if (virtualNode.type_ === RootType) {
-        return virtualNode.nativeNode_;
-    }
-    
-    if (virtualNode.parent_ === null) {
-        return null;
-    }
+const _findNativeHost = (node) => {
+    let current = node.parent_;
 
-    if (virtualNode.parent_.nativeNode_ !== null) {
-        return virtualNode.parent_.nativeNode_;
+    while (true) {
+        if (current === null) {
+            return null;
+        }
+        if (current.nativeNode_ !== null) {
+            return current.nativeNode_;
+        }
+        current = current.parent_;
     }
-    
-    return _findNativeHost(virtualNode.parent_);
 }
 
-const _loopClosestNativeNodes = (virtualNode, callback) => {
-    if (virtualNode.nativeNode_ !== null) {
-        callback(virtualNode.nativeNode_);
-        return;
-    }
-    
-    let childNode = virtualNode.child_;
-    while (childNode !== null) {
-        _loopClosestNativeNodes(childNode, callback);
-        childNode = childNode.sibling_;
+const _loopClosestNativeNodes = (node, callback) => {
+    let root = node;
+    let current = node;
+
+    while (true) {
+        if (current.nativeNode_ !== null) {
+            callback(current.nativeNode_);
+        } else if (current.child_ !== null) {
+            current = current.child_;
+            continue;
+        }
+        if (current === root) {
+            return;
+        }
+        while (current.sibling_ === null) {
+            if (current.parent_ === null || current.parent_ === root) {
+                return;
+            }
+            current = current.parent_;
+        }
+        current = current.sibling_;
+        continue;
     }
 }

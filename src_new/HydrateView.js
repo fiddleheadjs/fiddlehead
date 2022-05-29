@@ -1,18 +1,16 @@
-import {linkNativeNode, RootType, NODE_FRAGMENT, NODE_TEXT, NS_HTML, NS_SVG} from './VirtualNode';
+import {linkNativeNode, NODE_FRAGMENT, NODE_TEXT, NS_HTML, NS_SVG} from './VirtualNode';
 import {createNativeElementWithNS, createNativeTextNode, updateNativeTextNode, updateNativeElementAttributes} from './NativeDOM';
 import {attachVirtualNode} from './Externals';
 import {isFunction} from './Util';
 
-export const hydrateView = (virtualNode) => {
-    if (virtualNode.type_ === RootType) {
-        // Root nodes always have apredefined native nodes and namespaces
-        return;
-    }
+// Important Note
+// This module does not handle RootType
 
+export const hydrateView = (virtualNode) => {
     virtualNode.ns_ = _determineNS(virtualNode);
 
     if (virtualNode.type_ === NODE_FRAGMENT || isFunction(virtualNode.type_)) {
-        // Do nothing with fragments
+        // Do nothing more with fragments
         return;
     }
 
@@ -27,15 +25,10 @@ export const hydrateView = (virtualNode) => {
 }
 
 export const rehydrateView = (newVirtualNode, oldVirtualNode) => {
-    if (newVirtualNode.type_ === RootType) {
-        // Root nodes always have apredefined native nodes and namespaces
-        return;
-    }
-
     newVirtualNode.ns_ = _determineNS(newVirtualNode);
 
+    // Do nothing more with fragments
     if (newVirtualNode.type_ === NODE_FRAGMENT || isFunction(newVirtualNode.type_)) {
-        // Do nothing with fragments
         return;
     }
 
@@ -61,15 +54,15 @@ export const rehydrateView = (newVirtualNode, oldVirtualNode) => {
     }
 }
 
-const _createNativeNode = (node) => {
-    if (node.type_ === NODE_TEXT) {
-        return createNativeTextNode(node.props_.children);
+const _createNativeNode = (virtualNode) => {
+    if (virtualNode.type_ === NODE_TEXT) {
+        return createNativeTextNode(virtualNode.props_.children);
     }
 
     return createNativeElementWithNS(
-        node.ns_,
-        node.type_,
-        node.props_
+        virtualNode.ns_,
+        virtualNode.type_,
+        virtualNode.props_
     );
 }
 

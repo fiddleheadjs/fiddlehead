@@ -3,7 +3,6 @@ import {h, mount, createPortal, useRef, useEffect, useState} from '../../output'
 mount(<Root/>, document.getElementById('sandbox-container'));
 
 function Root() {
-    const [showsModal, setShowsModal] = useState(false);
     const [count, setCount] = useState(0);
 
     return (
@@ -11,13 +10,12 @@ function Root() {
             <button
                 onClick={() => {
                     setCount(t => t + 1);
-                    setShowsModal(t => !t);
                 }}
             >
                 Click me {count}
             </button>
             {
-                showsModal &&
+                count % 8 > 0 &&
                 <DocumentPortal>
                     <Modal>
                         Xin chao {count}

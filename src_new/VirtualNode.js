@@ -61,7 +61,7 @@ export const RootType = (props) => {
 /**
  * 
  * @param {VirtualNode} virtualNode 
- * @param {Node} nativeNode 
+ * @param {Node} nativeNode
  */
 export const linkNativeNode = (virtualNode, nativeNode) => {
     virtualNode.nativeNode_ = nativeNode;

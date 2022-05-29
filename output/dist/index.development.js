@@ -146,7 +146,7 @@ const RootType = (props) => {
 /**
  * 
  * @param {VirtualNode} virtualNode 
- * @param {Node} nativeNode 
+ * @param {Node} nativeNode
  */
 const linkNativeNode = (virtualNode, nativeNode) => {
     virtualNode.nativeNode_ = nativeNode;
@@ -386,16 +386,14 @@ const createNativeElementWithNS = (ns, type, attributes) => {
     return element;
 };
 
-const hydrateView = (virtualNode) => {
-    if (virtualNode.type_ === RootType) {
-        // Root nodes always have apredefined native nodes and namespaces
-        return;
-    }
+// Important Note
+// This module does not handle RootType
 
+const hydrateView = (virtualNode) => {
     virtualNode.ns_ = _determineNS(virtualNode);
 
     if (virtualNode.type_ === NODE_FRAGMENT || isFunction(virtualNode.type_)) {
-        // Do nothing with fragments
+        // Do nothing more with fragments
         return;
     }
 
@@ -410,15 +408,10 @@ const hydrateView = (virtualNode) => {
 };
 
 const rehydrateView = (newVirtualNode, oldVirtualNode) => {
-    if (newVirtualNode.type_ === RootType) {
-        // Root nodes always have apredefined native nodes and namespaces
-        return;
-    }
-
     newVirtualNode.ns_ = _determineNS(newVirtualNode);
 
+    // Do nothing more with fragments
     if (newVirtualNode.type_ === NODE_FRAGMENT || isFunction(newVirtualNode.type_)) {
-        // Do nothing with fragments
         return;
     }
 
@@ -444,15 +437,15 @@ const rehydrateView = (newVirtualNode, oldVirtualNode) => {
     }
 };
 
-const _createNativeNode = (node) => {
-    if (node.type_ === NODE_TEXT) {
-        return createNativeTextNode(node.props_.children);
+const _createNativeNode = (virtualNode) => {
+    if (virtualNode.type_ === NODE_TEXT) {
+        return createNativeTextNode(virtualNode.props_.children);
     }
 
     return createNativeElementWithNS(
-        node.ns_,
-        node.type_,
-        node.props_
+        virtualNode.ns_,
+        virtualNode.type_,
+        virtualNode.props_
     );
 };
 
@@ -471,6 +464,9 @@ const _determineNS = (virtualNode) => {
     // By default, pass namespace below.
     return virtualNode.parent_.ns_;
 };
+
+// Important Note
+// This module does not handle RootType
 
 const updateView = (newVirtualNode, oldVirtualNode) => {
     rehydrateView(newVirtualNode, oldVirtualNode);
@@ -496,32 +492,42 @@ const deleteView = (subtree) => {
     });
 };
 
-const _findNativeHost = (virtualNode) => {
-    if (virtualNode.type_ === RootType) {
-        return virtualNode.nativeNode_;
-    }
-    
-    if (virtualNode.parent_ === null) {
-        return null;
-    }
+const _findNativeHost = (node) => {
+    let current = node.parent_;
 
-    if (virtualNode.parent_.nativeNode_ !== null) {
-        return virtualNode.parent_.nativeNode_;
+    while (true) {
+        if (current === null) {
+            return null;
+        }
+        if (current.nativeNode_ !== null) {
+            return current.nativeNode_;
+        }
+        current = current.parent_;
     }
-    
-    return _findNativeHost(virtualNode.parent_);
 };
 
-const _loopClosestNativeNodes = (virtualNode, callback) => {
-    if (virtualNode.nativeNode_ !== null) {
-        callback(virtualNode.nativeNode_);
-        return;
-    }
-    
-    let childNode = virtualNode.child_;
-    while (childNode !== null) {
-        _loopClosestNativeNodes(childNode, callback);
-        childNode = childNode.sibling_;
+const _loopClosestNativeNodes = (node, callback) => {
+    let root = node;
+    let current = node;
+
+    while (true) {
+        if (current.nativeNode_ !== null) {
+            callback(current.nativeNode_);
+        } else if (current.child_ !== null) {
+            current = current.child_;
+            continue;
+        }
+        if (current === root) {
+            return;
+        }
+        while (current.sibling_ === null) {
+            if (current.parent_ === null || current.parent_ === root) {
+                return;
+            }
+            current = current.parent_;
+        }
+        current = current.sibling_;
+        continue;
     }
 };
 
@@ -842,6 +848,7 @@ const _mapChildren = (node) => {
 };
 
 // Algorithm: https://github.com/facebook/react/issues/7942
+
 const workLoop = (performUnit, root, ...data) => {
     let current = root;
     while (true) {
@@ -881,6 +888,12 @@ const updateTree = (current) => {
 
 const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
     reconcileChildren(current);
+
+    // RootType never changes its child
+    // Do nothing anymore
+    if (current.type_ === RootType) {
+        return;
+    }
 
     if (current === root) {
         unmountNodesMap.set(current, false);

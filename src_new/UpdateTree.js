@@ -2,6 +2,7 @@ import {insertView, updateView, deleteView} from './CommitView';
 import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNode} from './EffectHook';
 import {reconcileChildren} from './Reconciliation';
 import {isFunction} from './Util';
+import {RootType} from './VirtualNode';
 import {workLoop} from './WorkLoop';
 
 export const updateTree = (current) => {
@@ -22,6 +23,12 @@ export const updateTree = (current) => {
 
 const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
     reconcileChildren(current);
+
+    // RootType never changes its child
+    // Do nothing anymore
+    if (current.type_ === RootType) {
+        return;
+    }
 
     if (current === root) {
         unmountNodesMap.set(current, false);

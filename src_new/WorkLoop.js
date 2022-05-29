@@ -1,4 +1,5 @@
 // Algorithm: https://github.com/facebook/react/issues/7942
+
 export const workLoop = (performUnit, root, ...data) => {
     let current = root;
     while (true) {
