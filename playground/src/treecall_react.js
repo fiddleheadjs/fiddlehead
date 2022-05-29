@@ -10,7 +10,7 @@ function Tree() {
         <main>
             <TimeStart/>
             {
-                new Array(300).fill(1).map((_, index) => (
+                new Array(5000).fill(1).map((_, index) => (
                     <Node name={index} key={index}>
                         <Node name={index + ".1"}>
                             <div>

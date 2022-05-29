@@ -244,6 +244,8 @@ function MyAd() {
 function Demo() {
     const [shows, setShows] = useState(true);
 
+    if (!shows) return null;
+
     //console.log('shows', shows);
     return <><paragraph>
         <input type="checkbox" checked={shows} onChange={ev => setShows(shows => !shows)}/>
