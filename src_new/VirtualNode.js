@@ -23,8 +23,6 @@ export function VirtualNode(type, props = {}, key = null, ref = null) {
 
     this.sibling_ = null;
 
-    this.prevSibling_ = null;
-
     this.alternative_ = null;
 
     this.deletions_ = null;
@@ -117,8 +115,6 @@ export const appendChildrenFromContent = (parentNode, content) => {
             } else {
                 parentNode.child_ = childNode;
             }
-
-            childNode.prevSibling_ = prevChildNode;
 
             prevChildNode = childNode;
         }

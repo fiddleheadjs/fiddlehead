@@ -1,8 +1,8 @@
 // Algorithm: https://github.com/facebook/react/issues/7942
-export const workLoop = (performUnit, root, data) => {
+export const workLoop = (performUnit, root, ...data) => {
     let current = root;
     while (true) {
-        performUnit(current, root, data);
+        performUnit(current, root, ...data);
         if (current.child_ !== null) {
             current = current.child_;
             continue;

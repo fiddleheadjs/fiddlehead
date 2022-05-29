@@ -8,11 +8,12 @@ export const updateView = (newVirtualNode, oldVirtualNode) => {
 export const insertView = (node) => {
     hydrateView(node);
 
-    const nativeHost = _findNativeHost(node);
-
-    if (nativeHost !== null) {
-        if (node.nativeNode_)
-        nativeHost.appendChild(node.nativeNode_);
+    if (node.nativeNode_ !== null) {
+        const nativeHost = _findNativeHost(node);
+        if (nativeHost !== null) {
+            // TODO: insert before a ref node
+            nativeHost.appendChild(node.nativeNode_);
+        }
     }
 }
 
