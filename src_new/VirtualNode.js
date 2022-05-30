@@ -8,10 +8,10 @@ import {isArray, isFunction, isNullish, isNumber, isString} from './Util';
  * @param {string|number?} key 
  * @param {RefHook?} ref 
  */
-export function VirtualNode(type, props = {}, key = null, ref = null) {
+export function VirtualNode(type, props, key, ref) {
     this.type_ = type;
 
-    this.key_ = key;
+    this.key_ = key === undefined ? null : key;
     
     this.slot_ = null;
     
@@ -30,7 +30,7 @@ export function VirtualNode(type, props = {}, key = null, ref = null) {
     this.nativeNode_ = null;
 
     if (type !== NODE_FRAGMENT) {
-        this.props_ = props;
+        this.props_ = props || {};
         
         if (isFunction(type)) {
             this.hook_ = null;

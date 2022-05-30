@@ -4,20 +4,24 @@ mount(<Root/>, document.getElementById('sandbox-container'));
 
 function Root() {
     const [count, setCount] = useState(0);
+    const [shows, setShows] = useState(false);
+
+    console.log('render root', count, shows);
 
     return (
         <div className="Root">
             <button
                 onClick={() => {
                     setCount(t => t + 1);
+                    setShows(t => !t);
                 }}
             >
                 Click me {count}
             </button>
             {
-                count % 8 > 0 &&
+                (shows || count % 3 > 0) &&
                 <DocumentPortal>
-                    <Modal>
+                    <Modal {...{count, setCount, shows, setShows}}>
                         Xin chao {count}
                     </Modal>
                 </DocumentPortal>
@@ -26,7 +30,10 @@ function Root() {
     )
 }
 
-function Modal({children}) {
+function Modal({children, count, setCount, shows, setShows}) {
+    const [clicks, setClicks] = useState(0);
+    console.log('render modal', clicks);
+
     return (
         <div
             className="Modal"
@@ -44,6 +51,15 @@ function Modal({children}) {
             }}
         >
             {children}
+            <button
+                onClick={() => {
+                    setCount(t => t + 1);
+                    setShows(t => !t);
+                    setClicks(t => t + 1);
+                }}
+            >
+                Click me {clicks}
+            </button>
         </div>
     );
 }
