@@ -618,7 +618,7 @@ const useEffect = (callback, deps = null) => {
  * @param {VirtualNode} functionalVirtualNode
  * @param {boolean} isNewNodeMounted
  */
-const mountEffectsOnFunctionalVirtualNode = (functionalVirtualNode, isNewNodeMounted) => {
+const mountEffects = (functionalVirtualNode, isNewNodeMounted) => {
     for (
         let hook, i = 0, len = functionalVirtualNode.hooks_.length
         ; i < len
@@ -641,7 +641,7 @@ const mountEffectsOnFunctionalVirtualNode = (functionalVirtualNode, isNewNodeMou
  * @param {VirtualNode} functionalVirtualNode
  * @param {boolean} isNodeUnmounted
  */
-const destroyEffectsOnFunctionalVirtualNode = (functionalVirtualNode, isNodeUnmounted) => {
+const destroyEffects = (functionalVirtualNode, isNodeUnmounted) => {
     for (
         let hook, i = 0, len = functionalVirtualNode.hooks_.length
         ; i < len
@@ -902,10 +902,10 @@ const updateTree = (current) => {
 
     queueWork(() => {
         mountNodesMap.forEach((isNewlyMounted, node) => {
-            mountEffectsOnFunctionalVirtualNode(node, isNewlyMounted);
+            mountEffects(node, isNewlyMounted);
         });
         unmountNodesMap.forEach((isUnmounted, node) => {
-            destroyEffectsOnFunctionalVirtualNode(node, isUnmounted);
+            destroyEffects(node, isUnmounted);
         });
     });
 };

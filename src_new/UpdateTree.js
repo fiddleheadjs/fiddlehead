@@ -1,5 +1,5 @@
 import {insertView, updateView, deleteView} from './CommitView';
-import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNode} from './EffectHook';
+import {destroyEffects, mountEffects} from './EffectHook';
 import {reconcileChildren} from './Reconciliation';
 import {isFunction} from './Util';
 import {RootType} from './VirtualNode';
@@ -13,10 +13,10 @@ export const updateTree = (current) => {
 
     queueWork(() => {
         mountNodesMap.forEach((isNewlyMounted, node) => {
-            mountEffectsOnFunctionalVirtualNode(node, isNewlyMounted);
+            mountEffects(node, isNewlyMounted);
         });
         unmountNodesMap.forEach((isUnmounted, node) => {
-            destroyEffectsOnFunctionalVirtualNode(node, isUnmounted);
+            destroyEffects(node, isUnmounted);
         });
     });
 }
