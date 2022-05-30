@@ -1,4 +1,4 @@
-import {processCurrentHook} from './CurrentlyProcessing';
+import {resolveCurrentHook} from './CurrentlyProcessing';
 
 /**
  *
@@ -11,7 +11,7 @@ export function RefHook(current) {
 }
 
 export const useRef = (initialValue) => {
-    return processCurrentHook(
+    return resolveCurrentHook(
         (currentNode) => new RefHook(initialValue),
         (currentHook) => currentHook
     );

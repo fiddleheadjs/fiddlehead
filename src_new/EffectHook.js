@@ -1,4 +1,4 @@
-import {processCurrentHook} from './CurrentlyProcessing';
+import {resolveCurrentHook} from './CurrentlyProcessing';
 import {compareSameLengthArrays} from './Util';
 
 /**
@@ -25,7 +25,7 @@ const TAG_DEPS = 2;
 const TAG_DEPS_CHANGED = 3;
 
 export const useEffect = (callback, deps = null) => {
-    return processCurrentHook(
+    return resolveCurrentHook(
         (currentNode) => {
             const effectTag = _determineEffectTag(deps, null);
             return new EffectHook(callback, deps, null, effectTag);

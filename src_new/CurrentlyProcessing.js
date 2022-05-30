@@ -10,7 +10,7 @@ export const flushCurrentlyProcessing = () => {
     currentHook = null;
 }
 
-export const processCurrentHook = (createHookFn, processFn) => {
+export const resolveCurrentHook = (createHookFn, processFn) => {
     if (currentNode === null) {
         throw new Error('Cannot call hooks from outside of the component');
     }

@@ -1,4 +1,4 @@
-import {processCurrentHook} from './CurrentlyProcessing';
+import {resolveCurrentHook} from './CurrentlyProcessing';
 import {isFunction} from './Util';
 import {resolveTree} from './ResolveTree';
 
@@ -32,7 +32,7 @@ export function StateHook(context, initialValue) {
 }
 
 export const useState = (initialValue) => {
-    return processCurrentHook(
+    return resolveCurrentHook(
         (currentNode) => new StateHook(currentNode, initialValue),
         (currentHook) => [currentHook.value_, currentHook.setValue_]
     );

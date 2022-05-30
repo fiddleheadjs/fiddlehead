@@ -54,7 +54,7 @@ const flushCurrentlyProcessing = () => {
     currentHook = null;
 };
 
-const processCurrentHook = (createHookFn, processFn) => {
+const resolveCurrentHook = (createHookFn, processFn) => {
     if (currentNode === null) {
         throw new Error('Cannot call hooks from outside of the component');
     }
@@ -90,7 +90,7 @@ function RefHook(current) {
 }
 
 const useRef = (initialValue) => {
-    return processCurrentHook(
+    return resolveCurrentHook(
         (currentNode) => new RefHook(initialValue),
         (currentHook) => currentHook
     );
@@ -581,7 +581,7 @@ const TAG_DEPS = 2;
 const TAG_DEPS_CHANGED = 3;
 
 const useEffect = (callback, deps = null) => {
-    return processCurrentHook(
+    return resolveCurrentHook(
         (currentNode) => {
             const effectTag = _determineEffectTag(deps, null);
             return new EffectHook(callback, deps, null, effectTag);
@@ -738,7 +738,7 @@ function StateHook(context, initialValue) {
 }
 
 const useState = (initialValue) => {
-    return processCurrentHook(
+    return resolveCurrentHook(
         (currentNode) => new StateHook(currentNode, initialValue),
         (currentHook) => [currentHook.value_, currentHook.setValue_]
     );
