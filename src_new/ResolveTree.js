@@ -5,7 +5,7 @@ import {isFunction} from './Util';
 import {RootType} from './VirtualNode';
 import {queueWork, workLoop} from './WorkLoop';
 
-export const updateTree = (current) => {
+export const resolveTree = (current) => {
     const mountNodesMap = new Map();
     const unmountNodesMap = new Map();
     

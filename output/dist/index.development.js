@@ -739,7 +739,7 @@ function StateHook(context, initialValue) {
         
         if (newValue !== this.value_) {
             this.value_ = newValue;
-            updateTree(this.context_);
+            resolveTree(this.context_);
         }
     };
 }
@@ -894,7 +894,7 @@ const queueWork = (work) => {
     }
 };
 
-const updateTree = (current) => {
+const resolveTree = (current) => {
     const mountNodesMap = new Map();
     const unmountNodesMap = new Map();
     
@@ -960,7 +960,7 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
  const mount = (children, targetNativeNode) => {
     const rootVirtualNode = createPortal(children, targetNativeNode);
 
-    updateTree(rootVirtualNode);
+    resolveTree(rootVirtualNode);
 };
 
 /**

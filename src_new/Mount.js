@@ -1,6 +1,6 @@
 import {VirtualNode, linkNativeNode, NS_HTML, NS_SVG, RootType} from './VirtualNode';
 import {attachVirtualNode, extractVirtualNode} from './Externals';
-import {updateTree} from './UpdateTree';
+import {resolveTree} from './ResolveTree';
 
 /**
  * 
@@ -10,7 +10,7 @@ import {updateTree} from './UpdateTree';
  export const mount = (children, targetNativeNode) => {
     const rootVirtualNode = createPortal(children, targetNativeNode);
 
-    updateTree(rootVirtualNode);
+    resolveTree(rootVirtualNode);
 }
 
 /**

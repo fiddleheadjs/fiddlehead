@@ -1,6 +1,6 @@
 import {resolveCurrentlyProcessing} from './CurrentlyProcessing';
 import {isFunction} from './Util';
-import {updateTree} from './UpdateTree';
+import {resolveTree} from './ResolveTree';
 
 /**
  *
@@ -24,7 +24,7 @@ export function StateHook(context, initialValue) {
         
         if (newValue !== this.value_) {
             this.value_ = newValue;
-            updateTree(this.context_);
+            resolveTree(this.context_);
         }
     };
 }
