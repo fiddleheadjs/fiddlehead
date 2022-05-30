@@ -121,25 +121,23 @@ function VirtualNode(type, props = {}, key = null, ref = null) {
     this.alternative_ = null;
 
     this.deletions_ = null;
-
-    this.nativeNode_ = null;
-
-    // In the commit phase, the new child will be inserted
-    // after the last inserted/updated child
-    this.lastCommittedNativeChild_ = null;
     
-    if (ref instanceof RefHook) {
-        this.ref_ = ref;
-    } else {
-        this.ref_ = null;
-    }
+    this.nativeNode_ = null;
 
     if (type !== NODE_FRAGMENT) {
         this.props_ = props;
-
+        
         if (isFunction(type)) {
             this.hook_ = null;
+        } else {
+            if (ref instanceof RefHook) {
+                this.ref_ = ref;
+            }
         }
+        
+        // In the commit phase, the new child will be inserted
+        // after the last inserted/updated child
+        this.lastCommittedNativeChild_ = null;
     }
 }
 
@@ -165,7 +163,7 @@ const RootType = (props) => {
 const linkNativeNode = (virtualNode, nativeNode) => {
     virtualNode.nativeNode_ = nativeNode;
 
-    if (virtualNode.ref_ !== null) {
+    if (!isNullish(virtualNode.ref_)) {
         virtualNode.ref_.current = nativeNode;
     }
 };
@@ -406,8 +404,8 @@ const createNativeElementWithNS = (ns, type, attributes) => {
 const hydrateView = (virtualNode) => {
     virtualNode.ns_ = _determineNS(virtualNode);
 
-    if (virtualNode.type_ === NODE_FRAGMENT || isFunction(virtualNode.type_)) {
-        // Do nothing more with fragments
+    // Do nothing more with fragments
+    if (_isDry(virtualNode.type_)) {
         return;
     }
 
@@ -415,9 +413,7 @@ const hydrateView = (virtualNode) => {
 
     linkNativeNode(virtualNode, nativeNode);
     if (true) {
-        if (nativeNode !== null) {
-            attachVirtualNode(nativeNode, virtualNode);
-        }
+        attachVirtualNode(nativeNode, virtualNode);
     }
 };
 
@@ -425,7 +421,7 @@ const rehydrateView = (newVirtualNode, oldVirtualNode) => {
     newVirtualNode.ns_ = _determineNS(newVirtualNode);
 
     // Do nothing more with fragments
-    if (newVirtualNode.type_ === NODE_FRAGMENT || isFunction(newVirtualNode.type_)) {
+    if (_isDry(newVirtualNode.type_)) {
         return;
     }
 
@@ -477,6 +473,10 @@ const _determineNS = (virtualNode) => {
 
     // By default, pass namespace below.
     return virtualNode.parent_.ns_;
+};
+
+const _isDry = (type) => {
+    return type === NODE_FRAGMENT || isFunction(type);
 };
 
 // Important Note

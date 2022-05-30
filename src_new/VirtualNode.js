@@ -1,5 +1,5 @@
 import {RefHook} from './RefHook';
-import {isArray, isFunction, isNumber, isString} from './Util';
+import {isArray, isFunction, isNullish, isNumber, isString} from './Util';
 
 /**
  * 
@@ -26,25 +26,23 @@ export function VirtualNode(type, props = {}, key = null, ref = null) {
     this.alternative_ = null;
 
     this.deletions_ = null;
-
-    this.nativeNode_ = null;
-
-    // In the commit phase, the new child will be inserted
-    // after the last inserted/updated child
-    this.lastCommittedNativeChild_ = null;
     
-    if (ref instanceof RefHook) {
-        this.ref_ = ref;
-    } else {
-        this.ref_ = null;
-    }
+    this.nativeNode_ = null;
 
     if (type !== NODE_FRAGMENT) {
         this.props_ = props;
-
+        
         if (isFunction(type)) {
             this.hook_ = null;
+        } else {
+            if (ref instanceof RefHook) {
+                this.ref_ = ref;
+            }
         }
+        
+        // In the commit phase, the new child will be inserted
+        // after the last inserted/updated child
+        this.lastCommittedNativeChild_ = null;
     }
 }
 
@@ -70,7 +68,7 @@ export const RootType = (props) => {
 export const linkNativeNode = (virtualNode, nativeNode) => {
     virtualNode.nativeNode_ = nativeNode;
 
-    if (virtualNode.ref_ !== null) {
+    if (!isNullish(virtualNode.ref_)) {
         virtualNode.ref_.current = nativeNode;
     }
 }

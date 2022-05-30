@@ -9,8 +9,8 @@ import {isFunction} from './Util';
 export const hydrateView = (virtualNode) => {
     virtualNode.ns_ = _determineNS(virtualNode);
 
-    if (virtualNode.type_ === NODE_FRAGMENT || isFunction(virtualNode.type_)) {
-        // Do nothing more with fragments
+    // Do nothing more with fragments
+    if (_isDry(virtualNode.type_)) {
         return;
     }
 
@@ -18,9 +18,7 @@ export const hydrateView = (virtualNode) => {
 
     linkNativeNode(virtualNode, nativeNode);
     if (__DEV__) {
-        if (nativeNode !== null) {
-            attachVirtualNode(nativeNode, virtualNode);
-        }
+        attachVirtualNode(nativeNode, virtualNode);
     }
 }
 
@@ -28,7 +26,7 @@ export const rehydrateView = (newVirtualNode, oldVirtualNode) => {
     newVirtualNode.ns_ = _determineNS(newVirtualNode);
 
     // Do nothing more with fragments
-    if (newVirtualNode.type_ === NODE_FRAGMENT || isFunction(newVirtualNode.type_)) {
+    if (_isDry(newVirtualNode.type_)) {
         return;
     }
 
@@ -80,4 +78,8 @@ const _determineNS = (virtualNode) => {
 
     // By default, pass namespace below.
     return virtualNode.parent_.ns_;
+}
+
+const _isDry = (type) => {
+    return type === NODE_FRAGMENT || isFunction(type);
 }
