@@ -28,6 +28,10 @@ export function VirtualNode(type, props = {}, key = null, ref = null) {
     this.deletions_ = null;
 
     this.nativeNode_ = null;
+
+    // In the commit phase, the new child will be inserted
+    // after the last inserted/updated child
+    this.lastCommittedNativeChild_ = null;
     
     if (ref instanceof RefHook) {
         this.ref_ = ref;

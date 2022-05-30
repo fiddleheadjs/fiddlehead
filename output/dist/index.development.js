@@ -113,6 +113,10 @@ function VirtualNode(type, props = {}, key = null, ref = null) {
     this.deletions_ = null;
 
     this.nativeNode_ = null;
+
+    // In the commit phase, the new child will be inserted
+    // after the last inserted/updated child
+    this.lastCommittedNativeChild_ = null;
     
     if (ref instanceof RefHook) {
         this.ref_ = ref;
@@ -470,16 +474,27 @@ const _determineNS = (virtualNode) => {
 
 const updateView = (newVirtualNode, oldVirtualNode) => {
     rehydrateView(newVirtualNode, oldVirtualNode);
+
+    if (newVirtualNode.nativeNode_ !== null) {
+        const hostNode = _findHostNode(newVirtualNode);
+        if (hostNode !== null) {
+            hostNode.lastCommittedNativeChild_ = newVirtualNode.nativeNode_;
+        }
+    }
 };
 
 const insertView = (node) => {
     hydrateView(node);
 
     if (node.nativeNode_ !== null) {
-        const nativeHost = _findNativeHost(node);
-        if (nativeHost !== null) {
-            // TODO: insert before a ref node
-            nativeHost.appendChild(node.nativeNode_);
+        const hostNode = _findHostNode(node);
+        if (hostNode !== null) {
+            const nativeNodeAfter = (
+                hostNode.lastCommittedNativeChild_ === null ? null
+                : hostNode.lastCommittedNativeChild_.nextSibling
+            );
+            hostNode.nativeNode_.insertBefore(node.nativeNode_, nativeNodeAfter);
+            hostNode.lastCommittedNativeChild_ = node.nativeNode_;
         }
     }
 };
@@ -492,7 +507,8 @@ const deleteView = (subtree) => {
     });
 };
 
-const _findNativeHost = (node) => {
+// Find the virtual node in the parent chain which its native node is not null
+const _findHostNode = (node) => {
     let current = node.parent_;
 
     while (true) {
@@ -500,7 +516,7 @@ const _findNativeHost = (node) => {
             return null;
         }
         if (current.nativeNode_ !== null) {
-            return current.nativeNode_;
+            return current;
         }
         current = current.parent_;
     }
