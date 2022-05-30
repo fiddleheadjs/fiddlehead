@@ -1,4 +1,4 @@
-import {resolveCurrentlyProcessing} from './CurrentlyProcessing';
+import {processCurrentHook} from './CurrentlyProcessing';
 import {isFunction} from './Util';
 import {resolveTree} from './ResolveTree';
 
@@ -27,22 +27,13 @@ export function StateHook(context, initialValue) {
             resolveTree(this.context_);
         }
     };
+
+    this.next_ = null;
 }
 
 export const useState = (initialValue) => {
-    const [functionalVirtualNode, hookIndex] = resolveCurrentlyProcessing();
-
-    /**
-     * @type {StateHook}
-     */
-    let hook;
-
-    if (functionalVirtualNode.hooks_.length > hookIndex) {
-        hook = functionalVirtualNode.hooks_[hookIndex];
-    } else {
-        hook = new StateHook(functionalVirtualNode, initialValue);
-        functionalVirtualNode.hooks_.push(hook);
-    }
-
-    return [hook.value_, hook.setValue_];
+    return processCurrentHook(
+        (currentNode) => new StateHook(currentNode, initialValue),
+        (currentHook) => [currentHook.value_, currentHook.setValue_]
+    );
 }

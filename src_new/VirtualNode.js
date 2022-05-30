@@ -43,7 +43,7 @@ export function VirtualNode(type, props = {}, key = null, ref = null) {
         this.props_ = props;
 
         if (isFunction(type)) {
-            this.hooks_ = [];
+            this.hook_ = null;
         }
     }
 }

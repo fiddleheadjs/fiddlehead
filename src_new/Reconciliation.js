@@ -66,18 +66,14 @@ const _makeAlternative = (newChild, oldChild) => {
     newChild.alternative_ = oldChild;
 
     if (isFunction(newChild.type_)) {
-        newChild.hooks_ = oldChild.hooks_;
+        newChild.hook_ = oldChild.hook_;
 
-        for (
-            let hook, i = 0, len = newChild.hooks_.length
-            ; i < len
-            ; ++i
-        ) {
-            hook = newChild.hooks_[i];
-
+        let hook = newChild.hook_;
+        while (hook !== null) {
             if (hook instanceof StateHook) {
                 hook.context_ = newChild;
             }
+            hook = hook.next_;
         }
     }
 }

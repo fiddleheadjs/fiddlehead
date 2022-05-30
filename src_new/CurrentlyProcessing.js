@@ -1,20 +1,36 @@
-let currentlyProcessingFunctionalVirtualNode = null;
-let currentlyProcessingHookIndex = -1;
+let currentNode = null;
+let currentHook = null;
 
 export const prepareCurrentlyProcessing = (functionalVirtualNode) => {
-    currentlyProcessingFunctionalVirtualNode = functionalVirtualNode;
-    currentlyProcessingHookIndex = -1;
+    currentNode = functionalVirtualNode;
 }
 
 export const flushCurrentlyProcessing = () => {
-    currentlyProcessingFunctionalVirtualNode = null;
-    currentlyProcessingHookIndex = -1;
+    currentNode = null;
+    currentHook = null;
 }
 
-export const resolveCurrentlyProcessing = () => {
-    if (currentlyProcessingFunctionalVirtualNode === null) {
+export const processCurrentHook = (createHookFn, processFn) => {
+    if (currentNode === null) {
         throw new Error('Cannot call hooks from outside of the component');
     }
     
-    return [currentlyProcessingFunctionalVirtualNode, ++currentlyProcessingHookIndex];
+    if (currentHook === null) {
+        if (currentNode.hook_ === null) {
+            currentHook = createHookFn(currentNode);
+            currentNode.hook_ = currentHook;
+        } else {
+            currentHook = currentNode.hook_;
+        }
+    } else {
+        if (currentHook.next_ === null) {
+            const previousHook = currentHook;           
+            currentHook = createHookFn(currentNode);
+            previousHook.next_ = currentHook;
+        } else {
+            currentHook = currentHook.next_;
+        }
+    }
+
+    return processFn(currentHook);
 }

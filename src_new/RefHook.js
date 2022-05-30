@@ -1,4 +1,4 @@
-import {resolveCurrentlyProcessing} from './CurrentlyProcessing';
+import {processCurrentHook} from './CurrentlyProcessing';
 
 /**
  *
@@ -7,18 +7,12 @@ import {resolveCurrentlyProcessing} from './CurrentlyProcessing';
  */
 export function RefHook(current) {
     this.current = current;
+    this.next_ = null;
 }
 
 export const useRef = (initialValue) => {
-    const [functionalVirtualNode, hookIndex] = resolveCurrentlyProcessing();
-
-    if (functionalVirtualNode.hooks_.length > hookIndex) {
-        return functionalVirtualNode.hooks_[hookIndex];
-    }
-
-    const hook = new RefHook(initialValue);
-
-    functionalVirtualNode.hooks_.push(hook);
-
-    return hook;
+    return processCurrentHook(
+        (currentNode) => new RefHook(initialValue),
+        (currentHook) => currentHook
+    );
 }
