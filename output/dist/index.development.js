@@ -42,14 +42,6 @@ const compareSameLengthArrays = (a, b) => {
     return true;
 };
 
-const queueWork = (work) => {
-    if (typeof Promise !== 'undefined') {
-        Promise.resolve().then(work);
-    } else {
-        setTimeout(work);
-    }
-};
-
 let currentlyProcessingFunctionalVirtualNode = null;
 let currentlyProcessingHookIndex = -1;
 
@@ -891,6 +883,14 @@ const workLoop = (performUnit, root, ...data) => {
             current = current.parent_;
         }
         current = current.sibling_;
+    }
+};
+
+const queueWork = (work) => {
+    if (typeof Promise !== 'undefined') {
+        Promise.resolve().then(work);
+    } else {
+        setTimeout(work);
     }
 };
 

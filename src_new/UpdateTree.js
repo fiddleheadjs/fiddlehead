@@ -1,8 +1,9 @@
 import {insertView, updateView, deleteView} from './CommitView';
 import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNode} from './EffectHook';
 import {reconcileChildren} from './Reconciliation';
-import {isFunction, queueWork} from './Util';
+import {isFunction} from './Util';
 import {RootType} from './VirtualNode';
+import {queueWork, workLoop} from './WorkLoop';
 
 export const updateTree = (current) => {
     const mountNodesMap = new Map();
