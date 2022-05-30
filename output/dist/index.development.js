@@ -470,7 +470,7 @@ const _determineNS = (virtualNode) => {
 };
 
 // Important Note
-// This module does not handle RootType
+// This module does not handle RootType nodes
 
 const updateView = (newVirtualNode, oldVirtualNode) => {
     rehydrateView(newVirtualNode, oldVirtualNode);
@@ -892,7 +892,7 @@ const updateTree = (current) => {
     
     workLoop(_performUnitOfWork, current, mountNodesMap, unmountNodesMap);
 
-    requestAnimationFrame(() => {
+    setTimeout(() => {
         mountNodesMap.forEach((isNewlyMounted, node) => {
             mountEffectsOnFunctionalVirtualNode(node, isNewlyMounted);
         });

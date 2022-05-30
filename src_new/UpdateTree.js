@@ -11,7 +11,7 @@ export const updateTree = (current) => {
     
     workLoop(_performUnitOfWork, current, mountNodesMap, unmountNodesMap);
 
-    requestAnimationFrame(() => {
+    setTimeout(() => {
         mountNodesMap.forEach((isNewlyMounted, node) => {
             mountEffectsOnFunctionalVirtualNode(node, isNewlyMounted);
         });
