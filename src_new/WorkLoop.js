@@ -20,3 +20,11 @@ export const workLoop = (performUnit, root, ...data) => {
         current = current.sibling_;
     }
 }
+
+export const queueWork = (work) => {
+    if (typeof Promise !== 'undefined') {
+        Promise.resolve().then(work);
+    } else {
+        setTimeout(work);
+    }
+}

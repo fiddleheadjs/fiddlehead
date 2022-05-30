@@ -3,7 +3,6 @@ import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNo
 import {reconcileChildren} from './Reconciliation';
 import {isFunction, queueWork} from './Util';
 import {RootType} from './VirtualNode';
-import {workLoop} from './WorkLoop';
 
 export const updateTree = (current) => {
     const mountNodesMap = new Map();
