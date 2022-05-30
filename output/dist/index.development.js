@@ -42,6 +42,14 @@ const compareSameLengthArrays = (a, b) => {
     return true;
 };
 
+const queueWork = (work) => {
+    if (typeof Promise !== 'undefined') {
+        Promise.resolve().then(work);
+    } else {
+        setTimeout(work);
+    }
+};
+
 let currentlyProcessingFunctionalVirtualNode = null;
 let currentlyProcessingHookIndex = -1;
 
@@ -892,7 +900,7 @@ const updateTree = (current) => {
     
     workLoop(_performUnitOfWork, current, mountNodesMap, unmountNodesMap);
 
-    setTimeout(() => {
+    queueWork(() => {
         mountNodesMap.forEach((isNewlyMounted, node) => {
             mountEffectsOnFunctionalVirtualNode(node, isNewlyMounted);
         });

@@ -41,3 +41,11 @@ export const compareSameLengthArrays = (a, b) => {
 
     return true;
 }
+
+export const queueWork = (work) => {
+    if (typeof Promise !== 'undefined') {
+        Promise.resolve().then(work);
+    } else {
+        setTimeout(work);
+    }
+}

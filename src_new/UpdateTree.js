@@ -1,7 +1,7 @@
 import {insertView, updateView, deleteView} from './CommitView';
 import {destroyEffectsOnFunctionalVirtualNode, mountEffectsOnFunctionalVirtualNode} from './EffectHook';
 import {reconcileChildren} from './Reconciliation';
-import {isFunction} from './Util';
+import {isFunction, queueWork} from './Util';
 import {RootType} from './VirtualNode';
 import {workLoop} from './WorkLoop';
 
@@ -11,7 +11,7 @@ export const updateTree = (current) => {
     
     workLoop(_performUnitOfWork, current, mountNodesMap, unmountNodesMap);
 
-    setTimeout(() => {
+    queueWork(() => {
         mountNodesMap.forEach((isNewlyMounted, node) => {
             mountEffectsOnFunctionalVirtualNode(node, isNewlyMounted);
         });
