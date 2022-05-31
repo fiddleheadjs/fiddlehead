@@ -127,12 +127,12 @@ function VirtualNode(type, props, key = null, ref = null) {
 
     this.hook_ = null;
     
-    // Namespace, output native node, ref
-    // ==================================
-
-    this.ns_ = null;
+    // Native node and relates
+    // =======================
     
     this.nativeNode_ = null;
+
+    this.ns_ = null;
     
     this.ref_ = ref;
 
