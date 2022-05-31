@@ -102,10 +102,10 @@ const useRef = (initialValue) => {
 
 /**
  * 
- * @param {function|string} type 
+ * @param {function|string|number} type
  * @param {{}|string?} props: required for text nodes
- * @param {string|number?} key 
- * @param {RefHook?} ref 
+ * @param {string|number?} key
+ * @param {RefHook?} ref
  */
 function VirtualNode(type, props, key = null, ref = null) {
     // Identification
@@ -166,8 +166,8 @@ const NS_SVG = 1;
 // Note:
 // Use special URI characters
 
-const NODE_TEXT = '#';
-const NODE_FRAGMENT = '[';
+const NODE_TEXT = 0;
+const NODE_FRAGMENT = 1;
 
 const Root = (props) => {
     return props.children;
@@ -1058,7 +1058,7 @@ const createPortal = (children, targetNativeNode) => {
 
 exports.Fragment = Fragment;
 exports.createPortal = createPortal;
-exports.h = createElement;
+exports.jsx = createElement;
 exports.mount = mount;
 exports.useEffect = useEffect;
 exports.useRef = useRef;

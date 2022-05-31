@@ -6,8 +6,8 @@ import {useEffect} from './src_new/EffectHook';
 import {useRef} from './src_new/RefHook';
 
 export {
-    createElement as h,
     mount,
+    createElement as jsx,
     createPortal,
     useState,
     useEffect,

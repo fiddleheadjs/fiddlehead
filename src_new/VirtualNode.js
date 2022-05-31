@@ -2,10 +2,10 @@ import {RefHook} from './RefHook';
 
 /**
  * 
- * @param {function|string} type 
+ * @param {function|string|number} type
  * @param {{}|string?} props: required for text nodes
- * @param {string|number?} key 
- * @param {RefHook?} ref 
+ * @param {string|number?} key
+ * @param {RefHook?} ref
  */
 export function VirtualNode(type, props, key = null, ref = null) {
     // Identification
@@ -66,8 +66,8 @@ export const NS_SVG = 1;
 // Note:
 // Use special URI characters
 
-export const NODE_TEXT = '#';
-export const NODE_FRAGMENT = '[';
+export const NODE_TEXT = 0;
+export const NODE_FRAGMENT = 1;
 
 export const Root = (props) => {
     return props.children;

@@ -1,4 +1,4 @@
-import {h, mount, useState, useEffect} from '../../output'; 
+import {jsx, mount, useState, useEffect} from '../../output'; 
 
 console.time('mount');
 mount(<Tree/>, document.getElementById('sandbox-container'));
