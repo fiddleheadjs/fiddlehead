@@ -51,18 +51,22 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
     }
     
     if (current.deletions_ !== null) {
-        current.deletions_.forEach(subtree => {
-            queueWork(() => {
+        const deletions = current.deletions_;
+        current.deletions_ = null;
+
+        deletions.forEach(subtree => {
+            deleteView(subtree);
+        });
+
+        queueWork(() => {
+            deletions.forEach(subtree => {
                 workLoop((deletion) => {
                     if (deletion.hook_ !== null) {
                         unmountNodesMap.set(deletion, true);
                     }
                 }, null, subtree);
             });
-
-            deleteView(subtree);
         });
-        current.deletions_ = null;
     }
 }
 
