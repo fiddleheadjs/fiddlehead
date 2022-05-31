@@ -225,20 +225,21 @@ const createElement = (type, attributes, ...content) => {
  * @return {null|VirtualNode}
  */
  const createVirtualNodeFromContent = (content) => {
-    let node = null;
-
     if (content instanceof VirtualNode) {
-        node = content;
+        return content;
     }
-    else if (isString(content) || isNumber(content)) {
-        node = new VirtualNode(NODE_TEXT, content);
-    }
-    else if (isArray(content)) {
-        node = new VirtualNode(NODE_FRAGMENT);
-        _appendChildrenFromContent(node, content);
+        
+    if (isString(content) || isNumber(content)) {
+        return new VirtualNode(NODE_TEXT, content);
     }
 
-    return node;
+    if (isArray(content)) {
+        const node = new VirtualNode(NODE_FRAGMENT);
+        _appendChildrenFromContent(node, content);
+        return node;
+    }
+
+    return null;
 };
 
 /**
@@ -269,7 +270,7 @@ const _appendChildrenFromContent = (parentNode, content) => {
     }
 };
 
-const PROP_VIRTUAL_NODE = 'hook_vnode';
+const PROP_VNODE = '%vnode';
 
 /**
  * 
@@ -277,7 +278,7 @@ const PROP_VIRTUAL_NODE = 'hook_vnode';
  * @param {VirtualNode} virtualNode 
  */
 const attachVirtualNode = (nativeNode, virtualNode) => {
-    nativeNode[PROP_VIRTUAL_NODE] = virtualNode;
+    nativeNode[PROP_VNODE] = virtualNode;
 };
 
 /**
@@ -286,7 +287,7 @@ const attachVirtualNode = (nativeNode, virtualNode) => {
  * @returns {VirtualNode|undefined}
  */
 const extractVirtualNode = (nativeNode) => {
-    return nativeNode[PROP_VIRTUAL_NODE];
+    return nativeNode[PROP_VNODE];
 };
 
 const updateNativeElementAttributes = (element, newAttributes, oldAttributes) => {
@@ -741,12 +742,12 @@ const _determineEffectTag = (deps, lastDeps) => {
     }
 };
 
-let timeoutID = null;
 const queueMap = new Map();
+let timeoutId = null;
 
 const _flushQueues = () => {
     queueMap.forEach((queue, context) => {
-        let value, hook, hasChanges = 0;
+        let value, hook, hasChanges = false;
         
         while (queue.length > 0) {
             [value, hook] = queue.pop();
@@ -761,7 +762,7 @@ const _flushQueues = () => {
             
             if (newValue !== hook.value_) {
                 hook.value_ = newValue;
-                hasChanges = 1;
+                hasChanges = true;
             }
         }
 
@@ -771,7 +772,7 @@ const _flushQueues = () => {
     });
 
     queueMap.clear();
-    timeoutID = null;
+    timeoutId = null;
 };
 
 /**
@@ -794,11 +795,11 @@ function StateHook(context, initialValue) {
             queue.push([value, this]);
         }
 
-        if (timeoutID !== null) {
-            clearTimeout(timeoutID);
+        if (timeoutId !== null) {
+            clearTimeout(timeoutId);
         }
 
-        timeoutID = setTimeout(_flushQueues);
+        timeoutId = setTimeout(_flushQueues);
     };
 
     this.next_ = null;

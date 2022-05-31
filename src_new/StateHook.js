@@ -2,12 +2,12 @@ import {resolveCurrentHook} from './CurrentlyProcessing';
 import {isFunction} from './Util';
 import {resolveTree} from './ResolveTree';
 
-let timeoutID = null;
 const queueMap = new Map();
+let timeoutId = null;
 
 const _flushQueues = () => {
     queueMap.forEach((queue, context) => {
-        let value, hook, hasChanges = 0;
+        let value, hook, hasChanges = false;
         
         while (queue.length > 0) {
             [value, hook] = queue.pop();
@@ -22,7 +22,7 @@ const _flushQueues = () => {
             
             if (newValue !== hook.value_) {
                 hook.value_ = newValue;
-                hasChanges = 1;
+                hasChanges = true;
             }
         }
 
@@ -32,7 +32,7 @@ const _flushQueues = () => {
     });
 
     queueMap.clear();
-    timeoutID = null;
+    timeoutId = null;
 }
 
 /**
@@ -55,11 +55,11 @@ export function StateHook(context, initialValue) {
             queue.push([value, this]);
         }
 
-        if (timeoutID !== null) {
-            clearTimeout(timeoutID);
+        if (timeoutId !== null) {
+            clearTimeout(timeoutId);
         }
 
-        timeoutID = setTimeout(_flushQueues);
+        timeoutId = setTimeout(_flushQueues);
     };
 
     this.next_ = null;

@@ -36,20 +36,21 @@ export const createElement = (type, attributes, ...content) => {
  * @return {null|VirtualNode}
  */
  export const createVirtualNodeFromContent = (content) => {
-    let node = null;
-
     if (content instanceof VirtualNode) {
-        node = content;
+        return content;
     }
-    else if (isString(content) || isNumber(content)) {
-        node = new VirtualNode(NODE_TEXT, content);
-    }
-    else if (isArray(content)) {
-        node = new VirtualNode(NODE_FRAGMENT);
-        _appendChildrenFromContent(node, content);
+        
+    if (isString(content) || isNumber(content)) {
+        return new VirtualNode(NODE_TEXT, content);
     }
 
-    return node;
+    if (isArray(content)) {
+        const node = new VirtualNode(NODE_FRAGMENT);
+        _appendChildrenFromContent(node, content);
+        return node;
+    }
+
+    return null;
 }
 
 /**
