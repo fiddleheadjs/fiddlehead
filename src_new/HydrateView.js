@@ -37,10 +37,10 @@ export const rehydrateView = (newVirtualNode, oldVirtualNode) => {
     }
 
     if (newVirtualNode.type_ === NODE_TEXT) {
-        if (newVirtualNode.props_.children !== oldVirtualNode.props_.children) {
+        if (newVirtualNode.props_ !== oldVirtualNode.props_) {
             updateNativeTextNode(
                 newVirtualNode.nativeNode_,
-                newVirtualNode.props_.children
+                newVirtualNode.props_
             );
         }
     } else {
@@ -52,13 +52,9 @@ export const rehydrateView = (newVirtualNode, oldVirtualNode) => {
     }
 }
 
-const _isDry = (type) => {
-    return type === NODE_FRAGMENT || isFunction(type);
-}
-
 const _createNativeNode = (virtualNode) => {
     if (virtualNode.type_ === NODE_TEXT) {
-        return createNativeTextNode(virtualNode.props_.children);
+        return createNativeTextNode(virtualNode.props_);
     }
 
     return createNativeElementWithNS(
@@ -82,4 +78,8 @@ const _determineNS = (virtualNode) => {
 
     // By default, pass namespace below.
     return virtualNode.parent_.ns_;
+}
+
+const _isDry = (type) => {
+    return type === NODE_FRAGMENT || isFunction(type);
 }

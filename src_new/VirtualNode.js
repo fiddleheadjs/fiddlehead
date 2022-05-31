@@ -1,5 +1,4 @@
 import {RefHook} from './RefHook';
-import {isFunction, isNullish} from './Util';
 
 /**
  * 
@@ -8,35 +7,44 @@ import {isFunction, isNullish} from './Util';
  * @param {string|number?} key 
  * @param {RefHook?} ref 
  */
-export function VirtualNode(type, props, key, ref) {
+export function VirtualNode(type, props, key = null, ref = null) {
+    // Identification
+    // ==============
+
     this.type_ = type;
 
-    this.key_ = key === undefined ? null : key;
-    
+    this.key_ = key;
+
     this.slot_ = null;
+
+    // Props and hooks
+    // ===============
+
+    // With a text node, props will be the content string
+    this.props_ = type === NODE_FRAGMENT ? null : (
+        props !== undefined ? props : {}
+    );
+
+    this.hook_ = null;
     
+    // Namespace, output native node, ref
+    // ==================================
+
     this.ns_ = null;
+    
+    this.nativeNode_ = null;
+    
+    this.ref_ = ref;
+
+    // Linked-list pointers
+    // ====================
 
     this.parent_ = null;
     
     this.child_ = null;
 
     this.sibling_ = null;
-    
-    this.nativeNode_ = null;
 
-    if (type !== NODE_FRAGMENT) {
-        this.props_ = props || {};
-        
-        if (isFunction(type)) {
-            this.hook_ = null;
-        } else {
-            if (ref instanceof RefHook) {
-                this.ref_ = ref;
-            }
-        }
-    }
-    
     // Temp props
     // ==========
     
@@ -77,7 +85,7 @@ export const Fragment = () => {
 export const linkNativeNode = (virtualNode, nativeNode) => {
     virtualNode.nativeNode_ = nativeNode;
 
-    if (!isNullish(virtualNode.ref_)) {
+    if (virtualNode.ref_ instanceof RefHook) {
         virtualNode.ref_.current = nativeNode;
     }
 }

@@ -107,35 +107,44 @@ const useRef = (initialValue) => {
  * @param {string|number?} key 
  * @param {RefHook?} ref 
  */
-function VirtualNode(type, props, key, ref) {
+function VirtualNode(type, props, key = null, ref = null) {
+    // Identification
+    // ==============
+
     this.type_ = type;
 
-    this.key_ = key === undefined ? null : key;
-    
+    this.key_ = key;
+
     this.slot_ = null;
+
+    // Props and hooks
+    // ===============
+
+    // With a text node, props will be the content string
+    this.props_ = type === NODE_FRAGMENT ? null : (
+        props !== undefined ? props : {}
+    );
+
+    this.hook_ = null;
     
+    // Namespace, output native node, ref
+    // ==================================
+
     this.ns_ = null;
+    
+    this.nativeNode_ = null;
+    
+    this.ref_ = ref;
+
+    // Linked-list pointers
+    // ====================
 
     this.parent_ = null;
     
     this.child_ = null;
 
     this.sibling_ = null;
-    
-    this.nativeNode_ = null;
 
-    if (type !== NODE_FRAGMENT) {
-        this.props_ = props || {};
-        
-        if (isFunction(type)) {
-            this.hook_ = null;
-        } else {
-            if (ref instanceof RefHook) {
-                this.ref_ = ref;
-            }
-        }
-    }
-    
     // Temp props
     // ==========
     
@@ -176,7 +185,7 @@ const Fragment = () => {
 const linkNativeNode = (virtualNode, nativeNode) => {
     virtualNode.nativeNode_ = nativeNode;
 
-    if (!isNullish(virtualNode.ref_)) {
+    if (virtualNode.ref_ instanceof RefHook) {
         virtualNode.ref_.current = nativeNode;
     }
 };
@@ -222,7 +231,7 @@ const createElement = (type, attributes, ...content) => {
         node = content;
     }
     else if (isString(content) || isNumber(content)) {
-        node = new VirtualNode(NODE_TEXT, {children: content});
+        node = new VirtualNode(NODE_TEXT, content);
     }
     else if (isArray(content)) {
         node = new VirtualNode(NODE_FRAGMENT);
@@ -449,10 +458,10 @@ const rehydrateView = (newVirtualNode, oldVirtualNode) => {
     }
 
     if (newVirtualNode.type_ === NODE_TEXT) {
-        if (newVirtualNode.props_.children !== oldVirtualNode.props_.children) {
+        if (newVirtualNode.props_ !== oldVirtualNode.props_) {
             updateNativeTextNode(
                 newVirtualNode.nativeNode_,
-                newVirtualNode.props_.children
+                newVirtualNode.props_
             );
         }
     } else {
@@ -464,13 +473,9 @@ const rehydrateView = (newVirtualNode, oldVirtualNode) => {
     }
 };
 
-const _isDry = (type) => {
-    return type === NODE_FRAGMENT || isFunction(type);
-};
-
 const _createNativeNode = (virtualNode) => {
     if (virtualNode.type_ === NODE_TEXT) {
-        return createNativeTextNode(virtualNode.props_.children);
+        return createNativeTextNode(virtualNode.props_);
     }
 
     return createNativeElementWithNS(
@@ -494,6 +499,10 @@ const _determineNS = (virtualNode) => {
 
     // By default, pass namespace below.
     return virtualNode.parent_.ns_;
+};
+
+const _isDry = (type) => {
+    return type === NODE_FRAGMENT || isFunction(type);
 };
 
 // Important Note
@@ -959,21 +968,21 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
     }
 
     if (current === root) {
-        if (!isNullish(current.hook_)) {
+        if (current.hook_ !== null) {
             unmountNodesMap.set(current, false);
             mountNodesMap.set(current, false);
         }
     } else {
         if (current.alternative_ !== null) {
             updateView(current, current.alternative_);
-            if (!isNullish(current.hook_)) {
+            if (current.hook_ !== null) {
                 unmountNodesMap.set(current.alternative_, false);
                 mountNodesMap.set(current, false);
             }
             current.alternative_ = null;
         } else {
             insertView(current);
-            if (!isNullish(current.hook_)) {
+            if (current.hook_ !== null) {
                 mountNodesMap.set(current, true);
             }
         }
@@ -983,7 +992,7 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
         current.deletions_.forEach(subtree => {
             queueWork(() => {
                 workLoop((deletion) => {
-                    if (!isNullish(deletion.hook_)) {
+                    if (deletion.hook_ !== null) {
                         unmountNodesMap.set(deletion, true);
                     }
                 }, null, subtree);

@@ -42,7 +42,7 @@ export const createElement = (type, attributes, ...content) => {
         node = content;
     }
     else if (isString(content) || isNumber(content)) {
-        node = new VirtualNode(NODE_TEXT, {children: content});
+        node = new VirtualNode(NODE_TEXT, content);
     }
     else if (isArray(content)) {
         node = new VirtualNode(NODE_FRAGMENT);
