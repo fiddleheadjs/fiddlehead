@@ -599,7 +599,14 @@ const useState = (initialValue) => {
 
 const useError = (initialError) => {
     return resolveCurrentHook(
-        (currentNode) => new StateHook(currentNode, initialError, STATE_ERROR),
+        (currentNode) => {
+            if (!_validateError(initialError)) {
+                // If the initial error is invalid,
+                // use null instead
+                initialError = null;
+            }
+            return new StateHook(currentNode, initialError, STATE_ERROR);
+        },
         (currentHook) => [currentHook.value_, currentHook.setValue_]
     );
 };
@@ -644,13 +651,10 @@ const _flushQueues = () => {
                 newValue = value;
             }
 
-            if (hook.tag_ === STATE_ERROR) {
-                if (!(newValue === null || newValue instanceof Error)) {
-                    if (true) {
-                        console.error('Error hooks only accept the value is an instance of Error or null');
-                    }
-                    continue;
-                }
+            if (hook.tag_ === STATE_ERROR && !_validateError(newValue)) {
+                // If the new error is invalid,
+                // keep the current error unchanged
+                continue;
             }
             
             if (newValue !== hook.value_) {
@@ -666,6 +670,17 @@ const _flushQueues = () => {
 
     queueMap.clear();
     timeoutId = null;
+};
+
+const _validateError = (error) => {
+    if (!(error === null || error instanceof Error)) {
+        if (true) {
+            console.error('Error hooks only accept the value is an instance of Error or null');
+        }
+        return false;
+    }
+
+    return true;
 };
 
 const catchError = (error, virtualNode) => {
