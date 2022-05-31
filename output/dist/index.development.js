@@ -179,10 +179,35 @@ const linkNativeNode = (virtualNode, nativeNode) => {
 
 /**
  *
+ * @param {string|function} type
+ * @param {{}|null} attributes
+ * @param {[]} content
+ * @return {VirtualNode}
+ */
+const createElement = (type, attributes, ...content) => {
+    const {key, ref, ...props} = attributes || {};
+
+    const virtualNode = new VirtualNode(type, props, key, ref);
+
+    if (isFunction(type)) {
+        // JSX children
+        if (content.length > 0) {
+            virtualNode.props_.children = content.length > 1 ? content : content[0];
+        }
+    } else {
+        // Append children directly
+        _appendChildrenFromContent(virtualNode, content);
+    }
+
+    return virtualNode;
+};
+
+/**
+ *
  * @param {*} content
  * @return {null|VirtualNode}
  */
-const createVirtualNodeFromContent = (content) => {
+ const createVirtualNodeFromContent = (content) => {
     let node = null;
 
     if (content instanceof VirtualNode) {
@@ -193,7 +218,7 @@ const createVirtualNodeFromContent = (content) => {
     }
     else if (isArray(content)) {
         node = new VirtualNode(NODE_FRAGMENT);
-        appendChildrenFromContent(node, content);
+        _appendChildrenFromContent(node, content);
     }
 
     return node;
@@ -204,7 +229,7 @@ const createVirtualNodeFromContent = (content) => {
  * @param {VirtualNode} parentNode 
  * @param {Array} content
  */
-const appendChildrenFromContent = (parentNode, content) => {
+const _appendChildrenFromContent = (parentNode, content) => {
     for (
         let childNode, prevChildNode = null, i = 0, len = content.length
         ; i < len
@@ -225,31 +250,6 @@ const appendChildrenFromContent = (parentNode, content) => {
             prevChildNode = childNode;
         }
     }
-};
-
-/**
- *
- * @param {string|function} type
- * @param {{}|null} attributes
- * @param {[]} content
- * @return {VirtualNode}
- */
-const createElement = (type, attributes, ...content) => {
-    const {key, ref, ...props} = attributes || {};
-
-    const virtualNode = new VirtualNode(type, props, key, ref);
-
-    if (isFunction(type)) {
-        // JSX children
-        if (content.length > 0) {
-            virtualNode.props_.children = content.length > 1 ? content : content[0];
-        }
-    } else {
-        // Append children directly
-        appendChildrenFromContent(virtualNode, content);
-    }
-
-    return virtualNode;
 };
 
 const PROP_VIRTUAL_NODE = 'hook_vnode';
@@ -725,7 +725,7 @@ const queueMap = new Map();
 
 const _flushQueues = () => {
     queueMap.forEach((queue, context) => {
-        let value, hook, hasChanges = false;
+        let value, hook, hasChanges = 0;
         
         while (queue.length > 0) {
             [value, hook] = queue.pop();
@@ -740,7 +740,7 @@ const _flushQueues = () => {
             
             if (newValue !== hook.value_) {
                 hook.value_ = newValue;
-                hasChanges = true;
+                hasChanges = 1;
             }
         }
 
@@ -929,10 +929,10 @@ const resolveTree = (current) => {
 
     queueWork(() => {
         mountNodesMap.forEach((isNewlyMounted, node) => {
-            mountEffects(node, isNewlyMounted);
+            mountEffects(node, isNewlyMounted === 1);
         });
         unmountNodesMap.forEach((isUnmounted, node) => {
-            destroyEffects(node, isUnmounted);
+            destroyEffects(node, isUnmounted === 1);
         });
     });
 };
@@ -947,20 +947,20 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
     }
 
     if (current === root) {
-        unmountNodesMap.set(current, false);
-        mountNodesMap.set(current, false);
+        unmountNodesMap.set(current, 0);
+        mountNodesMap.set(current, 0);
     } else {
         if (current.alternative_ !== null) {
             updateView(current, current.alternative_);
             if (isFunction(current.type_)) {
-                unmountNodesMap.set(current.alternative_, false);
-                mountNodesMap.set(current, false);
+                unmountNodesMap.set(current.alternative_, 0);
+                mountNodesMap.set(current, 0);
             }
             current.alternative_ = null;
         } else {
             insertView(current);
             if (isFunction(current.type_)) {
-                mountNodesMap.set(current, true);
+                mountNodesMap.set(current, 1);
             }
         }
     }
@@ -969,7 +969,7 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
         current.deletions_.forEach(subtree => {
             workLoop((deletedNode) => {
                 if (isFunction(deletedNode.type_)) {
-                    unmountNodesMap.set(deletedNode, true);
+                    unmountNodesMap.set(deletedNode, 1);
                 }
             }, null, subtree);
 

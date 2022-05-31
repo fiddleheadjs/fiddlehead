@@ -7,7 +7,7 @@ const queueMap = new Map();
 
 const _flushQueues = () => {
     queueMap.forEach((queue, context) => {
-        let value, hook, hasChanges = false;
+        let value, hook, hasChanges = 0;
         
         while (queue.length > 0) {
             [value, hook] = queue.pop();
@@ -22,7 +22,7 @@ const _flushQueues = () => {
             
             if (newValue !== hook.value_) {
                 hook.value_ = newValue;
-                hasChanges = true;
+                hasChanges = 1;
             }
         }
 

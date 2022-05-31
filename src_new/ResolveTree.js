@@ -13,10 +13,10 @@ export const resolveTree = (current) => {
 
     queueWork(() => {
         mountNodesMap.forEach((isNewlyMounted, node) => {
-            mountEffects(node, isNewlyMounted);
+            mountEffects(node, isNewlyMounted === 1);
         });
         unmountNodesMap.forEach((isUnmounted, node) => {
-            destroyEffects(node, isUnmounted);
+            destroyEffects(node, isUnmounted === 1);
         });
     });
 }
@@ -31,20 +31,20 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
     }
 
     if (current === root) {
-        unmountNodesMap.set(current, false);
-        mountNodesMap.set(current, false);
+        unmountNodesMap.set(current, 0);
+        mountNodesMap.set(current, 0);
     } else {
         if (current.alternative_ !== null) {
             updateView(current, current.alternative_);
             if (isFunction(current.type_)) {
-                unmountNodesMap.set(current.alternative_, false);
-                mountNodesMap.set(current, false);
+                unmountNodesMap.set(current.alternative_, 0);
+                mountNodesMap.set(current, 0);
             }
             current.alternative_ = null;
         } else {
             insertView(current);
             if (isFunction(current.type_)) {
-                mountNodesMap.set(current, true);
+                mountNodesMap.set(current, 1);
             }
         }
     }
@@ -53,7 +53,7 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
         current.deletions_.forEach(subtree => {
             workLoop((deletedNode) => {
                 if (isFunction(deletedNode.type_)) {
-                    unmountNodesMap.set(deletedNode, true);
+                    unmountNodesMap.set(deletedNode, 1);
                 }
             }, null, subtree);
 

@@ -1,5 +1,5 @@
 import {RefHook} from './RefHook';
-import {isArray, isFunction, isNullish, isNumber, isString} from './Util';
+import {isFunction, isNullish} from './Util';
 
 /**
  * 
@@ -75,55 +75,5 @@ export const linkNativeNode = (virtualNode, nativeNode) => {
 
     if (!isNullish(virtualNode.ref_)) {
         virtualNode.ref_.current = nativeNode;
-    }
-}
-
-/**
- *
- * @param {*} content
- * @return {null|VirtualNode}
- */
-export const createVirtualNodeFromContent = (content) => {
-    let node = null;
-
-    if (content instanceof VirtualNode) {
-        node = content;
-    }
-    else if (isString(content) || isNumber(content)) {
-        node = new VirtualNode(NODE_TEXT, {children: content});
-    }
-    else if (isArray(content)) {
-        node = new VirtualNode(NODE_FRAGMENT);
-        appendChildrenFromContent(node, content);
-    }
-
-    return node;
-}
-
-/**
- * 
- * @param {VirtualNode} parentNode 
- * @param {Array} content
- */
-export const appendChildrenFromContent = (parentNode, content) => {
-    for (
-        let childNode, prevChildNode = null, i = 0, len = content.length
-        ; i < len
-        ; ++i
-    ) {
-        childNode = createVirtualNodeFromContent(content[i]);
-        
-        if (childNode !== null) {
-            childNode.parent_ = parentNode;
-            childNode.slot_ = i;
-
-            if (prevChildNode !== null) {
-                prevChildNode.sibling_ = childNode;
-            } else {
-                parentNode.child_ = childNode;
-            }
-
-            prevChildNode = childNode;
-        }
     }
 }

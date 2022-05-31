@@ -1,5 +1,5 @@
 import {isFunction} from './Util';
-import {createVirtualNodeFromContent} from './VirtualNode';
+import {createVirtualNodeFromContent} from './CreateElement';
 import {StateHook} from './StateHook';
 import {prepareCurrentlyProcessing, flushCurrentlyProcessing} from './CurrentlyProcessing';
 
