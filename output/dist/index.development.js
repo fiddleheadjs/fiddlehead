@@ -121,10 +121,6 @@ function VirtualNode(type, props, key, ref) {
     this.child_ = null;
 
     this.sibling_ = null;
-
-    this.alternative_ = null;
-
-    this.deletions_ = null;
     
     this.nativeNode_ = null;
 
@@ -138,11 +134,20 @@ function VirtualNode(type, props, key, ref) {
                 this.ref_ = ref;
             }
         }
-        
-        // In the commit phase, the new child will be inserted
-        // after the last inserted/updated child
-        this.lastCommittedNativeChild_ = null;
     }
+    
+    // Temp props
+    // ==========
+    
+    // The previous version of this node
+    this.alternative_ = null;
+
+    // The children (and their subtrees, of course) are marked to be deleted
+    this.deletions_ = null;
+
+    // In the commit phase, the new child will be inserted
+    // after the last inserted/updated child
+    this.lastCommittedNativeChild_ = null;
 }
 
 // Do not support namespace MathML as almost browsers do not support as well
@@ -506,7 +511,7 @@ const insertView = (node) => {
             const nativeNodeAfter = (
                 hostNode.lastCommittedNativeChild_ !== null
                     ? hostNode.lastCommittedNativeChild_.nextSibling
-                    : hostNode.firstChild
+                    : hostNode.nativeNode_.firstChild
             );
             hostNode.nativeNode_.insertBefore(node.nativeNode_, nativeNodeAfter);
             hostNode.lastCommittedNativeChild_ = node.nativeNode_;
@@ -884,7 +889,7 @@ const _mapChildren = (node) => {
 
 // Algorithm: https://github.com/facebook/react/issues/7942
 
-const workLoop = (performUnit, root, ...data) => {
+const workLoop = (performUnit, onReturn, root, ...data) => {
     let current = root;
     while (true) {
         performUnit(current, root, ...data);
@@ -900,6 +905,9 @@ const workLoop = (performUnit, root, ...data) => {
                 return;
             }
             current = current.parent_;
+            if (onReturn !== null) {
+                onReturn(current);
+            }
         }
         current = current.sibling_;
     }
@@ -917,7 +925,7 @@ const resolveTree = (current) => {
     const mountNodesMap = new Map();
     const unmountNodesMap = new Map();
     
-    workLoop(_performUnitOfWork, current, mountNodesMap, unmountNodesMap);
+    workLoop(_performUnitOfWork, _onReturn, current, mountNodesMap, unmountNodesMap);
 
     queueWork(() => {
         mountNodesMap.forEach((isNewlyMounted, node) => {
@@ -963,11 +971,19 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
                 if (isFunction(deletedNode.type_)) {
                     unmountNodesMap.set(deletedNode, true);
                 }
-            }, subtree);
+            }, null, subtree);
 
             deleteView(subtree);
         });
         current.deletions_ = null;
+    }
+};
+
+// Callback called after walking through a node and all of its ascendants
+const _onReturn = (current) => {
+    // This is when we cleanup the remaining temp props
+    if (current.lastCommittedNativeChild_ !== null) {
+        current.lastCommittedNativeChild_ = null;
     }
 };
 

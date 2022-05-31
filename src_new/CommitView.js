@@ -23,7 +23,7 @@ export const insertView = (node) => {
             const nativeNodeAfter = (
                 hostNode.lastCommittedNativeChild_ !== null
                     ? hostNode.lastCommittedNativeChild_.nextSibling
-                    : hostNode.firstChild
+                    : hostNode.nativeNode_.firstChild
             );
             hostNode.nativeNode_.insertBefore(node.nativeNode_, nativeNodeAfter);
             hostNode.lastCommittedNativeChild_ = node.nativeNode_;

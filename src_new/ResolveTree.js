@@ -9,7 +9,7 @@ export const resolveTree = (current) => {
     const mountNodesMap = new Map();
     const unmountNodesMap = new Map();
     
-    workLoop(_performUnitOfWork, current, mountNodesMap, unmountNodesMap);
+    workLoop(_performUnitOfWork, _onReturn, current, mountNodesMap, unmountNodesMap);
 
     queueWork(() => {
         mountNodesMap.forEach((isNewlyMounted, node) => {
@@ -55,10 +55,18 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
                 if (isFunction(deletedNode.type_)) {
                     unmountNodesMap.set(deletedNode, true);
                 }
-            }, subtree);
+            }, null, subtree);
 
             deleteView(subtree);
         });
         current.deletions_ = null;
+    }
+}
+
+// Callback called after walking through a node and all of its ascendants
+const _onReturn = (current) => {
+    // This is when we cleanup the remaining temp props
+    if (current.lastCommittedNativeChild_ !== null) {
+        current.lastCommittedNativeChild_ = null;
     }
 }

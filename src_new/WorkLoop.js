@@ -1,6 +1,6 @@
 // Algorithm: https://github.com/facebook/react/issues/7942
 
-export const workLoop = (performUnit, root, ...data) => {
+export const workLoop = (performUnit, onReturn, root, ...data) => {
     let current = root;
     while (true) {
         performUnit(current, root, ...data);
@@ -16,6 +16,9 @@ export const workLoop = (performUnit, root, ...data) => {
                 return;
             }
             current = current.parent_;
+            if (onReturn !== null) {
+                onReturn(current);
+            }
         }
         current = current.sibling_;
     }

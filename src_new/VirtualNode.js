@@ -22,10 +22,6 @@ export function VirtualNode(type, props, key, ref) {
     this.child_ = null;
 
     this.sibling_ = null;
-
-    this.alternative_ = null;
-
-    this.deletions_ = null;
     
     this.nativeNode_ = null;
 
@@ -39,11 +35,20 @@ export function VirtualNode(type, props, key, ref) {
                 this.ref_ = ref;
             }
         }
-        
-        // In the commit phase, the new child will be inserted
-        // after the last inserted/updated child
-        this.lastCommittedNativeChild_ = null;
     }
+    
+    // Temp props
+    // ==========
+    
+    // The previous version of this node
+    this.alternative_ = null;
+
+    // The children (and their subtrees, of course) are marked to be deleted
+    this.deletions_ = null;
+
+    // In the commit phase, the new child will be inserted
+    // after the last inserted/updated child
+    this.lastCommittedNativeChild_ = null;
 }
 
 // Do not support namespace MathML as almost browsers do not support as well
