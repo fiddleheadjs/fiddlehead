@@ -32,7 +32,11 @@ export const isNullish = (value) => {
  * @param {Array} b 
  * @returns {boolean}
  */
-export const compareSameLengthArrays = (a, b) => {
+export const compareArrays = (a, b) => {
+    if (a.length !== b.length) {
+        return false;
+    }
+
     for (let i = a.length - 1; i >= 0; --i) {
         if (a[i] !== b[i]) {
             return false;

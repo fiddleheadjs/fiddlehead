@@ -1,5 +1,5 @@
 import {resolveCurrentHook} from './CurrentlyProcessing';
-import {compareSameLengthArrays} from './Util';
+import {compareArrays} from './Util';
 
 /**
  *
@@ -38,6 +38,8 @@ export const useEffect = (callback, deps = null) => {
                 )) {
                     throw new Error('Deps must be size-fixed');
                 }
+                // On the production, we accept the deps change its length
+                // and consider it is changed
             }
     
             const effectTag = _determineEffectTag(deps, currentHook.deps_);
@@ -142,7 +144,7 @@ const _determineEffectTag = (deps, lastDeps) => {
         return TAG_DEPS;
     }
     // 2. Two arrays are equal
-    if (compareSameLengthArrays(deps, lastDeps)) {
+    if (compareArrays(deps, lastDeps)) {
         return TAG_DEPS;
     }
 

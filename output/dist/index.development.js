@@ -32,7 +32,11 @@ const isNullish = (value) => {
  * @param {Array} b 
  * @returns {boolean}
  */
-const compareSameLengthArrays = (a, b) => {
+const compareArrays = (a, b) => {
+    if (a.length !== b.length) {
+        return false;
+    }
+
     for (let i = a.length - 1; i >= 0; --i) {
         if (a[i] !== b[i]) {
             return false;
@@ -500,8 +504,9 @@ const insertView = (node) => {
         const hostNode = _findHostNode(node);
         if (hostNode !== null) {
             const nativeNodeAfter = (
-                hostNode.lastCommittedNativeChild_ === null ? null
-                : hostNode.lastCommittedNativeChild_.nextSibling
+                hostNode.lastCommittedNativeChild_ !== null
+                    ? hostNode.lastCommittedNativeChild_.nextSibling
+                    : hostNode.firstChild
             );
             hostNode.nativeNode_.insertBefore(node.nativeNode_, nativeNodeAfter);
             hostNode.lastCommittedNativeChild_ = node.nativeNode_;
@@ -594,6 +599,8 @@ const useEffect = (callback, deps = null) => {
                 )) {
                     throw new Error('Deps must be size-fixed');
                 }
+                // On the production, we accept the deps change its length
+                // and consider it is changed
             }
     
             const effectTag = _determineEffectTag(deps, currentHook.deps_);
@@ -698,7 +705,7 @@ const _determineEffectTag = (deps, lastDeps) => {
         return TAG_DEPS;
     }
     // 2. Two arrays are equal
-    if (compareSameLengthArrays(deps, lastDeps)) {
+    if (compareArrays(deps, lastDeps)) {
         return TAG_DEPS;
     }
 
