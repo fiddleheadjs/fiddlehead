@@ -33,7 +33,7 @@ const _flushQueues = () => {
 
     queueMap.clear();
     timeoutID = null;
-};
+}
 
 /**
  *
