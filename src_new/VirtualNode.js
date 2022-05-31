@@ -7,13 +7,14 @@ import {RefHook} from './RefHook';
  * @param {string|number?} key
  * @param {RefHook?} ref
  */
-export function VirtualNode(type, props, key = null, ref = null) {
+export function VirtualNode(type, props = null, key = null, ref = null) {
     // Identification
     // ==============
 
     this.type_ = type;
 
-    this.key_ = key;
+    // Convert to string to avoid conflict with slot
+    this.key_ = key !== null ? ('' + key) : key;
 
     this.slot_ = null;
 
@@ -22,7 +23,7 @@ export function VirtualNode(type, props, key = null, ref = null) {
 
     // With a text node, props will be the content string
     this.props_ = type === Fragment ? null : (
-        props !== undefined ? props : {}
+        props !== null ? props : {}
     );
 
     this.hook_ = null;

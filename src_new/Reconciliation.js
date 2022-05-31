@@ -2,26 +2,30 @@ import {isFunction} from './Util';
 import {createVirtualNodeFromContent} from './CreateElement';
 import {StateHook} from './StateHook';
 import {prepareCurrentlyProcessing, flushCurrentlyProcessing} from './CurrentlyProcessing';
+import {catchError} from './CatchError';
 
-export const reconcileChildren = (current) => {
+export const reconcileChildren = (current, isSubtreeRoot) => {
     if (isFunction(current.type_)) {
-        _reconcileChildOfDynamicNode(current);
+        _reconcileChildOfDynamicNode(current, isSubtreeRoot);
     } else {
         _reconcileChildrenOfStaticNode(current);
     }
 }
 
-const _reconcileChildOfDynamicNode = (current) => {
-    const oldChild = (
-        current.alternative_ !== null
-            ? current.alternative_.child_
-            : current.child_
+const _reconcileChildOfDynamicNode = (current, isSubtreeRoot) => {
+    const oldChild = isSubtreeRoot ? current.child_ : (
+        current.alternative_ !== null ? current.alternative_.child_ : null
     );
 
     prepareCurrentlyProcessing(current);
-    const newChild = createVirtualNodeFromContent(
-        current.type_(current.props_)
-    );
+    let newContent;
+    try {
+        newContent = current.type_(current.props_);
+    } catch (error) {
+        catchError(error, current);
+        return;
+    }
+    const newChild = createVirtualNodeFromContent(newContent);
     flushCurrentlyProcessing();
 
     current.child_ = newChild;
@@ -30,12 +34,8 @@ const _reconcileChildOfDynamicNode = (current) => {
         newChild.parent_ = current;
     }
 
-    if (newChild === null && oldChild !== null) {
-        _addDeletion(current, oldChild);
-    }
-    else if (newChild !== null && oldChild !== null) {
-        // If the same
-        if (newChild.type_ === oldChild.type_ && newChild.key_ === oldChild.key_) {
+    if (oldChild !== null) {
+        if (newChild !== null && newChild.type_ === oldChild.type_ && newChild.key_ === oldChild.key_) {
             _makeAlternative(newChild, oldChild);
         } else {
             _addDeletion(current, oldChild);

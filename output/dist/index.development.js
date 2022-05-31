@@ -107,13 +107,14 @@ const useRef = (initialValue) => {
  * @param {string|number?} key
  * @param {RefHook?} ref
  */
-function VirtualNode(type, props, key = null, ref = null) {
+function VirtualNode(type, props = null, key = null, ref = null) {
     // Identification
     // ==============
 
     this.type_ = type;
 
-    this.key_ = key;
+    // Convert to string to avoid conflict with slot
+    this.key_ = key !== null ? ('' + key) : key;
 
     this.slot_ = null;
 
@@ -122,7 +123,7 @@ function VirtualNode(type, props, key = null, ref = null) {
 
     // With a text node, props will be the content string
     this.props_ = type === Fragment ? null : (
-        props !== undefined ? props : {}
+        props !== null ? props : {}
     );
 
     this.hook_ = null;
@@ -236,9 +237,8 @@ const createElement = (type, attributes, ...content) => {
  */
 const _appendChildrenFromContent = (parentNode, content) => {
     for (
-        let childNode, prevChildNode = null, i = 0, len = content.length
-        ; i < len
-        ; ++i
+        let childNode, prevChildNode = null, i = 0;
+        i < content.length; ++i
     ) {
         childNode = createVirtualNodeFromContent(content[i]);
         
@@ -572,6 +572,127 @@ const _loopClosestNativeNodes = (node, callback) => {
     }
 };
 
+const STATE_NORMAL = 0;
+const STATE_ERROR = 1;
+
+/**
+ *
+ * @param {VirtualNode} context
+ * @param {*} initialValue
+ * @param {number} tag
+ * @constructor
+ */
+function StateHook(context, initialValue, tag) {
+    this.context_ = context;
+    this.value_ = initialValue;
+    this.setValue_ = _setState.bind(this);
+    this.tag_ = tag;
+    this.next_ = null;
+}
+
+const useState = (initialValue) => {
+    return resolveCurrentHook(
+        (currentNode) => new StateHook(currentNode, initialValue, STATE_NORMAL),
+        (currentHook) => [currentHook.value_, currentHook.setValue_]
+    );
+};
+
+const useError = (initialError) => {
+    return resolveCurrentHook(
+        (currentNode) => new StateHook(currentNode, initialError, STATE_ERROR),
+        (currentHook) => [currentHook.value_, currentHook.setValue_]
+    );
+};
+
+const queueMap = new Map();
+let timeoutId = null;
+
+function _setState(value) {
+    let queue = queueMap.get(this.context_);
+
+    if (queue === undefined) {
+        queue = [[value, this]];
+        queueMap.set(this.context_, queue);
+    } else {
+        queue.unshift([value, this]);
+    }
+
+    if (timeoutId !== null) {
+        clearTimeout(timeoutId);
+    }
+
+    timeoutId = setTimeout(_flushQueues);
+}
+
+const _flushQueues = () => {
+    queueMap.forEach((queue, context) => {
+        let value, hook, hasChanges = false;
+        
+        while (queue.length > 0) {
+            [value, hook] = queue.pop();
+
+            let newValue;
+            
+            if (isFunction(value)) {
+                try {
+                    newValue = value(hook.value_);
+                } catch (error) {
+                    catchError(error, context);
+                    continue;
+                }
+            } else {
+                newValue = value;
+            }
+
+            if (hook.tag_ === STATE_ERROR) {
+                if (!(newValue === null || newValue instanceof Error)) {
+                    if (true) {
+                        console.error('Error hooks only accept the value is an instance of Error or null');
+                    }
+                    continue;
+                }
+            }
+            
+            if (newValue !== hook.value_) {
+                hook.value_ = newValue;
+                hasChanges = true;
+            }
+        }
+
+        if (hasChanges) {
+            resolveTree(context);
+        }
+    });
+
+    queueMap.clear();
+    timeoutId = null;
+};
+
+const catchError = (error, virtualNode) => {
+    let parent = virtualNode.parent_;
+    let hook;
+
+    while (parent !== null) {
+        hook = parent.hook_;
+        while (hook !== null) {
+            if (hook instanceof StateHook && hook.tag_ === STATE_ERROR) {
+                hook.setValue_((prevError) => prevError || error);
+                return;
+            }
+            hook = hook.next_;
+        }
+        parent = parent.parent_;
+    }
+
+    if (true) {
+        setTimeout(() => {
+            console.info('You can catch this error by implementing an error boundary with the useError hook');
+        });
+    }
+
+    throw error;
+};
+
 /**
  *
  * @param {function} callback
@@ -646,10 +767,14 @@ const mountEffects = (functionalVirtualNode, isNewNodeMounted) => {
     while (hook !== null) {
         if (hook instanceof EffectHook) {
             if (isNewNodeMounted || hook.tag_ === TAG_ALWAYS || hook.tag_ === TAG_DEPS_CHANGED) {
-                _mountEffectHook(hook);
+                try {
+                    _mountEffect(hook);
+                } catch (error) {
+                    catchError(error, functionalVirtualNode);
+                    return;
+                }
             }
         }
-
         hook = hook.next_;
     }
 };
@@ -665,11 +790,15 @@ const destroyEffects = (functionalVirtualNode, isNodeUnmounted) => {
         if (hook instanceof EffectHook) {
             if (hook.lastDestroy_ !== null || hook.destroy_ !== null) {
                 if (isNodeUnmounted || hook.tag_ === TAG_ALWAYS || hook.tag_ === TAG_DEPS_CHANGED) {
-                    _destroyEffectHook(hook, isNodeUnmounted);
+                    try {
+                        _destroyEffect(hook, isNodeUnmounted);
+                    } catch (error) {
+                        catchError(error, functionalVirtualNode);
+                        return;
+                    }
                 }
             }
         }
-
         hook = hook.next_;
     }
 };
@@ -678,7 +807,7 @@ const destroyEffects = (functionalVirtualNode, isNodeUnmounted) => {
  *
  * @param {EffectHook} effectHook
  */
-const _mountEffectHook = (effectHook) => {
+const _mountEffect = (effectHook) => {
     effectHook.destroy_ = effectHook.callback_();
 
     if (effectHook.destroy_ === undefined) {
@@ -691,7 +820,7 @@ const _mountEffectHook = (effectHook) => {
  * @param {EffectHook} hook
  * @param {boolean} isNodeUnmounted
  */
-const _destroyEffectHook = (hook, isNodeUnmounted) => {
+const _destroyEffect = (hook, isNodeUnmounted) => {
     if (hook.lastDestroy_ !== null && !isNodeUnmounted) {
         hook.lastDestroy_();
         return;
@@ -729,95 +858,28 @@ const _determineEffectTag = (deps, lastDeps) => {
     }
 };
 
-const queueMap = new Map();
-let timeoutId = null;
-
-const _flushQueues = () => {
-    queueMap.forEach((queue, context) => {
-        let value, hook, hasChanges = false;
-        
-        while (queue.length > 0) {
-            [value, hook] = queue.pop();
-
-            let newValue;
-            
-            if (isFunction(value)) {
-                newValue = value(hook.value_);
-            } else {
-                newValue = value;
-            }
-            
-            if (newValue !== hook.value_) {
-                hook.value_ = newValue;
-                hasChanges = true;
-            }
-        }
-
-        if (hasChanges) {
-            resolveTree(context);
-        }
-    });
-
-    queueMap.clear();
-    timeoutId = null;
-};
-
-/**
- *
- * @param {VirtualNode} context
- * @param {*} initialValue
- * @constructor
- */
-function StateHook(context, initialValue) {
-    this.context_ = context;
-    
-    this.value_ = initialValue;
-
-    this.setValue_ = (value) => {
-        let queue = queueMap.get(this.context_);
-        if (queue === undefined) {
-            queue = [[value, this]];
-            queueMap.set(this.context_, queue);
-        } else {
-            queue.push([value, this]);
-        }
-
-        if (timeoutId !== null) {
-            clearTimeout(timeoutId);
-        }
-
-        timeoutId = setTimeout(_flushQueues);
-    };
-
-    this.next_ = null;
-}
-
-const useState = (initialValue) => {
-    return resolveCurrentHook(
-        (currentNode) => new StateHook(currentNode, initialValue),
-        (currentHook) => [currentHook.value_, currentHook.setValue_]
-    );
-};
-
-const reconcileChildren = (current) => {
+const reconcileChildren = (current, isSubtreeRoot) => {
     if (isFunction(current.type_)) {
-        _reconcileChildOfDynamicNode(current);
+        _reconcileChildOfDynamicNode(current, isSubtreeRoot);
     } else {
         _reconcileChildrenOfStaticNode(current);
     }
 };
 
-const _reconcileChildOfDynamicNode = (current) => {
-    const oldChild = (
-        current.alternative_ !== null
-            ? current.alternative_.child_
-            : current.child_
+const _reconcileChildOfDynamicNode = (current, isSubtreeRoot) => {
+    const oldChild = isSubtreeRoot ? current.child_ : (
+        current.alternative_ !== null ? current.alternative_.child_ : null
     );
 
     prepareCurrentlyProcessing(current);
-    const newChild = createVirtualNodeFromContent(
-        current.type_(current.props_)
-    );
+    let newContent;
+    try {
+        newContent = current.type_(current.props_);
+    } catch (error) {
+        catchError(error, current);
+        return;
+    }
+    const newChild = createVirtualNodeFromContent(newContent);
     flushCurrentlyProcessing();
 
     current.child_ = newChild;
@@ -826,12 +888,8 @@ const _reconcileChildOfDynamicNode = (current) => {
         newChild.parent_ = current;
     }
 
-    if (newChild === null && oldChild !== null) {
-        _addDeletion(current, oldChild);
-    }
-    else if (newChild !== null && oldChild !== null) {
-        // If the same
-        if (newChild.type_ === oldChild.type_ && newChild.key_ === oldChild.key_) {
+    if (oldChild !== null) {
+        if (newChild !== null && newChild.type_ === oldChild.type_ && newChild.key_ === oldChild.key_) {
             _makeAlternative(newChild, oldChild);
         } else {
             _addDeletion(current, oldChild);
@@ -947,7 +1005,9 @@ const resolveTree = (current) => {
 };
 
 const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
-    reconcileChildren(current);
+    const isSubtreeRoot = current === root;
+    
+    reconcileChildren(current, isSubtreeRoot);
 
     // RootType never changes its child
     // Do nothing anymore
@@ -955,7 +1015,7 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
         return;
     }
 
-    if (current === root) {
+    if (isSubtreeRoot) {
         if (current.hook_ !== null) {
             unmountNodesMap.set(current, false);
             mountNodesMap.set(current, false);
@@ -980,18 +1040,18 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
         const deletions = current.deletions_;
         current.deletions_ = null;
 
-        deletions.forEach(subtree => {
-            deleteView(subtree);
-        });
+        for (let i = 0; i < deletions.length; ++i) {
+            deleteView(deletions[i]);
+        }
 
         queueWork(() => {
-            deletions.forEach(subtree => {
-                workLoop((deletion) => {
-                    if (deletion.hook_ !== null) {
-                        unmountNodesMap.set(deletion, true);
+            for (let i = 0; i < deletions.length; ++i) {
+                workLoop((vnode) => {
+                    if (vnode.hook_ !== null) {
+                        unmountNodesMap.set(vnode, true);
                     }
-                }, null, subtree);
-            });
+                }, null, deletions[i]);
+            }
         });
     }
 };
@@ -1053,5 +1113,6 @@ exports.createPortal = createPortal;
 exports.jsx = createElement;
 exports.mount = mount;
 exports.useEffect = useEffect;
+exports.useError = useError;
 exports.useRef = useRef;
 exports.useState = useState;

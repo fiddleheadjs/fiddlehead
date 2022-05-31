@@ -21,7 +21,9 @@ export const resolveTree = (current) => {
 }
 
 const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
-    reconcileChildren(current);
+    const isSubtreeRoot = current === root;
+    
+    reconcileChildren(current, isSubtreeRoot);
 
     // RootType never changes its child
     // Do nothing anymore
@@ -29,7 +31,7 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
         return;
     }
 
-    if (current === root) {
+    if (isSubtreeRoot) {
         if (current.hook_ !== null) {
             unmountNodesMap.set(current, false);
             mountNodesMap.set(current, false);
@@ -54,18 +56,18 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
         const deletions = current.deletions_;
         current.deletions_ = null;
 
-        deletions.forEach(subtree => {
-            deleteView(subtree);
-        });
+        for (let i = 0; i < deletions.length; ++i) {
+            deleteView(deletions[i]);
+        }
 
         queueWork(() => {
-            deletions.forEach(subtree => {
-                workLoop((deletion) => {
-                    if (deletion.hook_ !== null) {
-                        unmountNodesMap.set(deletion, true);
+            for (let i = 0; i < deletions.length; ++i) {
+                workLoop((vnode) => {
+                    if (vnode.hook_ !== null) {
+                        unmountNodesMap.set(vnode, true);
                     }
-                }, null, subtree);
-            });
+                }, null, deletions[i]);
+            }
         });
     }
 }

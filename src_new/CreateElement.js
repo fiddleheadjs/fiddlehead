@@ -56,9 +56,8 @@ export const createElement = (type, attributes, ...content) => {
  */
 const _appendChildrenFromContent = (parentNode, content) => {
     for (
-        let childNode, prevChildNode = null, i = 0, len = content.length
-        ; i < len
-        ; ++i
+        let childNode, prevChildNode = null, i = 0;
+        i < content.length; ++i
     ) {
         childNode = createVirtualNodeFromContent(content[i]);
         

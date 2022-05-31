@@ -1,3 +1,4 @@
+import {catchError} from './CatchError';
 import {resolveCurrentHook} from './CurrentlyProcessing';
 import {compareArrays} from './Util';
 
@@ -75,10 +76,14 @@ export const mountEffects = (functionalVirtualNode, isNewNodeMounted) => {
     while (hook !== null) {
         if (hook instanceof EffectHook) {
             if (isNewNodeMounted || hook.tag_ === TAG_ALWAYS || hook.tag_ === TAG_DEPS_CHANGED) {
-                _mountEffectHook(hook);
+                try {
+                    _mountEffect(hook);
+                } catch (error) {
+                    catchError(error, functionalVirtualNode);
+                    return;
+                }
             }
         }
-
         hook = hook.next_;
     }
 }
@@ -94,11 +99,15 @@ export const destroyEffects = (functionalVirtualNode, isNodeUnmounted) => {
         if (hook instanceof EffectHook) {
             if (hook.lastDestroy_ !== null || hook.destroy_ !== null) {
                 if (isNodeUnmounted || hook.tag_ === TAG_ALWAYS || hook.tag_ === TAG_DEPS_CHANGED) {
-                    _destroyEffectHook(hook, isNodeUnmounted);
+                    try {
+                        _destroyEffect(hook, isNodeUnmounted);
+                    } catch (error) {
+                        catchError(error, functionalVirtualNode);
+                        return;
+                    }
                 }
             }
         }
-
         hook = hook.next_;
     }
 }
@@ -107,7 +116,7 @@ export const destroyEffects = (functionalVirtualNode, isNodeUnmounted) => {
  *
  * @param {EffectHook} effectHook
  */
-const _mountEffectHook = (effectHook) => {
+const _mountEffect = (effectHook) => {
     effectHook.destroy_ = effectHook.callback_();
 
     if (effectHook.destroy_ === undefined) {
@@ -120,7 +129,7 @@ const _mountEffectHook = (effectHook) => {
  * @param {EffectHook} hook
  * @param {boolean} isNodeUnmounted
  */
-const _destroyEffectHook = (hook, isNodeUnmounted) => {
+const _destroyEffect = (hook, isNodeUnmounted) => {
     if (hook.lastDestroy_ !== null && !isNodeUnmounted) {
         hook.lastDestroy_();
         return;
