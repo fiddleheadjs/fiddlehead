@@ -1,5 +1,5 @@
 import {isArray, isFunction, isNumber, isString} from './Util';
-import {Fragment, NODE_FRAGMENT, NODE_TEXT, VirtualNode} from './VirtualNode';
+import {Fragment, TextNode, VirtualNode} from './VirtualNode';
 
 /**
  *
@@ -10,10 +10,6 @@ import {Fragment, NODE_FRAGMENT, NODE_TEXT, VirtualNode} from './VirtualNode';
  */
 export const createElement = (type, attributes, ...content) => {
     const {key, ref, ...props} = attributes || {};
-
-    if (type === Fragment) {
-        type = NODE_FRAGMENT;
-    }
 
     const virtualNode = new VirtualNode(type, props, key, ref);
 
@@ -41,11 +37,11 @@ export const createElement = (type, attributes, ...content) => {
     }
         
     if (isString(content) || isNumber(content)) {
-        return new VirtualNode(NODE_TEXT, content);
+        return new VirtualNode(TextNode, content);
     }
 
     if (isArray(content)) {
-        const node = new VirtualNode(NODE_FRAGMENT);
+        const node = new VirtualNode(Fragment);
         _appendChildrenFromContent(node, content);
         return node;
     }

@@ -15,7 +15,7 @@ function getJsLoaders(isReact = false) {
                         "@babel/plugin-transform-react-jsx",
                         isReact ? {} : {
                             "pragma": "jsx",
-                            "pragmaFrag": "1",
+                            "pragmaFrag": "'['",
                         }
                     ],
                 ],

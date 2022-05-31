@@ -21,7 +21,7 @@ export function VirtualNode(type, props, key = null, ref = null) {
     // ===============
 
     // With a text node, props will be the content string
-    this.props_ = type === NODE_FRAGMENT ? null : (
+    this.props_ = type === Fragment ? null : (
         props !== undefined ? props : {}
     );
 
@@ -63,19 +63,10 @@ export function VirtualNode(type, props, key = null, ref = null) {
 export const NS_HTML = 0;
 export const NS_SVG = 1;
 
-// Note:
-// Use special URI characters
-
-export const NODE_TEXT = 0;
-export const NODE_FRAGMENT = 1;
-
-export const Root = (props) => {
-    return props.children;
-}
-
-export const Fragment = () => {
-    // Do nothing here
-}
+// Special node types
+export const TextNode = '#';
+export const Fragment = '[';
+export const Root = (props) => props.children;
 
 /**
  * 

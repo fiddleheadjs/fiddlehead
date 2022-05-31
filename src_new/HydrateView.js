@@ -1,4 +1,4 @@
-import {linkNativeNode, NODE_FRAGMENT, NODE_TEXT, NS_HTML, NS_SVG} from './VirtualNode';
+import {linkNativeNode, Fragment, TextNode, NS_HTML, NS_SVG} from './VirtualNode';
 import {createNativeElementWithNS, createNativeTextNode, updateNativeTextNode, updateNativeElementAttributes} from './NativeDOM';
 import {attachVirtualNode} from './Externals';
 import {isFunction} from './Util';
@@ -36,7 +36,7 @@ export const rehydrateView = (newVirtualNode, oldVirtualNode) => {
         attachVirtualNode(oldVirtualNode.nativeNode_, newVirtualNode);
     }
 
-    if (newVirtualNode.type_ === NODE_TEXT) {
+    if (newVirtualNode.type_ === TextNode) {
         if (newVirtualNode.props_ !== oldVirtualNode.props_) {
             updateNativeTextNode(
                 newVirtualNode.nativeNode_,
@@ -53,7 +53,7 @@ export const rehydrateView = (newVirtualNode, oldVirtualNode) => {
 }
 
 const _createNativeNode = (virtualNode) => {
-    if (virtualNode.type_ === NODE_TEXT) {
+    if (virtualNode.type_ === TextNode) {
         return createNativeTextNode(virtualNode.props_);
     }
 
@@ -81,5 +81,5 @@ const _determineNS = (virtualNode) => {
 }
 
 const _isDry = (type) => {
-    return type === NODE_FRAGMENT || isFunction(type);
+    return type === Fragment || isFunction(type);
 }

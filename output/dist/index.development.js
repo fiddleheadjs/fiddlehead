@@ -121,7 +121,7 @@ function VirtualNode(type, props, key = null, ref = null) {
     // ===============
 
     // With a text node, props will be the content string
-    this.props_ = type === NODE_FRAGMENT ? null : (
+    this.props_ = type === Fragment ? null : (
         props !== undefined ? props : {}
     );
 
@@ -163,19 +163,10 @@ function VirtualNode(type, props, key = null, ref = null) {
 const NS_HTML = 0;
 const NS_SVG = 1;
 
-// Note:
-// Use special URI characters
-
-const NODE_TEXT = 0;
-const NODE_FRAGMENT = 1;
-
-const Root = (props) => {
-    return props.children;
-};
-
-const Fragment = () => {
-    // Do nothing here
-};
+// Special node types
+const TextNode = '#';
+const Fragment = '[';
+const Root = (props) => props.children;
 
 /**
  * 
@@ -199,10 +190,6 @@ const linkNativeNode = (virtualNode, nativeNode) => {
  */
 const createElement = (type, attributes, ...content) => {
     const {key, ref, ...props} = attributes || {};
-
-    if (type === Fragment) {
-        type = NODE_FRAGMENT;
-    }
 
     const virtualNode = new VirtualNode(type, props, key, ref);
 
@@ -230,11 +217,11 @@ const createElement = (type, attributes, ...content) => {
     }
         
     if (isString(content) || isNumber(content)) {
-        return new VirtualNode(NODE_TEXT, content);
+        return new VirtualNode(TextNode, content);
     }
 
     if (isArray(content)) {
-        const node = new VirtualNode(NODE_FRAGMENT);
+        const node = new VirtualNode(Fragment);
         _appendChildrenFromContent(node, content);
         return node;
     }
@@ -458,7 +445,7 @@ const rehydrateView = (newVirtualNode, oldVirtualNode) => {
         attachVirtualNode(oldVirtualNode.nativeNode_, newVirtualNode);
     }
 
-    if (newVirtualNode.type_ === NODE_TEXT) {
+    if (newVirtualNode.type_ === TextNode) {
         if (newVirtualNode.props_ !== oldVirtualNode.props_) {
             updateNativeTextNode(
                 newVirtualNode.nativeNode_,
@@ -475,7 +462,7 @@ const rehydrateView = (newVirtualNode, oldVirtualNode) => {
 };
 
 const _createNativeNode = (virtualNode) => {
-    if (virtualNode.type_ === NODE_TEXT) {
+    if (virtualNode.type_ === TextNode) {
         return createNativeTextNode(virtualNode.props_);
     }
 
@@ -503,7 +490,7 @@ const _determineNS = (virtualNode) => {
 };
 
 const _isDry = (type) => {
-    return type === NODE_FRAGMENT || isFunction(type);
+    return type === Fragment || isFunction(type);
 };
 
 // Important Note
