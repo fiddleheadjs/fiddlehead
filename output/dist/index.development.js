@@ -156,7 +156,7 @@ function VirtualNode(type, props, key = null, ref = null) {
 
     // In the commit phase, the new child will be inserted
     // after the last inserted/updated child
-    this.lastCommittedNativeChild_ = null;
+    this.lastOutputtedNativeChild_ = null;
 }
 
 // Do not support namespace MathML as almost browsers do not support as well
@@ -502,7 +502,7 @@ const updateView = (newVirtualNode, oldVirtualNode) => {
     if (newVirtualNode.nativeNode_ !== null) {
         const hostNode = _findHostNode(newVirtualNode);
         if (hostNode !== null) {
-            hostNode.lastCommittedNativeChild_ = newVirtualNode.nativeNode_;
+            hostNode.lastOutputtedNativeChild_ = newVirtualNode.nativeNode_;
         }
     }
 };
@@ -514,12 +514,12 @@ const insertView = (node) => {
         const hostNode = _findHostNode(node);
         if (hostNode !== null) {
             const nativeNodeAfter = (
-                hostNode.lastCommittedNativeChild_ !== null
-                    ? hostNode.lastCommittedNativeChild_.nextSibling
+                hostNode.lastOutputtedNativeChild_ !== null
+                    ? hostNode.lastOutputtedNativeChild_.nextSibling
                     : hostNode.nativeNode_.firstChild
             );
             hostNode.nativeNode_.insertBefore(node.nativeNode_, nativeNodeAfter);
-            hostNode.lastCommittedNativeChild_ = node.nativeNode_;
+            hostNode.lastOutputtedNativeChild_ = node.nativeNode_;
         }
     }
 };
@@ -999,8 +999,8 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
 // Callback called after walking through a node and all of its ascendants
 const _onReturn = (current) => {
     // This is when we cleanup the remaining temp props
-    if (current.lastCommittedNativeChild_ !== null) {
-        current.lastCommittedNativeChild_ = null;
+    if (current.lastOutputtedNativeChild_ !== null) {
+        current.lastOutputtedNativeChild_ = null;
     }
 };
 

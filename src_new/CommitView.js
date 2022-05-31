@@ -9,7 +9,7 @@ export const updateView = (newVirtualNode, oldVirtualNode) => {
     if (newVirtualNode.nativeNode_ !== null) {
         const hostNode = _findHostNode(newVirtualNode);
         if (hostNode !== null) {
-            hostNode.lastCommittedNativeChild_ = newVirtualNode.nativeNode_;
+            hostNode.lastOutputtedNativeChild_ = newVirtualNode.nativeNode_;
         }
     }
 }
@@ -21,12 +21,12 @@ export const insertView = (node) => {
         const hostNode = _findHostNode(node);
         if (hostNode !== null) {
             const nativeNodeAfter = (
-                hostNode.lastCommittedNativeChild_ !== null
-                    ? hostNode.lastCommittedNativeChild_.nextSibling
+                hostNode.lastOutputtedNativeChild_ !== null
+                    ? hostNode.lastOutputtedNativeChild_.nextSibling
                     : hostNode.nativeNode_.firstChild
             );
             hostNode.nativeNode_.insertBefore(node.nativeNode_, nativeNodeAfter);
-            hostNode.lastCommittedNativeChild_ = node.nativeNode_;
+            hostNode.lastOutputtedNativeChild_ = node.nativeNode_;
         }
     }
 }
