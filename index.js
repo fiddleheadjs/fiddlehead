@@ -1,4 +1,5 @@
 import {createElement} from './src_new/CreateElement';
+import {Fragment} from './src_new/VirtualNode';
 import {mount, createPortal} from './src_new/Mount';
 import {useState} from './src_new/StateHook';
 import {useEffect} from './src_new/EffectHook';
@@ -11,4 +12,5 @@ export {
     useState,
     useEffect,
     useRef,
+    Fragment,
 };

@@ -1,5 +1,5 @@
 import {isArray, isFunction, isNumber, isString} from './Util';
-import {NODE_FRAGMENT, NODE_TEXT, VirtualNode} from './VirtualNode';
+import {Fragment, NODE_FRAGMENT, NODE_TEXT, VirtualNode} from './VirtualNode';
 
 /**
  *
@@ -10,6 +10,10 @@ import {NODE_FRAGMENT, NODE_TEXT, VirtualNode} from './VirtualNode';
  */
 export const createElement = (type, attributes, ...content) => {
     const {key, ref, ...props} = attributes || {};
+
+    if (type === Fragment) {
+        type = NODE_FRAGMENT;
+    }
 
     const virtualNode = new VirtualNode(type, props, key, ref);
 

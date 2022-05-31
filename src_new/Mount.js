@@ -1,4 +1,4 @@
-import {VirtualNode, linkNativeNode, NS_HTML, NS_SVG, RootType} from './VirtualNode';
+import {VirtualNode, linkNativeNode, NS_HTML, NS_SVG, Root} from './VirtualNode';
 import {attachVirtualNode, extractVirtualNode} from './Externals';
 import {resolveTree} from './ResolveTree';
 
@@ -32,7 +32,7 @@ export const createPortal = (children, targetNativeNode) => {
             }
         }
         
-        rootVirtualNode = new VirtualNode(RootType);
+        rootVirtualNode = new VirtualNode(Root);
 
         // Determine the namespace (we only support SVG and HTML namespaces)
         rootVirtualNode.ns_ = ('ownerSVGElement' in targetNativeNode) ? NS_SVG : NS_HTML;

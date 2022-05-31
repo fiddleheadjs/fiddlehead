@@ -160,8 +160,12 @@ const NS_SVG = 1;
 const NODE_TEXT = '#';
 const NODE_FRAGMENT = '[';
 
-const RootType = (props) => {
+const Root = (props) => {
     return props.children;
+};
+
+const Fragment = () => {
+    // Do nothing here
 };
 
 /**
@@ -186,6 +190,10 @@ const linkNativeNode = (virtualNode, nativeNode) => {
  */
 const createElement = (type, attributes, ...content) => {
     const {key, ref, ...props} = attributes || {};
+
+    if (type === Fragment) {
+        type = NODE_FRAGMENT;
+    }
 
     const virtualNode = new VirtualNode(type, props, key, ref);
 
@@ -456,6 +464,10 @@ const rehydrateView = (newVirtualNode, oldVirtualNode) => {
     }
 };
 
+const _isDry = (type) => {
+    return type === NODE_FRAGMENT || isFunction(type);
+};
+
 const _createNativeNode = (virtualNode) => {
     if (virtualNode.type_ === NODE_TEXT) {
         return createNativeTextNode(virtualNode.props_.children);
@@ -482,10 +494,6 @@ const _determineNS = (virtualNode) => {
 
     // By default, pass namespace below.
     return virtualNode.parent_.ns_;
-};
-
-const _isDry = (type) => {
-    return type === NODE_FRAGMENT || isFunction(type);
 };
 
 // Important Note
@@ -571,17 +579,16 @@ const _loopClosestNativeNodes = (node, callback) => {
  *
  * @param {function} callback
  * @param {[]|null} deps
- * @param {function} lastDestroy
  * @param {number} tag
  * @return {EffectHook}
  * @constructor
  */
-function EffectHook(callback, deps, lastDestroy, tag) {
+function EffectHook(callback, deps, tag) {
     this.callback_ = callback;
     this.deps_ = deps;
-    this.destroy_ = null;
-    this.lastDestroy_ = lastDestroy;
     this.tag_ = tag;
+    this.destroy_ = null;
+    this.lastDestroy_ = null;
     this.next_ = null;
 }
 
@@ -594,7 +601,7 @@ const useEffect = (callback, deps = null) => {
     return resolveCurrentHook(
         (currentNode) => {
             const effectTag = _determineEffectTag(deps, null);
-            return new EffectHook(callback, deps, null, effectTag);
+            return new EffectHook(callback, deps, effectTag);
         },
         (currentHook) => {
             if (true) {
@@ -609,7 +616,7 @@ const useEffect = (callback, deps = null) => {
             }
     
             const effectTag = _determineEffectTag(deps, currentHook.deps_);
-    
+
             if (effectTag === TAG_LAZY) {
                 return;
             }
@@ -620,7 +627,12 @@ const useEffect = (callback, deps = null) => {
             }
     
             if (effectTag === TAG_ALWAYS || effectTag === TAG_DEPS_CHANGED) {
-                EffectHook.call(currentHook, callback, deps, currentHook.destroy_, effectTag);
+                currentHook.callback_ = callback;
+                currentHook.deps_ = deps;
+                currentHook.tag_ = effectTag;
+
+                currentHook.lastDestroy_ = currentHook.destroy_;
+                currentHook.destroy_ = null;
                 return;
             }
         }
@@ -928,11 +940,11 @@ const resolveTree = (current) => {
     workLoop(_performUnitOfWork, _onReturn, current, mountNodesMap, unmountNodesMap);
 
     queueWork(() => {
-        mountNodesMap.forEach((isNewlyMounted, node) => {
-            mountEffects(node, isNewlyMounted === 1);
-        });
         unmountNodesMap.forEach((isUnmounted, node) => {
-            destroyEffects(node, isUnmounted === 1);
+            destroyEffects(node, isUnmounted);
+        });
+        mountNodesMap.forEach((isNewlyMounted, node) => {
+            mountEffects(node, isNewlyMounted);
         });
     });
 };
@@ -942,36 +954,40 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
 
     // RootType never changes its child
     // Do nothing anymore
-    if (current.type_ === RootType) {
+    if (current.type_ === Root) {
         return;
     }
 
     if (current === root) {
-        unmountNodesMap.set(current, 0);
-        mountNodesMap.set(current, 0);
+        if (!isNullish(current.hook_)) {
+            unmountNodesMap.set(current, false);
+            mountNodesMap.set(current, false);
+        }
     } else {
         if (current.alternative_ !== null) {
             updateView(current, current.alternative_);
-            if (isFunction(current.type_)) {
-                unmountNodesMap.set(current.alternative_, 0);
-                mountNodesMap.set(current, 0);
+            if (!isNullish(current.hook_)) {
+                unmountNodesMap.set(current.alternative_, false);
+                mountNodesMap.set(current, false);
             }
             current.alternative_ = null;
         } else {
             insertView(current);
-            if (isFunction(current.type_)) {
-                mountNodesMap.set(current, 1);
+            if (!isNullish(current.hook_)) {
+                mountNodesMap.set(current, true);
             }
         }
     }
     
     if (current.deletions_ !== null) {
         current.deletions_.forEach(subtree => {
-            workLoop((deletedNode) => {
-                if (isFunction(deletedNode.type_)) {
-                    unmountNodesMap.set(deletedNode, 1);
-                }
-            }, null, subtree);
+            queueWork(() => {
+                workLoop((deletion) => {
+                    if (!isNullish(deletion.hook_)) {
+                        unmountNodesMap.set(deletion, true);
+                    }
+                }, null, subtree);
+            });
 
             deleteView(subtree);
         });
@@ -1017,7 +1033,7 @@ const createPortal = (children, targetNativeNode) => {
             }
         }
         
-        rootVirtualNode = new VirtualNode(RootType);
+        rootVirtualNode = new VirtualNode(Root);
 
         // Determine the namespace (we only support SVG and HTML namespaces)
         rootVirtualNode.ns_ = ('ownerSVGElement' in targetNativeNode) ? NS_SVG : NS_HTML;
@@ -1031,6 +1047,7 @@ const createPortal = (children, targetNativeNode) => {
     return rootVirtualNode;
 };
 
+exports.Fragment = Fragment;
 exports.createPortal = createPortal;
 exports.h = createElement;
 exports.mount = mount;

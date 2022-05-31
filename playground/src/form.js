@@ -1,4 +1,4 @@
-import {h, mount, useState, useEffect, useRef} from "../../output";
+import {h, mount, useState, useEffect, useRef, Fragment} from "../../output";
 
 
 function Cat({text, setText}) {
@@ -97,7 +97,9 @@ function Bird({layout, text, setText}) {
     return <div className="Bird">
         {
             layout === 'dog' &&
-            <Dog text={text} setText={setText}/>
+            <Fragment key="hehehehe">
+                <Dog text={text} setText={setText}/>
+            </Fragment>
         }
         {
             layout === 'cat' &&

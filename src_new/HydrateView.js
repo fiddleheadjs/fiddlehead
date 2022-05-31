@@ -52,6 +52,10 @@ export const rehydrateView = (newVirtualNode, oldVirtualNode) => {
     }
 }
 
+const _isDry = (type) => {
+    return type === NODE_FRAGMENT || isFunction(type);
+}
+
 const _createNativeNode = (virtualNode) => {
     if (virtualNode.type_ === NODE_TEXT) {
         return createNativeTextNode(virtualNode.props_.children);
@@ -78,8 +82,4 @@ const _determineNS = (virtualNode) => {
 
     // By default, pass namespace below.
     return virtualNode.parent_.ns_;
-}
-
-const _isDry = (type) => {
-    return type === NODE_FRAGMENT || isFunction(type);
 }

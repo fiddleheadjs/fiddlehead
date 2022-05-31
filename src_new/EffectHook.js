@@ -5,17 +5,16 @@ import {compareArrays} from './Util';
  *
  * @param {function} callback
  * @param {[]|null} deps
- * @param {function} lastDestroy
  * @param {number} tag
  * @return {EffectHook}
  * @constructor
  */
-export function EffectHook(callback, deps, lastDestroy, tag) {
+export function EffectHook(callback, deps, tag) {
     this.callback_ = callback;
     this.deps_ = deps;
-    this.destroy_ = null;
-    this.lastDestroy_ = lastDestroy;
     this.tag_ = tag;
+    this.destroy_ = null;
+    this.lastDestroy_ = null;
     this.next_ = null;
 }
 
@@ -28,7 +27,7 @@ export const useEffect = (callback, deps = null) => {
     return resolveCurrentHook(
         (currentNode) => {
             const effectTag = _determineEffectTag(deps, null);
-            return new EffectHook(callback, deps, null, effectTag);
+            return new EffectHook(callback, deps, effectTag);
         },
         (currentHook) => {
             if (__DEV__) {
@@ -43,7 +42,7 @@ export const useEffect = (callback, deps = null) => {
             }
     
             const effectTag = _determineEffectTag(deps, currentHook.deps_);
-    
+
             if (effectTag === TAG_LAZY) {
                 return;
             }
@@ -54,7 +53,12 @@ export const useEffect = (callback, deps = null) => {
             }
     
             if (effectTag === TAG_ALWAYS || effectTag === TAG_DEPS_CHANGED) {
-                EffectHook.call(currentHook, callback, deps, currentHook.destroy_, effectTag);
+                currentHook.callback_ = callback;
+                currentHook.deps_ = deps;
+                currentHook.tag_ = effectTag;
+
+                currentHook.lastDestroy_ = currentHook.destroy_;
+                currentHook.destroy_ = null;
                 return;
             }
         }

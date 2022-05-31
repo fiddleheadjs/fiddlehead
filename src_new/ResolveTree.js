@@ -1,8 +1,8 @@
 import {insertView, updateView, deleteView} from './CommitView';
 import {destroyEffects, mountEffects} from './EffectHook';
 import {reconcileChildren} from './Reconciliation';
-import {isFunction} from './Util';
-import {RootType} from './VirtualNode';
+import {isNullish} from './Util';
+import {Root} from './VirtualNode';
 import {queueWork, workLoop} from './WorkLoop';
 
 export const resolveTree = (current) => {
@@ -12,11 +12,11 @@ export const resolveTree = (current) => {
     workLoop(_performUnitOfWork, _onReturn, current, mountNodesMap, unmountNodesMap);
 
     queueWork(() => {
-        mountNodesMap.forEach((isNewlyMounted, node) => {
-            mountEffects(node, isNewlyMounted === 1);
-        });
         unmountNodesMap.forEach((isUnmounted, node) => {
-            destroyEffects(node, isUnmounted === 1);
+            destroyEffects(node, isUnmounted);
+        });
+        mountNodesMap.forEach((isNewlyMounted, node) => {
+            mountEffects(node, isNewlyMounted);
         });
     });
 }
@@ -26,36 +26,40 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
 
     // RootType never changes its child
     // Do nothing anymore
-    if (current.type_ === RootType) {
+    if (current.type_ === Root) {
         return;
     }
 
     if (current === root) {
-        unmountNodesMap.set(current, 0);
-        mountNodesMap.set(current, 0);
+        if (!isNullish(current.hook_)) {
+            unmountNodesMap.set(current, false);
+            mountNodesMap.set(current, false);
+        }
     } else {
         if (current.alternative_ !== null) {
             updateView(current, current.alternative_);
-            if (isFunction(current.type_)) {
-                unmountNodesMap.set(current.alternative_, 0);
-                mountNodesMap.set(current, 0);
+            if (!isNullish(current.hook_)) {
+                unmountNodesMap.set(current.alternative_, false);
+                mountNodesMap.set(current, false);
             }
             current.alternative_ = null;
         } else {
             insertView(current);
-            if (isFunction(current.type_)) {
-                mountNodesMap.set(current, 1);
+            if (!isNullish(current.hook_)) {
+                mountNodesMap.set(current, true);
             }
         }
     }
     
     if (current.deletions_ !== null) {
         current.deletions_.forEach(subtree => {
-            workLoop((deletedNode) => {
-                if (isFunction(deletedNode.type_)) {
-                    unmountNodesMap.set(deletedNode, 1);
-                }
-            }, null, subtree);
+            queueWork(() => {
+                workLoop((deletion) => {
+                    if (!isNullish(deletion.hook_)) {
+                        unmountNodesMap.set(deletion, true);
+                    }
+                }, null, subtree);
+            });
 
             deleteView(subtree);
         });

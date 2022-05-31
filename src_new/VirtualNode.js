@@ -61,8 +61,12 @@ export const NS_SVG = 1;
 export const NODE_TEXT = '#';
 export const NODE_FRAGMENT = '[';
 
-export const RootType = (props) => {
+export const Root = (props) => {
     return props.children;
+}
+
+export const Fragment = () => {
+    // Do nothing here
 }
 
 /**
