@@ -103,7 +103,7 @@ const useRef = (initialValue) => {
 /**
  * 
  * @param {function|string} type 
- * @param {{}?} props 
+ * @param {{}|string?} props: required for text nodes
  * @param {string|number?} key 
  * @param {RefHook?} ref 
  */
