@@ -1,191 +1,80 @@
-import {linkNativeNode, NODE_TEXT, RootType} from './VirtualNode';
-import {updateNativeElementAttributes, updateNativeTextNode} from './NativeDOM';
-import {PATH_SEP} from './VirtualNode';
-import {startsWith, isNullish} from './Util';
-import {hydrateViewableVirtualNode} from './HydrateView';
-import {attachVirtualNode} from './Externals';
+import {hydrateView, rehydrateView} from './HydrateView';
 
-// !!!IMPORTANT
-// Only use this module for viewable nodes
-// Passing Functional, Array, Fragment nodes will lead to crash
+// Important Note
+// This module does not handle RootType nodes
 
-export const commitView = (oldViewableVirtualNodeMap, newViewableVirtualNodeMap) => {
-    if (oldViewableVirtualNodeMap.size === 0) {
-        _append(newViewableVirtualNodeMap);
-    } else {
-        /*
-        | for key in oldMap
-        |     if newMap.has(key)
-        |         updateNativeNodes
-        |     else
-        |         removeNativeNodes
-        |
-        | for key in newMap
-        |     if !oldMap.has(key)
-        |         insertNativeNodes
-        */
-        _removeAndUpdate(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
-        _insert(oldViewableVirtualNodeMap, newViewableVirtualNodeMap);
-    }
-}
+export const updateView = (newVirtualNode, oldVirtualNode) => {
+    rehydrateView(newVirtualNode, oldVirtualNode);
 
-const _removeAndUpdate = (oldViewableVirtualNodeMap, newViewableVirtualNodeMap) => {
-    // New node to be inserted
-    let newViewableVirtualNode;
-
-    // If the current node is under the last removed node
-    // So dont need to remove current node anymore
-    // Use lastRemovedKey to track
-    let lastRemovedKey = '';
-
-    oldViewableVirtualNodeMap.forEach((oldViewableVirtualNode, key) => {
-        if (newViewableVirtualNodeMap.has(key)) {
-            newViewableVirtualNode = newViewableVirtualNodeMap.get(key);
-
-            // Reuse the existing native node
-            linkNativeNode(newViewableVirtualNode, oldViewableVirtualNode.nativeNode_);
-
-            if (__DEV__) {
-                attachVirtualNode(oldViewableVirtualNode.nativeNode_, newViewableVirtualNode);
-            }
-
-            if (newViewableVirtualNode.type_ === NODE_TEXT) {
-                if (newViewableVirtualNode.props_.children !== oldViewableVirtualNode.props_.children) {
-                    updateNativeTextNode(
-                        newViewableVirtualNode.nativeNode_,
-                        newViewableVirtualNode.props_.children
-                    );
-                }
-            } else {
-                updateNativeElementAttributes(
-                    newViewableVirtualNode.nativeNode_,
-                    newViewableVirtualNode.props_,
-                    oldViewableVirtualNode.props_
-                );
-            }
-        } else {
-            if (!startsWith(key, lastRemovedKey + PATH_SEP)) {
-                _removeNativeNodesOfVirtualNode(oldViewableVirtualNode);
-                lastRemovedKey = key;
-            }
-        }
-    });
-}
-
-const _append = (newViewableVirtualNodeMap) => {
-    let nativeHost;
-
-    newViewableVirtualNodeMap.forEach((virtualNode) => {
-        nativeHost = _findNativeHost(virtualNode);
-
-        if (nativeHost !== null) {
-            hydrateViewableVirtualNode(virtualNode);
-            nativeHost.appendChild(virtualNode.nativeNode_);
-        }
-    });
-}
-
-const _insert = (oldViewableVirtualNodeMap, newViewableVirtualNodeMap) => {
-    let pendingViewableVirtualNodes = [];
-
-    newViewableVirtualNodeMap.forEach((newViewableVirtualNode, key) => {
-        if (!oldViewableVirtualNodeMap.has(key)) {
-            pendingViewableVirtualNodes.push(newViewableVirtualNode);
-        } else {
-            _insertClosestNativeNodesOfVirtualNodes(pendingViewableVirtualNodes, oldViewableVirtualNodeMap.get(key));
-            pendingViewableVirtualNodes.length = 0;
-        }
-    });
-
-    if (pendingViewableVirtualNodes.length > 0) {
-        _insertClosestNativeNodesOfVirtualNodes(pendingViewableVirtualNodes, null);
-    }
-}
-
-const _insertClosestNativeNodesOfVirtualNodes = (virtualNodes, virtualNodeAfter) => {
-    const nativeNodeAfter = virtualNodeAfter && _findFirstNativeNode(virtualNodeAfter) || null;
-    
-    for (
-        let virtualNode, nativeHost, i = 0, len = virtualNodes.length
-        ; i < len
-        ; ++i
-    ) {
-        virtualNode = virtualNodes[i];
-
-        nativeHost = _findNativeHost(virtualNode);
-        
-        if (nativeHost !== null) {
-            hydrateViewableVirtualNode(virtualNode);
-
-            if (nativeNodeAfter !== null && nativeHost === nativeNodeAfter.parentNode) {
-                nativeHost.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
-            } else {
-                nativeHost.appendChild(virtualNode.nativeNode_);
-            }
+    if (newVirtualNode.nativeNode_ !== null) {
+        const host = _findHostVirtualNode(newVirtualNode);
+        if (host !== null) {
+            host.lastManipulatedClientNativeNode_ = newVirtualNode.nativeNode_;
         }
     }
 }
 
-const _removeNativeNodesOfVirtualNode = (virtualNode) => {
-    const nativeNodes = _findClosestNativeNodes(virtualNode);
+export const insertView = (virtualNode) => {
+    hydrateView(virtualNode);
 
-    for (
-        let nativeNode, i = 0, len = nativeNodes.length
-        ; i < len
-        ; ++i
-    ) {
-        nativeNode = nativeNodes[i];
+    if (virtualNode.nativeNode_ !== null) {
+        const host = _findHostVirtualNode(virtualNode);
+        if (host !== null) {
+            const nativeNodeAfter = (
+                host.lastManipulatedClientNativeNode_ !== null
+                    ? host.lastManipulatedClientNativeNode_.nextSibling
+                    : host.nativeNode_.firstChild
+            );
+            host.nativeNode_.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
+            host.lastManipulatedClientNativeNode_ = virtualNode.nativeNode_;
+        }
+    }
+}
 
+export const deleteView = (subtree) => {
+    _loopClientNativeNodes(subtree, (nativeNode) => {
         if (nativeNode.parentNode !== null) {
             nativeNode.parentNode.removeChild(nativeNode);
         }
+    });
+}
+
+// Find the virtual node in the parent chain which its native node is not null
+const _findHostVirtualNode = (virtualNode) => {
+    let current = virtualNode.parent_;
+
+    while (true) {
+        if (current === null) {
+            return null;
+        }
+        if (current.nativeNode_ !== null) {
+            return current;
+        }
+        current = current.parent_;
     }
 }
 
-const _findNativeHost = (virtualNode) => {
-    if (virtualNode.type_ === RootType) {
-        return virtualNode.nativeNode_;
+const _loopClientNativeNodes = (virtualNode, callback) => {
+    let root = virtualNode;
+    let current = virtualNode;
+
+    while (true) {
+        if (current.nativeNode_ !== null) {
+            callback(current.nativeNode_);
+        } else if (current.child_ !== null) {
+            current = current.child_;
+            continue;
+        }
+        if (current === root) {
+            return;
+        }
+        while (current.sibling_ === null) {
+            if (current.parent_ === null || current.parent_ === root) {
+                return;
+            }
+            current = current.parent_;
+        }
+        current = current.sibling_;
+        continue;
     }
-    
-    if (virtualNode.parent_ === null) {
-        return null;
-    }
-
-    if (!isNullish(virtualNode.parent_.nativeNode_)) {
-        return virtualNode.parent_.nativeNode_;
-    }
-    
-    return _findNativeHost(virtualNode.parent_);
-}
-
-const _findFirstNativeNode = (virtualNode) => {
-    if (!isNullish(virtualNode.nativeNode_)) {
-        return virtualNode.nativeNode_;
-    }
-
-    let firstNativeNode = null;
-    let childNode = virtualNode.child_;
-
-    while (firstNativeNode === null && childNode !== null) {
-        firstNativeNode = _findFirstNativeNode(childNode);
-        childNode = childNode.sibling_;
-    }
-
-    return firstNativeNode;
-}
-
-const _findClosestNativeNodes = (virtualNode) => {
-    if (!isNullish(virtualNode.nativeNode_)) {
-        return [virtualNode.nativeNode_];
-    }
-    
-    const closestNativeNodes = [];
-    let childNode = virtualNode.child_;
-
-    while (childNode !== null) {
-        closestNativeNodes.push(..._findClosestNativeNodes(childNode));
-        childNode = childNode.sibling_;
-    }
-
-    return closestNativeNodes;
 }

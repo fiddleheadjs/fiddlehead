@@ -1,147 +1,84 @@
 import {RefHook} from './RefHook';
-import {isArray, isFunction, isNumber, isString} from './Util';
 
 /**
  * 
- * @param {function|string} type 
- * @param {{}?} props 
- * @param {string|number?} key 
- * @param {RefHook?} ref 
+ * @param {function|string} type
+ * @param {{}?} props
+ * @param {string?} key
  */
-export function VirtualNode(type, props = {}, key = null, ref = null) {
+export function VirtualNode(type, props = {}, key = null) {
+    // Identification
+    // ==============
+
     this.type_ = type;
 
-    this.key_ = key;
+    // Convert to string to avoid conflict with slot
+    this.key_ = key !== null ? ('' + key) : key;
+
+    this.slot_ = null;
+
+    // Props and hooks
+    // ===============
+
+    if (!(props.ref === undefined || props.ref instanceof RefHook)) {
+        delete props.ref;
+        
+        if (__DEV__) {
+            console.error('The ref property must be created by the useRef hook');
+        }
+    }
+    this.props_ = props;
+
+    this.hook_ = null;
     
-    this.path_ = '';
+    // Native node and relates
+    // =======================
     
+    this.nativeNode_ = null;
+
     this.ns_ = null;
+
+    // Linked-list pointers
+    // ====================
 
     this.parent_ = null;
     
     this.child_ = null;
 
     this.sibling_ = null;
-    
-    if (type !== NODE_FRAGMENT) {
-        this.props_ = props;
 
-        this.ref_ = ref;
+    // Temp props
+    // ==========
     
-        this.nativeNode_ = null;
+    // The previous version of this node
+    this.alternative_ = null;
 
-        if (isFunction(type)) {
-            this.hooks_ = [];
-        }
-    }
+    // The children (and their subtrees, of course) are marked to be deleted
+    this.deletions_ = null;
+
+    // In the commit phase, the new child will be inserted
+    // after the last inserted/updated child
+    this.lastManipulatedClientNativeNode_ = null;
 }
 
 // Do not support namespace MathML as almost browsers do not support as well
 export const NS_HTML = 0;
 export const NS_SVG = 1;
 
-// Note:
-// Use special URI characters
-
-export const NODE_TEXT = '#';
-export const NODE_FRAGMENT = '[';
-
-export const PATH_SEP = '/';
-
-export const RootType = (props) => {
-    return props.children;
-}
-
-/**
- * 
- * @param {string|number} key 
- * @returns {string}
- */
-export const escapeVirtualNodeKey = (key) => {
-    return '@' + encodeURIComponent(key);
-}
-
-let functionalTypeInc = 0;
-let rootIdInc = 0;
-
-/**
- * 
- * @param {Function} type 
- * @returns {string}
- */
-export const createFunctionalTypeAlias = (type) => {
-    return (
-        (__DEV__ ? type.name : '') +
-        '{' + (++functionalTypeInc).toString(36)
-    );
-}
-
-/**
- * 
- * @returns {string}
- */
-export const createRootId = () => {
-    return '~' + (++rootIdInc).toString(36);
-}
+// Special node types
+export const TextNode = '#';
+export const Fragment = '[';
+export const Root = (props) => props.children;
 
 /**
  * 
  * @param {VirtualNode} virtualNode 
- * @param {Node} nativeNode 
+ * @param {Node} nativeNode
  */
 export const linkNativeNode = (virtualNode, nativeNode) => {
     virtualNode.nativeNode_ = nativeNode;
 
-    if (virtualNode.ref_ instanceof RefHook) {
-        virtualNode.ref_.current = nativeNode;
-    }
-}
-
-/**
- *
- * @param {*} content
- * @return {null|VirtualNode}
- */
-export const createVirtualNodeFromContent = (content) => {
-    let node = null;
-
-    if (content instanceof VirtualNode) {
-        node = content;
-    }
-    else if (isString(content) || isNumber(content)) {
-        node = new VirtualNode(NODE_TEXT, {children: content});
-    }
-    else if (isArray(content)) {
-        node = new VirtualNode(NODE_FRAGMENT);
-        appendChildrenFromContent(node, content);
-    }
-
-    return node;
-}
-
-/**
- * 
- * @param {VirtualNode} parentNode 
- * @param {Array} content
- */
-export const appendChildrenFromContent = (parentNode, content) => {
-    for (
-        let childNode, prevChildNode = null, i = 0, len = content.length
-        ; i < len
-        ; ++i
-    ) {
-        childNode = createVirtualNodeFromContent(content[i]);
-        
-        if (childNode !== null) {
-            childNode.parent_ = parentNode;
-
-            if (prevChildNode !== null) {
-                prevChildNode.sibling_ = childNode;
-            } else {
-                parentNode.child_ = childNode;
-            }
-
-            prevChildNode = childNode;
-        }
+    if (virtualNode.props_.ref !== undefined) {
+        virtualNode.props_.ref.current = nativeNode;
     }
 }

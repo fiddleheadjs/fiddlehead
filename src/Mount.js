@@ -1,7 +1,6 @@
-import {VirtualNode, linkNativeNode, NS_HTML, NS_SVG, RootType} from './VirtualNode';
-import {resolveVirtualTree} from './ResolveVirtualTree';
-import {updateVirtualTree} from './UpdateVirtualTree';
-import {attachVirtualNode, extractVirtualNode, getRootId} from './Externals';
+import {VirtualNode, linkNativeNode, NS_HTML, NS_SVG, Root} from './VirtualNode';
+import {attachVirtualNode, extractVirtualNode} from './Externals';
+import {resolveTree} from './ResolveTree';
 
 /**
  * 
@@ -11,12 +10,7 @@ import {attachVirtualNode, extractVirtualNode, getRootId} from './Externals';
  export const mount = (children, targetNativeNode) => {
     const rootVirtualNode = createPortal(children, targetNativeNode);
 
-    // Set an unique path to split tree states between roots
-    rootVirtualNode.path_ = getRootId(targetNativeNode);
-    
-    resolveVirtualTree(rootVirtualNode);
-
-    updateVirtualTree(rootVirtualNode);
+    resolveTree(rootVirtualNode);
 }
 
 /**
@@ -38,7 +32,7 @@ export const createPortal = (children, targetNativeNode) => {
             }
         }
         
-        rootVirtualNode = new VirtualNode(RootType);
+        rootVirtualNode = new VirtualNode(Root);
 
         // Determine the namespace (we only support SVG and HTML namespaces)
         rootVirtualNode.ns_ = ('ownerSVGElement' in targetNativeNode) ? NS_SVG : NS_HTML;

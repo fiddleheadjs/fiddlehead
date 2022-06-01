@@ -28,31 +28,15 @@ export const isNullish = (value) => {
 
 /**
  * 
- * @param {Array|string} full 
- * @param {Array|string} sub 
- * @returns {boolean}
- */
-export const startsWith = (full, sub) => {
-    if (full.length < sub.length) {
-        return false;
-    }
-
-    for (let i = sub.length - 1; i >= 0; --i) {
-        if (sub[i] !== full[i]) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-/**
- * 
  * @param {Array} a 
  * @param {Array} b 
  * @returns {boolean}
  */
-export const compareSameLengthArrays = (a, b) => {
+export const compareArrays = (a, b) => {
+    if (a.length !== b.length) {
+        return false;
+    }
+
     for (let i = a.length - 1; i >= 0; --i) {
         if (a[i] !== b[i]) {
             return false;
