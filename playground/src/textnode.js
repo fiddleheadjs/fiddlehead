@@ -20,7 +20,7 @@ function Root() {
             <input type="text" placeholder="First name" onInput={ev => setFirstName(ev.target.value)}/>
             <input type="text" placeholder="Last name" onInput={ev => setLastName(ev.target.value)}/>
             <p>
-                <FullName firstName={firstName} lastName={lastName} ref={4}/>
+                <FullName firstName={firstName} lastName={lastName} ref={textRef}/>
             </p>
         </div>
     )
