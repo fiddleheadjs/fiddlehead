@@ -103,8 +103,8 @@ const useRef = (initialValue) => {
 /**
  * 
  * @param {function|string} type
- * @param {{}|string?} props: required for text nodes
- * @param {string|number?} key
+ * @param {{}?} props
+ * @param {string?} key
  */
 function VirtualNode(type, props = {}, key = null) {
     // Identification

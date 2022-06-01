@@ -1,11 +1,10 @@
 import {RefHook} from './RefHook';
-import {isNullish} from './Util';
 
 /**
  * 
  * @param {function|string} type
- * @param {{}|string?} props: required for text nodes
- * @param {string|number?} key
+ * @param {{}?} props
+ * @param {string?} key
  */
 export function VirtualNode(type, props = {}, key = null) {
     // Identification
