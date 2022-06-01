@@ -32,7 +32,11 @@ export function createElement(type, props, content) {
             // Place TextNode after Function
             // because this way is much less frequently used
             if (multiple) {
-                virtualNode.props_.children = content.map(text => _normalizeText(text)).join('');
+                let text = '', i = 0;
+                for (; i < content.length; ++i) {
+                    text += _normalizeText(content[i]);
+                }
+                virtualNode.props_.children = text;
             } else {
                 virtualNode.props_.children = _normalizeText(content);
             }
