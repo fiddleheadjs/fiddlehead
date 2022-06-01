@@ -121,6 +121,7 @@ function VirtualNode(type, props = {}, key = null) {
     // ===============
 
     if (!(props.ref === undefined || props.ref instanceof RefHook)) {
+        // Delete the invalid ref
         delete props.ref;
         
         if (true) {
@@ -131,7 +132,7 @@ function VirtualNode(type, props = {}, key = null) {
 
     this.hook_ = null;
     
-    // Native node and relates
+    // Output native node and relates
     // =======================
     
     this.nativeNode_ = null;
