@@ -1,16 +1,16 @@
 let currentNode = null;
 let currentHook = null;
 
-export const prepareCurrentlyProcessing = (functionalVirtualNode) => {
+export function prepareCurrentlyProcessing(functionalVirtualNode) {
     currentNode = functionalVirtualNode;
 }
 
-export const flushCurrentlyProcessing = () => {
+export function flushCurrentlyProcessing() {
     currentNode = null;
     currentHook = null;
 }
 
-export const resolveCurrentHook = (createHookFn, processFn) => {
+export function resolveCurrentHook(createHookFn, processFn) {
     if (currentNode === null) {
         throw new Error('Cannot use hooks from outside of components');
     }

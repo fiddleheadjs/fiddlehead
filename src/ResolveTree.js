@@ -4,23 +4,23 @@ import {reconcileChildren} from './Reconciliation';
 import {Portal} from './VirtualNode';
 import {queueWork, workLoop} from './WorkLoop';
 
-export const resolveTree = (current) => {
+export function resolveTree(current) {
     const mountNodesMap = new Map();
     const unmountNodesMap = new Map();
     
     workLoop(_performUnitOfWork, _onReturn, current, mountNodesMap, unmountNodesMap);
 
-    queueWork(() => {
-        unmountNodesMap.forEach((isUnmounted, node) => {
+    queueWork(function () {
+        unmountNodesMap.forEach(function (isUnmounted, node) {
             destroyEffects(node, isUnmounted);
         });
-        mountNodesMap.forEach((isNewlyMounted, node) => {
+        mountNodesMap.forEach(function (isNewlyMounted, node) {
             mountEffects(node, isNewlyMounted);
         });
     });
 }
 
-const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
+function _performUnitOfWork(current, root, mountNodesMap, unmountNodesMap) {
     const isSubtreeRoot = current === root;
     
     reconcileChildren(current, isSubtreeRoot);
@@ -60,9 +60,9 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
             deleteView(deletions[i]);
         }
 
-        queueWork(() => {
+        queueWork(function () {
             for (let i = 0; i < deletions.length; ++i) {
-                workLoop((vnode) => {
+                workLoop(function (vnode) {
                     if (vnode.hook_ !== null) {
                         unmountNodesMap.set(vnode, true);
                     }
@@ -73,7 +73,7 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
 }
 
 // Callback called after walking through a node and all of its ascendants
-const _onReturn = (current) => {
+function _onReturn(current) {
     // This is when we cleanup the remaining temp props
     if (current.lastManipulatedClientNativeNode_ !== null) {
         current.lastManipulatedClientNativeNode_ = null;

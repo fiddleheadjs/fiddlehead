@@ -32,7 +32,11 @@ export function createElement(type, props, content) {
             // Place TextNode after Function
             // because this way is much less frequently used
             if (multiple) {
-                virtualNode.props_.children = content.map(text => _normalizeText(text)).join('');
+                let text = '', i = 0;
+                for (; i < content.length; ++i) {
+                    text += _normalizeText(content[i]);
+                }
+                virtualNode.props_.children = text;
             } else {
                 virtualNode.props_.children = _normalizeText(content);
             }
@@ -50,7 +54,7 @@ export function createElement(type, props, content) {
  * @param {*} content
  * @return {null|VirtualNode}
  */
- export const createVirtualNodeFromContent = (content) => {
+ export function createVirtualNodeFromContent(content) {
     if (content instanceof VirtualNode) {
         return content;
     }
@@ -72,7 +76,12 @@ export function createElement(type, props, content) {
     return null;
 }
 
-const _normalizeText = (text) => {
+/**
+ * 
+ * @param {*} text 
+ * @returns {string}
+ */
+function _normalizeText(text) {
     if (isString(text)) {
         return text;
     }
@@ -89,7 +98,7 @@ const _normalizeText = (text) => {
  * @param {VirtualNode} parentNode 
  * @param {Array} content
  */
- const _appendChildrenFromContent = (parentNode, content) => {
+function _appendChildrenFromContent(parentNode, content) {
     for (
         let childNode, prevChildNode = null, i = 0;
         i < content.length; ++i

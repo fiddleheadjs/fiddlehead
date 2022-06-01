@@ -6,7 +6,7 @@ import {isFunction} from './Util';
 // Important!!!
 // This module does not handle Portal nodes
 
-export const hydrateView = (virtualNode) => {
+export function hydrateView(virtualNode) {
     virtualNode.ns_ = _determineNS(virtualNode);
 
     // Do nothing more with fragments
@@ -22,7 +22,7 @@ export const hydrateView = (virtualNode) => {
     }
 }
 
-export const rehydrateView = (newVirtualNode, oldVirtualNode) => {
+export function rehydrateView(newVirtualNode, oldVirtualNode) {
     newVirtualNode.ns_ = _determineNS(newVirtualNode);
 
     // Do nothing more with fragments
@@ -52,7 +52,7 @@ export const rehydrateView = (newVirtualNode, oldVirtualNode) => {
     }
 }
 
-const _createNativeNode = (virtualNode) => {
+function _createNativeNode(virtualNode) {
     if (virtualNode.type_ === TextNode) {
         return createNativeTextNode(virtualNode.props_.children);
     }
@@ -64,7 +64,7 @@ const _createNativeNode = (virtualNode) => {
     );
 }
 
-const _determineNS = (virtualNode) => {
+function _determineNS(virtualNode) {
     // Intrinsic namespace
     if (virtualNode.type_ === 'svg') {
         return NS_SVG;
@@ -80,6 +80,6 @@ const _determineNS = (virtualNode) => {
     return virtualNode.parent_.ns_;
 }
 
-const _isDry = (type) => {
+function _isDry(type) {
     return type === Fragment || isFunction(type);
 }

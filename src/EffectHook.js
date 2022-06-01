@@ -24,17 +24,17 @@ const EFFECT_LAZY = 1;
 const EFFECT_DEPS = 2;
 const EFFECT_DEPS_CHANGED = 3;
 
-export const useEffect = (callback, deps) => {
+export function useEffect(callback, deps) {
     if (deps === undefined) {
         deps = null;
     }
-    
+
     return resolveCurrentHook(
-        (currentNode) => {
+        function (currentNode) {
             const effectTag = _determineEffectTag(deps, null);
             return new EffectHook(callback, deps, effectTag);
         },
-        (currentHook) => {
+        function (currentHook) {
             if (__DEV__) {
                 if (!(
                     deps === null && currentHook.deps_ === null ||
@@ -75,7 +75,7 @@ export const useEffect = (callback, deps) => {
  * @param {VirtualNode} functionalVirtualNode
  * @param {boolean} isNewlyMounted
  */
-export const mountEffects = (functionalVirtualNode, isNewlyMounted) => {
+export function mountEffects(functionalVirtualNode, isNewlyMounted) {
     let hook = functionalVirtualNode.hook_;
     while (hook !== null) {
         if (hook instanceof EffectHook) {
@@ -96,7 +96,7 @@ export const mountEffects = (functionalVirtualNode, isNewlyMounted) => {
  * @param {VirtualNode} functionalVirtualNode
  * @param {boolean} isUnmounted
  */
-export const destroyEffects = (functionalVirtualNode, isUnmounted) => {
+export function destroyEffects(functionalVirtualNode, isUnmounted) {
     let hook = functionalVirtualNode.hook_;
     while (hook !== null) {
         if (hook instanceof EffectHook) {
@@ -118,7 +118,7 @@ export const destroyEffects = (functionalVirtualNode, isUnmounted) => {
  *
  * @param {EffectHook} effectHook
  */
-const _mountEffect = (effectHook) => {
+function _mountEffect(effectHook) {
     effectHook.destroy_ = effectHook.callback_();
 
     if (effectHook.destroy_ === undefined) {
@@ -131,7 +131,7 @@ const _mountEffect = (effectHook) => {
  * @param {EffectHook} hook
  * @param {boolean} isNodeUnmounted
  */
-const _destroyEffect = (hook, isNodeUnmounted) => {
+function _destroyEffect(hook, isNodeUnmounted) {
     if (hook.lastDestroy_ !== null && !isNodeUnmounted) {
         hook.lastDestroy_();
         return;
@@ -142,7 +142,13 @@ const _destroyEffect = (hook, isNodeUnmounted) => {
     }
 }
 
-const _determineEffectTag = (deps, lastDeps) => {
+/**
+ * 
+ * @param {[]|null} deps 
+ * @param {[]|null} lastDeps 
+ * @returns 
+ */
+function _determineEffectTag(deps, lastDeps) {
     // Always
     if (deps === null) {
         return EFFECT_ALWAYS;

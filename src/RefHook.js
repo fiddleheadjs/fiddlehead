@@ -10,9 +10,13 @@ export function RefHook(current) {
     this.next_ = null;
 }
 
-export const useRef = (initialValue) => {
+export function useRef(initialValue) {
     return resolveCurrentHook(
-        (currentNode) => new RefHook(initialValue),
-        (currentHook) => currentHook
+        function (currentNode) {
+            return new RefHook(initialValue);
+        },
+        function (currentHook) {
+            return currentHook;
+        }
     );
 }

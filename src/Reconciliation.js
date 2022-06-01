@@ -4,7 +4,7 @@ import {StateHook} from './StateHook';
 import {prepareCurrentlyProcessing, flushCurrentlyProcessing} from './CurrentlyProcessing';
 import {catchError} from './CatchError';
 
-export const reconcileChildren = (current, isSubtreeRoot) => {
+export function reconcileChildren(current, isSubtreeRoot) {
     if (isFunction(current.type_)) {
         _reconcileChildOfDynamicNode(current, isSubtreeRoot);
     } else {
@@ -12,7 +12,7 @@ export const reconcileChildren = (current, isSubtreeRoot) => {
     }
 }
 
-const _reconcileChildOfDynamicNode = (current, isSubtreeRoot) => {
+function _reconcileChildOfDynamicNode(current, isSubtreeRoot) {
     const oldChild = isSubtreeRoot ? current.child_ : (
         current.alternative_ !== null ? current.alternative_.child_ : null
     );
@@ -46,7 +46,7 @@ const _reconcileChildOfDynamicNode = (current, isSubtreeRoot) => {
     current.child_ = newChild;
 }
 
-const _reconcileChildrenOfStaticNode = (current) => {
+function _reconcileChildrenOfStaticNode(current) {
     if (current.alternative_ === null) {
         return;
     }
@@ -55,7 +55,7 @@ const _reconcileChildrenOfStaticNode = (current) => {
     const newChildren = _mapChildren(current);
 
     let newChild;
-    oldChildren.forEach((oldChild, mapKey) => {
+    oldChildren.forEach(function (oldChild, mapKey) {
         newChild = newChildren.get(mapKey);
         if (newChild !== undefined && newChild.type_ === oldChild.type_) {
             _makeAlternative(newChild, oldChild);
@@ -65,7 +65,7 @@ const _reconcileChildrenOfStaticNode = (current) => {
     });
 }
 
-const _makeAlternative = (newChild, oldChild) => {
+function _makeAlternative(newChild, oldChild) {
     newChild.alternative_ = oldChild;
 
     if (isFunction(newChild.type_)) {
@@ -81,7 +81,7 @@ const _makeAlternative = (newChild, oldChild) => {
     }
 }
 
-const _addDeletion = (current, childToDelete) => {
+function _addDeletion(current, childToDelete) {
     if (current.deletions_ === null) {
         current.deletions_ = [childToDelete];
     } else {
@@ -89,7 +89,7 @@ const _addDeletion = (current, childToDelete) => {
     }
 }
 
-const _mapChildren = (node) => {
+function _mapChildren(node) {
     const map = new Map();
     let child = node.child_;
     while (child !== null) {

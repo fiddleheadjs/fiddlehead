@@ -70,14 +70,16 @@ export const NS_SVG = 1;
 // Special node types
 export const TextNode = '#';
 export const Fragment = '[';
-export const Portal = (props) => props.children;
+export function Portal(props) {
+    return props.children;
+}
 
 /**
  * 
  * @param {VirtualNode} virtualNode 
  * @param {Node} nativeNode
  */
-export const linkNativeNode = (virtualNode, nativeNode) => {
+export function linkNativeNode(virtualNode, nativeNode) {
     virtualNode.nativeNode_ = nativeNode;
 
     if (virtualNode.props_.ref !== undefined) {
