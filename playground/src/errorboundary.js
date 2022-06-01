@@ -40,13 +40,12 @@ function Contents({setClicks}) {
 
 function ErrorBoundary({children}) {
     const [error, setError] = useError(null);
-    // console.log('-->', error);
+    // const [error2, setError2] = useError(null);
 
     useEffect(() => {
 
     });
 
-    window.errorBoundary = this;
     // console.log('return OldChild ==>', this.child_ && this.child_.type_.name);
 
     // console.log(error ? 'ERR: ' + error.message : 'ERR: none');

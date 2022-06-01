@@ -31,11 +31,25 @@ export const useState = (initialValue) => {
 export const useError = (initialError) => {
     return resolveCurrentHook(
         (currentNode) => {
+            // Make sure we have only one error hook in a component
+            // In the production, we allow the initialization but skip it then
+            if (__DEV__) {
+                let hook = currentNode.hook_;
+                while (hook !== null) {
+                    if (hook instanceof StateHook && hook.tag_ === STATE_ERROR) {
+                        throw new Error('A component accepts only one useError hook');
+                    }
+                    hook = hook.next_;
+                }
+            }
+
+            // Make sure the initial error is valid
             if (!_validateError(initialError)) {
                 // If the initial error is invalid,
                 // use null instead
                 initialError = null;
             }
+            
             return new StateHook(currentNode, initialError, STATE_ERROR);
         },
         (currentHook) => [currentHook.value_, currentHook.setValue_]
