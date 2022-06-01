@@ -1,4 +1,4 @@
-import {hasOwnProperty, isNullish, isNumber, isString} from './Util';
+import {hasOwnProperty, isNullish, isNumber, isString, isObject} from './Util';
 
 export function updateNativeElementAttributes(element, newAttributes, oldAttributes) {
     _updateKeyValues(
@@ -15,7 +15,13 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
     }
 
     if (attrName === 'style') {
-        _updateStyleProperties(element.style, newAttrValue, oldAttrValue || {});
+        if (!isObject(newAttrValue)) {
+            newAttrValue = {};
+        }
+        if (!isObject(oldAttrValue)) {
+            oldAttrValue = {};
+        }
+        _updateStyleProperties(element[attrName], newAttrValue, oldAttrValue);
         return;
     }
 
@@ -38,17 +44,28 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
 
 function _removeElementAttribute(element, attrName, oldAttrValue) {
     attrName = _normalizeElementAttributeName(attrName);
-
+    
     if (attrName === '') {
         return;
     }
 
+    if (attrName === 'style') {
+        if (!isObject(oldAttrValue)) {
+            oldAttrValue = {};
+        }
+        _updateStyleProperties(element[attrName], {}, oldAttrValue);
+
+        // Clean up HTML code
+        element.removeAttribute(attrName);
+        return;
+    }
+    
     if (isString(oldAttrValue) || isNumber(oldAttrValue)) {
         element.removeAttribute(attrName);
         return;
     }
-
-    // Cases: properties, event listeners
+    
+    // Remove properties, event listeners
     if (attrName in element) {
         try {
             element[attrName] = null;
