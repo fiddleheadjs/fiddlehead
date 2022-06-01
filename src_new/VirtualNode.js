@@ -57,7 +57,7 @@ export function VirtualNode(type, props = null, key = null, ref = null) {
 
     // In the commit phase, the new child will be inserted
     // after the last inserted/updated child
-    this.lastOutputtedNativeChild_ = null;
+    this.lastManipulatedNativeChild_ = null;
 }
 
 // Do not support namespace MathML as almost browsers do not support as well
