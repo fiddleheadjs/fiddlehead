@@ -417,7 +417,7 @@ const createNativeElementWithNS = (ns, type, attributes) => {
     return element;
 };
 
-// Important Note
+// Important!!!
 // This module does not handle RootType
 
 const hydrateView = (virtualNode) => {
@@ -498,7 +498,7 @@ const _isDry = (type) => {
     return type === Fragment || isFunction(type);
 };
 
-// Important Note
+// Important!!!
 // This module does not handle RootType nodes
 
 const updateView = (newVirtualNode, oldVirtualNode) => {
@@ -638,9 +638,9 @@ function _setState(value) {
 
 const _flushQueues = () => {
     queueMap.forEach((queue, contextAsKey) => {
-        // Important Note:
-        // Do not use contextAsKey as it may be outdated
-        // during the reconciliation process
+        // Important!!!
+        // Use hook.context_ instead of contextAsKey
+        // as it may be outdated during the reconciliation process
 
         let value, hook, hasChanges = false;
         

@@ -3,7 +3,7 @@ import {createNativeElementWithNS, createNativeTextNode, updateNativeTextNode, u
 import {attachVirtualNode} from './Externals';
 import {isFunction} from './Util';
 
-// Important Note
+// Important!!!
 // This module does not handle RootType
 
 export const hydrateView = (virtualNode) => {

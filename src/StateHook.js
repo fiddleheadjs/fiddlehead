@@ -64,9 +64,9 @@ export function _setState(value) {
 
 const _flushQueues = () => {
     queueMap.forEach((queue, contextAsKey) => {
-        // Important Note:
-        // Do not use contextAsKey as it may be outdated
-        // during the reconciliation process
+        // Important!!!
+        // Use hook.context_ instead of contextAsKey
+        // as it may be outdated during the reconciliation process
 
         let value, hook, hasChanges = false;
         
