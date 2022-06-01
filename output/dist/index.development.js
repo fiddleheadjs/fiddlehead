@@ -60,7 +60,7 @@ const flushCurrentlyProcessing = () => {
 
 const resolveCurrentHook = (createHookFn, processFn) => {
     if (currentNode === null) {
-        throw new Error('Cannot call hooks from outside of the component');
+        throw new Error('Cannot use hooks from outside of components');
     }
     
     if (currentHook === null) {
@@ -688,12 +688,13 @@ const _flushQueues = () => {
         // Use hook.context_ instead of contextAsKey
         // as it may be outdated due to the reconciliation process
 
-        let value, hook, hasChanges = false;
+        let unit, value, hook, newValue, hasChanges = false;
         
         while (queue.length > 0) {
-            [value, hook] = queue.pop();
-
-            let newValue;
+            unit = queue.pop();
+            
+            value = unit[0];
+            hook = unit[1];
             
             if (isFunction(value)) {
                 try {

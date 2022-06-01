@@ -6,6 +6,7 @@
     "watch": "rollup -c rollup.config.js -w"
   },
   "devDependencies": {
+    "@rollup/plugin-babel": "^5.3.1",
     "@rollup/plugin-replace": "^4.0.0",
     "rollup": "^2.74.1",
     "rollup-plugin-terser": "^7.0.2"

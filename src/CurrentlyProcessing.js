@@ -12,7 +12,7 @@ export const flushCurrentlyProcessing = () => {
 
 export const resolveCurrentHook = (createHookFn, processFn) => {
     if (currentNode === null) {
-        throw new Error('Cannot call hooks from outside of the component');
+        throw new Error('Cannot use hooks from outside of components');
     }
     
     if (currentHook === null) {

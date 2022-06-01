@@ -82,12 +82,13 @@ const _flushQueues = () => {
         // Use hook.context_ instead of contextAsKey
         // as it may be outdated due to the reconciliation process
 
-        let value, hook, hasChanges = false;
+        let unit, value, hook, newValue, hasChanges = false;
         
         while (queue.length > 0) {
-            [value, hook] = queue.pop();
-
-            let newValue;
+            unit = queue.pop();
+            
+            value = unit[0];
+            hook = unit[1];
             
             if (isFunction(value)) {
                 try {
