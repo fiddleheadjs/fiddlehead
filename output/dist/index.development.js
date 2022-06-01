@@ -213,7 +213,7 @@ function createElement(type, props, content) {
             virtualNode.props_.children = content;
         } else if (type === TextNode) {
             // Place TextNode after Function
-            // because this type will be rarely used
+            // because this way is much less frequently used
             if (multiple) {
                 virtualNode.props_.children = content.map(text => _normalizeText(text)).join('');
             } else {
