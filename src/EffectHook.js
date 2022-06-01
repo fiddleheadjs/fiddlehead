@@ -24,7 +24,11 @@ const EFFECT_LAZY = 1;
 const EFFECT_DEPS = 2;
 const EFFECT_DEPS_CHANGED = 3;
 
-export const useEffect = (callback, deps = null) => {
+export const useEffect = (callback, deps) => {
+    if (deps === undefined) {
+        deps = null;
+    }
+    
     return resolveCurrentHook(
         (currentNode) => {
             const effectTag = _determineEffectTag(deps, null);

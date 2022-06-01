@@ -113,5 +113,5 @@ const _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn
 }
 
 const _hasOwnNonEmpty = (target, prop) => {
-    return hasOwnProperty(target, prop) && !isNullish(target[prop]);
+    return hasOwnProperty.call(target, prop) && !isNullish(target[prop]);
 }

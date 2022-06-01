@@ -33,7 +33,7 @@ export const createPortal = (children, targetNativeNode) => {
             }
         }
         
-        portal = new VirtualNode(Portal);
+        portal = new VirtualNode(Portal, {});
 
         // Determine the namespace (we only support SVG and HTML namespaces)
         portal.ns_ = ('ownerSVGElement' in targetNativeNode) ? NS_SVG : NS_HTML;

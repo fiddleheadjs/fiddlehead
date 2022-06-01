@@ -2,9 +2,9 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-const hasOwnProperty = (obj, propName) => {
-    return Object.prototype.hasOwnProperty.call(obj, propName);
-};
+const hasOwnProperty = Object.prototype.hasOwnProperty;
+
+const slice = Array.prototype.slice;
 
 const isString = (value) => {
     return typeof value === 'string'/* || value instanceof String*/;
@@ -103,17 +103,17 @@ const useRef = (initialValue) => {
 /**
  * 
  * @param {function|string} type
- * @param {{}?} props
- * @param {string?} key
+ * @param {{}} props
+ * @param {string|null?} key
  */
-function VirtualNode(type, props = {}, key = null) {
+function VirtualNode(type, props, key) {
     // Identification
     // ==============
 
     this.type_ = type;
 
     // Convert to string to avoid conflict with slot
-    this.key_ = key !== null ? ('' + key) : key;
+    this.key_ = !isNullish(key) ? ('' + key) : null;
 
     this.slot_ = null;
 
@@ -187,31 +187,46 @@ const linkNativeNode = (virtualNode, nativeNode) => {
 /**
  *
  * @param {string|function} type
- * @param {{}|null} attributes
- * @param {[]} content
+ * @param {{}|null} props
+ * @param {*} content
  * @return {VirtualNode}
  */
-const createElement = (type, attributes, ...content) => {
-    const {key, ...props} = attributes || {};
-
+function createElement(type, props, content) {
+    if (props === null) {
+        props = {};
+    }
+    
+    const key = props.key;
+    delete props.key;
+    
     const virtualNode = new VirtualNode(type, props, key);
 
-    if (isFunction(type)) {
-        // JSX children
-        if (content.length > 0) {
-            virtualNode.props_.children = content.length > 1 ? content : content[0];
+    if (arguments.length > 2) {
+        const multiple = arguments.length > 3;
+
+        if (multiple) {
+            content = slice.call(arguments, 2);
         }
-    } else if (type === TextNode) {
-        // Place TextNode after Function
-        // because this type will be rarely used
-        virtualNode.props_.children = content.map(t => '' + t).join('');
-    } else {
-        // Append children directly with static nodes
-        _appendChildrenFromContent(virtualNode, content);
+    
+        if (isFunction(type)) {
+            // JSX children
+            virtualNode.props_.children = content;
+        } else if (type === TextNode) {
+            // Place TextNode after Function
+            // because this type will be rarely used
+            if (multiple) {
+                virtualNode.props_.children = content.map(text => _normalizeText(text)).join('');
+            } else {
+                virtualNode.props_.children = _normalizeText(content);
+            }
+        } else {
+            // Append children directly with static nodes
+            _appendChildrenFromContent(virtualNode, multiple ? content : [content]);
+        }
     }
 
     return virtualNode;
-};
+}
 
 /**
  *
@@ -232,7 +247,7 @@ const createElement = (type, attributes, ...content) => {
     }
 
     if (isArray(content)) {
-        const fragment = new VirtualNode(Fragment);
+        const fragment = new VirtualNode(Fragment, {});
         _appendChildrenFromContent(fragment, content);
         return fragment;
     }
@@ -265,6 +280,18 @@ const _appendChildrenFromContent = (parentNode, content) => {
             prevChildNode = childNode;
         }
     }
+};
+
+const _normalizeText = (text) => {
+    if (isString(text)) {
+        return text;
+    }
+
+    if (isNumber(text)) {
+        return '' + text;
+    }
+    
+    return '';
 };
 
 const PROP_VNODE = '%vnode';
@@ -400,7 +427,7 @@ const _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn
 };
 
 const _hasOwnNonEmpty = (target, prop) => {
-    return hasOwnProperty(target, prop) && !isNullish(target[prop]);
+    return hasOwnProperty.call(target, prop) && !isNullish(target[prop]);
 };
 
 const createNativeTextNode = (text) => {
@@ -760,7 +787,11 @@ const EFFECT_LAZY = 1;
 const EFFECT_DEPS = 2;
 const EFFECT_DEPS_CHANGED = 3;
 
-const useEffect = (callback, deps = null) => {
+const useEffect = (callback, deps) => {
+    if (deps === undefined) {
+        deps = null;
+    }
+    
     return resolveCurrentHook(
         (currentNode) => {
             const effectTag = _determineEffectTag(deps, null);
@@ -1002,10 +1033,10 @@ const _mapChildren = (node) => {
 
 // Algorithm: https://github.com/facebook/react/issues/7942
 
-const workLoop = (performUnit, onReturn, root, ...data) => {
+const workLoop = (performUnit, onReturn, root, ref_0, ref_1) => {
     let current = root;
     while (true) {
-        performUnit(current, root, ...data);
+        performUnit(current, root, ref_0, ref_1);
         if (current.child_ !== null) {
             current = current.child_;
             continue;
@@ -1141,7 +1172,7 @@ const createPortal = (children, targetNativeNode) => {
             }
         }
         
-        portal = new VirtualNode(Portal);
+        portal = new VirtualNode(Portal, {});
 
         // Determine the namespace (we only support SVG and HTML namespaces)
         portal.ns_ = ('ownerSVGElement' in targetNativeNode) ? NS_SVG : NS_HTML;

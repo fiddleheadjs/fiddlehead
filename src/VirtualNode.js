@@ -1,19 +1,20 @@
 import {RefHook} from './RefHook';
+import {isNullish} from './Util';
 
 /**
  * 
  * @param {function|string} type
- * @param {{}?} props
- * @param {string?} key
+ * @param {{}} props
+ * @param {string|null?} key
  */
-export function VirtualNode(type, props = {}, key = null) {
+export function VirtualNode(type, props, key) {
     // Identification
     // ==============
 
     this.type_ = type;
 
     // Convert to string to avoid conflict with slot
-    this.key_ = key !== null ? ('' + key) : key;
+    this.key_ = !isNullish(key) ? ('' + key) : null;
 
     this.slot_ = null;
 

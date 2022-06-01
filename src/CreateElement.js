@@ -1,30 +1,45 @@
-import {isArray, isFunction, isNumber, isString} from './Util';
+import {isArray, isFunction, isNumber, isString, slice} from './Util';
 import {Fragment, TextNode, VirtualNode} from './VirtualNode';
 
 /**
  *
  * @param {string|function} type
- * @param {{}|null} attributes
- * @param {[]} content
+ * @param {{}|null} props
+ * @param {*} content
  * @return {VirtualNode}
  */
-export const createElement = (type, attributes, ...content) => {
-    const {key, ...props} = attributes || {};
-
+export function createElement(type, props, content) {
+    if (props === null) {
+        props = {};
+    }
+    
+    const key = props.key;
+    delete props.key;
+    
     const virtualNode = new VirtualNode(type, props, key);
 
-    if (isFunction(type)) {
-        // JSX children
-        if (content.length > 0) {
-            virtualNode.props_.children = content.length > 1 ? content : content[0];
+    if (arguments.length > 2) {
+        const multiple = arguments.length > 3;
+
+        if (multiple) {
+            content = slice.call(arguments, 2);
         }
-    } else if (type === TextNode) {
-        // Place TextNode after Function
-        // because this type will be rarely used
-        virtualNode.props_.children = content.map(t => '' + t).join('');
-    } else {
-        // Append children directly with static nodes
-        _appendChildrenFromContent(virtualNode, content);
+    
+        if (isFunction(type)) {
+            // JSX children
+            virtualNode.props_.children = content;
+        } else if (type === TextNode) {
+            // Place TextNode after Function
+            // because this type will be rarely used
+            if (multiple) {
+                virtualNode.props_.children = content.map(text => _normalizeText(text)).join('');
+            } else {
+                virtualNode.props_.children = _normalizeText(content);
+            }
+        } else {
+            // Append children directly with static nodes
+            _appendChildrenFromContent(virtualNode, multiple ? content : [content]);
+        }
     }
 
     return virtualNode;
@@ -49,7 +64,7 @@ export const createElement = (type, attributes, ...content) => {
     }
 
     if (isArray(content)) {
-        const fragment = new VirtualNode(Fragment);
+        const fragment = new VirtualNode(Fragment, {});
         _appendChildrenFromContent(fragment, content);
         return fragment;
     }
@@ -82,4 +97,16 @@ const _appendChildrenFromContent = (parentNode, content) => {
             prevChildNode = childNode;
         }
     }
+}
+
+const _normalizeText = (text) => {
+    if (isString(text)) {
+        return text;
+    }
+
+    if (isNumber(text)) {
+        return '' + text;
+    }
+    
+    return '';
 }

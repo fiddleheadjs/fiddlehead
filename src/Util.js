@@ -1,6 +1,6 @@
-export const hasOwnProperty = (obj, propName) => {
-    return Object.prototype.hasOwnProperty.call(obj, propName);
-}
+export const hasOwnProperty = Object.prototype.hasOwnProperty;
+
+export const slice = Array.prototype.slice;
 
 export const isString = (value) => {
     return typeof value === 'string'/* || value instanceof String*/;
