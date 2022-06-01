@@ -63,7 +63,11 @@ export function _setState(value) {
 }
 
 const _flushQueues = () => {
-    queueMap.forEach((queue, context) => {
+    queueMap.forEach((queue, contextAsKey) => {
+        // Important Note:
+        // Do not use contextAsKey as it may be outdated
+        // during the reconciliation process
+
         let value, hook, hasChanges = false;
         
         while (queue.length > 0) {
@@ -75,7 +79,7 @@ const _flushQueues = () => {
                 try {
                     newValue = value(hook.value_);
                 } catch (error) {
-                    catchError(error, context);
+                    catchError(error, hook.context_);
                     continue;
                 }
             } else {
@@ -95,7 +99,7 @@ const _flushQueues = () => {
         }
 
         if (hasChanges) {
-            resolveTree(context);
+            resolveTree(hook.context_);
         }
     });
 

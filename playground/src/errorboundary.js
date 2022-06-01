@@ -11,13 +11,31 @@ function Root() {
             <h2>Root Component {clicks}</h2>
             <button onClick={() => setCount(t => t + 1)}>Update Root {count}</button>
             <ErrorBoundary>
-                <Content1>
-                    <Content2/>
-                    <Content3 setClicks={setClicks}/>
-                </Content1>
+                {
+                    clicks < 1
+                    ?
+                    <Content1>
+                        <Content2/>
+                        <Contents setClicks={setClicks}/>
+                    </Content1>
+                    :
+                    <Content2>
+                        <Content1/>
+                        <Contents setClicks={setClicks}/>
+                    </Content2>
+                }
             </ErrorBoundary>
         </Fragment>
     )
+}
+
+function Contents({setClicks}) {
+    const [shows, setShows] = useState(0);
+
+    return <>
+        <h4>Shows: {shows}</h4>
+        <Content3 setClicks={setClicks} setShows={setShows}/>
+    </>;
 }
 
 function ErrorBoundary({children}) {
@@ -28,20 +46,29 @@ function ErrorBoundary({children}) {
 
     });
 
+    window.errorBoundary = this;
+    // console.log('return OldChild ==>', this.child_ && this.child_.type_.name);
+
     // console.log(error ? 'ERR: ' + error.message : 'ERR: none');
 
+    if (error === null) {
+        // console.log('return children', this.child_);
+        return children;
+    }
+
+    // console.log('return error', this.child_);
     return (
-        <div>
-            <div>Error Boundary</div>
+        <nav>
+            <h4>Error Boundary</h4>
+            Error: {error && error.message}
             {
-                error !== null ? <>
+                error !== null &&
+                <>
                     <div style={{color: '#f00'}}>Oops: {error.message}</div>
                     <button onClick={() => setError(null)}>Clear error</button>
-                </> : (
-                    children
-                )
+                </>
             }
-        </div>
+        </nav>
     );
 }
 
@@ -62,21 +89,21 @@ function Content2({children}) {
     console.log('run content 2');
 
     useEffect(() => {
-        console.log('hehe');
+        // console.log('hehe');
         // ee += 1;
 
         return () => {
-            console.log(' gg');
-            this.gg[++ik.current + ' gg'] = 1;
+            // console.log(' gg');
+            // this.gg[++ik.current + ' gg'] = 1;
         };
     });
 
     useEffect(() => {
-        console.log('run effect');
-        this.ef[++ik.current + ' ef'] = 2;
+        // console.log('run effect');
+        // this.ef[++ik.current + ' ef'] = 2;
     }, []);
 
-    this.cc[++ik.current + ' cc'] = 2;
+    // this.cc[++ik.current + ' cc'] = 2;
     
     return (
         <div className="Content2">
@@ -86,7 +113,7 @@ function Content2({children}) {
     );
 }
 
-function Content3({children, setClicks}) {
+function Content3({children, setClicks, setShows}) {
     console.log('run content 3');
     // b += 2;
 
@@ -99,9 +126,10 @@ function Content3({children, setClicks}) {
             {children}
             <div>
                 <button onClick={() => {
-                    setCount(t => c += 1);
-                    setClicks(t => t + 1);
-                }}>Update Root {count}</button>
+                    setCount(t => {console.log('---return count'); return count += 1;});
+                    setClicks(t => {console.log('---return clicks'); return t + 1;});
+                    setShows(t => {console.log('---return shows =', t); return t + 1;});
+                }}>Click me {count}</button>
             </div>
         </div>
     );

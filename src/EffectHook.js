@@ -80,7 +80,6 @@ export const mountEffects = (functionalVirtualNode, isNewNodeMounted) => {
                     _mountEffect(hook);
                 } catch (error) {
                     catchError(error, functionalVirtualNode);
-                    return;
                 }
             }
         }
@@ -103,7 +102,6 @@ export const destroyEffects = (functionalVirtualNode, isNodeUnmounted) => {
                         _destroyEffect(hook, isNodeUnmounted);
                     } catch (error) {
                         catchError(error, functionalVirtualNode);
-                        return;
                     }
                 }
             }

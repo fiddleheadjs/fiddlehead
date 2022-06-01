@@ -7,6 +7,7 @@ import {useRef} from './src/RefHook';
 
 export {
     mount,
+    createElement,
     createElement as jsx,
     createPortal,
     useState,

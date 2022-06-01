@@ -8,7 +8,9 @@ export const catchError = (error, virtualNode) => {
         hook = parent.hook_;
         while (hook !== null) {
             if (hook instanceof StateHook && hook.tag_ === STATE_ERROR) {
-                hook.setValue_((prevError) => prevError || error);
+                hook.setValue_((prevError) => {
+                    return prevError || error;
+                });
                 return;
             }
             hook = hook.next_;

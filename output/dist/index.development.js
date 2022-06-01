@@ -124,7 +124,7 @@ function VirtualNode(type, props = {}, key = null) {
         delete props.ref;
         
         if (true) {
-            console.error('The ref property must be created by the useRef hook');
+            console.error('The ref value must be created by the useRef hook');
         }
     }
     this.props_ = props;
@@ -637,7 +637,11 @@ function _setState(value) {
 }
 
 const _flushQueues = () => {
-    queueMap.forEach((queue, context) => {
+    queueMap.forEach((queue, contextAsKey) => {
+        // Important Note:
+        // Do not use contextAsKey as it may be outdated
+        // during the reconciliation process
+
         let value, hook, hasChanges = false;
         
         while (queue.length > 0) {
@@ -649,7 +653,7 @@ const _flushQueues = () => {
                 try {
                     newValue = value(hook.value_);
                 } catch (error) {
-                    catchError(error, context);
+                    catchError(error, hook.context_);
                     continue;
                 }
             } else {
@@ -669,7 +673,7 @@ const _flushQueues = () => {
         }
 
         if (hasChanges) {
-            resolveTree(context);
+            resolveTree(hook.context_);
         }
     });
 
@@ -696,7 +700,9 @@ const catchError = (error, virtualNode) => {
         hook = parent.hook_;
         while (hook !== null) {
             if (hook instanceof StateHook && hook.tag_ === STATE_ERROR) {
-                hook.setValue_((prevError) => prevError || error);
+                hook.setValue_((prevError) => {
+                    return prevError || error;
+                });
                 return;
             }
             hook = hook.next_;
@@ -791,7 +797,6 @@ const mountEffects = (functionalVirtualNode, isNewNodeMounted) => {
                     _mountEffect(hook);
                 } catch (error) {
                     catchError(error, functionalVirtualNode);
-                    return;
                 }
             }
         }
@@ -814,7 +819,6 @@ const destroyEffects = (functionalVirtualNode, isNodeUnmounted) => {
                         _destroyEffect(hook, isNodeUnmounted);
                     } catch (error) {
                         catchError(error, functionalVirtualNode);
-                        return;
                     }
                 }
             }
@@ -891,21 +895,22 @@ const _reconcileChildOfDynamicNode = (current, isSubtreeRoot) => {
         current.alternative_ !== null ? current.alternative_.child_ : null
     );
 
-    prepareCurrentlyProcessing(current);
     let newContent;
+
+    prepareCurrentlyProcessing(current);
     try {
         newContent = current.type_(current.props_);
     } catch (error) {
         catchError(error, current);
-        return;
+        newContent = null;
     }
-    const newChild = createVirtualNodeFromContent(newContent);
     flushCurrentlyProcessing();
 
-    current.child_ = newChild;
+    const newChild = createVirtualNodeFromContent(newContent);
 
     if (newChild !== null) {
         newChild.parent_ = current;
+        newChild.slot_ = 0;
     }
 
     if (oldChild !== null) {
@@ -915,6 +920,8 @@ const _reconcileChildOfDynamicNode = (current, isSubtreeRoot) => {
             _addDeletion(current, oldChild);
         }
     }
+
+    current.child_ = newChild;
 };
 
 const _reconcileChildrenOfStaticNode = (current) => {
@@ -952,11 +959,11 @@ const _makeAlternative = (newChild, oldChild) => {
     }
 };
 
-const _addDeletion = (current, deletedChild) => {
+const _addDeletion = (current, childToDelete) => {
     if (current.deletions_ === null) {
-        current.deletions_ = [deletedChild];
+        current.deletions_ = [childToDelete];
     } else {
-        current.deletions_.push(deletedChild);
+        current.deletions_.push(childToDelete);
     }
 };
 
@@ -1130,6 +1137,7 @@ const createPortal = (children, targetNativeNode) => {
 
 exports.Fragment = Fragment;
 exports.TextNode = TextNode;
+exports.createElement = createElement;
 exports.createPortal = createPortal;
 exports.jsx = createElement;
 exports.mount = mount;

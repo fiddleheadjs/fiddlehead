@@ -26,7 +26,7 @@ function Root() {
     )
 }
 
-function FullName({firstName, lastName, ref}) {
+function FullName({firstName, lastName, ref, inputRef}) {
     return (
         <TextNode ref={ref}>
             {firstName}

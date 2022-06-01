@@ -24,7 +24,7 @@ export function VirtualNode(type, props = {}, key = null) {
         delete props.ref;
         
         if (__DEV__) {
-            console.error('The ref property must be created by the useRef hook');
+            console.error('The ref value must be created by the useRef hook');
         }
     }
     this.props_ = props;

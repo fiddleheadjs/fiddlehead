@@ -17,21 +17,22 @@ const _reconcileChildOfDynamicNode = (current, isSubtreeRoot) => {
         current.alternative_ !== null ? current.alternative_.child_ : null
     );
 
-    prepareCurrentlyProcessing(current);
     let newContent;
+
+    prepareCurrentlyProcessing(current);
     try {
         newContent = current.type_(current.props_);
     } catch (error) {
         catchError(error, current);
-        return;
+        newContent = null;
     }
-    const newChild = createVirtualNodeFromContent(newContent);
     flushCurrentlyProcessing();
 
-    current.child_ = newChild;
+    const newChild = createVirtualNodeFromContent(newContent);
 
     if (newChild !== null) {
         newChild.parent_ = current;
+        newChild.slot_ = 0;
     }
 
     if (oldChild !== null) {
@@ -41,6 +42,8 @@ const _reconcileChildOfDynamicNode = (current, isSubtreeRoot) => {
             _addDeletion(current, oldChild);
         }
     }
+
+    current.child_ = newChild;
 }
 
 const _reconcileChildrenOfStaticNode = (current) => {
@@ -78,11 +81,11 @@ const _makeAlternative = (newChild, oldChild) => {
     }
 }
 
-const _addDeletion = (current, deletedChild) => {
+const _addDeletion = (current, childToDelete) => {
     if (current.deletions_ === null) {
-        current.deletions_ = [deletedChild];
+        current.deletions_ = [childToDelete];
     } else {
-        current.deletions_.push(deletedChild);
+        current.deletions_.push(childToDelete);
     }
 }
 
