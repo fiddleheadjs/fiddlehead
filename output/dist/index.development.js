@@ -157,7 +157,7 @@ function VirtualNode(type, props = null, key = null, ref = null) {
 
     // In the commit phase, the new child will be inserted
     // after the last inserted/updated child
-    this.lastOutputtedNativeChild_ = null;
+    this.lastManipulatedClientNativeNode_ = null;
 }
 
 // Do not support namespace MathML as almost browsers do not support as well
@@ -500,32 +500,32 @@ const updateView = (newVirtualNode, oldVirtualNode) => {
     rehydrateView(newVirtualNode, oldVirtualNode);
 
     if (newVirtualNode.nativeNode_ !== null) {
-        const hostNode = _findHostNode(newVirtualNode);
-        if (hostNode !== null) {
-            hostNode.lastOutputtedNativeChild_ = newVirtualNode.nativeNode_;
+        const host = _findHostVirtualNode(newVirtualNode);
+        if (host !== null) {
+            host.lastManipulatedClientNativeNode_ = newVirtualNode.nativeNode_;
         }
     }
 };
 
-const insertView = (node) => {
-    hydrateView(node);
+const insertView = (virtualNode) => {
+    hydrateView(virtualNode);
 
-    if (node.nativeNode_ !== null) {
-        const hostNode = _findHostNode(node);
-        if (hostNode !== null) {
+    if (virtualNode.nativeNode_ !== null) {
+        const host = _findHostVirtualNode(virtualNode);
+        if (host !== null) {
             const nativeNodeAfter = (
-                hostNode.lastOutputtedNativeChild_ !== null
-                    ? hostNode.lastOutputtedNativeChild_.nextSibling
-                    : hostNode.nativeNode_.firstChild
+                host.lastManipulatedClientNativeNode_ !== null
+                    ? host.lastManipulatedClientNativeNode_.nextSibling
+                    : host.nativeNode_.firstChild
             );
-            hostNode.nativeNode_.insertBefore(node.nativeNode_, nativeNodeAfter);
-            hostNode.lastOutputtedNativeChild_ = node.nativeNode_;
+            host.nativeNode_.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
+            host.lastManipulatedClientNativeNode_ = virtualNode.nativeNode_;
         }
     }
 };
 
 const deleteView = (subtree) => {
-    _loopClosestNativeNodes(subtree, (nativeNode) => {
+    _loopClientNativeNodes(subtree, (nativeNode) => {
         if (nativeNode.parentNode !== null) {
             nativeNode.parentNode.removeChild(nativeNode);
         }
@@ -533,8 +533,8 @@ const deleteView = (subtree) => {
 };
 
 // Find the virtual node in the parent chain which its native node is not null
-const _findHostNode = (node) => {
-    let current = node.parent_;
+const _findHostVirtualNode = (virtualNode) => {
+    let current = virtualNode.parent_;
 
     while (true) {
         if (current === null) {
@@ -547,9 +547,9 @@ const _findHostNode = (node) => {
     }
 };
 
-const _loopClosestNativeNodes = (node, callback) => {
-    let root = node;
-    let current = node;
+const _loopClientNativeNodes = (virtualNode, callback) => {
+    let root = virtualNode;
+    let current = virtualNode;
 
     while (true) {
         if (current.nativeNode_ !== null) {
@@ -1074,8 +1074,8 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
 // Callback called after walking through a node and all of its ascendants
 const _onReturn = (current) => {
     // This is when we cleanup the remaining temp props
-    if (current.lastOutputtedNativeChild_ !== null) {
-        current.lastOutputtedNativeChild_ = null;
+    if (current.lastManipulatedClientNativeNode_ !== null) {
+        current.lastManipulatedClientNativeNode_ = null;
     }
 };
 

@@ -7,9 +7,9 @@ export const updateView = (newVirtualNode, oldVirtualNode) => {
     rehydrateView(newVirtualNode, oldVirtualNode);
 
     if (newVirtualNode.nativeNode_ !== null) {
-        const hostVirtualNode = _findHostVirtualNode(newVirtualNode);
-        if (hostVirtualNode !== null) {
-            hostVirtualNode.lastManipulatedNativeChild_ = newVirtualNode.nativeNode_;
+        const host = _findHostVirtualNode(newVirtualNode);
+        if (host !== null) {
+            host.lastManipulatedClientNativeNode_ = newVirtualNode.nativeNode_;
         }
     }
 }
@@ -18,21 +18,21 @@ export const insertView = (virtualNode) => {
     hydrateView(virtualNode);
 
     if (virtualNode.nativeNode_ !== null) {
-        const hostVirtualNode = _findHostVirtualNode(virtualNode);
-        if (hostVirtualNode !== null) {
+        const host = _findHostVirtualNode(virtualNode);
+        if (host !== null) {
             const nativeNodeAfter = (
-                hostVirtualNode.lastManipulatedNativeChild_ !== null
-                    ? hostVirtualNode.lastManipulatedNativeChild_.nextSibling
-                    : hostVirtualNode.nativeNode_.firstChild
+                host.lastManipulatedClientNativeNode_ !== null
+                    ? host.lastManipulatedClientNativeNode_.nextSibling
+                    : host.nativeNode_.firstChild
             );
-            hostVirtualNode.nativeNode_.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
-            hostVirtualNode.lastManipulatedNativeChild_ = virtualNode.nativeNode_;
+            host.nativeNode_.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
+            host.lastManipulatedClientNativeNode_ = virtualNode.nativeNode_;
         }
     }
 }
 
 export const deleteView = (subtree) => {
-    _loopClosestNativeNodes(subtree, (nativeNode) => {
+    _loopClientNativeNodes(subtree, (nativeNode) => {
         if (nativeNode.parentNode !== null) {
             nativeNode.parentNode.removeChild(nativeNode);
         }
@@ -54,7 +54,7 @@ const _findHostVirtualNode = (virtualNode) => {
     }
 }
 
-const _loopClosestNativeNodes = (virtualNode, callback) => {
+const _loopClientNativeNodes = (virtualNode, callback) => {
     let root = virtualNode;
     let current = virtualNode;
 

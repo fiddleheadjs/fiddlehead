@@ -75,7 +75,7 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
 // Callback called after walking through a node and all of its ascendants
 const _onReturn = (current) => {
     // This is when we cleanup the remaining temp props
-    if (current.lastManipulatedNativeChild_ !== null) {
-        current.lastManipulatedNativeChild_ = null;
+    if (current.lastManipulatedClientNativeNode_ !== null) {
+        current.lastManipulatedClientNativeNode_ = null;
     }
 }
