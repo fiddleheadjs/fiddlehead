@@ -49,9 +49,9 @@ export const createElement = (type, attributes, ...content) => {
     }
 
     if (isArray(content)) {
-        const node = new VirtualNode(Fragment);
-        _appendChildrenFromContent(node, content);
-        return node;
+        const fragment = new VirtualNode(Fragment);
+        _appendChildrenFromContent(fragment, content);
+        return fragment;
     }
 
     return null;

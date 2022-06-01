@@ -232,9 +232,9 @@ const createElement = (type, attributes, ...content) => {
     }
 
     if (isArray(content)) {
-        const node = new VirtualNode(Fragment);
-        _appendChildrenFromContent(node, content);
-        return node;
+        const fragment = new VirtualNode(Fragment);
+        _appendChildrenFromContent(fragment, content);
+        return fragment;
     }
 
     return null;
@@ -423,7 +423,7 @@ const createNativeElementWithNS = (ns, type, attributes) => {
 };
 
 // Important!!!
-// This module does not handle RootType
+// This module does not handle Portal nodes
 
 const hydrateView = (virtualNode) => {
     virtualNode.ns_ = _determineNS(virtualNode);
@@ -504,7 +504,7 @@ const _isDry = (type) => {
 };
 
 // Important!!!
-// This module does not handle RootType nodes
+// This module does not handle Portal nodes
 
 const updateView = (newVirtualNode, oldVirtualNode) => {
     rehydrateView(newVirtualNode, oldVirtualNode);
@@ -1055,7 +1055,7 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
     
     reconcileChildren(current, isSubtreeRoot);
 
-    // Root node never changes its child
+    // Portal nodes never change their child
     // Do nothing anymore
     if (current.type_ === Portal) {
         return;

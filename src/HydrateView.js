@@ -4,7 +4,7 @@ import {attachVirtualNode} from './Externals';
 import {isFunction} from './Util';
 
 // Important!!!
-// This module does not handle RootType
+// This module does not handle Portal nodes
 
 export const hydrateView = (virtualNode) => {
     virtualNode.ns_ = _determineNS(virtualNode);

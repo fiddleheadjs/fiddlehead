@@ -1,7 +1,7 @@
 import {hydrateView, rehydrateView} from './HydrateView';
 
 // Important!!!
-// This module does not handle RootType nodes
+// This module does not handle Portal nodes
 
 export const updateView = (newVirtualNode, oldVirtualNode) => {
     rehydrateView(newVirtualNode, oldVirtualNode);

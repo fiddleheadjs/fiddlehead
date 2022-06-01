@@ -25,7 +25,7 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
     
     reconcileChildren(current, isSubtreeRoot);
 
-    // Root node never changes its child
+    // Portal nodes never change their child
     // Do nothing anymore
     if (current.type_ === Portal) {
         return;
