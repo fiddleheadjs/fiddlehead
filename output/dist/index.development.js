@@ -22,6 +22,10 @@ const isArray = (value) => {
     return value instanceof Array;
 };
 
+const isObject = (value) => {
+    return value !== null && typeof value === 'object';
+};
+
 const isNullish = (value) => {
     return value === null || value === undefined;
 };
@@ -318,14 +322,14 @@ const extractVirtualNode = (nativeNode) => {
     return nativeNode[PROP_VNODE];
 };
 
-const updateNativeElementAttributes = (element, newAttributes, oldAttributes) => {
+function updateNativeElementAttributes(element, newAttributes, oldAttributes) {
     _updateKeyValues(
         element, newAttributes, oldAttributes,
         _updateElementAttribute, _removeElementAttribute
     );
-};
+}
 
-const _updateElementAttribute = (element, attrName, newAttrValue, oldAttrValue) => {
+function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) {
     attrName = _normalizeElementAttributeName(attrName);
 
     if (attrName === '') {
@@ -333,7 +337,13 @@ const _updateElementAttribute = (element, attrName, newAttrValue, oldAttrValue) 
     }
 
     if (attrName === 'style') {
-        _updateStyleProperties(element.style, newAttrValue, oldAttrValue || {});
+        if (!isObject(newAttrValue)) {
+            newAttrValue = {};
+        }
+        if (!isObject(oldAttrValue)) {
+            oldAttrValue = {};
+        }
+        _updateStyleProperties(element[attrName], newAttrValue, oldAttrValue);
         return;
     }
 
@@ -352,21 +362,32 @@ const _updateElementAttribute = (element, attrName, newAttrValue, oldAttrValue) 
             }
         }
     }
-};
+}
 
-const _removeElementAttribute = (element, attrName, oldAttrValue) => {
+function _removeElementAttribute(element, attrName, oldAttrValue) {
     attrName = _normalizeElementAttributeName(attrName);
-
+    
     if (attrName === '') {
         return;
     }
 
+    if (attrName === 'style') {
+        if (!isObject(oldAttrValue)) {
+            oldAttrValue = {};
+        }
+        _updateStyleProperties(element[attrName], {}, oldAttrValue);
+
+        // Clean up HTML code
+        element.removeAttribute(attrName);
+        return;
+    }
+    
     if (isString(oldAttrValue) || isNumber(oldAttrValue)) {
         element.removeAttribute(attrName);
         return;
     }
-
-    // Cases: properties, event listeners
+    
+    // Remove properties, event listeners
     if (attrName in element) {
         try {
             element[attrName] = null;
@@ -376,9 +397,9 @@ const _removeElementAttribute = (element, attrName, oldAttrValue) => {
             }
         }
     }
-};
+}
 
-const _normalizeElementAttributeName = (attrName) => {
+function _normalizeElementAttributeName(attrName) {
     if (attrName === 'class') {
         if (true) {
             console.error('Use `className` instead of `class`');
@@ -395,24 +416,24 @@ const _normalizeElementAttributeName = (attrName) => {
     }
 
     return attrName;
-};
+}
 
-const _updateStyleProperties = (style, newProperties, oldProperties) => {
+function _updateStyleProperties(style, newProperties, oldProperties) {
     _updateKeyValues(
         style, newProperties, oldProperties,
         _updateStyleProperty, _removeStyleProperty
     );
-};
+}
 
-const _updateStyleProperty = (style, propName, newPropValue) => {
+function _updateStyleProperty(style, propName, newPropValue) {
     style[propName] = newPropValue;
-};
+}
 
-const _removeStyleProperty = (style, propName) => {
+function _removeStyleProperty(style, propName) {
     style[propName] = '';
-};
+}
 
-const _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn) => {
+function _updateKeyValues(target, newKeyValues, oldKeyValues, updateFn, removeFn) {
     let key;
     
     for (key in oldKeyValues) {
@@ -428,11 +449,11 @@ const _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn
             updateFn(target, key, newKeyValues[key], oldKeyValues[key]);
         }
     }
-};
+}
 
-const _hasOwnNonEmpty = (target, prop) => {
+function _hasOwnNonEmpty(target, prop) {
     return hasOwnProperty.call(target, prop) && !isNullish(target[prop]);
-};
+}
 
 const createNativeTextNode = (text) => {
     return document.createTextNode(text);
