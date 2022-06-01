@@ -640,7 +640,7 @@ const _flushQueues = () => {
     queueMap.forEach((queue, contextAsKey) => {
         // Important!!!
         // Use hook.context_ instead of contextAsKey
-        // as it may be outdated during the reconciliation process
+        // as it may be outdated due to the reconciliation process
 
         let value, hook, hasChanges = false;
         
