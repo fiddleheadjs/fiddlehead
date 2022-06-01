@@ -120,8 +120,10 @@ function VirtualNode(type, props = {}, key = null) {
     // Props and hooks
     // ===============
 
-    if (true) {
-        if (!(props.ref === undefined || props.ref instanceof RefHook)) {
+    if (!(props.ref === undefined || props.ref instanceof RefHook)) {
+        delete props.ref;
+        
+        if (true) {
             console.error('The ref property must be created by the useRef hook');
         }
     }
@@ -176,7 +178,7 @@ const Root = (props) => props.children;
 const linkNativeNode = (virtualNode, nativeNode) => {
     virtualNode.nativeNode_ = nativeNode;
 
-    if (virtualNode.props_.ref instanceof RefHook) {
+    if (virtualNode.props_.ref !== undefined) {
         virtualNode.props_.ref.current = nativeNode;
     }
 };
