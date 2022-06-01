@@ -255,12 +255,24 @@ function createElement(type, props, content) {
     return null;
 };
 
+const _normalizeText = (text) => {
+    if (isString(text)) {
+        return text;
+    }
+
+    if (isNumber(text)) {
+        return '' + text;
+    }
+    
+    return '';
+};
+
 /**
  * 
  * @param {VirtualNode} parentNode 
  * @param {Array} content
  */
-const _appendChildrenFromContent = (parentNode, content) => {
+ const _appendChildrenFromContent = (parentNode, content) => {
     for (
         let childNode, prevChildNode = null, i = 0;
         i < content.length; ++i
@@ -280,18 +292,6 @@ const _appendChildrenFromContent = (parentNode, content) => {
             prevChildNode = childNode;
         }
     }
-};
-
-const _normalizeText = (text) => {
-    if (isString(text)) {
-        return text;
-    }
-
-    if (isNumber(text)) {
-        return '' + text;
-    }
-    
-    return '';
 };
 
 const PROP_VNODE = '%vnode';
