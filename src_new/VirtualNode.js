@@ -1,13 +1,13 @@
 import {RefHook} from './RefHook';
+import {isNullish} from './Util';
 
 /**
  * 
- * @param {function|string|number} type
+ * @param {function|string} type
  * @param {{}|string?} props: required for text nodes
  * @param {string|number?} key
- * @param {RefHook?} ref
  */
-export function VirtualNode(type, props = null, key = null, ref = null) {
+export function VirtualNode(type, props = {}, key = null) {
     // Identification
     // ==============
 
@@ -21,10 +21,12 @@ export function VirtualNode(type, props = null, key = null, ref = null) {
     // Props and hooks
     // ===============
 
-    // With a text node, props will be the content string
-    this.props_ = type === Fragment ? null : (
-        props !== null ? props : {}
-    );
+    if (__DEV__) {
+        if (!(props.ref === undefined || props.ref instanceof RefHook)) {
+            console.error('The ref property must be created by the useRef hook');
+        }
+    }
+    this.props_ = props;
 
     this.hook_ = null;
     
@@ -34,8 +36,6 @@ export function VirtualNode(type, props = null, key = null, ref = null) {
     this.nativeNode_ = null;
 
     this.ns_ = null;
-    
-    this.ref_ = ref;
 
     // Linked-list pointers
     // ====================
@@ -77,7 +77,7 @@ export const Root = (props) => props.children;
 export const linkNativeNode = (virtualNode, nativeNode) => {
     virtualNode.nativeNode_ = nativeNode;
 
-    if (virtualNode.ref_ instanceof RefHook) {
-        virtualNode.ref_.current = nativeNode;
+    if (virtualNode.props_.ref instanceof RefHook) {
+        virtualNode.props_.ref.current = nativeNode;
     }
 }

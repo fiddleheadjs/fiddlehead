@@ -9,17 +9,21 @@ import {Fragment, TextNode, VirtualNode} from './VirtualNode';
  * @return {VirtualNode}
  */
 export const createElement = (type, attributes, ...content) => {
-    const {key, ref, ...props} = attributes || {};
+    const {key, ...props} = attributes || {};
 
-    const virtualNode = new VirtualNode(type, props, key, ref);
+    const virtualNode = new VirtualNode(type, props, key);
 
     if (isFunction(type)) {
         // JSX children
         if (content.length > 0) {
             virtualNode.props_.children = content.length > 1 ? content : content[0];
         }
+    } else if (type === TextNode) {
+        // Place TextNode after Function
+        // because this type will be rarely used
+        virtualNode.props_.children = content.map(t => '' + t).join('');
     } else {
-        // Append children directly
+        // Append children directly with static nodes
         _appendChildrenFromContent(virtualNode, content);
     }
 
@@ -37,7 +41,7 @@ export const createElement = (type, attributes, ...content) => {
     }
         
     if (isString(content) || isNumber(content)) {
-        return new VirtualNode(TextNode, content);
+        return new VirtualNode(TextNode, {children: content});
     }
 
     if (isArray(content)) {

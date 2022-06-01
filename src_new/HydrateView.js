@@ -37,10 +37,10 @@ export const rehydrateView = (newVirtualNode, oldVirtualNode) => {
     }
 
     if (newVirtualNode.type_ === TextNode) {
-        if (newVirtualNode.props_ !== oldVirtualNode.props_) {
+        if (newVirtualNode.props_.children !== oldVirtualNode.props_.children) {
             updateNativeTextNode(
                 newVirtualNode.nativeNode_,
-                newVirtualNode.props_
+                newVirtualNode.props_.children
             );
         }
     } else {
@@ -54,7 +54,7 @@ export const rehydrateView = (newVirtualNode, oldVirtualNode) => {
 
 const _createNativeNode = (virtualNode) => {
     if (virtualNode.type_ === TextNode) {
-        return createNativeTextNode(virtualNode.props_);
+        return createNativeTextNode(virtualNode.props_.children);
     }
 
     return createNativeElementWithNS(

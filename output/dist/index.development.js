@@ -102,12 +102,11 @@ const useRef = (initialValue) => {
 
 /**
  * 
- * @param {function|string|number} type
+ * @param {function|string} type
  * @param {{}|string?} props: required for text nodes
  * @param {string|number?} key
- * @param {RefHook?} ref
  */
-function VirtualNode(type, props = null, key = null, ref = null) {
+function VirtualNode(type, props = {}, key = null) {
     // Identification
     // ==============
 
@@ -121,10 +120,12 @@ function VirtualNode(type, props = null, key = null, ref = null) {
     // Props and hooks
     // ===============
 
-    // With a text node, props will be the content string
-    this.props_ = type === Fragment ? null : (
-        props !== null ? props : {}
-    );
+    if (true) {
+        if (!(props.ref === undefined || props.ref instanceof RefHook)) {
+            console.error('The ref property must be created by the useRef hook');
+        }
+    }
+    this.props_ = props;
 
     this.hook_ = null;
     
@@ -134,8 +135,6 @@ function VirtualNode(type, props = null, key = null, ref = null) {
     this.nativeNode_ = null;
 
     this.ns_ = null;
-    
-    this.ref_ = ref;
 
     // Linked-list pointers
     // ====================
@@ -177,8 +176,8 @@ const Root = (props) => props.children;
 const linkNativeNode = (virtualNode, nativeNode) => {
     virtualNode.nativeNode_ = nativeNode;
 
-    if (virtualNode.ref_ instanceof RefHook) {
-        virtualNode.ref_.current = nativeNode;
+    if (virtualNode.props_.ref instanceof RefHook) {
+        virtualNode.props_.ref.current = nativeNode;
     }
 };
 
@@ -190,17 +189,21 @@ const linkNativeNode = (virtualNode, nativeNode) => {
  * @return {VirtualNode}
  */
 const createElement = (type, attributes, ...content) => {
-    const {key, ref, ...props} = attributes || {};
+    const {key, ...props} = attributes || {};
 
-    const virtualNode = new VirtualNode(type, props, key, ref);
+    const virtualNode = new VirtualNode(type, props, key);
 
     if (isFunction(type)) {
         // JSX children
         if (content.length > 0) {
             virtualNode.props_.children = content.length > 1 ? content : content[0];
         }
+    } else if (type === TextNode) {
+        // Place TextNode after Function
+        // because this type will be rarely used
+        virtualNode.props_.children = content.map(t => '' + t).join('');
     } else {
-        // Append children directly
+        // Append children directly with static nodes
         _appendChildrenFromContent(virtualNode, content);
     }
 
@@ -218,7 +221,7 @@ const createElement = (type, attributes, ...content) => {
     }
         
     if (isString(content) || isNumber(content)) {
-        return new VirtualNode(TextNode, content);
+        return new VirtualNode(TextNode, {children: content});
     }
 
     if (isArray(content)) {
@@ -446,10 +449,10 @@ const rehydrateView = (newVirtualNode, oldVirtualNode) => {
     }
 
     if (newVirtualNode.type_ === TextNode) {
-        if (newVirtualNode.props_ !== oldVirtualNode.props_) {
+        if (newVirtualNode.props_.children !== oldVirtualNode.props_.children) {
             updateNativeTextNode(
                 newVirtualNode.nativeNode_,
-                newVirtualNode.props_
+                newVirtualNode.props_.children
             );
         }
     } else {
@@ -463,7 +466,7 @@ const rehydrateView = (newVirtualNode, oldVirtualNode) => {
 
 const _createNativeNode = (virtualNode) => {
     if (virtualNode.type_ === TextNode) {
-        return createNativeTextNode(virtualNode.props_);
+        return createNativeTextNode(virtualNode.props_.children);
     }
 
     return createNativeElementWithNS(
@@ -1124,6 +1127,7 @@ const createPortal = (children, targetNativeNode) => {
 };
 
 exports.Fragment = Fragment;
+exports.TextNode = TextNode;
 exports.createPortal = createPortal;
 exports.jsx = createElement;
 exports.mount = mount;
