@@ -34,7 +34,7 @@ export function VirtualNode(type, props, key) {
     this.hook_ = null;
     
     // Output native node and relates
-    // =======================
+    // ==============================
     
     this.nativeNode_ = null;
 
