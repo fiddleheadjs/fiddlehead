@@ -7,26 +7,26 @@ export const updateView = (newVirtualNode, oldVirtualNode) => {
     rehydrateView(newVirtualNode, oldVirtualNode);
 
     if (newVirtualNode.nativeNode_ !== null) {
-        const hostNode = _findHostNode(newVirtualNode);
-        if (hostNode !== null) {
-            hostNode.lastManipulatedNativeChild_ = newVirtualNode.nativeNode_;
+        const hostVirtualNode = _findHostVirtualNode(newVirtualNode);
+        if (hostVirtualNode !== null) {
+            hostVirtualNode.lastManipulatedNativeChild_ = newVirtualNode.nativeNode_;
         }
     }
 }
 
-export const insertView = (node) => {
-    hydrateView(node);
+export const insertView = (virtualNode) => {
+    hydrateView(virtualNode);
 
-    if (node.nativeNode_ !== null) {
-        const hostNode = _findHostNode(node);
-        if (hostNode !== null) {
+    if (virtualNode.nativeNode_ !== null) {
+        const hostVirtualNode = _findHostVirtualNode(virtualNode);
+        if (hostVirtualNode !== null) {
             const nativeNodeAfter = (
-                hostNode.lastManipulatedNativeChild_ !== null
-                    ? hostNode.lastManipulatedNativeChild_.nextSibling
-                    : hostNode.nativeNode_.firstChild
+                hostVirtualNode.lastManipulatedNativeChild_ !== null
+                    ? hostVirtualNode.lastManipulatedNativeChild_.nextSibling
+                    : hostVirtualNode.nativeNode_.firstChild
             );
-            hostNode.nativeNode_.insertBefore(node.nativeNode_, nativeNodeAfter);
-            hostNode.lastManipulatedNativeChild_ = node.nativeNode_;
+            hostVirtualNode.nativeNode_.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
+            hostVirtualNode.lastManipulatedNativeChild_ = virtualNode.nativeNode_;
         }
     }
 }
@@ -40,8 +40,8 @@ export const deleteView = (subtree) => {
 }
 
 // Find the virtual node in the parent chain which its native node is not null
-const _findHostNode = (node) => {
-    let current = node.parent_;
+const _findHostVirtualNode = (virtualNode) => {
+    let current = virtualNode.parent_;
 
     while (true) {
         if (current === null) {
@@ -54,9 +54,9 @@ const _findHostNode = (node) => {
     }
 }
 
-const _loopClosestNativeNodes = (node, callback) => {
-    let root = node;
-    let current = node;
+const _loopClosestNativeNodes = (virtualNode, callback) => {
+    let root = virtualNode;
+    let current = virtualNode;
 
     while (true) {
         if (current.nativeNode_ !== null) {
