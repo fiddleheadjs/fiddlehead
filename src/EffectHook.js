@@ -19,10 +19,10 @@ export function EffectHook(callback, deps, tag) {
     this.next_ = null;
 }
 
-const TAG_ALWAYS = 0;
-const TAG_LAZY = 1;
-const TAG_DEPS = 2;
-const TAG_DEPS_CHANGED = 3;
+const EFFECT_ALWAYS = 0;
+const EFFECT_LAZY = 1;
+const EFFECT_DEPS = 2;
+const EFFECT_DEPS_CHANGED = 3;
 
 export const useEffect = (callback, deps = null) => {
     return resolveCurrentHook(
@@ -44,16 +44,16 @@ export const useEffect = (callback, deps = null) => {
     
             const effectTag = _determineEffectTag(deps, currentHook.deps_);
 
-            if (effectTag === TAG_LAZY) {
+            if (effectTag === EFFECT_LAZY) {
                 return;
             }
     
-            if (effectTag === TAG_DEPS) {
+            if (effectTag === EFFECT_DEPS) {
                 currentHook.tag_ = effectTag;
                 return;
             }
     
-            if (effectTag === TAG_ALWAYS || effectTag === TAG_DEPS_CHANGED) {
+            if (effectTag === EFFECT_ALWAYS || effectTag === EFFECT_DEPS_CHANGED) {
                 currentHook.callback_ = callback;
                 currentHook.deps_ = deps;
                 currentHook.tag_ = effectTag;
@@ -69,13 +69,13 @@ export const useEffect = (callback, deps = null) => {
 /**
  *
  * @param {VirtualNode} functionalVirtualNode
- * @param {boolean} isNewNodeMounted
+ * @param {boolean} isNewlyMounted
  */
-export const mountEffects = (functionalVirtualNode, isNewNodeMounted) => {
+export const mountEffects = (functionalVirtualNode, isNewlyMounted) => {
     let hook = functionalVirtualNode.hook_;
     while (hook !== null) {
         if (hook instanceof EffectHook) {
-            if (isNewNodeMounted || hook.tag_ === TAG_ALWAYS || hook.tag_ === TAG_DEPS_CHANGED) {
+            if (isNewlyMounted || hook.tag_ === EFFECT_ALWAYS || hook.tag_ === EFFECT_DEPS_CHANGED) {
                 try {
                     _mountEffect(hook);
                 } catch (error) {
@@ -90,16 +90,16 @@ export const mountEffects = (functionalVirtualNode, isNewNodeMounted) => {
 /**
  *
  * @param {VirtualNode} functionalVirtualNode
- * @param {boolean} isNodeUnmounted
+ * @param {boolean} isUnmounted
  */
-export const destroyEffects = (functionalVirtualNode, isNodeUnmounted) => {
+export const destroyEffects = (functionalVirtualNode, isUnmounted) => {
     let hook = functionalVirtualNode.hook_;
     while (hook !== null) {
         if (hook instanceof EffectHook) {
             if (hook.lastDestroy_ !== null || hook.destroy_ !== null) {
-                if (isNodeUnmounted || hook.tag_ === TAG_ALWAYS || hook.tag_ === TAG_DEPS_CHANGED) {
+                if (isUnmounted || hook.tag_ === EFFECT_ALWAYS || hook.tag_ === EFFECT_DEPS_CHANGED) {
                     try {
-                        _destroyEffect(hook, isNodeUnmounted);
+                        _destroyEffect(hook, isUnmounted);
                     } catch (error) {
                         catchError(error, functionalVirtualNode);
                     }
@@ -141,26 +141,26 @@ const _destroyEffect = (hook, isNodeUnmounted) => {
 const _determineEffectTag = (deps, lastDeps) => {
     // Always
     if (deps === null) {
-        return TAG_ALWAYS;
+        return EFFECT_ALWAYS;
     }
 
     // Lazy
     if (deps.length === 0) {
-        return TAG_LAZY;
+        return EFFECT_LAZY;
     }
 
     // Deps
     // 1. When init effect
     if (lastDeps === null) {
-        return TAG_DEPS;
+        return EFFECT_DEPS;
     }
     // 2. Two arrays are equal
     if (compareArrays(deps, lastDeps)) {
-        return TAG_DEPS;
+        return EFFECT_DEPS;
     }
 
     // DepsChanged
     {
-        return TAG_DEPS_CHANGED;
+        return EFFECT_DEPS_CHANGED;
     }
 }

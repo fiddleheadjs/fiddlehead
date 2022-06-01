@@ -55,7 +55,7 @@ export function VirtualNode(type, props = {}, key = null) {
 
     // The children (and their subtrees, of course) are marked to be deleted
     this.deletions_ = null;
-
+ 
     // In the commit phase, the new child will be inserted
     // after the last inserted/updated child
     this.lastManipulatedClientNativeNode_ = null;
@@ -68,7 +68,7 @@ export const NS_SVG = 1;
 // Special node types
 export const TextNode = '#';
 export const Fragment = '[';
-export const Root = (props) => props.children;
+export const Portal = (props) => props.children;
 
 /**
  * 

@@ -155,7 +155,7 @@ function VirtualNode(type, props = {}, key = null) {
 
     // The children (and their subtrees, of course) are marked to be deleted
     this.deletions_ = null;
-
+ 
     // In the commit phase, the new child will be inserted
     // after the last inserted/updated child
     this.lastManipulatedClientNativeNode_ = null;
@@ -168,7 +168,7 @@ const NS_SVG = 1;
 // Special node types
 const TextNode = '#';
 const Fragment = '[';
-const Root = (props) => props.children;
+const Portal = (props) => props.children;
 
 /**
  * 
@@ -222,8 +222,12 @@ const createElement = (type, attributes, ...content) => {
         return content;
     }
         
-    if (isString(content) || isNumber(content)) {
+    if (isString(content)) {
         return new VirtualNode(TextNode, {children: content});
+    }
+
+    if (isNumber(content)) {
+        return new VirtualNode(TextNode, {children: '' + content});
     }
 
     if (isArray(content)) {
@@ -736,10 +740,10 @@ function EffectHook(callback, deps, tag) {
     this.next_ = null;
 }
 
-const TAG_ALWAYS = 0;
-const TAG_LAZY = 1;
-const TAG_DEPS = 2;
-const TAG_DEPS_CHANGED = 3;
+const EFFECT_ALWAYS = 0;
+const EFFECT_LAZY = 1;
+const EFFECT_DEPS = 2;
+const EFFECT_DEPS_CHANGED = 3;
 
 const useEffect = (callback, deps = null) => {
     return resolveCurrentHook(
@@ -761,16 +765,16 @@ const useEffect = (callback, deps = null) => {
     
             const effectTag = _determineEffectTag(deps, currentHook.deps_);
 
-            if (effectTag === TAG_LAZY) {
+            if (effectTag === EFFECT_LAZY) {
                 return;
             }
     
-            if (effectTag === TAG_DEPS) {
+            if (effectTag === EFFECT_DEPS) {
                 currentHook.tag_ = effectTag;
                 return;
             }
     
-            if (effectTag === TAG_ALWAYS || effectTag === TAG_DEPS_CHANGED) {
+            if (effectTag === EFFECT_ALWAYS || effectTag === EFFECT_DEPS_CHANGED) {
                 currentHook.callback_ = callback;
                 currentHook.deps_ = deps;
                 currentHook.tag_ = effectTag;
@@ -786,13 +790,13 @@ const useEffect = (callback, deps = null) => {
 /**
  *
  * @param {VirtualNode} functionalVirtualNode
- * @param {boolean} isNewNodeMounted
+ * @param {boolean} isNewlyMounted
  */
-const mountEffects = (functionalVirtualNode, isNewNodeMounted) => {
+const mountEffects = (functionalVirtualNode, isNewlyMounted) => {
     let hook = functionalVirtualNode.hook_;
     while (hook !== null) {
         if (hook instanceof EffectHook) {
-            if (isNewNodeMounted || hook.tag_ === TAG_ALWAYS || hook.tag_ === TAG_DEPS_CHANGED) {
+            if (isNewlyMounted || hook.tag_ === EFFECT_ALWAYS || hook.tag_ === EFFECT_DEPS_CHANGED) {
                 try {
                     _mountEffect(hook);
                 } catch (error) {
@@ -807,16 +811,16 @@ const mountEffects = (functionalVirtualNode, isNewNodeMounted) => {
 /**
  *
  * @param {VirtualNode} functionalVirtualNode
- * @param {boolean} isNodeUnmounted
+ * @param {boolean} isUnmounted
  */
-const destroyEffects = (functionalVirtualNode, isNodeUnmounted) => {
+const destroyEffects = (functionalVirtualNode, isUnmounted) => {
     let hook = functionalVirtualNode.hook_;
     while (hook !== null) {
         if (hook instanceof EffectHook) {
             if (hook.lastDestroy_ !== null || hook.destroy_ !== null) {
-                if (isNodeUnmounted || hook.tag_ === TAG_ALWAYS || hook.tag_ === TAG_DEPS_CHANGED) {
+                if (isUnmounted || hook.tag_ === EFFECT_ALWAYS || hook.tag_ === EFFECT_DEPS_CHANGED) {
                     try {
-                        _destroyEffect(hook, isNodeUnmounted);
+                        _destroyEffect(hook, isUnmounted);
                     } catch (error) {
                         catchError(error, functionalVirtualNode);
                     }
@@ -858,27 +862,27 @@ const _destroyEffect = (hook, isNodeUnmounted) => {
 const _determineEffectTag = (deps, lastDeps) => {
     // Always
     if (deps === null) {
-        return TAG_ALWAYS;
+        return EFFECT_ALWAYS;
     }
 
     // Lazy
     if (deps.length === 0) {
-        return TAG_LAZY;
+        return EFFECT_LAZY;
     }
 
     // Deps
     // 1. When init effect
     if (lastDeps === null) {
-        return TAG_DEPS;
+        return EFFECT_DEPS;
     }
     // 2. Two arrays are equal
     if (compareArrays(deps, lastDeps)) {
-        return TAG_DEPS;
+        return EFFECT_DEPS;
     }
 
     // DepsChanged
     {
-        return TAG_DEPS_CHANGED;
+        return EFFECT_DEPS_CHANGED;
     }
 };
 
@@ -1036,9 +1040,9 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
     
     reconcileChildren(current, isSubtreeRoot);
 
-    // RootType never changes its child
+    // Root node never changes its child
     // Do nothing anymore
-    if (current.type_ === Root) {
+    if (current.type_ === Portal) {
         return;
     }
 
@@ -1097,9 +1101,10 @@ const _onReturn = (current) => {
  * @param {Element} targetNativeNode
  */
  const mount = (children, targetNativeNode) => {
-    const rootVirtualNode = createPortal(children, targetNativeNode);
+    const portal = createPortal(children, targetNativeNode);
 
-    resolveTree(rootVirtualNode);
+    // Render view
+    resolveTree(portal);
 };
 
 /**
@@ -1112,27 +1117,27 @@ const createPortal = (children, targetNativeNode) => {
     /**
      * @type {VirtualNode}
      */
-    let rootVirtualNode;
+    let portal;
 
-    if (!(rootVirtualNode = extractVirtualNode(targetNativeNode))) {
+    if (!(portal = extractVirtualNode(targetNativeNode))) {
         if (true) {
             if (targetNativeNode.firstChild) {
                 console.error('Target node must be empty');
             }
         }
         
-        rootVirtualNode = new VirtualNode(Root);
+        portal = new VirtualNode(Portal);
 
         // Determine the namespace (we only support SVG and HTML namespaces)
-        rootVirtualNode.ns_ = ('ownerSVGElement' in targetNativeNode) ? NS_SVG : NS_HTML;
+        portal.ns_ = ('ownerSVGElement' in targetNativeNode) ? NS_SVG : NS_HTML;
         
-        linkNativeNode(rootVirtualNode, targetNativeNode);
-        attachVirtualNode(targetNativeNode, rootVirtualNode);
+        linkNativeNode(portal, targetNativeNode);
+        attachVirtualNode(targetNativeNode, portal);
     }
 
-    rootVirtualNode.props_.children = children;
+    portal.props_.children = children;
 
-    return rootVirtualNode;
+    return portal;
 };
 
 exports.Fragment = Fragment;

@@ -40,8 +40,12 @@ export const createElement = (type, attributes, ...content) => {
         return content;
     }
         
-    if (isString(content) || isNumber(content)) {
+    if (isString(content)) {
         return new VirtualNode(TextNode, {children: content});
+    }
+
+    if (isNumber(content)) {
+        return new VirtualNode(TextNode, {children: '' + content});
     }
 
     if (isArray(content)) {

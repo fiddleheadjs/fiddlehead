@@ -1,4 +1,4 @@
-import {VirtualNode, linkNativeNode, NS_HTML, NS_SVG, Root} from './VirtualNode';
+import {VirtualNode, linkNativeNode, NS_HTML, NS_SVG, Portal} from './VirtualNode';
 import {attachVirtualNode, extractVirtualNode} from './Externals';
 import {resolveTree} from './ResolveTree';
 
@@ -8,9 +8,10 @@ import {resolveTree} from './ResolveTree';
  * @param {Element} targetNativeNode
  */
  export const mount = (children, targetNativeNode) => {
-    const rootVirtualNode = createPortal(children, targetNativeNode);
+    const portal = createPortal(children, targetNativeNode);
 
-    resolveTree(rootVirtualNode);
+    // Render view
+    resolveTree(portal);
 }
 
 /**
@@ -23,25 +24,25 @@ export const createPortal = (children, targetNativeNode) => {
     /**
      * @type {VirtualNode}
      */
-    let rootVirtualNode;
+    let portal;
 
-    if (!(rootVirtualNode = extractVirtualNode(targetNativeNode))) {
+    if (!(portal = extractVirtualNode(targetNativeNode))) {
         if (__DEV__) {
             if (targetNativeNode.firstChild) {
                 console.error('Target node must be empty');
             }
         }
         
-        rootVirtualNode = new VirtualNode(Root);
+        portal = new VirtualNode(Portal);
 
         // Determine the namespace (we only support SVG and HTML namespaces)
-        rootVirtualNode.ns_ = ('ownerSVGElement' in targetNativeNode) ? NS_SVG : NS_HTML;
+        portal.ns_ = ('ownerSVGElement' in targetNativeNode) ? NS_SVG : NS_HTML;
         
-        linkNativeNode(rootVirtualNode, targetNativeNode);
-        attachVirtualNode(targetNativeNode, rootVirtualNode);
+        linkNativeNode(portal, targetNativeNode);
+        attachVirtualNode(targetNativeNode, portal);
     }
 
-    rootVirtualNode.props_.children = children;
+    portal.props_.children = children;
 
-    return rootVirtualNode;
+    return portal;
 }

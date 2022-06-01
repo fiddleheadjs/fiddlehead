@@ -1,7 +1,7 @@
 import {insertView, updateView, deleteView} from './CommitView';
 import {destroyEffects, mountEffects} from './EffectHook';
 import {reconcileChildren} from './Reconciliation';
-import {Root} from './VirtualNode';
+import {Portal} from './VirtualNode';
 import {queueWork, workLoop} from './WorkLoop';
 
 export const resolveTree = (current) => {
@@ -25,9 +25,9 @@ const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
     
     reconcileChildren(current, isSubtreeRoot);
 
-    // RootType never changes its child
+    // Root node never changes its child
     // Do nothing anymore
-    if (current.type_ === Root) {
+    if (current.type_ === Portal) {
         return;
     }
 
