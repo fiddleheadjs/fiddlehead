@@ -1,5 +1,5 @@
 import {catchError} from './CatchError';
-import {resolveCurrentHook} from './CurrentlyProcessing';
+import {resolveCurrentStateHook} from './CurrentlyProcessing';
 import {resolveTree} from './ResolveTree';
 import {isFunction} from './Util';
 
@@ -22,7 +22,7 @@ export function StateHook(context, initialValue, tag) {
 }
 
 export function useState(initialValue) {
-    return resolveCurrentHook(
+    return resolveCurrentStateHook(
         function (currentNode) {
             return new StateHook(currentNode, initialValue, STATE_NORMAL);
         },
@@ -33,14 +33,14 @@ export function useState(initialValue) {
 }
 
 export function useError(initialError) {
-    return resolveCurrentHook(
+    return resolveCurrentStateHook(
         function (currentNode) {
             // Make sure we have only one error hook in a component
             // In the production, we allow the initialization but skip it then
             if (__DEV__) {
-                let hook = currentNode.hook_;
+                let hook = currentNode.stateHook_;
                 while (hook !== null) {
-                    if (hook instanceof StateHook && hook.tag_ === STATE_ERROR) {
+                    if (hook.tag_ === STATE_ERROR) {
                         throw new Error('A component accepts only one useError hook');
                     }
                     hook = hook.next_;

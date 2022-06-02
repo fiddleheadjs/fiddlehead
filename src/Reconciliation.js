@@ -1,6 +1,5 @@
 import {isFunction} from './Util';
 import {createVirtualNodeFromContent} from './CreateElement';
-import {StateHook} from './StateHook';
 import {prepareCurrentlyProcessing, flushCurrentlyProcessing} from './CurrentlyProcessing';
 import {catchError} from './CatchError';
 
@@ -69,14 +68,16 @@ function _makeAlternative(newChild, oldChild) {
     newChild.alternative_ = oldChild;
 
     if (isFunction(newChild.type_)) {
-        newChild.hook_ = oldChild.hook_;
+        // Copy hooks
+        newChild.refHook_ = oldChild.refHook_;
+        newChild.stateHook_ = oldChild.stateHook_;
+        newChild.effectHook_ = oldChild.effectHook_;
 
-        let hook = newChild.hook_;
-        while (hook !== null) {
-            if (hook instanceof StateHook) {
-                hook.context_ = newChild;
-            }
-            hook = hook.next_;
+        // Update contexts of state hooks
+        let stateHook = newChild.stateHook_;
+        while (stateHook !== null) {
+            stateHook.context_ = newChild;
+            stateHook = stateHook.next_;
         }
     }
 }

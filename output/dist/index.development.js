@@ -51,7 +51,9 @@ function compareArrays(a, b) {
 }
 
 let currentNode = null;
-let currentHook = null;
+let currentRefHook = null;
+let currentStateHook = null;
+let currentEffectHook = null;
 
 function prepareCurrentlyProcessing(functionalVirtualNode) {
     currentNode = functionalVirtualNode;
@@ -59,32 +61,60 @@ function prepareCurrentlyProcessing(functionalVirtualNode) {
 
 function flushCurrentlyProcessing() {
     currentNode = null;
-    currentHook = null;
+    currentRefHook = null;
+    currentStateHook = null;
+    currentEffectHook = null;
 }
 
-function resolveCurrentHook(createHookFn, processFn) {
+function resolveCurrentRefHook(createHookFn, processFn) {
+    _throwIfCallInvalid();
+    currentRefHook = _resolveCurrentHookImpl(createHookFn, currentRefHook, currentNode.refHook_);
+    if (currentNode.refHook_ === null) {
+        currentNode.refHook_ = currentRefHook;
+    }
+    return processFn(currentRefHook);
+}
+
+function resolveCurrentStateHook(createHookFn, processFn) {
+    _throwIfCallInvalid();
+    currentStateHook = _resolveCurrentHookImpl(createHookFn, currentStateHook, currentNode.stateHook_);
+    if (currentNode.stateHook_ === null) {
+        currentNode.stateHook_ = currentStateHook;
+    }
+    return processFn(currentStateHook);
+}
+
+function resolveCurrentEffectHook(createHookFn, processFn) {
+    _throwIfCallInvalid();
+    currentEffectHook = _resolveCurrentHookImpl(createHookFn, currentEffectHook, currentNode.effectHook_);
+    if (currentNode.effectHook_ === null) {
+        currentNode.effectHook_ = currentEffectHook;
+    }
+    return processFn(currentEffectHook);
+}
+
+function _throwIfCallInvalid() {
     if (currentNode === null) {
         throw new Error('Cannot use hooks from outside of components');
     }
-    
+}
+
+function _resolveCurrentHookImpl(createHookFn, currentHook, nodeFirstHook) {
     if (currentHook === null) {
-        if (currentNode.hook_ === null) {
-            currentHook = createHookFn(currentNode);
-            currentNode.hook_ = currentHook;
+        if (nodeFirstHook === null) {
+            return createHookFn(currentNode);
         } else {
-            currentHook = currentNode.hook_;
+            return nodeFirstHook;
         }
     } else {
         if (currentHook.next_ === null) {
-            const previousHook = currentHook;           
-            currentHook = createHookFn(currentNode);
-            previousHook.next_ = currentHook;
+            const nextHook = createHookFn(currentNode);
+            currentHook.next_ = nextHook;
+            return nextHook;
         } else {
-            currentHook = currentHook.next_;
+            return currentHook.next_;
         }
     }
-
-    return processFn(currentHook);
 }
 
 /**
@@ -112,7 +142,7 @@ function RefHook(current) {
  * @constructor
  */
 function useRef(initialValue) {
-    return resolveCurrentHook(
+    return resolveCurrentRefHook(
         function (currentNode) {
             return new RefHook(initialValue);
         },
@@ -152,7 +182,11 @@ function VirtualNode(type, props, key) {
     }
     this.props_ = props;
 
-    this.hook_ = null;
+    this.refHook_ = null;
+    
+    this.stateHook_ = null;
+
+    this.effectHook_ = null;
     
     // Output native node and relates
     // ==============================
@@ -678,7 +712,7 @@ function StateHook(context, initialValue, tag) {
 }
 
 function useState(initialValue) {
-    return resolveCurrentHook(
+    return resolveCurrentStateHook(
         function (currentNode) {
             return new StateHook(currentNode, initialValue, STATE_NORMAL);
         },
@@ -689,14 +723,14 @@ function useState(initialValue) {
 }
 
 function useError(initialError) {
-    return resolveCurrentHook(
+    return resolveCurrentStateHook(
         function (currentNode) {
             // Make sure we have only one error hook in a component
             // In the production, we allow the initialization but skip it then
             if (true) {
-                let hook = currentNode.hook_;
+                let hook = currentNode.stateHook_;
                 while (hook !== null) {
-                    if (hook instanceof StateHook && hook.tag_ === STATE_ERROR) {
+                    if (hook.tag_ === STATE_ERROR) {
                         throw new Error('A component accepts only one useError hook');
                     }
                     hook = hook.next_;
@@ -800,9 +834,9 @@ function catchError(error, virtualNode) {
     let hook;
 
     while (parent !== null) {
-        hook = parent.hook_;
+        hook = parent.stateHook_;
         while (hook !== null) {
-            if (hook instanceof StateHook && hook.tag_ === STATE_ERROR) {
+            if (hook.tag_ === STATE_ERROR) {
                 hook.setValue_(function (prevError) {
                     return prevError || error;
                 });
@@ -862,7 +896,7 @@ function _useEffectImpl(callback, deps, tag) {
         deps = null;
     }
 
-    return resolveCurrentHook(
+    return resolveCurrentEffectHook(
         function (currentNode) {
             const flag = _determineFlag(deps, null);
             return new EffectHook(callback, deps, tag, flag);
@@ -910,9 +944,9 @@ function _useEffectImpl(callback, deps, tag) {
  * @param {boolean} isNewlyMounted
  */
 function mountEffects(effectTag, functionalVirtualNode, isNewlyMounted) {
-    let hook = functionalVirtualNode.hook_;
+    let hook = functionalVirtualNode.effectHook_;
     while (hook !== null) {
-        if (hook instanceof EffectHook && hook.tag_ === effectTag) {
+        if (hook.tag_ === effectTag) {
             if (isNewlyMounted || hook.flag_ === FLAG_ALWAYS || hook.flag_ === FLAG_DEPS_CHANGED) {
                 try {
                     _mountEffect(hook);
@@ -931,9 +965,9 @@ function mountEffects(effectTag, functionalVirtualNode, isNewlyMounted) {
  * @param {boolean} isUnmounted
  */
 function destroyEffects(effectTag, functionalVirtualNode, isUnmounted) {
-    let hook = functionalVirtualNode.hook_;
+    let hook = functionalVirtualNode.effectHook_;
     while (hook !== null) {
-        if (hook instanceof EffectHook && hook.tag_ === effectTag) {
+        if (hook.tag_ === effectTag) {
             if (hook.lastDestroy_ !== null || hook.destroy_ !== null) {
                 if (isUnmounted || hook.flag_ === FLAG_ALWAYS || hook.flag_ === FLAG_DEPS_CHANGED) {
                     try {
@@ -1074,14 +1108,16 @@ function _makeAlternative(newChild, oldChild) {
     newChild.alternative_ = oldChild;
 
     if (isFunction(newChild.type_)) {
-        newChild.hook_ = oldChild.hook_;
+        // Copy hooks
+        newChild.refHook_ = oldChild.refHook_;
+        newChild.stateHook_ = oldChild.stateHook_;
+        newChild.effectHook_ = oldChild.effectHook_;
 
-        let hook = newChild.hook_;
-        while (hook !== null) {
-            if (hook instanceof StateHook) {
-                hook.context_ = newChild;
-            }
-            hook = hook.next_;
+        // Update contexts of state hooks
+        let stateHook = newChild.stateHook_;
+        while (stateHook !== null) {
+            stateHook.context_ = newChild;
+            stateHook = stateHook.next_;
         }
     }
 }
@@ -1177,21 +1213,21 @@ function _performUnitOfWork(current, root, mountNodesMap, unmountNodesMap) {
     }
 
     if (isSubtreeRoot) {
-        if (current.hook_ !== null) {
+        if (current.effectHook_ !== null) {
             unmountNodesMap.set(current, false);
             mountNodesMap.set(current, false);
         }
     } else {
         if (current.alternative_ !== null) {
             updateView(current, current.alternative_);
-            if (current.hook_ !== null) {
+            if (current.effectHook_ !== null) {
                 unmountNodesMap.set(current.alternative_, false);
                 mountNodesMap.set(current, false);
             }
             current.alternative_ = null;
         } else {
             insertView(current);
-            if (current.hook_ !== null) {
+            if (current.effectHook_ !== null) {
                 mountNodesMap.set(current, true);
             }
         }
@@ -1208,7 +1244,7 @@ function _performUnitOfWork(current, root, mountNodesMap, unmountNodesMap) {
         queueWork(function () {
             for (let i = 0; i < deletions.length; ++i) {
                 workLoop(function (vnode) {
-                    if (vnode.hook_ !== null) {
+                    if (vnode.effectHook_ !== null) {
                         unmountNodesMap.set(vnode, true);
                     }
                 }, null, deletions[i]);

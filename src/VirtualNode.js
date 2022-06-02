@@ -31,7 +31,11 @@ export function VirtualNode(type, props, key) {
     }
     this.props_ = props;
 
-    this.hook_ = null;
+    this.refHook_ = null;
+    
+    this.stateHook_ = null;
+
+    this.effectHook_ = null;
     
     // Output native node and relates
     // ==============================

@@ -39,21 +39,21 @@ function _performUnitOfWork(current, root, mountNodesMap, unmountNodesMap) {
     }
 
     if (isSubtreeRoot) {
-        if (current.hook_ !== null) {
+        if (current.effectHook_ !== null) {
             unmountNodesMap.set(current, false);
             mountNodesMap.set(current, false);
         }
     } else {
         if (current.alternative_ !== null) {
             updateView(current, current.alternative_);
-            if (current.hook_ !== null) {
+            if (current.effectHook_ !== null) {
                 unmountNodesMap.set(current.alternative_, false);
                 mountNodesMap.set(current, false);
             }
             current.alternative_ = null;
         } else {
             insertView(current);
-            if (current.hook_ !== null) {
+            if (current.effectHook_ !== null) {
                 mountNodesMap.set(current, true);
             }
         }
@@ -70,7 +70,7 @@ function _performUnitOfWork(current, root, mountNodesMap, unmountNodesMap) {
         queueWork(function () {
             for (let i = 0; i < deletions.length; ++i) {
                 workLoop(function (vnode) {
-                    if (vnode.hook_ !== null) {
+                    if (vnode.effectHook_ !== null) {
                         unmountNodesMap.set(vnode, true);
                     }
                 }, null, deletions[i]);

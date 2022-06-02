@@ -59,6 +59,27 @@ function DemoWrapperWrapper() {
         };
     }, []);
 
+    // useInsertionEffect(() => {
+    //     console.log('insertion effect always', rootRef.current, wrapperRef.current);
+    //     return () => {
+    //         console.log('insertion unmount always', rootRef.current, wrapperRef.current);
+    //     };
+    // });
+
+    // useInsertionEffect(() => {
+    //     console.log('insertion effect deps', rootRef.current, wrapperRef.current);
+    //     return () => {
+    //         console.log('insertion unmount deps', rootRef.current, wrapperRef.current);
+    //     };
+    // }, [layout]);
+
+    // useInsertionEffect(() => {
+    //     console.log('insertion effect lazy', rootRef.current, wrapperRef.current);
+    //     return () => {
+    //         console.log('insertion unmount lazy', rootRef.current, wrapperRef.current);
+    //     };
+    // }, []);
+
     return (
         <div className="Root" ref={rootRef}>
             <select onChange={ev => setLayout(ev.target.value)}>

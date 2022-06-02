@@ -1,4 +1,4 @@
-import {resolveCurrentHook} from './CurrentlyProcessing';
+import {resolveCurrentEffectHook} from './CurrentlyProcessing';
 import {catchError} from './CatchError';
 import {compareArrays} from './Util';
 
@@ -42,7 +42,7 @@ function _useEffectImpl(callback, deps, tag) {
         deps = null;
     }
 
-    return resolveCurrentHook(
+    return resolveCurrentEffectHook(
         function (currentNode) {
             const flag = _determineFlag(deps, null);
             return new EffectHook(callback, deps, tag, flag);
@@ -90,9 +90,9 @@ function _useEffectImpl(callback, deps, tag) {
  * @param {boolean} isNewlyMounted
  */
 export function mountEffects(effectTag, functionalVirtualNode, isNewlyMounted) {
-    let hook = functionalVirtualNode.hook_;
+    let hook = functionalVirtualNode.effectHook_;
     while (hook !== null) {
-        if (hook instanceof EffectHook && hook.tag_ === effectTag) {
+        if (hook.tag_ === effectTag) {
             if (isNewlyMounted || hook.flag_ === FLAG_ALWAYS || hook.flag_ === FLAG_DEPS_CHANGED) {
                 try {
                     _mountEffect(hook);
@@ -111,9 +111,9 @@ export function mountEffects(effectTag, functionalVirtualNode, isNewlyMounted) {
  * @param {boolean} isUnmounted
  */
 export function destroyEffects(effectTag, functionalVirtualNode, isUnmounted) {
-    let hook = functionalVirtualNode.hook_;
+    let hook = functionalVirtualNode.effectHook_;
     while (hook !== null) {
-        if (hook instanceof EffectHook && hook.tag_ === effectTag) {
+        if (hook.tag_ === effectTag) {
             if (hook.lastDestroy_ !== null || hook.destroy_ !== null) {
                 if (isUnmounted || hook.flag_ === FLAG_ALWAYS || hook.flag_ === FLAG_DEPS_CHANGED) {
                     try {

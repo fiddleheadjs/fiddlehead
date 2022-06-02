@@ -1,4 +1,4 @@
-import {resolveCurrentHook} from './CurrentlyProcessing';
+import {resolveCurrentRefHook} from './CurrentlyProcessing';
 
 /**
  *
@@ -25,7 +25,7 @@ export function RefHook(current) {
  * @constructor
  */
 export function useRef(initialValue) {
-    return resolveCurrentHook(
+    return resolveCurrentRefHook(
         function (currentNode) {
             return new RefHook(initialValue);
         },
