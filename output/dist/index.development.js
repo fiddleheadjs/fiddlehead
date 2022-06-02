@@ -1051,8 +1051,8 @@ function _determineFlag(deps, lastDeps) {
 function reconcileChildren(current, isSubtreeRoot) {
     if (isFunction(current.type_)) {
         _reconcileChildOfDynamicNode(current, isSubtreeRoot);
-    } else {
-        _reconcileChildrenOfStaticNode(current);
+    } else if (current.alternative_ !== null) {
+        _reconcileChildrenOfStaticNode(current, current.alternative_);
     }
 }
 
@@ -1090,12 +1090,8 @@ function _reconcileChildOfDynamicNode(current, isSubtreeRoot) {
     current.child_ = newChild;
 }
 
-function _reconcileChildrenOfStaticNode(current) {
-    if (current.alternative_ === null) {
-        return;
-    }
-
-    const oldChildren = _mapChildren(current.alternative_);
+function _reconcileChildrenOfStaticNode(current, alternative) {
+    const oldChildren = _mapChildren(alternative);
     const newChildren = _mapChildren(current);
 
     let newChild;
