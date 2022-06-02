@@ -74,10 +74,10 @@ function _makeAlternative(newChild, oldChild) {
         newChild.effectHook_ = oldChild.effectHook_;
 
         // Update contexts of state hooks
-        let stateHook = newChild.stateHook_;
-        while (stateHook !== null) {
-            stateHook.context_ = newChild;
-            stateHook = stateHook.next_;
+        let hook = newChild.stateHook_;
+        while (hook !== null) {
+            hook.context_ = newChild;
+            hook = hook.next_;
         }
     }
 }

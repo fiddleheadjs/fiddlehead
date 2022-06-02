@@ -99,12 +99,12 @@ function _throwIfCallInvalid() {
     }
 }
 
-function _resolveCurrentHookImpl(createHookFn, currentHook, nodeFirstHook) {
+function _resolveCurrentHookImpl(createHookFn, currentHook, firstHookOfNode) {
     if (currentHook === null) {
-        if (nodeFirstHook === null) {
+        if (firstHookOfNode === null) {
             return createHookFn(currentNode);
         } else {
-            return nodeFirstHook;
+            return firstHookOfNode;
         }
     } else {
         if (currentHook.next_ === null) {
@@ -215,7 +215,7 @@ function VirtualNode(type, props, key) {
  
     // In the commit phase, the new child will be inserted
     // after the last inserted/updated child
-    this.lastManipulatedClientNativeNode_ = null;
+    this.lastManipulatedClient_ = null;
 }
 
 // Do not support namespace MathML as almost browsers do not support as well
@@ -623,7 +623,7 @@ function updateView(newVirtualNode, oldVirtualNode) {
     if (newVirtualNode.nativeNode_ !== null) {
         const host = _findHostVirtualNode(newVirtualNode);
         if (host !== null) {
-            host.lastManipulatedClientNativeNode_ = newVirtualNode.nativeNode_;
+            host.lastManipulatedClient_ = newVirtualNode.nativeNode_;
         }
     }
 }
@@ -635,12 +635,12 @@ function insertView(virtualNode) {
         const host = _findHostVirtualNode(virtualNode);
         if (host !== null) {
             const nativeNodeAfter = (
-                host.lastManipulatedClientNativeNode_ !== null
-                    ? host.lastManipulatedClientNativeNode_.nextSibling
+                host.lastManipulatedClient_ !== null
+                    ? host.lastManipulatedClient_.nextSibling
                     : host.nativeNode_.firstChild
             );
             host.nativeNode_.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
-            host.lastManipulatedClientNativeNode_ = virtualNode.nativeNode_;
+            host.lastManipulatedClient_ = virtualNode.nativeNode_;
         }
     }
 }
@@ -1114,10 +1114,10 @@ function _makeAlternative(newChild, oldChild) {
         newChild.effectHook_ = oldChild.effectHook_;
 
         // Update contexts of state hooks
-        let stateHook = newChild.stateHook_;
-        while (stateHook !== null) {
-            stateHook.context_ = newChild;
-            stateHook = stateHook.next_;
+        let hook = newChild.stateHook_;
+        while (hook !== null) {
+            hook.context_ = newChild;
+            hook = hook.next_;
         }
     }
 }
@@ -1256,8 +1256,8 @@ function _performUnitOfWork(current, root, mountNodesMap, unmountNodesMap) {
 // Callback called after walking through a node and all of its ascendants
 function _onReturn(current) {
     // This is when we cleanup the remaining temp props
-    if (current.lastManipulatedClientNativeNode_ !== null) {
-        current.lastManipulatedClientNativeNode_ = null;
+    if (current.lastManipulatedClient_ !== null) {
+        current.lastManipulatedClient_ = null;
     }
 }
 

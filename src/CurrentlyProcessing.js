@@ -47,12 +47,12 @@ function _throwIfCallInvalid() {
     }
 }
 
-function _resolveCurrentHookImpl(createHookFn, currentHook, nodeFirstHook) {
+function _resolveCurrentHookImpl(createHookFn, currentHook, firstHookOfNode) {
     if (currentHook === null) {
-        if (nodeFirstHook === null) {
+        if (firstHookOfNode === null) {
             return createHookFn(currentNode);
         } else {
-            return nodeFirstHook;
+            return firstHookOfNode;
         }
     } else {
         if (currentHook.next_ === null) {
