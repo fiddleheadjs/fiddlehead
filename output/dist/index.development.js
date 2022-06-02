@@ -92,9 +92,8 @@ function resolveCurrentHook(createHookFn, processFn) {
  * @param {*} current
  * @constructor
  */
-function RefHook(current) {
-    this.ref_ = new Ref(current);
-    this.next_ = null;
+ function Ref(current) {
+    this.current = current;
 }
 
 /**
@@ -102,8 +101,9 @@ function RefHook(current) {
  * @param {*} current
  * @constructor
  */
-function Ref(current) {
-    this.current = current;
+function RefHook(current) {
+    this.ref_ = new Ref(current);
+    this.next_ = null;
 }
 
 /**

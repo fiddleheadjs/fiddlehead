@@ -5,9 +5,8 @@ import {resolveCurrentHook} from './CurrentlyProcessing';
  * @param {*} current
  * @constructor
  */
-export function RefHook(current) {
-    this.ref_ = new Ref(current);
-    this.next_ = null;
+ export function Ref(current) {
+    this.current = current;
 }
 
 /**
@@ -15,8 +14,9 @@ export function RefHook(current) {
  * @param {*} current
  * @constructor
  */
-export function Ref(current) {
-    this.current = current;
+export function RefHook(current) {
+    this.ref_ = new Ref(current);
+    this.next_ = null;
 }
 
 /**
