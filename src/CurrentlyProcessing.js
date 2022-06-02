@@ -41,12 +41,6 @@ export function resolveCurrentEffectHook(createHookFn, processFn) {
     return processFn(currentEffectHook);
 }
 
-function _throwIfCallInvalid() {
-    if (currentNode === null) {
-        throw new Error('Cannot use hooks from outside of components');
-    }
-}
-
 function _resolveCurrentHookImpl(createHookFn, currentHook, firstHookOfNode) {
     if (currentHook === null) {
         if (firstHookOfNode === null) {
@@ -62,5 +56,11 @@ function _resolveCurrentHookImpl(createHookFn, currentHook, firstHookOfNode) {
         } else {
             return currentHook.next_;
         }
+    }
+}
+
+function _throwIfCallInvalid() {
+    if (currentNode === null) {
+        throw new Error('Cannot use hooks from outside of components');
     }
 }

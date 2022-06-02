@@ -18,67 +18,46 @@ function DemoWrapperWrapper() {
     const wrapperRef = useRef(null);
 
     useEffect(() => {
-        console.log('effect always', rootRef.current, wrapperRef.current);
-        return () => {
-            console.log('unmount always', rootRef.current, wrapperRef.current);
-        };
+        // console.log('effect always', rootRef.current, wrapperRef.current);
+        // return () => {
+        //     console.log('unmount always', rootRef.current, wrapperRef.current);
+        // };
     });
 
     useEffect(() => {
-        console.log('effect deps', rootRef.current, wrapperRef.current);
-        return () => {
-            console.log('unmount deps', rootRef.current, wrapperRef.current);
-        };
+        // console.log('effect deps', rootRef.current, wrapperRef.current);
+        // return () => {
+        //     console.log('unmount deps', rootRef.current, wrapperRef.current);
+        // };
     }, [layout]);
 
     useEffect(() => {
-        console.log('effect lazy', rootRef.current, wrapperRef.current);
-        return () => {
-            console.log('unmount lazy', rootRef.current, wrapperRef.current);
-        };
+        // console.log('effect lazy', rootRef.current, wrapperRef.current);
+        // return () => {
+        //     console.log('unmount lazy', rootRef.current, wrapperRef.current);
+        // };
     }, []);
 
     useLayoutEffect(() => {
-        console.log('layout effect always', rootRef.current, wrapperRef.current);
-        return () => {
-            console.log('layout unmount always', rootRef.current, wrapperRef.current);
-        };
+        // console.log('layout effect always', rootRef.current, wrapperRef.current);
+        // return () => {
+        //     console.log('layout unmount always', rootRef.current, wrapperRef.current);
+        // };
     });
 
     useLayoutEffect(() => {
-        console.log('layout effect deps', rootRef.current, wrapperRef.current);
-        return () => {
-            console.log('layout unmount deps', rootRef.current, wrapperRef.current);
-        };
+        // console.log('layout effect deps', rootRef.current, wrapperRef.current);
+        // return () => {
+        //     console.log('layout unmount deps', rootRef.current, wrapperRef.current);
+        // };
     }, [layout]);
 
     useLayoutEffect(() => {
-        console.log('layout effect lazy', rootRef.current, wrapperRef.current);
-        return () => {
-            console.log('layout unmount lazy', rootRef.current, wrapperRef.current);
-        };
+        // console.log('layout effect lazy', rootRef.current, wrapperRef.current);
+        // return () => {
+        //     console.log('layout unmount lazy', rootRef.current, wrapperRef.current);
+        // };
     }, []);
-
-    // useInsertionEffect(() => {
-    //     console.log('insertion effect always', rootRef.current, wrapperRef.current);
-    //     return () => {
-    //         console.log('insertion unmount always', rootRef.current, wrapperRef.current);
-    //     };
-    // });
-
-    // useInsertionEffect(() => {
-    //     console.log('insertion effect deps', rootRef.current, wrapperRef.current);
-    //     return () => {
-    //         console.log('insertion unmount deps', rootRef.current, wrapperRef.current);
-    //     };
-    // }, [layout]);
-
-    // useInsertionEffect(() => {
-    //     console.log('insertion effect lazy', rootRef.current, wrapperRef.current);
-    //     return () => {
-    //         console.log('insertion unmount lazy', rootRef.current, wrapperRef.current);
-    //     };
-    // }, []);
 
     return (
         <div className="Root" ref={rootRef}>

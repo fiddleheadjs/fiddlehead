@@ -86,18 +86,18 @@ function _useEffectImpl(callback, deps, tag) {
 /**
  *
  * @param {number} effectTag
- * @param {VirtualNode} functionalVirtualNode
+ * @param {VirtualNode} virtualNode
  * @param {boolean} isNewlyMounted
  */
-export function mountEffects(effectTag, functionalVirtualNode, isNewlyMounted) {
-    let hook = functionalVirtualNode.effectHook_;
+export function mountEffects(effectTag, virtualNode, isNewlyMounted) {
+    let hook = virtualNode.effectHook_;
     while (hook !== null) {
         if (hook.tag_ === effectTag) {
             if (isNewlyMounted || hook.flag_ === FLAG_ALWAYS || hook.flag_ === FLAG_DEPS_CHANGED) {
                 try {
                     _mountEffect(hook);
                 } catch (error) {
-                    catchError(error, functionalVirtualNode);
+                    catchError(error, virtualNode);
                 }
             }
         }
@@ -107,11 +107,11 @@ export function mountEffects(effectTag, functionalVirtualNode, isNewlyMounted) {
 
 /**
  * @param {number} effectTag
- * @param {VirtualNode} functionalVirtualNode
+ * @param {VirtualNode} virtualNode
  * @param {boolean} isUnmounted
  */
-export function destroyEffects(effectTag, functionalVirtualNode, isUnmounted) {
-    let hook = functionalVirtualNode.effectHook_;
+export function destroyEffects(effectTag, virtualNode, isUnmounted) {
+    let hook = virtualNode.effectHook_;
     while (hook !== null) {
         if (hook.tag_ === effectTag) {
             if (hook.lastDestroy_ !== null || hook.destroy_ !== null) {
@@ -119,7 +119,7 @@ export function destroyEffects(effectTag, functionalVirtualNode, isUnmounted) {
                     try {
                         _destroyEffect(hook, isUnmounted);
                     } catch (error) {
-                        catchError(error, functionalVirtualNode);
+                        catchError(error, virtualNode);
                     }
                 }
             }
@@ -143,10 +143,10 @@ function _mountEffect(effectHook) {
 /**
  *
  * @param {EffectHook} hook
- * @param {boolean} isNodeUnmounted
+ * @param {boolean} isUnmounted
  */
-function _destroyEffect(hook, isNodeUnmounted) {
-    if (hook.lastDestroy_ !== null && !isNodeUnmounted) {
+function _destroyEffect(hook, isUnmounted) {
+    if (hook.lastDestroy_ !== null && !isUnmounted) {
         hook.lastDestroy_();
         return;
     }
