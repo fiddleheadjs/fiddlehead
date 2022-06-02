@@ -1,11 +1,12 @@
 import React, {useRef, useState, useEffect} from 'react';
 import ReactDOM from 'react-dom/client';
+import {BigSvg} from './bigsvg';
 
 console.time('stack');
 console.time('mount');
 
 const root = ReactDOM.createRoot(document.getElementById('sandbox-container'));
-root.render([<Svg0 />, <Svg1 />, <Svg2 />, <Svg3 />, <TimeEnd />]);
+root.render([<Svg0 />, <Svg1 />, <Svg2 />, <Svg3 />, <BigSvg />, <TimeEnd />]);
 
 console.timeEnd('stack');
 
