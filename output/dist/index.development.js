@@ -93,17 +93,31 @@ function resolveCurrentHook(createHookFn, processFn) {
  * @constructor
  */
 function RefHook(current) {
-    this.current = current;
+    this.ref_ = new Ref(current);
     this.next_ = null;
 }
 
+/**
+ *
+ * @param {*} current
+ * @constructor
+ */
+function Ref(current) {
+    this.current = current;
+}
+
+/**
+ *
+ * @param {*} initialValue
+ * @constructor
+ */
 function useRef(initialValue) {
     return resolveCurrentHook(
         function (currentNode) {
             return new RefHook(initialValue);
         },
         function (currentHook) {
-            return currentHook;
+            return currentHook.ref_;
         }
     );
 }
@@ -128,7 +142,7 @@ function VirtualNode(type, props, key) {
     // Props and hooks
     // ===============
 
-    if (!(props.ref === undefined || props.ref instanceof RefHook)) {
+    if (!(props.ref === undefined || props.ref instanceof Ref)) {
         // Delete the invalid ref
         delete props.ref;
         
@@ -1236,6 +1250,7 @@ function createPortal(children, targetNativeNode) {
 }
 
 exports.Fragment = Fragment;
+exports.Ref = Ref;
 exports.TextNode = TextNode;
 exports.createElement = createElement;
 exports.createPortal = createPortal;

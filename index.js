@@ -3,7 +3,7 @@ import {Fragment, TextNode} from './src/VirtualNode';
 import {mount, createPortal} from './src/Mount';
 import {useState, useError} from './src/StateHook';
 import {useEffect} from './src/EffectHook';
-import {useRef} from './src/RefHook';
+import {useRef, Ref} from './src/RefHook';
 
 export {
     mount,
@@ -14,6 +14,7 @@ export {
     useError,
     useEffect,
     useRef,
+    Ref,
     Fragment,
     TextNode,
 };

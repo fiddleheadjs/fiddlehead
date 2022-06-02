@@ -1,4 +1,4 @@
-import {RefHook} from './RefHook';
+import {Ref} from './RefHook';
 import {isNullish} from './Util';
 
 /**
@@ -21,7 +21,7 @@ export function VirtualNode(type, props, key) {
     // Props and hooks
     // ===============
 
-    if (!(props.ref === undefined || props.ref instanceof RefHook)) {
+    if (!(props.ref === undefined || props.ref instanceof Ref)) {
         // Delete the invalid ref
         delete props.ref;
         
