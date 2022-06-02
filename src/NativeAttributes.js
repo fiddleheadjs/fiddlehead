@@ -1,4 +1,4 @@
-import {hasOwnProperty, isNullish, isNumber, isString, isObject} from './Util';
+import {hasOwnProperty, isNumber, isString, isObject} from './Util';
 
 export function updateNativeElementAttributes(element, newAttributes, oldAttributes) {
     _updateKeyValues(
@@ -130,5 +130,9 @@ function _updateKeyValues(target, newKeyValues, oldKeyValues, updateFn, removeFn
 }
 
 function _hasOwnNonEmpty(target, prop) {
-    return hasOwnProperty.call(target, prop) && !isNullish(target[prop]);
+    return (
+        hasOwnProperty.call(target, prop) &&
+        target[prop] !== undefined &&
+        target[prop] !== null
+    );
 }

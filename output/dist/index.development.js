@@ -2,54 +2,6 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-const hasOwnProperty = Object.prototype.hasOwnProperty;
-
-const slice = Array.prototype.slice;
-
-function isString(value) {
-    return typeof value === 'string'/* || value instanceof String*/;
-}
-
-function isNumber(value) {
-    return typeof value === 'number'/* || value instanceof Number*/;
-}
-
-function isFunction(value) {
-    return typeof value === 'function';
-}
-
-function isArray(value) {
-    return value instanceof Array;
-}
-
-function isObject(value) {
-    return value !== null && typeof value === 'object';
-}
-
-function isNullish(value) {
-    return value === null || value === undefined;
-}
-
-/**
- * 
- * @param {Array} a 
- * @param {Array} b 
- * @returns {boolean}
- */
-function compareArrays(a, b) {
-    if (a.length !== b.length) {
-        return false;
-    }
-
-    for (let i = a.length - 1; i >= 0; --i) {
-        if (a[i] !== b[i]) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 let currentNode = null;
 let currentRefHook = null;
 let currentStateHook = null;
@@ -152,11 +104,55 @@ function useRef(initialValue) {
     );
 }
 
+const hasOwnProperty = Object.prototype.hasOwnProperty;
+
+const slice = Array.prototype.slice;
+
+function isString(value) {
+    return typeof value === 'string'/* || value instanceof String*/;
+}
+
+function isNumber(value) {
+    return typeof value === 'number'/* || value instanceof Number*/;
+}
+
+function isFunction(value) {
+    return typeof value === 'function';
+}
+
+function isArray(value) {
+    return value instanceof Array;
+}
+
+function isObject(value) {
+    return value !== null && typeof value === 'object';
+}
+
+/**
+ * 
+ * @param {Array} a 
+ * @param {Array} b 
+ * @returns {boolean}
+ */
+function compareArrays(a, b) {
+    if (a.length !== b.length) {
+        return false;
+    }
+
+    for (let i = a.length - 1; i >= 0; --i) {
+        if (a[i] !== b[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 /**
  * 
  * @param {function|string} type
  * @param {{}} props
- * @param {string|null?} key
+ * @param {string|null} key
  */
 function VirtualNode(type, props, key) {
     // Identification
@@ -165,21 +161,13 @@ function VirtualNode(type, props, key) {
     this.type_ = type;
 
     // Convert to string to avoid conflict with slot
-    this.key_ = !isNullish(key) ? ('' + key) : null;
+    this.key_ = key;
 
     this.slot_ = null;
 
     // Props and hooks
     // ===============
 
-    if (!(props.ref === undefined || props.ref instanceof Ref)) {
-        // Delete the invalid ref
-        delete props.ref;
-        
-        if (true) {
-            console.error('The ref value must be created by the useRef hook');
-        }
-    }
     this.props_ = props;
 
     this.refHook_ = null;
@@ -254,11 +242,25 @@ function createElement(type, props, content) {
         props = {};
     }
     
-    const key = props.key;
+    // Normalize key
+    let key = null;
+    if (!(props.key === undefined || props.key === null)) {
+        key = '' + key;
+    }
     delete props.key;
+
+    // Normalize ref
+    if (!(props.ref === undefined || props.ref instanceof Ref)) {
+        if (true) {
+            console.error('The ref value must be created by the useRef hook');
+        }
+        delete props.ref;
+    }
     
+    // Create the node
     const virtualNode = new VirtualNode(type, props, key);
 
+    // Append children
     if (arguments.length > 2) {
         const multiple = arguments.length > 3;
 
@@ -301,15 +303,15 @@ function createElement(type, props, content) {
     }
         
     if (isString(content)) {
-        return new VirtualNode(TextNode, {children: content});
+        return new VirtualNode(TextNode, {children: content}, null);
     }
 
     if (isNumber(content)) {
-        return new VirtualNode(TextNode, {children: '' + content});
+        return new VirtualNode(TextNode, {children: '' + content}, null);
     }
 
     if (isArray(content)) {
-        const fragment = new VirtualNode(Fragment, {});
+        const fragment = new VirtualNode(Fragment, {}, null);
         _appendChildrenFromContent(fragment, content);
         return fragment;
     }
@@ -511,7 +513,11 @@ function _updateKeyValues(target, newKeyValues, oldKeyValues, updateFn, removeFn
 }
 
 function _hasOwnNonEmpty(target, prop) {
-    return hasOwnProperty.call(target, prop) && !isNullish(target[prop]);
+    return (
+        hasOwnProperty.call(target, prop) &&
+        target[prop] !== undefined &&
+        target[prop] !== null
+    );
 }
 
 function createNativeTextNode(text) {
@@ -1291,7 +1297,7 @@ function createPortal(children, targetNativeNode) {
             }
         }
         
-        portal = new VirtualNode(Portal, {});
+        portal = new VirtualNode(Portal, {}, null);
 
         // Determine the namespace (we only support SVG and HTML namespaces)
         portal.ns_ = ('ownerSVGElement' in targetNativeNode) ? NS_SVG : NS_HTML;

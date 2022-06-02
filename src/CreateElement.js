@@ -1,3 +1,4 @@
+import {Ref} from './RefHook';
 import {isArray, isFunction, isNumber, isString, slice} from './Util';
 import {Fragment, TextNode, VirtualNode} from './VirtualNode';
 
@@ -13,11 +14,25 @@ export function createElement(type, props, content) {
         props = {};
     }
     
-    const key = props.key;
+    // Normalize key
+    let key = null;
+    if (!(props.key === undefined || props.key === null)) {
+        key = '' + key;
+    }
     delete props.key;
+
+    // Normalize ref
+    if (!(props.ref === undefined || props.ref instanceof Ref)) {
+        if (__DEV__) {
+            console.error('The ref value must be created by the useRef hook');
+        }
+        delete props.ref;
+    }
     
+    // Create the node
     const virtualNode = new VirtualNode(type, props, key);
 
+    // Append children
     if (arguments.length > 2) {
         const multiple = arguments.length > 3;
 
@@ -60,15 +75,15 @@ export function createElement(type, props, content) {
     }
         
     if (isString(content)) {
-        return new VirtualNode(TextNode, {children: content});
+        return new VirtualNode(TextNode, {children: content}, null);
     }
 
     if (isNumber(content)) {
-        return new VirtualNode(TextNode, {children: '' + content});
+        return new VirtualNode(TextNode, {children: '' + content}, null);
     }
 
     if (isArray(content)) {
-        const fragment = new VirtualNode(Fragment, {});
+        const fragment = new VirtualNode(Fragment, {}, null);
         _appendChildrenFromContent(fragment, content);
         return fragment;
     }

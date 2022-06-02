@@ -1,11 +1,8 @@
-import {Ref} from './RefHook';
-import {isNullish} from './Util';
-
 /**
  * 
  * @param {function|string} type
  * @param {{}} props
- * @param {string|null?} key
+ * @param {string|null} key
  */
 export function VirtualNode(type, props, key) {
     // Identification
@@ -14,21 +11,13 @@ export function VirtualNode(type, props, key) {
     this.type_ = type;
 
     // Convert to string to avoid conflict with slot
-    this.key_ = !isNullish(key) ? ('' + key) : null;
+    this.key_ = key;
 
     this.slot_ = null;
 
     // Props and hooks
     // ===============
 
-    if (!(props.ref === undefined || props.ref instanceof Ref)) {
-        // Delete the invalid ref
-        delete props.ref;
-        
-        if (__DEV__) {
-            console.error('The ref value must be created by the useRef hook');
-        }
-    }
     this.props_ = props;
 
     this.refHook_ = null;
