@@ -726,12 +726,11 @@ function useError(initialError) {
     return resolveCurrentStateHook(
         function (currentNode) {
             // Make sure we have only one error hook in a component
-            // In the production, we allow the initialization but skip it then
             if (true) {
                 let hook = currentNode.stateHook_;
                 while (hook !== null) {
                     if (hook.tag_ === STATE_ERROR) {
-                        throw new Error('A component accepts only one useError hook');
+                        console.error('A component accepts only one useError hook');
                     }
                     hook = hook.next_;
                 }
