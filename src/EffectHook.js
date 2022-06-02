@@ -1,38 +1,51 @@
-import {catchError} from './CatchError';
 import {resolveCurrentHook} from './CurrentlyProcessing';
+import {catchError} from './CatchError';
 import {compareArrays} from './Util';
+
+export const EFFECT_NORMAL = 0;
+export const EFFECT_LAYOUT = 1;
+
+const FLAG_ALWAYS = 0;
+const FLAG_LAZY = 1;
+const FLAG_DEPS = 2;
+const FLAG_DEPS_CHANGED = 3;
 
 /**
  *
  * @param {function} callback
  * @param {[]|null} deps
  * @param {number} tag
+ * @param {number} flag
  * @return {EffectHook}
  * @constructor
  */
-export function EffectHook(callback, deps, tag) {
+export function EffectHook(callback, deps, tag, flag) {
     this.callback_ = callback;
     this.deps_ = deps;
     this.tag_ = tag;
+    this.flag_ = flag;
     this.destroy_ = null;
     this.lastDestroy_ = null;
     this.next_ = null;
 }
 
-const EFFECT_ALWAYS = 0;
-const EFFECT_LAZY = 1;
-const EFFECT_DEPS = 2;
-const EFFECT_DEPS_CHANGED = 3;
-
 export function useEffect(callback, deps) {
+    return _useEffectImpl(callback, deps, EFFECT_NORMAL);
+}
+
+export function useLayoutEffect(callback, deps) {
+    return _useEffectImpl(callback, deps, EFFECT_LAYOUT);
+}
+
+function _useEffectImpl(callback, deps, tag) {
     if (deps === undefined) {
         deps = null;
     }
 
     return resolveCurrentHook(
         function (currentNode) {
-            const effectTag = _determineEffectTag(deps, null);
-            return new EffectHook(callback, deps, effectTag);
+            const flag = _determineFlag(deps, null);
+            return new EffectHook(callback, deps, tag, flag);
         },
         function (currentHook) {
             if (__DEV__) {
@@ -46,21 +59,21 @@ export function useEffect(callback, deps) {
                 // and consider it is changed
             }
     
-            const effectTag = _determineEffectTag(deps, currentHook.deps_);
+            const flag = _determineFlag(deps, currentHook.deps_);
 
-            if (effectTag === EFFECT_LAZY) {
+            if (flag === FLAG_LAZY) {
                 return;
             }
     
-            if (effectTag === EFFECT_DEPS) {
-                currentHook.tag_ = effectTag;
+            if (flag === FLAG_DEPS) {
+                currentHook.flag_ = flag;
                 return;
             }
     
-            if (effectTag === EFFECT_ALWAYS || effectTag === EFFECT_DEPS_CHANGED) {
+            if (flag === FLAG_ALWAYS || flag === FLAG_DEPS_CHANGED) {
                 currentHook.callback_ = callback;
                 currentHook.deps_ = deps;
-                currentHook.tag_ = effectTag;
+                currentHook.flag_ = flag;
 
                 currentHook.lastDestroy_ = currentHook.destroy_;
                 currentHook.destroy_ = null;
@@ -72,14 +85,15 @@ export function useEffect(callback, deps) {
 
 /**
  *
+ * @param {number} effectTag
  * @param {VirtualNode} functionalVirtualNode
  * @param {boolean} isNewlyMounted
  */
-export function mountEffects(functionalVirtualNode, isNewlyMounted) {
+export function mountEffects(effectTag, functionalVirtualNode, isNewlyMounted) {
     let hook = functionalVirtualNode.hook_;
     while (hook !== null) {
-        if (hook instanceof EffectHook) {
-            if (isNewlyMounted || hook.tag_ === EFFECT_ALWAYS || hook.tag_ === EFFECT_DEPS_CHANGED) {
+        if (hook instanceof EffectHook && hook.tag_ === effectTag) {
+            if (isNewlyMounted || hook.flag_ === FLAG_ALWAYS || hook.flag_ === FLAG_DEPS_CHANGED) {
                 try {
                     _mountEffect(hook);
                 } catch (error) {
@@ -92,16 +106,16 @@ export function mountEffects(functionalVirtualNode, isNewlyMounted) {
 }
 
 /**
- *
+ * @param {number} effectTag
  * @param {VirtualNode} functionalVirtualNode
  * @param {boolean} isUnmounted
  */
-export function destroyEffects(functionalVirtualNode, isUnmounted) {
+export function destroyEffects(effectTag, functionalVirtualNode, isUnmounted) {
     let hook = functionalVirtualNode.hook_;
     while (hook !== null) {
-        if (hook instanceof EffectHook) {
+        if (hook instanceof EffectHook && hook.tag_ === effectTag) {
             if (hook.lastDestroy_ !== null || hook.destroy_ !== null) {
-                if (isUnmounted || hook.tag_ === EFFECT_ALWAYS || hook.tag_ === EFFECT_DEPS_CHANGED) {
+                if (isUnmounted || hook.flag_ === FLAG_ALWAYS || hook.flag_ === FLAG_DEPS_CHANGED) {
                     try {
                         _destroyEffect(hook, isUnmounted);
                     } catch (error) {
@@ -148,29 +162,29 @@ function _destroyEffect(hook, isNodeUnmounted) {
  * @param {[]|null} lastDeps 
  * @returns 
  */
-function _determineEffectTag(deps, lastDeps) {
+function _determineFlag(deps, lastDeps) {
     // Always
     if (deps === null) {
-        return EFFECT_ALWAYS;
+        return FLAG_ALWAYS;
     }
 
     // Lazy
     if (deps.length === 0) {
-        return EFFECT_LAZY;
+        return FLAG_LAZY;
     }
 
     // Deps
     // 1. When init effect
     if (lastDeps === null) {
-        return EFFECT_DEPS;
+        return FLAG_DEPS;
     }
     // 2. Two arrays are equal
     if (compareArrays(deps, lastDeps)) {
-        return EFFECT_DEPS;
+        return FLAG_DEPS;
     }
 
     // DepsChanged
     {
-        return EFFECT_DEPS_CHANGED;
+        return FLAG_DEPS_CHANGED;
     }
 }

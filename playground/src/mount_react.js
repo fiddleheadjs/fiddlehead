@@ -1,4 +1,4 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useLayoutEffect} from 'react';
 import ReactDOM from 'react-dom';
 
 function Wrapper2({children, myRef}) {
@@ -36,6 +36,27 @@ function DemoWrapperWrapper() {
         console.log('effect lazy', rootRef.current, wrapperRef.current);
         return () => {
             console.log('unmount lazy', rootRef.current, wrapperRef.current);
+        };
+    }, []);
+
+    useLayoutEffect(() => {
+        console.log('layout effect always', rootRef.current, wrapperRef.current);
+        return () => {
+            console.log('layout unmount always', rootRef.current, wrapperRef.current);
+        };
+    });
+
+    useLayoutEffect(() => {
+        console.log('layout effect deps', rootRef.current, wrapperRef.current);
+        return () => {
+            console.log('layout unmount deps', rootRef.current, wrapperRef.current);
+        };
+    }, [layout]);
+
+    useLayoutEffect(() => {
+        console.log('layout effect lazy', rootRef.current, wrapperRef.current);
+        return () => {
+            console.log('layout unmount lazy', rootRef.current, wrapperRef.current);
         };
     }, []);
 

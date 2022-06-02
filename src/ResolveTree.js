@@ -1,5 +1,5 @@
 import {insertView, updateView, deleteView} from './CommitView';
-import {destroyEffects, mountEffects} from './EffectHook';
+import {destroyEffects, EFFECT_LAYOUT, EFFECT_NORMAL, mountEffects} from './EffectHook';
 import {reconcileChildren} from './Reconciliation';
 import {Portal} from './VirtualNode';
 import {queueWork, workLoop} from './WorkLoop';
@@ -10,12 +10,19 @@ export function resolveTree(current) {
     
     workLoop(_performUnitOfWork, _onReturn, current, mountNodesMap, unmountNodesMap);
 
+    unmountNodesMap.forEach(function (isUnmounted, vnode) {
+        destroyEffects(EFFECT_LAYOUT, vnode, isUnmounted);
+    });
+    mountNodesMap.forEach(function (isNewlyMounted, vnode) {
+        mountEffects(EFFECT_LAYOUT, vnode, isNewlyMounted);
+    });
+
     queueWork(function () {
-        unmountNodesMap.forEach(function (isUnmounted, node) {
-            destroyEffects(node, isUnmounted);
+        unmountNodesMap.forEach(function (isUnmounted, vnode) {
+            destroyEffects(EFFECT_NORMAL, vnode, isUnmounted);
         });
-        mountNodesMap.forEach(function (isNewlyMounted, node) {
-            mountEffects(node, isNewlyMounted);
+        mountNodesMap.forEach(function (isNewlyMounted, vnode) {
+            mountEffects(EFFECT_NORMAL, vnode, isNewlyMounted);
         });
     });
 }
