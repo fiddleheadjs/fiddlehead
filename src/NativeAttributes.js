@@ -30,7 +30,7 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
         return;
     }
 
-    // Cases: properties, event listeners
+    // Set properties and event listeners
     if (attrName in element) {
         try {
             element[attrName] = newAttrValue;
@@ -65,7 +65,7 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
         return;
     }
     
-    // Remove properties, event listeners
+    // Remove properties and event listeners
     if (attrName in element) {
         try {
             element[attrName] = null;
