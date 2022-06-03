@@ -1,4 +1,4 @@
-import {VirtualNode, linkNativeNode, NS_HTML, NS_SVG, Portal} from './VirtualNode';
+import {VirtualNode, linkNativeNode, NAMSPACE_HTML, NAMSPACE_SVG, Portal} from './VirtualNode';
 import {attachVirtualNode, extractVirtualNode} from './Externals';
 import {resolveTree} from './ResolveTree';
 
@@ -36,7 +36,7 @@ export function createPortal(children, targetNativeNode) {
         portal = new VirtualNode(Portal, {}, null);
 
         // Determine the namespace (we only support SVG and HTML namespaces)
-        portal.ns_ = ('ownerSVGElement' in targetNativeNode) ? NS_SVG : NS_HTML;
+        portal.namespace_ = ('ownerSVGElement' in targetNativeNode) ? NAMSPACE_SVG : NAMSPACE_HTML;
         
         linkNativeNode(portal, targetNativeNode);
         attachVirtualNode(targetNativeNode, portal);

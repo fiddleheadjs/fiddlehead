@@ -181,7 +181,7 @@ function VirtualNode(type, props, key) {
     
     this.nativeNode_ = null;
 
-    this.ns_ = null;
+    this.namespace_ = null;
 
     // Linked-list pointers
     // ====================
@@ -207,8 +207,8 @@ function VirtualNode(type, props, key) {
 }
 
 // Do not support namespace MathML as almost browsers do not support as well
-const NS_HTML = 0;
-const NS_SVG = 1;
+const NAMSPACE_HTML = 0;
+const NAMSPACE_SVG = 1;
 
 // Special node types
 const TextNode = '#';
@@ -529,7 +529,7 @@ function updateNativeTextNode(node, text) {
 }
 
 function createNativeElementWithNS(ns, type, attributes) {
-    const element = (ns === NS_SVG
+    const element = (ns === NAMSPACE_SVG
         ? document.createElementNS('http://www.w3.org/2000/svg', type)
         : document.createElement(type)
     );
@@ -543,7 +543,7 @@ function createNativeElementWithNS(ns, type, attributes) {
 // This module does not handle Portal nodes
 
 function hydrateView(virtualNode) {
-    virtualNode.ns_ = _determineNS(virtualNode);
+    virtualNode.namespace_ = _determineNS(virtualNode);
 
     // Do nothing more with fragments
     if (_isDry(virtualNode.type_)) {
@@ -559,7 +559,7 @@ function hydrateView(virtualNode) {
 }
 
 function rehydrateView(newVirtualNode, oldVirtualNode) {
-    newVirtualNode.ns_ = _determineNS(newVirtualNode);
+    newVirtualNode.namespace_ = _determineNS(newVirtualNode);
 
     // Do nothing more with fragments
     if (_isDry(newVirtualNode.type_)) {
@@ -594,26 +594,30 @@ function _createNativeNode(virtualNode) {
     }
 
     return createNativeElementWithNS(
-        virtualNode.ns_,
+        virtualNode.namespace_,
         virtualNode.type_,
         virtualNode.props_
     );
 }
 
+// We only support HTML and SVG namespaces
+// as the most of browsers support
 function _determineNS(virtualNode) {
     // Intrinsic namespace
     if (virtualNode.type_ === 'svg') {
-        return NS_SVG;
+        return NAMSPACE_SVG;
     }
 
     // As we never hydrate the container node,
     // the parent_ never empty here
-    if (virtualNode.parent_.ns_ === NS_SVG && virtualNode.parent_.type_ === 'foreignObject') {
-        return NS_HTML;
+    if (virtualNode.parent_.namespace_ === NAMSPACE_SVG &&
+        virtualNode.parent_.type_ === 'foreignObject'
+    ) {
+        return NAMSPACE_HTML;
     }
 
     // By default, pass namespace below.
-    return virtualNode.parent_.ns_;
+    return virtualNode.parent_.namespace_;
 }
 
 function _isDry(type) {
@@ -1296,7 +1300,7 @@ function createPortal(children, targetNativeNode) {
         portal = new VirtualNode(Portal, {}, null);
 
         // Determine the namespace (we only support SVG and HTML namespaces)
-        portal.ns_ = ('ownerSVGElement' in targetNativeNode) ? NS_SVG : NS_HTML;
+        portal.namespace_ = ('ownerSVGElement' in targetNativeNode) ? NAMSPACE_SVG : NAMSPACE_HTML;
         
         linkNativeNode(portal, targetNativeNode);
         attachVirtualNode(targetNativeNode, portal);

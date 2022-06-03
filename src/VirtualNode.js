@@ -31,7 +31,7 @@ export function VirtualNode(type, props, key) {
     
     this.nativeNode_ = null;
 
-    this.ns_ = null;
+    this.namespace_ = null;
 
     // Linked-list pointers
     // ====================
@@ -57,8 +57,8 @@ export function VirtualNode(type, props, key) {
 }
 
 // Do not support namespace MathML as almost browsers do not support as well
-export const NS_HTML = 0;
-export const NS_SVG = 1;
+export const NAMSPACE_HTML = 0;
+export const NAMSPACE_SVG = 1;
 
 // Special node types
 export const TextNode = '#';

@@ -33,6 +33,7 @@ export default {
                         booleans_as_integers: true,
                         keep_infinity: true,
                         keep_fargs: false,
+                        inline: true,
                     },
                     mangle: {
                         properties: {
