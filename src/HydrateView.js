@@ -1,4 +1,4 @@
-import {linkNativeNode, Fragment, TextNode, NAMSPACE_HTML, NAMSPACE_SVG} from './VirtualNode';
+import {linkNativeNode, Fragment, TextNode, NAMESPACE_HTML, NAMESPACE_SVG} from './VirtualNode';
 import {createNativeElementWithNS, createNativeTextNode, updateNativeTextNode, updateNativeElementAttributes} from './NativeDOM';
 import {attachVirtualNode} from './Externals';
 import {isFunction} from './Util';
@@ -69,15 +69,15 @@ function _createNativeNode(virtualNode) {
 function _determineNS(virtualNode) {
     // Intrinsic namespace
     if (virtualNode.type_ === 'svg') {
-        return NAMSPACE_SVG;
+        return NAMESPACE_SVG;
     }
 
     // As we never hydrate the container node,
     // the parent_ never empty here
-    if (virtualNode.parent_.namespace_ === NAMSPACE_SVG &&
+    if (virtualNode.parent_.namespace_ === NAMESPACE_SVG &&
         virtualNode.parent_.type_ === 'foreignObject'
     ) {
-        return NAMSPACE_HTML;
+        return NAMESPACE_HTML;
     }
 
     // By default, pass namespace below.

@@ -1,6 +1,6 @@
 // Do not support namespace MathML as almost browsers do not support as well
-export const NAMSPACE_HTML = 0;
-export const NAMSPACE_SVG = 1;
+export const NAMESPACE_HTML = 0;
+export const NAMESPACE_SVG = 1;
 
 // Special node types
 export const TextNode = '#';

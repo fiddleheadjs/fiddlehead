@@ -149,8 +149,8 @@ function compareArrays(a, b) {
 }
 
 // Do not support namespace MathML as almost browsers do not support as well
-const NAMSPACE_HTML = 0;
-const NAMSPACE_SVG = 1;
+const NAMESPACE_HTML = 0;
+const NAMESPACE_SVG = 1;
 
 // Special node types
 const TextNode = '#';
@@ -527,7 +527,7 @@ function updateNativeTextNode(node, text) {
 }
 
 function createNativeElementWithNS(ns, type, attributes) {
-    const element = (ns === NAMSPACE_SVG
+    const element = (ns === NAMESPACE_SVG
         ? document.createElementNS('http://www.w3.org/2000/svg', type)
         : document.createElement(type)
     );
@@ -603,15 +603,15 @@ function _createNativeNode(virtualNode) {
 function _determineNS(virtualNode) {
     // Intrinsic namespace
     if (virtualNode.type_ === 'svg') {
-        return NAMSPACE_SVG;
+        return NAMESPACE_SVG;
     }
 
     // As we never hydrate the container node,
     // the parent_ never empty here
-    if (virtualNode.parent_.namespace_ === NAMSPACE_SVG &&
+    if (virtualNode.parent_.namespace_ === NAMESPACE_SVG &&
         virtualNode.parent_.type_ === 'foreignObject'
     ) {
-        return NAMSPACE_HTML;
+        return NAMESPACE_HTML;
     }
 
     // By default, pass namespace below.
@@ -1291,7 +1291,7 @@ function createPortal(children, targetNativeNode) {
         portal = new VirtualNode(Portal, {}, null);
 
         // Determine the namespace (we only support SVG and HTML namespaces)
-        portal.namespace_ = ('ownerSVGElement' in targetNativeNode) ? NAMSPACE_SVG : NAMSPACE_HTML;
+        portal.namespace_ = ('ownerSVGElement' in targetNativeNode) ? NAMESPACE_SVG : NAMESPACE_HTML;
         
         linkNativeNode(portal, targetNativeNode);
         attachVirtualNode(targetNativeNode, portal);
