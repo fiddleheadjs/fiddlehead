@@ -1213,36 +1213,33 @@ function _performUnitOfWork(current, root, mountNodesMap, unmountNodesMap) {
     
     reconcileChildren(current, isSubtreeRoot);
 
-    // Portal nodes never change their child
-    // Do nothing anymore
-    if (current.type_ === Portal) {
-        return;
-    }
-
-    if (isSubtreeRoot) {
-        if (current.effectHook_ !== null) {
-            unmountNodesMap.set(current, false);
-            mountNodesMap.set(current, false);
-        }
-    } else {
-        if (current.alternative_ !== null) {
-            updateView(current, current.alternative_);
+    // Portal nodes never change the view itself
+    if (current.type_ !== Portal) {
+        if (isSubtreeRoot) {
             if (current.effectHook_ !== null) {
-                unmountNodesMap.set(current.alternative_, false);
+                unmountNodesMap.set(current, false);
                 mountNodesMap.set(current, false);
             }
-            current.alternative_ = null;
         } else {
-            insertView(current);
-            if (current.effectHook_ !== null) {
-                mountNodesMap.set(current, true);
+            if (current.alternative_ !== null) {
+                updateView(current, current.alternative_);
+                if (current.effectHook_ !== null) {
+                    unmountNodesMap.set(current.alternative_, false);
+                    mountNodesMap.set(current, false);
+                }
+                current.alternative_ = null;
+            } else {
+                insertView(current);
+                if (current.effectHook_ !== null) {
+                    mountNodesMap.set(current, true);
+                }
             }
         }
     }
     
+    // Delete subtrees that no longer exist
     if (current.deletions_ !== null) {
         const deletions = current.deletions_;
-        current.deletions_ = null;
 
         for (let i = 0; i < deletions.length; ++i) {
             deleteView(deletions[i]);
@@ -1257,6 +1254,8 @@ function _performUnitOfWork(current, root, mountNodesMap, unmountNodesMap) {
                 }, null, deletions[i]);
             }
         });
+
+        current.deletions_ = null;
     }
 }
 
