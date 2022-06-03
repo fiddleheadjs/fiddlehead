@@ -5,29 +5,29 @@ import {Portal} from './VirtualNode';
 import {queueWork, workLoop} from './WorkLoop';
 
 export function resolveTree(current) {
-    const mountNodesMap = new Map();
-    const unmountNodesMap = new Map();
+    const effectMountNodes = new Map();
+    const effectDestroyNodes = new Map();
     
-    workLoop(_performUnitOfWork, _onReturn, current, mountNodesMap, unmountNodesMap);
+    workLoop(_performUnitOfWork, _onReturn, current, effectMountNodes, effectDestroyNodes);
 
-    unmountNodesMap.forEach(function (isUnmounted, vnode) {
+    effectDestroyNodes.forEach(function (isUnmounted, vnode) {
         destroyEffects(EFFECT_LAYOUT, vnode, isUnmounted);
     });
-    mountNodesMap.forEach(function (isNewlyMounted, vnode) {
+    effectMountNodes.forEach(function (isNewlyMounted, vnode) {
         mountEffects(EFFECT_LAYOUT, vnode, isNewlyMounted);
     });
 
     queueWork(function () {
-        unmountNodesMap.forEach(function (isUnmounted, vnode) {
+        effectDestroyNodes.forEach(function (isUnmounted, vnode) {
             destroyEffects(EFFECT_NORMAL, vnode, isUnmounted);
         });
-        mountNodesMap.forEach(function (isNewlyMounted, vnode) {
+        effectMountNodes.forEach(function (isNewlyMounted, vnode) {
             mountEffects(EFFECT_NORMAL, vnode, isNewlyMounted);
         });
     });
 }
 
-function _performUnitOfWork(current, root, mountNodesMap, unmountNodesMap) {
+function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes) {
     const isSubtreeRoot = current === root;
     
     reconcileChildren(current, isSubtreeRoot);
@@ -36,21 +36,21 @@ function _performUnitOfWork(current, root, mountNodesMap, unmountNodesMap) {
     if (current.type_ !== Portal) {
         if (isSubtreeRoot) {
             if (current.effectHook_ !== null) {
-                unmountNodesMap.set(current, false);
-                mountNodesMap.set(current, false);
+                effectDestroyNodes.set(current, false);
+                effectMountNodes.set(current, false);
             }
         } else {
             if (current.alternative_ !== null) {
                 updateView(current, current.alternative_);
                 if (current.effectHook_ !== null) {
-                    unmountNodesMap.set(current.alternative_, false);
-                    mountNodesMap.set(current, false);
+                    effectDestroyNodes.set(current.alternative_, false);
+                    effectMountNodes.set(current, false);
                 }
                 current.alternative_ = null;
             } else {
                 insertView(current);
                 if (current.effectHook_ !== null) {
-                    mountNodesMap.set(current, true);
+                    effectMountNodes.set(current, true);
                 }
             }
         }
@@ -58,22 +58,14 @@ function _performUnitOfWork(current, root, mountNodesMap, unmountNodesMap) {
     
     // Delete subtrees that no longer exist
     if (current.deletions_ !== null) {
-        const deletions = current.deletions_;
-
-        for (let i = 0; i < deletions.length; ++i) {
-            deleteView(deletions[i]);
+        for (let i = 0; i < current.deletions_.length; ++i) {
+            deleteView(current.deletions_[i]);
+            workLoop(function (vnode) {
+                if (vnode.effectHook_ !== null) {
+                    effectDestroyNodes.set(vnode, true);
+                }
+            }, null, current.deletions_[i]);
         }
-
-        queueWork(function () {
-            for (let i = 0; i < deletions.length; ++i) {
-                workLoop(function (vnode) {
-                    if (vnode.effectHook_ !== null) {
-                        unmountNodesMap.set(vnode, true);
-                    }
-                }, null, deletions[i]);
-            }
-        });
-
         current.deletions_ = null;
     }
 }

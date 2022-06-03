@@ -114,10 +114,8 @@ function _normalizeText(text) {
  * @param {Array} content
  */
 function _appendChildrenFromContent(parentNode, content) {
-    for (
-        let childNode, prevChildNode = null, i = 0;
-        i < content.length; ++i
-    ) {
+    let childNode, prevChildNode = null, i = 0;
+    for (; i < content.length; ++i) {
         childNode = createVirtualNodeFromContent(content[i]);
         
         if (childNode !== null) {
