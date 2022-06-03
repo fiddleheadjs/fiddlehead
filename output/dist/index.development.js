@@ -148,6 +148,17 @@ function compareArrays(a, b) {
     return true;
 }
 
+// Do not support namespace MathML as almost browsers do not support as well
+const NAMSPACE_HTML = 0;
+const NAMSPACE_SVG = 1;
+
+// Special node types
+const TextNode = '#';
+const Fragment = '[';
+function Portal(props) {
+    return props.children;
+}
+
 /**
  * 
  * @param {function|string} type
@@ -204,17 +215,6 @@ function VirtualNode(type, props, key) {
     // In the commit phase, the new child will be inserted
     // after the last inserted/updated child
     this.lastManipulatedClient_ = null;
-}
-
-// Do not support namespace MathML as almost browsers do not support as well
-const NAMSPACE_HTML = 0;
-const NAMSPACE_SVG = 1;
-
-// Special node types
-const TextNode = '#';
-const Fragment = '[';
-function Portal(props) {
-    return props.children;
 }
 
 /**

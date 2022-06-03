@@ -1,3 +1,14 @@
+// Do not support namespace MathML as almost browsers do not support as well
+export const NAMSPACE_HTML = 0;
+export const NAMSPACE_SVG = 1;
+
+// Special node types
+export const TextNode = '#';
+export const Fragment = '[';
+export function Portal(props) {
+    return props.children;
+}
+
 /**
  * 
  * @param {function|string} type
@@ -54,17 +65,6 @@ export function VirtualNode(type, props, key) {
     // In the commit phase, the new child will be inserted
     // after the last inserted/updated child
     this.lastManipulatedClient_ = null;
-}
-
-// Do not support namespace MathML as almost browsers do not support as well
-export const NAMSPACE_HTML = 0;
-export const NAMSPACE_SVG = 1;
-
-// Special node types
-export const TextNode = '#';
-export const Fragment = '[';
-export function Portal(props) {
-    return props.children;
 }
 
 /**
