@@ -8,10 +8,10 @@ function Root() {
     const textRef = useRef(null);
 
     useEffect(() => {
-        console.log('mount', textRef.current);
+        console.log('mount', textRef);
 
         return () => {
-            console.log('destroy', textRef.current);
+            console.log('destroy', textRef);
         };
     });
 

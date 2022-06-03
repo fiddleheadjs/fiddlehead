@@ -1,18 +1,17 @@
 import {isFunction} from './Util';
 import {createVirtualNodeFromContent} from './CreateElement';
-import {StateHook} from './StateHook';
 import {prepareCurrentlyProcessing, flushCurrentlyProcessing} from './CurrentlyProcessing';
 import {catchError} from './CatchError';
 
-export const reconcileChildren = (current, isSubtreeRoot) => {
+export function reconcileChildren(current, isSubtreeRoot) {
     if (isFunction(current.type_)) {
         _reconcileChildOfDynamicNode(current, isSubtreeRoot);
-    } else {
-        _reconcileChildrenOfStaticNode(current);
+    } else if (current.alternative_ !== null) {
+        _reconcileChildrenOfStaticNode(current, current.alternative_);
     }
 }
 
-const _reconcileChildOfDynamicNode = (current, isSubtreeRoot) => {
+function _reconcileChildOfDynamicNode(current, isSubtreeRoot) {
     const oldChild = isSubtreeRoot ? current.child_ : (
         current.alternative_ !== null ? current.alternative_.child_ : null
     );
@@ -32,7 +31,9 @@ const _reconcileChildOfDynamicNode = (current, isSubtreeRoot) => {
 
     if (newChild !== null) {
         newChild.parent_ = current;
-        newChild.slot_ = 0;
+        
+        // Don't need to set the slot property
+        // as a dynamic node can have only one child
     }
 
     if (oldChild !== null) {
@@ -46,16 +47,12 @@ const _reconcileChildOfDynamicNode = (current, isSubtreeRoot) => {
     current.child_ = newChild;
 }
 
-const _reconcileChildrenOfStaticNode = (current) => {
-    if (current.alternative_ === null) {
-        return;
-    }
-
-    const oldChildren = _mapChildren(current.alternative_);
+function _reconcileChildrenOfStaticNode(current, alternative) {
+    const oldChildren = _mapChildren(alternative);
     const newChildren = _mapChildren(current);
 
     let newChild;
-    oldChildren.forEach((oldChild, mapKey) => {
+    oldChildren.forEach(function (oldChild, mapKey) {
         newChild = newChildren.get(mapKey);
         if (newChild !== undefined && newChild.type_ === oldChild.type_) {
             _makeAlternative(newChild, oldChild);
@@ -65,23 +62,25 @@ const _reconcileChildrenOfStaticNode = (current) => {
     });
 }
 
-const _makeAlternative = (newChild, oldChild) => {
+function _makeAlternative(newChild, oldChild) {
     newChild.alternative_ = oldChild;
 
     if (isFunction(newChild.type_)) {
-        newChild.hook_ = oldChild.hook_;
+        // Copy hooks
+        newChild.refHook_ = oldChild.refHook_;
+        newChild.stateHook_ = oldChild.stateHook_;
+        newChild.effectHook_ = oldChild.effectHook_;
 
-        let hook = newChild.hook_;
+        // Update contexts of state hooks
+        let hook = newChild.stateHook_;
         while (hook !== null) {
-            if (hook instanceof StateHook) {
-                hook.context_ = newChild;
-            }
+            hook.context_ = newChild;
             hook = hook.next_;
         }
     }
 }
 
-const _addDeletion = (current, childToDelete) => {
+function _addDeletion(current, childToDelete) {
     if (current.deletions_ === null) {
         current.deletions_ = [childToDelete];
     } else {
@@ -89,7 +88,7 @@ const _addDeletion = (current, childToDelete) => {
     }
 }
 
-const _mapChildren = (node) => {
+function _mapChildren(node) {
     const map = new Map();
     let child = node.child_;
     while (child !== null) {

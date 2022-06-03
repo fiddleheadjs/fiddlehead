@@ -1,6 +1,6 @@
 // Algorithm: https://github.com/facebook/react/issues/7942
 
-export const workLoop = (performUnit, onReturn, root, ref_0, ref_1) => {
+export function workLoop(performUnit, onReturn, root, ref_0, ref_1) {
     let current = root;
     while (true) {
         performUnit(current, root, ref_0, ref_1);
@@ -24,7 +24,7 @@ export const workLoop = (performUnit, onReturn, root, ref_0, ref_1) => {
     }
 }
 
-export const queueWork = (work) => {
+export function queueWork(work) {
     if (typeof Promise !== 'undefined') {
         Promise.resolve().then(work);
     } else {

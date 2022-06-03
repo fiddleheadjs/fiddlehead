@@ -1,14 +1,14 @@
-import {StateHook, STATE_ERROR} from './StateHook';
+import {STATE_ERROR} from './StateHook';
 
-export const catchError = (error, virtualNode) => {
+export function catchError(error, virtualNode) {
     let parent = virtualNode.parent_;
     let hook;
 
     while (parent !== null) {
-        hook = parent.hook_;
+        hook = parent.stateHook_;
         while (hook !== null) {
-            if (hook instanceof StateHook && hook.tag_ === STATE_ERROR) {
-                hook.setValue_((prevError) => {
+            if (hook.tag_ === STATE_ERROR) {
+                hook.setValue_(function (prevError) {
                     return prevError || error;
                 });
                 return;
@@ -19,7 +19,7 @@ export const catchError = (error, virtualNode) => {
     }
 
     if (__DEV__) {
-        setTimeout(() => {
+        setTimeout(function () {
             console.info('You can catch this error by implementing an error boundary with the useError hook');
         });
     }

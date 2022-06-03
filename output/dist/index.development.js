@@ -2,33 +2,131 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+let currentNode = null;
+let currentRefHook = null;
+let currentStateHook = null;
+let currentEffectHook = null;
+
+function prepareCurrentlyProcessing(functionalVirtualNode) {
+    currentNode = functionalVirtualNode;
+}
+
+function flushCurrentlyProcessing() {
+    currentNode = null;
+    currentRefHook = null;
+    currentStateHook = null;
+    currentEffectHook = null;
+}
+
+function resolveCurrentRefHook(createHookFn, processFn) {
+    _throwIfCallInvalid();
+    currentRefHook = _resolveCurrentHookImpl(createHookFn, currentRefHook, currentNode.refHook_);
+    if (currentNode.refHook_ === null) {
+        currentNode.refHook_ = currentRefHook;
+    }
+    return processFn(currentRefHook);
+}
+
+function resolveCurrentStateHook(createHookFn, processFn) {
+    _throwIfCallInvalid();
+    currentStateHook = _resolveCurrentHookImpl(createHookFn, currentStateHook, currentNode.stateHook_);
+    if (currentNode.stateHook_ === null) {
+        currentNode.stateHook_ = currentStateHook;
+    }
+    return processFn(currentStateHook);
+}
+
+function resolveCurrentEffectHook(createHookFn, processFn) {
+    _throwIfCallInvalid();
+    currentEffectHook = _resolveCurrentHookImpl(createHookFn, currentEffectHook, currentNode.effectHook_);
+    if (currentNode.effectHook_ === null) {
+        currentNode.effectHook_ = currentEffectHook;
+    }
+    return processFn(currentEffectHook);
+}
+
+function _resolveCurrentHookImpl(createHookFn, currentHook, firstHookOfNode) {
+    if (currentHook === null) {
+        if (firstHookOfNode === null) {
+            return createHookFn(currentNode);
+        } else {
+            return firstHookOfNode;
+        }
+    } else {
+        if (currentHook.next_ === null) {
+            const nextHook = createHookFn(currentNode);
+            currentHook.next_ = nextHook;
+            return nextHook;
+        } else {
+            return currentHook.next_;
+        }
+    }
+}
+
+function _throwIfCallInvalid() {
+    if (currentNode === null) {
+        throw new Error('Cannot use hooks from outside of components');
+    }
+}
+
+/**
+ *
+ * @param {*} current
+ * @constructor
+ */
+ function Ref(current) {
+    this.current = current;
+}
+
+/**
+ *
+ * @param {*} current
+ * @constructor
+ */
+function RefHook(current) {
+    this.ref_ = new Ref(current);
+    this.next_ = null;
+}
+
+/**
+ *
+ * @param {*} initialValue
+ * @constructor
+ */
+function useRef(initialValue) {
+    return resolveCurrentRefHook(
+        function (currentNode) {
+            return new RefHook(initialValue);
+        },
+        function (currentHook) {
+            return currentHook.ref_;
+        }
+    );
+}
+
 const hasOwnProperty = Object.prototype.hasOwnProperty;
 
 const slice = Array.prototype.slice;
 
-const isString = (value) => {
+function isString(value) {
     return typeof value === 'string'/* || value instanceof String*/;
-};
+}
 
-const isNumber = (value) => {
+function isNumber(value) {
     return typeof value === 'number'/* || value instanceof Number*/;
-};
+}
 
-const isFunction = (value) => {
+function isFunction(value) {
     return typeof value === 'function';
-};
+}
 
-const isArray = (value) => {
+function isArray(value) {
     return value instanceof Array;
-};
+}
 
-const isObject = (value) => {
+function isObject(value) {
     return value !== null && typeof value === 'object';
-};
-
-const isNullish = (value) => {
-    return value === null || value === undefined;
-};
+}
 
 /**
  * 
@@ -36,7 +134,7 @@ const isNullish = (value) => {
  * @param {Array} b 
  * @returns {boolean}
  */
-const compareArrays = (a, b) => {
+function compareArrays(a, b) {
     if (a.length !== b.length) {
         return false;
     }
@@ -48,67 +146,13 @@ const compareArrays = (a, b) => {
     }
 
     return true;
-};
-
-let currentNode = null;
-let currentHook = null;
-
-const prepareCurrentlyProcessing = (functionalVirtualNode) => {
-    currentNode = functionalVirtualNode;
-};
-
-const flushCurrentlyProcessing = () => {
-    currentNode = null;
-    currentHook = null;
-};
-
-const resolveCurrentHook = (createHookFn, processFn) => {
-    if (currentNode === null) {
-        throw new Error('Cannot use hooks from outside of components');
-    }
-    
-    if (currentHook === null) {
-        if (currentNode.hook_ === null) {
-            currentHook = createHookFn(currentNode);
-            currentNode.hook_ = currentHook;
-        } else {
-            currentHook = currentNode.hook_;
-        }
-    } else {
-        if (currentHook.next_ === null) {
-            const previousHook = currentHook;           
-            currentHook = createHookFn(currentNode);
-            previousHook.next_ = currentHook;
-        } else {
-            currentHook = currentHook.next_;
-        }
-    }
-
-    return processFn(currentHook);
-};
-
-/**
- *
- * @param {*} current
- * @constructor
- */
-function RefHook(current) {
-    this.current = current;
-    this.next_ = null;
 }
-
-const useRef = (initialValue) => {
-    return resolveCurrentHook(
-        (currentNode) => new RefHook(initialValue),
-        (currentHook) => currentHook
-    );
-};
 
 /**
  * 
  * @param {function|string} type
  * @param {{}} props
- * @param {string|null?} key
+ * @param {string|null} key
  */
 function VirtualNode(type, props, key) {
     // Identification
@@ -117,31 +161,27 @@ function VirtualNode(type, props, key) {
     this.type_ = type;
 
     // Convert to string to avoid conflict with slot
-    this.key_ = !isNullish(key) ? ('' + key) : null;
+    this.key_ = key;
 
     this.slot_ = null;
 
     // Props and hooks
     // ===============
 
-    if (!(props.ref === undefined || props.ref instanceof RefHook)) {
-        // Delete the invalid ref
-        delete props.ref;
-        
-        if (true) {
-            console.error('The ref value must be created by the useRef hook');
-        }
-    }
     this.props_ = props;
 
-    this.hook_ = null;
+    this.refHook_ = null;
+    
+    this.stateHook_ = null;
+
+    this.effectHook_ = null;
     
     // Output native node and relates
-    // =======================
+    // ==============================
     
     this.nativeNode_ = null;
 
-    this.ns_ = null;
+    this.namespace_ = null;
 
     // Linked-list pointers
     // ====================
@@ -163,30 +203,32 @@ function VirtualNode(type, props, key) {
  
     // In the commit phase, the new child will be inserted
     // after the last inserted/updated child
-    this.lastManipulatedClientNativeNode_ = null;
+    this.lastManipulatedClient_ = null;
 }
 
 // Do not support namespace MathML as almost browsers do not support as well
-const NS_HTML = 0;
-const NS_SVG = 1;
+const NAMSPACE_HTML = 0;
+const NAMSPACE_SVG = 1;
 
 // Special node types
 const TextNode = '#';
 const Fragment = '[';
-const Portal = (props) => props.children;
+function Portal(props) {
+    return props.children;
+}
 
 /**
  * 
  * @param {VirtualNode} virtualNode 
  * @param {Node} nativeNode
  */
-const linkNativeNode = (virtualNode, nativeNode) => {
+function linkNativeNode(virtualNode, nativeNode) {
     virtualNode.nativeNode_ = nativeNode;
 
     if (virtualNode.props_.ref !== undefined) {
         virtualNode.props_.ref.current = nativeNode;
     }
-};
+}
 
 /**
  *
@@ -200,11 +242,25 @@ function createElement(type, props, content) {
         props = {};
     }
     
-    const key = props.key;
+    // Normalize key
+    let key = null;
+    if (!(props.key === undefined || props.key === null)) {
+        key = '' + key;
+    }
     delete props.key;
+
+    // Normalize ref
+    if (!(props.ref === undefined || props.ref instanceof Ref)) {
+        if (true) {
+            console.error('The ref value must be created by the useRef hook');
+        }
+        delete props.ref;
+    }
     
+    // Create the node
     const virtualNode = new VirtualNode(type, props, key);
 
+    // Append children
     if (arguments.length > 2) {
         const multiple = arguments.length > 3;
 
@@ -241,29 +297,34 @@ function createElement(type, props, content) {
  * @param {*} content
  * @return {null|VirtualNode}
  */
- const createVirtualNodeFromContent = (content) => {
+ function createVirtualNodeFromContent(content) {
     if (content instanceof VirtualNode) {
         return content;
     }
         
     if (isString(content)) {
-        return new VirtualNode(TextNode, {children: content});
+        return new VirtualNode(TextNode, {children: content}, null);
     }
 
     if (isNumber(content)) {
-        return new VirtualNode(TextNode, {children: '' + content});
+        return new VirtualNode(TextNode, {children: '' + content}, null);
     }
 
     if (isArray(content)) {
-        const fragment = new VirtualNode(Fragment, {});
+        const fragment = new VirtualNode(Fragment, {}, null);
         _appendChildrenFromContent(fragment, content);
         return fragment;
     }
 
     return null;
-};
+}
 
-const _normalizeText = (text) => {
+/**
+ * 
+ * @param {*} text 
+ * @returns {string}
+ */
+function _normalizeText(text) {
     if (isString(text)) {
         return text;
     }
@@ -273,14 +334,14 @@ const _normalizeText = (text) => {
     }
     
     return '';
-};
+}
 
 /**
  * 
  * @param {VirtualNode} parentNode 
  * @param {Array} content
  */
- const _appendChildrenFromContent = (parentNode, content) => {
+function _appendChildrenFromContent(parentNode, content) {
     for (
         let childNode, prevChildNode = null, i = 0;
         i < content.length; ++i
@@ -300,7 +361,7 @@ const _normalizeText = (text) => {
             prevChildNode = childNode;
         }
     }
-};
+}
 
 const PROP_VNODE = '%vnode';
 
@@ -309,18 +370,18 @@ const PROP_VNODE = '%vnode';
  * @param {Node} nativeNode 
  * @param {VirtualNode} virtualNode 
  */
-const attachVirtualNode = (nativeNode, virtualNode) => {
+function attachVirtualNode(nativeNode, virtualNode) {
     nativeNode[PROP_VNODE] = virtualNode;
-};
+}
 
 /**
  * 
  * @param {Node} nativeNode 
  * @returns {VirtualNode|undefined}
  */
-const extractVirtualNode = (nativeNode) => {
+function extractVirtualNode(nativeNode) {
     return nativeNode[PROP_VNODE];
-};
+}
 
 function updateNativeElementAttributes(element, newAttributes, oldAttributes) {
     _updateKeyValues(
@@ -352,7 +413,7 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
         return;
     }
 
-    // Cases: properties, event listeners
+    // Set properties and event listeners
     if (attrName in element) {
         try {
             element[attrName] = newAttrValue;
@@ -387,7 +448,7 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
         return;
     }
     
-    // Remove properties, event listeners
+    // Remove properties and event listeners
     if (attrName in element) {
         try {
             element[attrName] = null;
@@ -452,19 +513,23 @@ function _updateKeyValues(target, newKeyValues, oldKeyValues, updateFn, removeFn
 }
 
 function _hasOwnNonEmpty(target, prop) {
-    return hasOwnProperty.call(target, prop) && !isNullish(target[prop]);
+    return (
+        hasOwnProperty.call(target, prop) &&
+        target[prop] !== undefined &&
+        target[prop] !== null
+    );
 }
 
-const createNativeTextNode = (text) => {
+function createNativeTextNode(text) {
     return document.createTextNode(text);
-};
+}
 
-const updateNativeTextNode = (node, text) => {
+function updateNativeTextNode(node, text) {
     node.textContent = text;
-};
+}
 
-const createNativeElementWithNS = (ns, type, attributes) => {
-    const element = (ns === NS_SVG
+function createNativeElementWithNS(ns, type, attributes) {
+    const element = (ns === NAMSPACE_SVG
         ? document.createElementNS('http://www.w3.org/2000/svg', type)
         : document.createElement(type)
     );
@@ -472,13 +537,13 @@ const createNativeElementWithNS = (ns, type, attributes) => {
     updateNativeElementAttributes(element, attributes, {});
     
     return element;
-};
+}
 
 // Important!!!
 // This module does not handle Portal nodes
 
-const hydrateView = (virtualNode) => {
-    virtualNode.ns_ = _determineNS(virtualNode);
+function hydrateView(virtualNode) {
+    virtualNode.namespace_ = _determineNS(virtualNode);
 
     // Do nothing more with fragments
     if (_isDry(virtualNode.type_)) {
@@ -491,10 +556,10 @@ const hydrateView = (virtualNode) => {
     if (true) {
         attachVirtualNode(nativeNode, virtualNode);
     }
-};
+}
 
-const rehydrateView = (newVirtualNode, oldVirtualNode) => {
-    newVirtualNode.ns_ = _determineNS(newVirtualNode);
+function rehydrateView(newVirtualNode, oldVirtualNode) {
+    newVirtualNode.namespace_ = _determineNS(newVirtualNode);
 
     // Do nothing more with fragments
     if (_isDry(newVirtualNode.type_)) {
@@ -521,81 +586,85 @@ const rehydrateView = (newVirtualNode, oldVirtualNode) => {
             oldVirtualNode.props_
         );
     }
-};
+}
 
-const _createNativeNode = (virtualNode) => {
+function _createNativeNode(virtualNode) {
     if (virtualNode.type_ === TextNode) {
         return createNativeTextNode(virtualNode.props_.children);
     }
 
     return createNativeElementWithNS(
-        virtualNode.ns_,
+        virtualNode.namespace_,
         virtualNode.type_,
         virtualNode.props_
     );
-};
+}
 
-const _determineNS = (virtualNode) => {
+// We only support HTML and SVG namespaces
+// as the most of browsers support
+function _determineNS(virtualNode) {
     // Intrinsic namespace
     if (virtualNode.type_ === 'svg') {
-        return NS_SVG;
+        return NAMSPACE_SVG;
     }
 
     // As we never hydrate the container node,
     // the parent_ never empty here
-    if (virtualNode.parent_.ns_ === NS_SVG && virtualNode.parent_.type_ === 'foreignObject') {
-        return NS_HTML;
+    if (virtualNode.parent_.namespace_ === NAMSPACE_SVG &&
+        virtualNode.parent_.type_ === 'foreignObject'
+    ) {
+        return NAMSPACE_HTML;
     }
 
     // By default, pass namespace below.
-    return virtualNode.parent_.ns_;
-};
+    return virtualNode.parent_.namespace_;
+}
 
-const _isDry = (type) => {
+function _isDry(type) {
     return type === Fragment || isFunction(type);
-};
+}
 
 // Important!!!
 // This module does not handle Portal nodes
 
-const updateView = (newVirtualNode, oldVirtualNode) => {
+function updateView(newVirtualNode, oldVirtualNode) {
     rehydrateView(newVirtualNode, oldVirtualNode);
 
     if (newVirtualNode.nativeNode_ !== null) {
         const host = _findHostVirtualNode(newVirtualNode);
         if (host !== null) {
-            host.lastManipulatedClientNativeNode_ = newVirtualNode.nativeNode_;
+            host.lastManipulatedClient_ = newVirtualNode.nativeNode_;
         }
     }
-};
+}
 
-const insertView = (virtualNode) => {
+function insertView(virtualNode) {
     hydrateView(virtualNode);
 
     if (virtualNode.nativeNode_ !== null) {
         const host = _findHostVirtualNode(virtualNode);
         if (host !== null) {
             const nativeNodeAfter = (
-                host.lastManipulatedClientNativeNode_ !== null
-                    ? host.lastManipulatedClientNativeNode_.nextSibling
+                host.lastManipulatedClient_ !== null
+                    ? host.lastManipulatedClient_.nextSibling
                     : host.nativeNode_.firstChild
             );
             host.nativeNode_.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
-            host.lastManipulatedClientNativeNode_ = virtualNode.nativeNode_;
+            host.lastManipulatedClient_ = virtualNode.nativeNode_;
         }
     }
-};
+}
 
-const deleteView = (subtree) => {
-    _loopClientNativeNodes(subtree, (nativeNode) => {
+function deleteView(subtree) {
+    _loopClientNativeNodes(subtree, function (nativeNode) {
         if (nativeNode.parentNode !== null) {
             nativeNode.parentNode.removeChild(nativeNode);
         }
     });
-};
+}
 
 // Find the virtual node in the parent chain which its native node is not null
-const _findHostVirtualNode = (virtualNode) => {
+function _findHostVirtualNode(virtualNode) {
     let current = virtualNode.parent_;
 
     while (true) {
@@ -607,9 +676,9 @@ const _findHostVirtualNode = (virtualNode) => {
         }
         current = current.parent_;
     }
-};
+}
 
-const _loopClientNativeNodes = (virtualNode, callback) => {
+function _loopClientNativeNodes(virtualNode, callback) {
     let root = virtualNode;
     let current = virtualNode;
 
@@ -632,7 +701,7 @@ const _loopClientNativeNodes = (virtualNode, callback) => {
         current = current.sibling_;
         continue;
     }
-};
+}
 
 const STATE_NORMAL = 0;
 const STATE_ERROR = 1;
@@ -652,23 +721,26 @@ function StateHook(context, initialValue, tag) {
     this.next_ = null;
 }
 
-const useState = (initialValue) => {
-    return resolveCurrentHook(
-        (currentNode) => new StateHook(currentNode, initialValue, STATE_NORMAL),
-        (currentHook) => [currentHook.value_, currentHook.setValue_]
+function useState(initialValue) {
+    return resolveCurrentStateHook(
+        function (currentNode) {
+            return new StateHook(currentNode, initialValue, STATE_NORMAL);
+        },
+        function (currentHook) {
+            return [currentHook.value_, currentHook.setValue_];
+        }
     );
-};
+}
 
-const useError = (initialError) => {
-    return resolveCurrentHook(
-        (currentNode) => {
+function useError(initialError) {
+    return resolveCurrentStateHook(
+        function (currentNode) {
             // Make sure we have only one error hook in a component
-            // In the production, we allow the initialization but skip it then
             if (true) {
-                let hook = currentNode.hook_;
+                let hook = currentNode.stateHook_;
                 while (hook !== null) {
-                    if (hook instanceof StateHook && hook.tag_ === STATE_ERROR) {
-                        throw new Error('A component accepts only one useError hook');
+                    if (hook.tag_ === STATE_ERROR) {
+                        console.error('A component accepts only one useError hook');
                     }
                     hook = hook.next_;
                 }
@@ -683,9 +755,11 @@ const useError = (initialError) => {
             
             return new StateHook(currentNode, initialError, STATE_ERROR);
         },
-        (currentHook) => [currentHook.value_, currentHook.setValue_]
+        function (currentHook) {
+            return [currentHook.value_, currentHook.setValue_];
+        }
     );
-};
+}
 
 const queueMap = new Map();
 let timeoutId = null;
@@ -707,8 +781,8 @@ function _setState(value) {
     timeoutId = setTimeout(_flushQueues);
 }
 
-const _flushQueues = () => {
-    queueMap.forEach((queue, contextAsKey) => {
+function _flushQueues() {
+    queueMap.forEach(function (queue, contextAsKey) {
         // Important!!!
         // Use hook.context_ instead of contextAsKey
         // as it may be outdated due to the reconciliation process
@@ -751,9 +825,9 @@ const _flushQueues = () => {
 
     queueMap.clear();
     timeoutId = null;
-};
+}
 
-const _validateError = (error) => {
+function _validateError(error) {
     if (!(error === null || error instanceof Error)) {
         if (true) {
             console.error('Error hooks only accept the value is an instance of Error or null');
@@ -762,17 +836,17 @@ const _validateError = (error) => {
     }
 
     return true;
-};
+}
 
-const catchError = (error, virtualNode) => {
+function catchError(error, virtualNode) {
     let parent = virtualNode.parent_;
     let hook;
 
     while (parent !== null) {
-        hook = parent.hook_;
+        hook = parent.stateHook_;
         while (hook !== null) {
-            if (hook instanceof StateHook && hook.tag_ === STATE_ERROR) {
-                hook.setValue_((prevError) => {
+            if (hook.tag_ === STATE_ERROR) {
+                hook.setValue_(function (prevError) {
                     return prevError || error;
                 });
                 return;
@@ -783,47 +857,60 @@ const catchError = (error, virtualNode) => {
     }
 
     if (true) {
-        setTimeout(() => {
+        setTimeout(function () {
             console.info('You can catch this error by implementing an error boundary with the useError hook');
         });
     }
 
     throw error;
-};
+}
+
+const EFFECT_NORMAL = 0;
+const EFFECT_LAYOUT = 1;
+
+const FLAG_ALWAYS = 0;
+const FLAG_LAZY = 1;
+const FLAG_DEPS = 2;
+const FLAG_DEPS_CHANGED = 3;
 
 /**
  *
  * @param {function} callback
  * @param {[]|null} deps
  * @param {number} tag
+ * @param {number} flag
  * @return {EffectHook}
  * @constructor
  */
-function EffectHook(callback, deps, tag) {
+function EffectHook(callback, deps, tag, flag) {
     this.callback_ = callback;
     this.deps_ = deps;
     this.tag_ = tag;
+    this.flag_ = flag;
     this.destroy_ = null;
     this.lastDestroy_ = null;
     this.next_ = null;
 }
 
-const EFFECT_ALWAYS = 0;
-const EFFECT_LAZY = 1;
-const EFFECT_DEPS = 2;
-const EFFECT_DEPS_CHANGED = 3;
+function useEffect(callback, deps) {
+    return _useEffectImpl(callback, deps, EFFECT_NORMAL);
+}
 
-const useEffect = (callback, deps) => {
+function useLayoutEffect(callback, deps) {
+    return _useEffectImpl(callback, deps, EFFECT_LAYOUT);
+}
+
+function _useEffectImpl(callback, deps, tag) {
     if (deps === undefined) {
         deps = null;
     }
-    
-    return resolveCurrentHook(
-        (currentNode) => {
-            const effectTag = _determineEffectTag(deps, null);
-            return new EffectHook(callback, deps, effectTag);
+
+    return resolveCurrentEffectHook(
+        function (currentNode) {
+            const flag = _determineFlag(deps, null);
+            return new EffectHook(callback, deps, tag, flag);
         },
-        (currentHook) => {
+        function (currentHook) {
             if (true) {
                 if (!(
                     deps === null && currentHook.deps_ === null ||
@@ -835,21 +922,21 @@ const useEffect = (callback, deps) => {
                 // and consider it is changed
             }
     
-            const effectTag = _determineEffectTag(deps, currentHook.deps_);
+            const flag = _determineFlag(deps, currentHook.deps_);
 
-            if (effectTag === EFFECT_LAZY) {
+            if (flag === FLAG_LAZY) {
                 return;
             }
     
-            if (effectTag === EFFECT_DEPS) {
-                currentHook.tag_ = effectTag;
+            if (flag === FLAG_DEPS) {
+                currentHook.flag_ = flag;
                 return;
             }
     
-            if (effectTag === EFFECT_ALWAYS || effectTag === EFFECT_DEPS_CHANGED) {
+            if (flag === FLAG_ALWAYS || flag === FLAG_DEPS_CHANGED) {
                 currentHook.callback_ = callback;
                 currentHook.deps_ = deps;
-                currentHook.tag_ = effectTag;
+                currentHook.flag_ = flag;
 
                 currentHook.lastDestroy_ = currentHook.destroy_;
                 currentHook.destroy_ = null;
@@ -857,71 +944,72 @@ const useEffect = (callback, deps) => {
             }
         }
     );
-};
+}
 
 /**
  *
- * @param {VirtualNode} functionalVirtualNode
+ * @param {number} effectTag
+ * @param {VirtualNode} virtualNode
  * @param {boolean} isNewlyMounted
  */
-const mountEffects = (functionalVirtualNode, isNewlyMounted) => {
-    let hook = functionalVirtualNode.hook_;
+function mountEffects(effectTag, virtualNode, isNewlyMounted) {
+    let hook = virtualNode.effectHook_;
     while (hook !== null) {
-        if (hook instanceof EffectHook) {
-            if (isNewlyMounted || hook.tag_ === EFFECT_ALWAYS || hook.tag_ === EFFECT_DEPS_CHANGED) {
+        if (hook.tag_ === effectTag) {
+            if (isNewlyMounted || hook.flag_ === FLAG_ALWAYS || hook.flag_ === FLAG_DEPS_CHANGED) {
                 try {
                     _mountEffect(hook);
                 } catch (error) {
-                    catchError(error, functionalVirtualNode);
+                    catchError(error, virtualNode);
                 }
             }
         }
         hook = hook.next_;
     }
-};
+}
 
 /**
- *
- * @param {VirtualNode} functionalVirtualNode
+ * @param {number} effectTag
+ * @param {VirtualNode} virtualNode
  * @param {boolean} isUnmounted
  */
-const destroyEffects = (functionalVirtualNode, isUnmounted) => {
-    let hook = functionalVirtualNode.hook_;
+function destroyEffects(effectTag, virtualNode, isUnmounted) {
+    let hook = virtualNode.effectHook_;
     while (hook !== null) {
-        if (hook instanceof EffectHook) {
+        if (hook.tag_ === effectTag) {
             if (hook.lastDestroy_ !== null || hook.destroy_ !== null) {
-                if (isUnmounted || hook.tag_ === EFFECT_ALWAYS || hook.tag_ === EFFECT_DEPS_CHANGED) {
+                if (isUnmounted || hook.flag_ === FLAG_ALWAYS || hook.flag_ === FLAG_DEPS_CHANGED) {
                     try {
                         _destroyEffect(hook, isUnmounted);
                     } catch (error) {
-                        catchError(error, functionalVirtualNode);
+                        catchError(error, virtualNode);
                     }
                 }
             }
         }
         hook = hook.next_;
     }
-};
+}
 
 /**
  *
  * @param {EffectHook} effectHook
  */
-const _mountEffect = (effectHook) => {
+function _mountEffect(effectHook) {
     effectHook.destroy_ = effectHook.callback_();
 
     if (effectHook.destroy_ === undefined) {
         effectHook.destroy_ = null;
     }
-};
+}
 
 /**
  *
  * @param {EffectHook} hook
- * @param {boolean} isNodeUnmounted
+ * @param {boolean} isUnmounted
  */
-const _destroyEffect = (hook, isNodeUnmounted) => {
-    if (hook.lastDestroy_ !== null && !isNodeUnmounted) {
+function _destroyEffect(hook, isUnmounted) {
+    if (hook.lastDestroy_ !== null && !isUnmounted) {
         hook.lastDestroy_();
         return;
     }
@@ -929,44 +1017,50 @@ const _destroyEffect = (hook, isNodeUnmounted) => {
     if (hook.destroy_ !== null) {
         hook.destroy_();
     }
-};
+}
 
-const _determineEffectTag = (deps, lastDeps) => {
+/**
+ * 
+ * @param {[]|null} deps 
+ * @param {[]|null} lastDeps 
+ * @returns 
+ */
+function _determineFlag(deps, lastDeps) {
     // Always
     if (deps === null) {
-        return EFFECT_ALWAYS;
+        return FLAG_ALWAYS;
     }
 
     // Lazy
     if (deps.length === 0) {
-        return EFFECT_LAZY;
+        return FLAG_LAZY;
     }
 
     // Deps
     // 1. When init effect
     if (lastDeps === null) {
-        return EFFECT_DEPS;
+        return FLAG_DEPS;
     }
     // 2. Two arrays are equal
     if (compareArrays(deps, lastDeps)) {
-        return EFFECT_DEPS;
+        return FLAG_DEPS;
     }
 
     // DepsChanged
     {
-        return EFFECT_DEPS_CHANGED;
+        return FLAG_DEPS_CHANGED;
     }
-};
+}
 
-const reconcileChildren = (current, isSubtreeRoot) => {
+function reconcileChildren(current, isSubtreeRoot) {
     if (isFunction(current.type_)) {
         _reconcileChildOfDynamicNode(current, isSubtreeRoot);
-    } else {
-        _reconcileChildrenOfStaticNode(current);
+    } else if (current.alternative_ !== null) {
+        _reconcileChildrenOfStaticNode(current, current.alternative_);
     }
-};
+}
 
-const _reconcileChildOfDynamicNode = (current, isSubtreeRoot) => {
+function _reconcileChildOfDynamicNode(current, isSubtreeRoot) {
     const oldChild = isSubtreeRoot ? current.child_ : (
         current.alternative_ !== null ? current.alternative_.child_ : null
     );
@@ -986,7 +1080,9 @@ const _reconcileChildOfDynamicNode = (current, isSubtreeRoot) => {
 
     if (newChild !== null) {
         newChild.parent_ = current;
-        newChild.slot_ = 0;
+        
+        // Don't need to set the slot property
+        // as a dynamic node can have only one child
     }
 
     if (oldChild !== null) {
@@ -998,18 +1094,14 @@ const _reconcileChildOfDynamicNode = (current, isSubtreeRoot) => {
     }
 
     current.child_ = newChild;
-};
+}
 
-const _reconcileChildrenOfStaticNode = (current) => {
-    if (current.alternative_ === null) {
-        return;
-    }
-
-    const oldChildren = _mapChildren(current.alternative_);
+function _reconcileChildrenOfStaticNode(current, alternative) {
+    const oldChildren = _mapChildren(alternative);
     const newChildren = _mapChildren(current);
 
     let newChild;
-    oldChildren.forEach((oldChild, mapKey) => {
+    oldChildren.forEach(function (oldChild, mapKey) {
         newChild = newChildren.get(mapKey);
         if (newChild !== undefined && newChild.type_ === oldChild.type_) {
             _makeAlternative(newChild, oldChild);
@@ -1017,33 +1109,35 @@ const _reconcileChildrenOfStaticNode = (current) => {
             _addDeletion(current, oldChild);
         }
     });
-};
+}
 
-const _makeAlternative = (newChild, oldChild) => {
+function _makeAlternative(newChild, oldChild) {
     newChild.alternative_ = oldChild;
 
     if (isFunction(newChild.type_)) {
-        newChild.hook_ = oldChild.hook_;
+        // Copy hooks
+        newChild.refHook_ = oldChild.refHook_;
+        newChild.stateHook_ = oldChild.stateHook_;
+        newChild.effectHook_ = oldChild.effectHook_;
 
-        let hook = newChild.hook_;
+        // Update contexts of state hooks
+        let hook = newChild.stateHook_;
         while (hook !== null) {
-            if (hook instanceof StateHook) {
-                hook.context_ = newChild;
-            }
+            hook.context_ = newChild;
             hook = hook.next_;
         }
     }
-};
+}
 
-const _addDeletion = (current, childToDelete) => {
+function _addDeletion(current, childToDelete) {
     if (current.deletions_ === null) {
         current.deletions_ = [childToDelete];
     } else {
         current.deletions_.push(childToDelete);
     }
-};
+}
 
-const _mapChildren = (node) => {
+function _mapChildren(node) {
     const map = new Map();
     let child = node.child_;
     while (child !== null) {
@@ -1055,11 +1149,11 @@ const _mapChildren = (node) => {
         child = child.sibling_;
     }
     return map;
-};
+}
 
 // Algorithm: https://github.com/facebook/react/issues/7942
 
-const workLoop = (performUnit, onReturn, root, ref_0, ref_1) => {
+function workLoop(performUnit, onReturn, root, ref_0, ref_1) {
     let current = root;
     while (true) {
         performUnit(current, root, ref_0, ref_1);
@@ -1081,103 +1175,109 @@ const workLoop = (performUnit, onReturn, root, ref_0, ref_1) => {
         }
         current = current.sibling_;
     }
-};
+}
 
-const queueWork = (work) => {
+function queueWork(work) {
     if (typeof Promise !== 'undefined') {
         Promise.resolve().then(work);
     } else {
         setTimeout(work);
     }
-};
+}
 
-const resolveTree = (current) => {
+function resolveTree(current) {
     const mountNodesMap = new Map();
     const unmountNodesMap = new Map();
     
     workLoop(_performUnitOfWork, _onReturn, current, mountNodesMap, unmountNodesMap);
 
-    queueWork(() => {
-        unmountNodesMap.forEach((isUnmounted, node) => {
-            destroyEffects(node, isUnmounted);
+    unmountNodesMap.forEach(function (isUnmounted, vnode) {
+        destroyEffects(EFFECT_LAYOUT, vnode, isUnmounted);
+    });
+    mountNodesMap.forEach(function (isNewlyMounted, vnode) {
+        mountEffects(EFFECT_LAYOUT, vnode, isNewlyMounted);
+    });
+
+    queueWork(function () {
+        unmountNodesMap.forEach(function (isUnmounted, vnode) {
+            destroyEffects(EFFECT_NORMAL, vnode, isUnmounted);
         });
-        mountNodesMap.forEach((isNewlyMounted, node) => {
-            mountEffects(node, isNewlyMounted);
+        mountNodesMap.forEach(function (isNewlyMounted, vnode) {
+            mountEffects(EFFECT_NORMAL, vnode, isNewlyMounted);
         });
     });
-};
+}
 
-const _performUnitOfWork = (current, root, mountNodesMap, unmountNodesMap) => {
+function _performUnitOfWork(current, root, mountNodesMap, unmountNodesMap) {
     const isSubtreeRoot = current === root;
     
     reconcileChildren(current, isSubtreeRoot);
 
-    // Portal nodes never change their child
-    // Do nothing anymore
-    if (current.type_ === Portal) {
-        return;
-    }
-
-    if (isSubtreeRoot) {
-        if (current.hook_ !== null) {
-            unmountNodesMap.set(current, false);
-            mountNodesMap.set(current, false);
-        }
-    } else {
-        if (current.alternative_ !== null) {
-            updateView(current, current.alternative_);
-            if (current.hook_ !== null) {
-                unmountNodesMap.set(current.alternative_, false);
+    // Portal nodes never change the view itself
+    if (current.type_ !== Portal) {
+        if (isSubtreeRoot) {
+            if (current.effectHook_ !== null) {
+                unmountNodesMap.set(current, false);
                 mountNodesMap.set(current, false);
             }
-            current.alternative_ = null;
         } else {
-            insertView(current);
-            if (current.hook_ !== null) {
-                mountNodesMap.set(current, true);
+            if (current.alternative_ !== null) {
+                updateView(current, current.alternative_);
+                if (current.effectHook_ !== null) {
+                    unmountNodesMap.set(current.alternative_, false);
+                    mountNodesMap.set(current, false);
+                }
+                current.alternative_ = null;
+            } else {
+                insertView(current);
+                if (current.effectHook_ !== null) {
+                    mountNodesMap.set(current, true);
+                }
             }
         }
     }
     
+    // Delete subtrees that no longer exist
     if (current.deletions_ !== null) {
         const deletions = current.deletions_;
-        current.deletions_ = null;
 
         for (let i = 0; i < deletions.length; ++i) {
             deleteView(deletions[i]);
         }
 
-        queueWork(() => {
+        queueWork(function () {
             for (let i = 0; i < deletions.length; ++i) {
-                workLoop((vnode) => {
-                    if (vnode.hook_ !== null) {
+                workLoop(function (vnode) {
+                    if (vnode.effectHook_ !== null) {
                         unmountNodesMap.set(vnode, true);
                     }
                 }, null, deletions[i]);
             }
         });
+
+        current.deletions_ = null;
     }
-};
+}
 
 // Callback called after walking through a node and all of its ascendants
-const _onReturn = (current) => {
+function _onReturn(current) {
     // This is when we cleanup the remaining temp props
-    if (current.lastManipulatedClientNativeNode_ !== null) {
-        current.lastManipulatedClientNativeNode_ = null;
+    if (current.lastManipulatedClient_ !== null) {
+        current.lastManipulatedClient_ = null;
     }
-};
+}
 
 /**
  * 
  * @param {*} children 
  * @param {Element} targetNativeNode
  */
- const mount = (children, targetNativeNode) => {
+ function mount(children, targetNativeNode) {
     const portal = createPortal(children, targetNativeNode);
 
     // Render view
     resolveTree(portal);
-};
+}
 
 /**
  * 
@@ -1185,7 +1285,7 @@ const _onReturn = (current) => {
  * @param {Element} targetNativeNode
  * @returns {VirtualNode}
  */
-const createPortal = (children, targetNativeNode) => {
+function createPortal(children, targetNativeNode) {
     /**
      * @type {VirtualNode}
      */
@@ -1198,10 +1298,10 @@ const createPortal = (children, targetNativeNode) => {
             }
         }
         
-        portal = new VirtualNode(Portal, {});
+        portal = new VirtualNode(Portal, {}, null);
 
         // Determine the namespace (we only support SVG and HTML namespaces)
-        portal.ns_ = ('ownerSVGElement' in targetNativeNode) ? NS_SVG : NS_HTML;
+        portal.namespace_ = ('ownerSVGElement' in targetNativeNode) ? NAMSPACE_SVG : NAMSPACE_HTML;
         
         linkNativeNode(portal, targetNativeNode);
         attachVirtualNode(targetNativeNode, portal);
@@ -1210,9 +1310,10 @@ const createPortal = (children, targetNativeNode) => {
     portal.props_.children = children;
 
     return portal;
-};
+}
 
 exports.Fragment = Fragment;
+exports.Ref = Ref;
 exports.TextNode = TextNode;
 exports.createElement = createElement;
 exports.createPortal = createPortal;
@@ -1220,5 +1321,6 @@ exports.jsx = createElement;
 exports.mount = mount;
 exports.useEffect = useEffect;
 exports.useError = useError;
+exports.useLayoutEffect = useLayoutEffect;
 exports.useRef = useRef;
 exports.useState = useState;

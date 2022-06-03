@@ -1,36 +1,66 @@
 let currentNode = null;
-let currentHook = null;
+let currentRefHook = null;
+let currentStateHook = null;
+let currentEffectHook = null;
 
-export const prepareCurrentlyProcessing = (functionalVirtualNode) => {
+export function prepareCurrentlyProcessing(functionalVirtualNode) {
     currentNode = functionalVirtualNode;
 }
 
-export const flushCurrentlyProcessing = () => {
+export function flushCurrentlyProcessing() {
     currentNode = null;
-    currentHook = null;
+    currentRefHook = null;
+    currentStateHook = null;
+    currentEffectHook = null;
 }
 
-export const resolveCurrentHook = (createHookFn, processFn) => {
-    if (currentNode === null) {
-        throw new Error('Cannot use hooks from outside of components');
+export function resolveCurrentRefHook(createHookFn, processFn) {
+    _throwIfCallInvalid();
+    currentRefHook = _resolveCurrentHookImpl(createHookFn, currentRefHook, currentNode.refHook_);
+    if (currentNode.refHook_ === null) {
+        currentNode.refHook_ = currentRefHook;
     }
-    
+    return processFn(currentRefHook);
+}
+
+export function resolveCurrentStateHook(createHookFn, processFn) {
+    _throwIfCallInvalid();
+    currentStateHook = _resolveCurrentHookImpl(createHookFn, currentStateHook, currentNode.stateHook_);
+    if (currentNode.stateHook_ === null) {
+        currentNode.stateHook_ = currentStateHook;
+    }
+    return processFn(currentStateHook);
+}
+
+export function resolveCurrentEffectHook(createHookFn, processFn) {
+    _throwIfCallInvalid();
+    currentEffectHook = _resolveCurrentHookImpl(createHookFn, currentEffectHook, currentNode.effectHook_);
+    if (currentNode.effectHook_ === null) {
+        currentNode.effectHook_ = currentEffectHook;
+    }
+    return processFn(currentEffectHook);
+}
+
+function _resolveCurrentHookImpl(createHookFn, currentHook, firstHookOfNode) {
     if (currentHook === null) {
-        if (currentNode.hook_ === null) {
-            currentHook = createHookFn(currentNode);
-            currentNode.hook_ = currentHook;
+        if (firstHookOfNode === null) {
+            return createHookFn(currentNode);
         } else {
-            currentHook = currentNode.hook_;
+            return firstHookOfNode;
         }
     } else {
         if (currentHook.next_ === null) {
-            const previousHook = currentHook;           
-            currentHook = createHookFn(currentNode);
-            previousHook.next_ = currentHook;
+            const nextHook = createHookFn(currentNode);
+            currentHook.next_ = nextHook;
+            return nextHook;
         } else {
-            currentHook = currentHook.next_;
+            return currentHook.next_;
         }
     }
+}
 
-    return processFn(currentHook);
+function _throwIfCallInvalid() {
+    if (currentNode === null) {
+        throw new Error('Cannot use hooks from outside of components');
+    }
 }

@@ -1,4 +1,4 @@
-import {linkNativeNode, Fragment, TextNode, NS_HTML, NS_SVG} from './VirtualNode';
+import {linkNativeNode, Fragment, TextNode, NAMSPACE_HTML, NAMSPACE_SVG} from './VirtualNode';
 import {createNativeElementWithNS, createNativeTextNode, updateNativeTextNode, updateNativeElementAttributes} from './NativeDOM';
 import {attachVirtualNode} from './Externals';
 import {isFunction} from './Util';
@@ -6,8 +6,8 @@ import {isFunction} from './Util';
 // Important!!!
 // This module does not handle Portal nodes
 
-export const hydrateView = (virtualNode) => {
-    virtualNode.ns_ = _determineNS(virtualNode);
+export function hydrateView(virtualNode) {
+    virtualNode.namespace_ = _determineNS(virtualNode);
 
     // Do nothing more with fragments
     if (_isDry(virtualNode.type_)) {
@@ -22,8 +22,8 @@ export const hydrateView = (virtualNode) => {
     }
 }
 
-export const rehydrateView = (newVirtualNode, oldVirtualNode) => {
-    newVirtualNode.ns_ = _determineNS(newVirtualNode);
+export function rehydrateView(newVirtualNode, oldVirtualNode) {
+    newVirtualNode.namespace_ = _determineNS(newVirtualNode);
 
     // Do nothing more with fragments
     if (_isDry(newVirtualNode.type_)) {
@@ -52,34 +52,38 @@ export const rehydrateView = (newVirtualNode, oldVirtualNode) => {
     }
 }
 
-const _createNativeNode = (virtualNode) => {
+function _createNativeNode(virtualNode) {
     if (virtualNode.type_ === TextNode) {
         return createNativeTextNode(virtualNode.props_.children);
     }
 
     return createNativeElementWithNS(
-        virtualNode.ns_,
+        virtualNode.namespace_,
         virtualNode.type_,
         virtualNode.props_
     );
 }
 
-const _determineNS = (virtualNode) => {
+// We only support HTML and SVG namespaces
+// as the most of browsers support
+function _determineNS(virtualNode) {
     // Intrinsic namespace
     if (virtualNode.type_ === 'svg') {
-        return NS_SVG;
+        return NAMSPACE_SVG;
     }
 
     // As we never hydrate the container node,
     // the parent_ never empty here
-    if (virtualNode.parent_.ns_ === NS_SVG && virtualNode.parent_.type_ === 'foreignObject') {
-        return NS_HTML;
+    if (virtualNode.parent_.namespace_ === NAMSPACE_SVG &&
+        virtualNode.parent_.type_ === 'foreignObject'
+    ) {
+        return NAMSPACE_HTML;
     }
 
     // By default, pass namespace below.
-    return virtualNode.parent_.ns_;
+    return virtualNode.parent_.namespace_;
 }
 
-const _isDry = (type) => {
+function _isDry(type) {
     return type === Fragment || isFunction(type);
 }

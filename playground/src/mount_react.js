@@ -1,4 +1,4 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useLayoutEffect, useInsertionEffect} from 'react';
 import ReactDOM from 'react-dom';
 
 function Wrapper2({children, myRef}) {
@@ -19,24 +19,45 @@ function DemoWrapperWrapper() {
     const wrapperRef = useRef(null);
 
     useEffect(() => {
-        console.log('effect always', rootRef.current, wrapperRef.current);
-        return () => {
-            console.log('unmount always', rootRef.current, wrapperRef.current);
-        };
+        // console.log('effect always', rootRef.current, wrapperRef.current);
+        // return () => {
+        //     console.log('unmount always', rootRef.current, wrapperRef.current);
+        // };
     });
 
     useEffect(() => {
-        console.log('effect deps', rootRef.current, wrapperRef.current);
-        return () => {
-            console.log('unmount deps', rootRef.current, wrapperRef.current);
-        };
+        // console.log('effect deps', rootRef.current, wrapperRef.current);
+        // return () => {
+        //     console.log('unmount deps', rootRef.current, wrapperRef.current);
+        // };
     }, [layout]);
 
     useEffect(() => {
-        console.log('effect lazy', rootRef.current, wrapperRef.current);
-        return () => {
-            console.log('unmount lazy', rootRef.current, wrapperRef.current);
-        };
+        // console.log('effect lazy', rootRef.current, wrapperRef.current);
+        // return () => {
+        //     console.log('unmount lazy', rootRef.current, wrapperRef.current);
+        // };
+    }, []);
+
+    useLayoutEffect(() => {
+        // console.log('layout effect always', rootRef.current, wrapperRef.current);
+        // return () => {
+        //     console.log('layout unmount always', rootRef.current, wrapperRef.current);
+        // };
+    });
+
+    useLayoutEffect(() => {
+        // console.log('layout effect deps', rootRef.current, wrapperRef.current);
+        // return () => {
+        //     console.log('layout unmount deps', rootRef.current, wrapperRef.current);
+        // };
+    }, [layout]);
+
+    useLayoutEffect(() => {
+        // console.log('layout effect lazy', rootRef.current, wrapperRef.current);
+        // return () => {
+        //     console.log('layout unmount lazy', rootRef.current, wrapperRef.current);
+        // };
     }, []);
 
     return (

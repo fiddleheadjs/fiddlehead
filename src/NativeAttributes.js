@@ -1,4 +1,4 @@
-import {hasOwnProperty, isNullish, isNumber, isString, isObject} from './Util';
+import {hasOwnProperty, isNumber, isString, isObject} from './Util';
 
 export function updateNativeElementAttributes(element, newAttributes, oldAttributes) {
     _updateKeyValues(
@@ -30,7 +30,7 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
         return;
     }
 
-    // Cases: properties, event listeners
+    // Set properties and event listeners
     if (attrName in element) {
         try {
             element[attrName] = newAttrValue;
@@ -65,7 +65,7 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
         return;
     }
     
-    // Remove properties, event listeners
+    // Remove properties and event listeners
     if (attrName in element) {
         try {
             element[attrName] = null;
@@ -130,5 +130,9 @@ function _updateKeyValues(target, newKeyValues, oldKeyValues, updateFn, removeFn
 }
 
 function _hasOwnNonEmpty(target, prop) {
-    return hasOwnProperty.call(target, prop) && !isNullish(target[prop]);
+    return (
+        hasOwnProperty.call(target, prop) &&
+        target[prop] !== undefined &&
+        target[prop] !== null
+    );
 }

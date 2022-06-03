@@ -1,5 +1,5 @@
 import {catchError} from './CatchError';
-import {resolveCurrentHook} from './CurrentlyProcessing';
+import {resolveCurrentStateHook} from './CurrentlyProcessing';
 import {resolveTree} from './ResolveTree';
 import {isFunction} from './Util';
 
@@ -21,23 +21,26 @@ export function StateHook(context, initialValue, tag) {
     this.next_ = null;
 }
 
-export const useState = (initialValue) => {
-    return resolveCurrentHook(
-        (currentNode) => new StateHook(currentNode, initialValue, STATE_NORMAL),
-        (currentHook) => [currentHook.value_, currentHook.setValue_]
+export function useState(initialValue) {
+    return resolveCurrentStateHook(
+        function (currentNode) {
+            return new StateHook(currentNode, initialValue, STATE_NORMAL);
+        },
+        function (currentHook) {
+            return [currentHook.value_, currentHook.setValue_];
+        }
     );
 }
 
-export const useError = (initialError) => {
-    return resolveCurrentHook(
-        (currentNode) => {
+export function useError(initialError) {
+    return resolveCurrentStateHook(
+        function (currentNode) {
             // Make sure we have only one error hook in a component
-            // In the production, we allow the initialization but skip it then
             if (__DEV__) {
-                let hook = currentNode.hook_;
+                let hook = currentNode.stateHook_;
                 while (hook !== null) {
-                    if (hook instanceof StateHook && hook.tag_ === STATE_ERROR) {
-                        throw new Error('A component accepts only one useError hook');
+                    if (hook.tag_ === STATE_ERROR) {
+                        console.error('A component accepts only one useError hook');
                     }
                     hook = hook.next_;
                 }
@@ -52,7 +55,9 @@ export const useError = (initialError) => {
             
             return new StateHook(currentNode, initialError, STATE_ERROR);
         },
-        (currentHook) => [currentHook.value_, currentHook.setValue_]
+        function (currentHook) {
+            return [currentHook.value_, currentHook.setValue_];
+        }
     );
 }
 
@@ -76,8 +81,8 @@ export function _setState(value) {
     timeoutId = setTimeout(_flushQueues);
 }
 
-const _flushQueues = () => {
-    queueMap.forEach((queue, contextAsKey) => {
+function _flushQueues() {
+    queueMap.forEach(function (queue, contextAsKey) {
         // Important!!!
         // Use hook.context_ instead of contextAsKey
         // as it may be outdated due to the reconciliation process
@@ -122,7 +127,7 @@ const _flushQueues = () => {
     timeoutId = null;
 }
 
-const _validateError = (error) => {
+function _validateError(error) {
     if (!(error === null || error instanceof Error)) {
         if (__DEV__) {
             console.error('Error hooks only accept the value is an instance of Error or null');

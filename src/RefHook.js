@@ -1,4 +1,13 @@
-import {resolveCurrentHook} from './CurrentlyProcessing';
+import {resolveCurrentRefHook} from './CurrentlyProcessing';
+
+/**
+ *
+ * @param {*} current
+ * @constructor
+ */
+ export function Ref(current) {
+    this.current = current;
+}
 
 /**
  *
@@ -6,13 +15,22 @@ import {resolveCurrentHook} from './CurrentlyProcessing';
  * @constructor
  */
 export function RefHook(current) {
-    this.current = current;
+    this.ref_ = new Ref(current);
     this.next_ = null;
 }
 
-export const useRef = (initialValue) => {
-    return resolveCurrentHook(
-        (currentNode) => new RefHook(initialValue),
-        (currentHook) => currentHook
+/**
+ *
+ * @param {*} initialValue
+ * @constructor
+ */
+export function useRef(initialValue) {
+    return resolveCurrentRefHook(
+        function (currentNode) {
+            return new RefHook(initialValue);
+        },
+        function (currentHook) {
+            return currentHook.ref_;
+        }
     );
 }

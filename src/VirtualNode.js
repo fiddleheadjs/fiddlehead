@@ -1,11 +1,8 @@
-import {RefHook} from './RefHook';
-import {isNullish} from './Util';
-
 /**
  * 
  * @param {function|string} type
  * @param {{}} props
- * @param {string|null?} key
+ * @param {string|null} key
  */
 export function VirtualNode(type, props, key) {
     // Identification
@@ -14,31 +11,27 @@ export function VirtualNode(type, props, key) {
     this.type_ = type;
 
     // Convert to string to avoid conflict with slot
-    this.key_ = !isNullish(key) ? ('' + key) : null;
+    this.key_ = key;
 
     this.slot_ = null;
 
     // Props and hooks
     // ===============
 
-    if (!(props.ref === undefined || props.ref instanceof RefHook)) {
-        // Delete the invalid ref
-        delete props.ref;
-        
-        if (__DEV__) {
-            console.error('The ref value must be created by the useRef hook');
-        }
-    }
     this.props_ = props;
 
-    this.hook_ = null;
+    this.refHook_ = null;
+    
+    this.stateHook_ = null;
+
+    this.effectHook_ = null;
     
     // Output native node and relates
-    // =======================
+    // ==============================
     
     this.nativeNode_ = null;
 
-    this.ns_ = null;
+    this.namespace_ = null;
 
     // Linked-list pointers
     // ====================
@@ -60,24 +53,26 @@ export function VirtualNode(type, props, key) {
  
     // In the commit phase, the new child will be inserted
     // after the last inserted/updated child
-    this.lastManipulatedClientNativeNode_ = null;
+    this.lastManipulatedClient_ = null;
 }
 
 // Do not support namespace MathML as almost browsers do not support as well
-export const NS_HTML = 0;
-export const NS_SVG = 1;
+export const NAMSPACE_HTML = 0;
+export const NAMSPACE_SVG = 1;
 
 // Special node types
 export const TextNode = '#';
 export const Fragment = '[';
-export const Portal = (props) => props.children;
+export function Portal(props) {
+    return props.children;
+}
 
 /**
  * 
  * @param {VirtualNode} virtualNode 
  * @param {Node} nativeNode
  */
-export const linkNativeNode = (virtualNode, nativeNode) => {
+export function linkNativeNode(virtualNode, nativeNode) {
     virtualNode.nativeNode_ = nativeNode;
 
     if (virtualNode.props_.ref !== undefined) {

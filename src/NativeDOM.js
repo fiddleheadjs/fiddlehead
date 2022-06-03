@@ -1,16 +1,16 @@
-import {NS_SVG} from './VirtualNode';
+import {NAMSPACE_SVG} from './VirtualNode';
 import {updateNativeElementAttributes} from './NativeAttributes';
 
-export const createNativeTextNode = (text) => {
+export function createNativeTextNode(text) {
     return document.createTextNode(text);
 }
 
-export const updateNativeTextNode = (node, text) => {
+export function updateNativeTextNode(node, text) {
     node.textContent = text;
 }
 
-export const createNativeElementWithNS = (ns, type, attributes) => {
-    const element = (ns === NS_SVG
+export function createNativeElementWithNS(ns, type, attributes) {
+    const element = (ns === NAMSPACE_SVG
         ? document.createElementNS('http://www.w3.org/2000/svg', type)
         : document.createElement(type)
     );
