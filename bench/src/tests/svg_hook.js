@@ -9,7 +9,7 @@ import {Svg4} from "../components/Svg4";
 
 const root = document.getElementById("root");
 
-bench([render0, render1, render2, render3, render4], 50);
+bench([render0, render1, render2, render3, render4], 100);
 
 function render0(onFinish) {
     mount(<App0 onFinish={onFinish} />, root);

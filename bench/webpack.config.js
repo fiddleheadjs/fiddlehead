@@ -3,7 +3,7 @@ const fs = require('fs');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
-function getJsLoaders(isReact = false) {
+function getJsLoaders(lib) {
     return [
         {
             loader: 'babel-loader',
@@ -14,7 +14,7 @@ function getJsLoaders(isReact = false) {
                 plugins: [
                     [
                         "@babel/plugin-transform-react-jsx",
-                        isReact ? {} : {
+                        lib === 'react' ? {} : {
                             "pragma": "jsx",
                             "pragmaFrag": "'['",
                         }
@@ -36,6 +36,8 @@ fs.readdirSync('./src/tests').map(pathname => {
 
     console.log(filename);
 
+    const lib = filename.split('_')[1];
+
     configs.push({
         mode: isDev ? 'development' : 'production',
         entry: `./src/tests/${filename}.js`,
@@ -48,13 +50,14 @@ fs.readdirSync('./src/tests').map(pathname => {
             rules: [
                 {
                     test: /\.js$/,
-                    use: getJsLoaders(filename.endsWith('_react'))
+                    use: getJsLoaders(lib)
                 },
             ]
         },
         plugins: [
             new webpack.DefinePlugin({
-                __DEV__: isDev
+                __DEV__: isDev,
+                __LIB__: `'${lib}'`,
             }),
             new HtmlWebpackPlugin({
                 title: filename,

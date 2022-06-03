@@ -1,19 +1,16 @@
 export function bench(renderFns, repeats) {
-    const timeTable = renderFns.map((fn, index) => ({
-        name: fn.name || index,
-        times: []
-    }));
+    const timeTable = renderFns.map(() => []);
 
-    const run = (renderIndex) => {
-        if (renderIndex < renderFns.length) {
+    const run = (index) => {
+        if (index < renderFns.length) {
             const timeStart = performance.now();
             const onFinish = () => {
-                timeTable[renderIndex].times.push(performance.now() - timeStart);
+                timeTable[index].push(performance.now() - timeStart);
                 setTimeout(() => {
-                    run(renderIndex + 1);
+                    run(index + 1);
                 });
             };
-            renderFns[renderIndex](onFinish);
+            renderFns[index](onFinish);
         } else {
             if (--repeats > 0) {
                 setTimeout(() => {
@@ -30,9 +27,8 @@ export function bench(renderFns, repeats) {
 
 function printOutput(timeTable) {
     const tableData = [];
-    timeTable.forEach(({name, times}) => {
+    timeTable.forEach((times) => {
         tableData.push({
-            "Name": name,
             "Repeats": times.length,
             "Avg Time": average(times),
             "Med Time": median(times),
