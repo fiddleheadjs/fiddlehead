@@ -28,11 +28,17 @@ export default {
                     __DEV__: false,
                 }),
                 terser({
+                    compress: {
+                        module: true,
+                        booleans_as_integers: true,
+                        keep_infinity: true,
+                        keep_fargs: false,
+                    },
                     mangle: {
                         properties: {
                             regex: /^[^_].*_$/,
                         },
-                    }
+                    },
                 }),
             ],
         },
