@@ -1080,7 +1080,9 @@ function _reconcileChildOfDynamicNode(current, isSubtreeRoot) {
 
     if (newChild !== null) {
         newChild.parent_ = current;
-        newChild.slot_ = 0;
+        
+        // Don't need to set the slot property
+        // as a dynamic node can have only one child
     }
 
     if (oldChild !== null) {
