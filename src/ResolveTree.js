@@ -2,7 +2,7 @@ import {insertView, updateView, deleteView} from './CommitView';
 import {destroyEffects, EFFECT_LAYOUT, EFFECT_NORMAL, mountEffects} from './EffectHook';
 import {reconcileChildren} from './Reconciliation';
 import {Portal} from './VirtualNode';
-import {queueWork, workLoop} from './WorkLoop';
+import {workLoop} from './WorkLoop';
 
 export function resolveTree(current) {
     const effectMountNodes = new Map();
@@ -17,7 +17,7 @@ export function resolveTree(current) {
         mountEffects(EFFECT_LAYOUT, vnode, isNewlyMounted);
     });
 
-    queueWork(function () {
+    setTimeout(function () {
         effectDestroyNodes.forEach(function (isUnmounted, vnode) {
             destroyEffects(EFFECT_NORMAL, vnode, isUnmounted);
         });

@@ -17,7 +17,7 @@ export function createElement(type, props, content) {
     // Normalize key
     let key = null;
     if (!(props.key === undefined || props.key === null)) {
-        key = '' + key;
+        key = '' + props.key;
     }
     delete props.key;
 

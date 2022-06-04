@@ -245,7 +245,7 @@ function createElement(type, props, content) {
     // Normalize key
     let key = null;
     if (!(props.key === undefined || props.key === null)) {
-        key = '' + key;
+        key = '' + props.key;
     }
     delete props.key;
 
@@ -1175,14 +1175,6 @@ function workLoop(performUnit, onReturn, root, ref_0, ref_1) {
     }
 }
 
-function queueWork(work) {
-    if (typeof Promise !== 'undefined') {
-        Promise.resolve().then(work);
-    } else {
-        setTimeout(work);
-    }
-}
-
 function resolveTree(current) {
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
@@ -1196,7 +1188,7 @@ function resolveTree(current) {
         mountEffects(EFFECT_LAYOUT, vnode, isNewlyMounted);
     });
 
-    queueWork(function () {
+    setTimeout(function () {
         effectDestroyNodes.forEach(function (isUnmounted, vnode) {
             destroyEffects(EFFECT_NORMAL, vnode, isUnmounted);
         });

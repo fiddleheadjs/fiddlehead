@@ -23,11 +23,3 @@ export function workLoop(performUnit, onReturn, root, ref_0, ref_1) {
         current = current.sibling_;
     }
 }
-
-export function queueWork(work) {
-    if (typeof Promise !== 'undefined') {
-        Promise.resolve().then(work);
-    } else {
-        setTimeout(work);
-    }
-}
