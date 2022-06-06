@@ -1,15 +1,31 @@
 import {insertView, updateView, deleteView} from './CommitView';
 import {destroyEffects, EFFECT_LAYOUT, EFFECT_NORMAL, mountEffects} from './EffectHook';
+import {findHostVirtualNode} from './HostClient';
 import {reconcileChildren} from './Reconciliation';
 import {Portal} from './VirtualNode';
 import {workLoop} from './WorkLoop';
+
+// Append/remove children into/from a fragment
+// Then finally append the fragment into the live DOM
+// This will improve the performance because the browser only reflows once
+const domFragment = new DocumentFragment();
 
 export function resolveTree(current) {
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
     
-    workLoop(_performUnitOfWork, _onReturn, current, effectMountNodes, effectDestroyNodes);
+    // Main work
+    const host = findHostVirtualNode(current);
+    const hostNative = host.nativeNode_;
+    host.nativeNode_ = domFragment;
+    workLoop(
+        _performUnitOfWork, _onReturn, current,
+        effectMountNodes, effectDestroyNodes
+    );
+    hostNative.appendChild(domFragment);
+    host.nativeNode_ = hostNative;
 
+    // Layout effects
     effectDestroyNodes.forEach(function (isUnmounted, vnode) {
         destroyEffects(EFFECT_LAYOUT, vnode, isUnmounted);
     });
@@ -17,6 +33,7 @@ export function resolveTree(current) {
         mountEffects(EFFECT_LAYOUT, vnode, isNewlyMounted);
     });
 
+    // Effects
     setTimeout(function () {
         effectDestroyNodes.forEach(function (isUnmounted, vnode) {
             destroyEffects(EFFECT_NORMAL, vnode, isUnmounted);

@@ -425,6 +425,43 @@ function extractVirtualNode(nativeNode) {
     return nativeNode[PROP_VNODE];
 }
 
+// Find the virtual node in the parent chain which its native node is not null
+function findHostVirtualNode(current) {
+    while (true) {
+        if (current === null) {
+            return null;
+        }
+        if (current.nativeNode_ !== null) {
+            return current;
+        }
+        current = current.parent_;
+    }
+}
+
+function loopClientNativeNodes(current, callback) {
+    const root = current;
+
+    while (true) {
+        if (current.nativeNode_ !== null) {
+            callback(current.nativeNode_);
+        } else if (current.child_ !== null) {
+            current = current.child_;
+            continue;
+        }
+        if (current === root) {
+            return;
+        }
+        while (current.sibling_ === null) {
+            if (current.parent_ === null || current.parent_ === root) {
+                return;
+            }
+            current = current.parent_;
+        }
+        current = current.sibling_;
+        continue;
+    }
+}
+
 function updateNativeElementAttributes(element, newAttributes, oldAttributes) {
     _updateKeyValues(
         element, newAttributes, oldAttributes,
@@ -673,7 +710,7 @@ function updateView(newVirtualNode, oldVirtualNode) {
     rehydrateView(newVirtualNode, oldVirtualNode);
 
     if (newVirtualNode.nativeNode_ !== null) {
-        const host = _findHostVirtualNode(newVirtualNode);
+        const host = findHostVirtualNode(newVirtualNode.parent_);
         if (host !== null) {
             host.lastManipulatedClient_ = newVirtualNode.nativeNode_;
         }
@@ -684,7 +721,7 @@ function insertView(virtualNode) {
     hydrateView(virtualNode);
 
     if (virtualNode.nativeNode_ !== null) {
-        const host = _findHostVirtualNode(virtualNode);
+        const host = findHostVirtualNode(virtualNode.parent_);
         if (host !== null) {
             const nativeNodeAfter = (
                 host.lastManipulatedClient_ !== null
@@ -698,51 +735,11 @@ function insertView(virtualNode) {
 }
 
 function deleteView(subtree) {
-    _loopClientNativeNodes(subtree, function (nativeNode) {
+    loopClientNativeNodes(subtree, function (nativeNode) {
         if (nativeNode.parentNode !== null) {
             nativeNode.parentNode.removeChild(nativeNode);
         }
     });
-}
-
-// Find the virtual node in the parent chain which its native node is not null
-function _findHostVirtualNode(virtualNode) {
-    let current = virtualNode.parent_;
-
-    while (true) {
-        if (current === null) {
-            return null;
-        }
-        if (current.nativeNode_ !== null) {
-            return current;
-        }
-        current = current.parent_;
-    }
-}
-
-function _loopClientNativeNodes(virtualNode, callback) {
-    let root = virtualNode;
-    let current = virtualNode;
-
-    while (true) {
-        if (current.nativeNode_ !== null) {
-            callback(current.nativeNode_);
-        } else if (current.child_ !== null) {
-            current = current.child_;
-            continue;
-        }
-        if (current === root) {
-            return;
-        }
-        while (current.sibling_ === null) {
-            if (current.parent_ === null || current.parent_ === root) {
-                return;
-            }
-            current = current.parent_;
-        }
-        current = current.sibling_;
-        continue;
-    }
 }
 
 const STATE_NORMAL = 0;
@@ -1219,12 +1216,27 @@ function workLoop(performUnit, onReturn, root, ref_0, ref_1) {
     }
 }
 
+// Append/remove children into/from a fragment
+// Then finally append the fragment into the live DOM
+// This will improve the performance because the browser only reflows once
+const domFragment = new DocumentFragment();
+
 function resolveTree(current) {
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
     
-    workLoop(_performUnitOfWork, _onReturn, current, effectMountNodes, effectDestroyNodes);
+    // Main work
+    const host = findHostVirtualNode(current);
+    const hostNative = host.nativeNode_;
+    host.nativeNode_ = domFragment;
+    workLoop(
+        _performUnitOfWork, _onReturn, current,
+        effectMountNodes, effectDestroyNodes
+    );
+    hostNative.appendChild(domFragment);
+    host.nativeNode_ = hostNative;
 
+    // Layout effects
     effectDestroyNodes.forEach(function (isUnmounted, vnode) {
         destroyEffects(EFFECT_LAYOUT, vnode, isUnmounted);
     });
@@ -1232,6 +1244,7 @@ function resolveTree(current) {
         mountEffects(EFFECT_LAYOUT, vnode, isNewlyMounted);
     });
 
+    // Effects
     setTimeout(function () {
         effectDestroyNodes.forEach(function (isUnmounted, vnode) {
             destroyEffects(EFFECT_NORMAL, vnode, isUnmounted);
