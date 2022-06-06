@@ -2,6 +2,7 @@ import {Ref} from './RefHook';
 import {isArray, isFunction, isNumber, isString, slice} from './Util';
 import {Fragment, TextNode, VirtualNode} from './VirtualNode';
 
+// Use the same object for every empty props to save memory
 const EmptyProps = {};
 
 /**

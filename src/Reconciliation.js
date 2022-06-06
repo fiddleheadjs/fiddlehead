@@ -45,11 +45,6 @@ function _reconcileChildOfDynamicNode(current, isSubtreeRoot) {
     }
     
     current.child_ = newChild;
-
-    // With functional components
-    // We don't need props any more
-    // Remove it to save memory
-    current.props_ = null;
 }
 
 function _reconcileChildrenOfStaticNode(current, alternative) {

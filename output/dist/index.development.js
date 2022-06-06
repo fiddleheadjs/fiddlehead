@@ -156,16 +156,13 @@ const NAMESPACE_SVG = 1;
 const TextNode = '#';
 const Fragment = '[';
 function Portal(props) {
-    // Return props instead of props.children
-    // This is a trick to allow setting props to null
-    // in order to save memory
-    return props;
+    return props.children;
 }
 
 /**
  * 
  * @param {function|string} type
- * @param {{}|null} props
+ * @param {{}} props
  * @param {string|null} key
  */
 function VirtualNode(type, props, key) {
@@ -191,7 +188,7 @@ function VirtualNode(type, props, key) {
     // ===============
 
     /**
-     * @type {{}|null}
+     * @type {{}}
      */
     this.props_ = props;
 
@@ -277,6 +274,7 @@ function linkNativeNode(virtualNode, nativeNode) {
     }
 }
 
+// Use the same object for every empty props to save memory
 const EmptyProps = {};
 
 /**
@@ -1154,11 +1152,6 @@ function _reconcileChildOfDynamicNode(current, isSubtreeRoot) {
     }
     
     current.child_ = newChild;
-
-    // With functional components
-    // We don't need props any more
-    // Remove it to save memory
-    current.props_ = null;
 }
 
 function _reconcileChildrenOfStaticNode(current, alternative) {
@@ -1363,21 +1356,16 @@ function createPortal(children, targetNativeNode) {
             }
         }
         
-        portal = new VirtualNode(Portal, null, null);
+        portal = new VirtualNode(Portal, {}, null);
 
         // Determine the namespace (we only support SVG and HTML namespaces)
         portal.namespace_ = ('ownerSVGElement' in targetNativeNode) ? NAMESPACE_SVG : NAMESPACE_HTML;
         
-        // Do not use linkNativeNode method
-        // As we passed the props is null
-        portal.nativeNode_ = targetNativeNode;
-
+        linkNativeNode(portal, targetNativeNode);
         attachVirtualNode(targetNativeNode, portal);
     }
 
-    // Assign children directly to props
-    // See Portal
-    portal.props_ = children;
+    portal.props_.children = children;
 
     return portal;
 }
