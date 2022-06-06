@@ -1209,32 +1209,6 @@ function _mapChildren(node) {
     return map;
 }
 
-// Algorithm: https://github.com/facebook/react/issues/7942
-
-function workLoop(performUnit, onReturn, root, ref_0, ref_1) {
-    let current = root;
-    while (true) {
-        performUnit(current, root, ref_0, ref_1);
-        if (current.child_ !== null) {
-            current = current.child_;
-            continue;
-        }
-        if (current === root) {
-            return;
-        }
-        while (current.sibling_ === null) {
-            if (current.parent_ === null || current.parent_ === root) {
-                return;
-            }
-            current = current.parent_;
-            if (onReturn !== null) {
-                onReturn(current);
-            }
-        }
-        current = current.sibling_;
-    }
-}
-
 // Append/remove children into/from a fragment
 // Then finally append the fragment into the live DOM
 // This will improve the performance because the browser only reflows once
@@ -1248,7 +1222,7 @@ function resolveTree(current) {
     const host = findHostVirtualNode(current);
     const hostNative = host.nativeNode_;
     host.nativeNode_ = domFragment;
-    workLoop(
+    _workLoop(
         _performUnitOfWork, _onReturn, current,
         effectMountNodes, effectDestroyNodes
     );
@@ -1307,7 +1281,7 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
     if (current.deletions_ !== null) {
         for (let i = 0; i < current.deletions_.length; ++i) {
             deleteView(current.deletions_[i]);
-            workLoop(function (vnode) {
+            _workLoop(function (vnode) {
                 if (vnode.effectHook_ !== null) {
                     effectDestroyNodes.set(vnode, true);
                 }
@@ -1322,6 +1296,31 @@ function _onReturn(current) {
     // This is when we cleanup the remaining temp props
     if (current.lastManipulatedClient_ !== null) {
         current.lastManipulatedClient_ = null;
+    }
+}
+
+// Reference: https://github.com/facebook/react/issues/7942
+function _workLoop(performUnit, onReturn, root, r0, r1) {
+    let current = root;
+    while (true) {
+        performUnit(current, root, r0, r1);
+        if (current.child_ !== null) {
+            current = current.child_;
+            continue;
+        }
+        if (current === root) {
+            return;
+        }
+        while (current.sibling_ === null) {
+            if (current.parent_ === null || current.parent_ === root) {
+                return;
+            }
+            current = current.parent_;
+            if (onReturn !== null) {
+                onReturn(current);
+            }
+        }
+        current = current.sibling_;
     }
 }
 
