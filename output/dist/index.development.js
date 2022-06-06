@@ -382,25 +382,25 @@ function _normalizeText(text) {
 
 /**
  * 
- * @param {VirtualNode} parentNode 
+ * @param {VirtualNode} current 
  * @param {Array} content
  */
-function _appendChildrenFromContent(parentNode, content) {
-    let childNode, prevChildNode = null, i = 0;
+function _appendChildrenFromContent(current, content) {
+    let child, prevChild = null, i = 0;
     for (; i < content.length; ++i) {
-        childNode = createVirtualNodeFromContent(content[i]);
+        child = createVirtualNodeFromContent(content[i]);
         
-        if (childNode !== null) {
-            childNode.parent_ = parentNode;
-            childNode.slot_ = i;
+        if (child !== null) {
+            child.parent_ = current;
+            child.slot_ = i;
 
-            if (prevChildNode !== null) {
-                prevChildNode.sibling_ = childNode;
+            if (prevChild !== null) {
+                prevChild.sibling_ = child;
             } else {
-                parentNode.child_ = childNode;
+                current.child_ = child;
             }
 
-            prevChildNode = childNode;
+            prevChild = child;
         }
     }
 }
