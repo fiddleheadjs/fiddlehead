@@ -1,4 +1,4 @@
-import {VirtualNode, linkNativeNode, NAMESPACE_HTML, NAMESPACE_SVG, Portal} from './VirtualNode';
+import {VirtualNode, NAMESPACE_HTML, NAMESPACE_SVG, Portal} from './VirtualNode';
 import {attachVirtualNode, extractVirtualNode} from './Externals';
 import {resolveTree} from './ResolveTree';
 
@@ -33,16 +33,21 @@ export function createPortal(children, targetNativeNode) {
             }
         }
         
-        portal = new VirtualNode(Portal, {}, null);
+        portal = new VirtualNode(Portal, null, null);
 
         // Determine the namespace (we only support SVG and HTML namespaces)
         portal.namespace_ = ('ownerSVGElement' in targetNativeNode) ? NAMESPACE_SVG : NAMESPACE_HTML;
         
-        linkNativeNode(portal, targetNativeNode);
+        // Do not use linkNativeNode method
+        // As we passed the props is null
+        portal.nativeNode_ = targetNativeNode;
+
         attachVirtualNode(targetNativeNode, portal);
     }
 
-    portal.props_.children = children;
+    // Assign children directly to props
+    // See Portal
+    portal.props_ = children;
 
     return portal;
 }

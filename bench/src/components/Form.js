@@ -3,7 +3,7 @@ import * as React from 'react';
 
 const {jsx} = Hook;
 
-const Lib = __JSX__ === 'hook' ? Hook : React;
+const Lib = __LIB__ === 'hook' ? Hook : React;
 
 function Cat({text, setText}) {
     //console.log('run Cat', text);

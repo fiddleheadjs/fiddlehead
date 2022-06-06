@@ -2,6 +2,8 @@ import {Ref} from './RefHook';
 import {isArray, isFunction, isNumber, isString, slice} from './Util';
 import {Fragment, TextNode, VirtualNode} from './VirtualNode';
 
+const EmptyProps = {};
+
 /**
  *
  * @param {string|function} type
@@ -10,23 +12,33 @@ import {Fragment, TextNode, VirtualNode} from './VirtualNode';
  * @return {VirtualNode}
  */
 export function createElement(type, props, content) {
-    if (props === null) {
-        props = {};
-    }
-    
-    // Normalize key
     let key = null;
-    if (!(props.key === undefined || props.key === null)) {
-        key = '' + props.key;
-    }
-    delete props.key;
 
-    // Normalize ref
-    if (!(props.ref === undefined || props.ref instanceof Ref)) {
-        if (__DEV__) {
-            console.error('The ref value must be created by the useRef hook');
+    // props never undefined here
+    if (props === null) {
+        props = EmptyProps;
+    } else {
+        // Normalize key
+        // Accept any data type, except number and undefined
+        if (props.key !== undefined) {
+            if (isNumber(props.key)) {
+                key = '' + props.key;
+            } else {
+                key = props.key;
+            }
+
+            // Delete key from props, but for performance,
+            // we don't try to delete undefined property
+            delete props.key;
         }
-        delete props.ref;
+    
+        // Normalize ref
+        if (!(props.ref === undefined || props.ref instanceof Ref)) {
+            if (__DEV__) {
+                console.error('The ref value must be created by the useRef hook');
+            }
+            delete props.ref;
+        }
     }
     
     // Create the node
@@ -42,10 +54,16 @@ export function createElement(type, props, content) {
     
         if (isFunction(type)) {
             // JSX children
+            if (virtualNode.props_ === EmptyProps) {
+                virtualNode.props_ = {};
+            }
             virtualNode.props_.children = content;
         } else if (type === TextNode) {
             // Place TextNode after Function
             // because this way is much less frequently used
+            if (virtualNode.props_ === EmptyProps) {
+                virtualNode.props_ = {};
+            }
             if (multiple) {
                 let text = '', i = 0;
                 for (; i < content.length; ++i) {
@@ -83,7 +101,7 @@ export function createElement(type, props, content) {
     }
 
     if (isArray(content)) {
-        const fragment = new VirtualNode(Fragment, {}, null);
+        const fragment = new VirtualNode(Fragment, EmptyProps, null);
         _appendChildrenFromContent(fragment, content);
         return fragment;
     }

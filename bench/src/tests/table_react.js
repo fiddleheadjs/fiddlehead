@@ -3,23 +3,24 @@ import React, {
     useEffect,
     useLayoutEffect,
     useRef,
+    Fragment,
 } from "react";
-import ReactDOM from "react-dom/client";
+import ReactDOM from "react-dom";
 import {bench} from "../bench";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
+const root = document.getElementById("root");
 
 const TABLE_ROWS = 10000;
 console.log('Rows: ', TABLE_ROWS);
 
-bench([renderFn1, renderFn2], 50);
+bench([renderFn2, renderFn1], 100);
 
 function renderFn1(onFinish) {
-    root.render(<App1 onFinish={onFinish} />);
+    ReactDOM.render(<App1 onFinish={onFinish} />, root);
 }
 
 function renderFn2(onFinish) {
-    root.render(<App2 onFinish={onFinish} />);
+    ReactDOM.render(<App2 onFinish={onFinish} />, root);
 }
 
 function App1({onFinish}) {

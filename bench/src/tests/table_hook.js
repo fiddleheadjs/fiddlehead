@@ -5,15 +5,17 @@ import {
     useEffect,
     useLayoutEffect,
     useRef,
+    Fragment,
 } from "../../../output";
 import {bench} from "../bench";
 
 const root = document.getElementById("root");
 
 const TABLE_ROWS = 10000;
+
 console.log('Rows: ', TABLE_ROWS);
 
-bench([renderFn1, renderFn2], 50);
+bench([renderFn2, renderFn1], 100);
 
 function renderFn1(onFinish) {
     mount(<App1 onFinish={onFinish} />, root);

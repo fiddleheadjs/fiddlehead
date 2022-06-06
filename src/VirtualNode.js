@@ -6,13 +6,16 @@ export const NAMESPACE_SVG = 1;
 export const TextNode = '#';
 export const Fragment = '[';
 export function Portal(props) {
-    return props.children;
+    // Return props instead of props.children
+    // This is a trick to allow setting props to null
+    // in order to save memory
+    return props;
 }
 
 /**
  * 
  * @param {function|string} type
- * @param {{}} props
+ * @param {{}|null} props
  * @param {string|null} key
  */
 export function VirtualNode(type, props, key) {
@@ -38,7 +41,7 @@ export function VirtualNode(type, props, key) {
     // ===============
 
     /**
-     * @type {{}}
+     * @type {{}|null}
      */
     this.props_ = props;
 

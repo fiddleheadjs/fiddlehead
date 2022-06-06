@@ -26,16 +26,16 @@ function _reconcileChildOfDynamicNode(current, isSubtreeRoot) {
         newContent = null;
     }
     flushCurrentlyProcessing();
-
+    
     const newChild = createVirtualNodeFromContent(newContent);
-
+    
     if (newChild !== null) {
         newChild.parent_ = current;
         
         // Don't need to set the slot property
         // as a dynamic node can have only one child
     }
-
+    
     if (oldChild !== null) {
         if (newChild !== null && newChild.type_ === oldChild.type_ && newChild.key_ === oldChild.key_) {
             _makeAlternative(newChild, oldChild);
@@ -43,8 +43,13 @@ function _reconcileChildOfDynamicNode(current, isSubtreeRoot) {
             _addDeletion(current, oldChild);
         }
     }
-
+    
     current.child_ = newChild;
+
+    // With functional components
+    // We don't need props any more
+    // Remove it to save memory
+    current.props_ = null;
 }
 
 function _reconcileChildrenOfStaticNode(current, alternative) {

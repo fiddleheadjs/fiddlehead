@@ -156,13 +156,16 @@ const NAMESPACE_SVG = 1;
 const TextNode = '#';
 const Fragment = '[';
 function Portal(props) {
-    return props.children;
+    // Return props instead of props.children
+    // This is a trick to allow setting props to null
+    // in order to save memory
+    return props;
 }
 
 /**
  * 
  * @param {function|string} type
- * @param {{}} props
+ * @param {{}|null} props
  * @param {string|null} key
  */
 function VirtualNode(type, props, key) {
@@ -188,7 +191,7 @@ function VirtualNode(type, props, key) {
     // ===============
 
     /**
-     * @type {{}}
+     * @type {{}|null}
      */
     this.props_ = props;
 
@@ -274,6 +277,8 @@ function linkNativeNode(virtualNode, nativeNode) {
     }
 }
 
+const EmptyProps = {};
+
 /**
  *
  * @param {string|function} type
@@ -282,23 +287,33 @@ function linkNativeNode(virtualNode, nativeNode) {
  * @return {VirtualNode}
  */
 function createElement(type, props, content) {
-    if (props === null) {
-        props = {};
-    }
-    
-    // Normalize key
     let key = null;
-    if (!(props.key === undefined || props.key === null)) {
-        key = '' + props.key;
-    }
-    delete props.key;
 
-    // Normalize ref
-    if (!(props.ref === undefined || props.ref instanceof Ref)) {
-        if (true) {
-            console.error('The ref value must be created by the useRef hook');
+    // props never undefined here
+    if (props === null) {
+        props = EmptyProps;
+    } else {
+        // Normalize key
+        // Accept any data type, except number and undefined
+        if (props.key !== undefined) {
+            if (isNumber(props.key)) {
+                key = '' + props.key;
+            } else {
+                key = props.key;
+            }
+
+            // Delete key from props, but for performance,
+            // we don't try to delete undefined property
+            delete props.key;
         }
-        delete props.ref;
+    
+        // Normalize ref
+        if (!(props.ref === undefined || props.ref instanceof Ref)) {
+            if (true) {
+                console.error('The ref value must be created by the useRef hook');
+            }
+            delete props.ref;
+        }
     }
     
     // Create the node
@@ -314,10 +329,16 @@ function createElement(type, props, content) {
     
         if (isFunction(type)) {
             // JSX children
+            if (virtualNode.props_ === EmptyProps) {
+                virtualNode.props_ = {};
+            }
             virtualNode.props_.children = content;
         } else if (type === TextNode) {
             // Place TextNode after Function
             // because this way is much less frequently used
+            if (virtualNode.props_ === EmptyProps) {
+                virtualNode.props_ = {};
+            }
             if (multiple) {
                 let text = '', i = 0;
                 for (; i < content.length; ++i) {
@@ -355,7 +376,7 @@ function createElement(type, props, content) {
     }
 
     if (isArray(content)) {
-        const fragment = new VirtualNode(Fragment, {}, null);
+        const fragment = new VirtualNode(Fragment, EmptyProps, null);
         _appendChildrenFromContent(fragment, content);
         return fragment;
     }
@@ -1114,16 +1135,16 @@ function _reconcileChildOfDynamicNode(current, isSubtreeRoot) {
         newContent = null;
     }
     flushCurrentlyProcessing();
-
+    
     const newChild = createVirtualNodeFromContent(newContent);
-
+    
     if (newChild !== null) {
         newChild.parent_ = current;
         
         // Don't need to set the slot property
         // as a dynamic node can have only one child
     }
-
+    
     if (oldChild !== null) {
         if (newChild !== null && newChild.type_ === oldChild.type_ && newChild.key_ === oldChild.key_) {
             _makeAlternative(newChild, oldChild);
@@ -1131,8 +1152,13 @@ function _reconcileChildOfDynamicNode(current, isSubtreeRoot) {
             _addDeletion(current, oldChild);
         }
     }
-
+    
     current.child_ = newChild;
+
+    // With functional components
+    // We don't need props any more
+    // Remove it to save memory
+    current.props_ = null;
 }
 
 function _reconcileChildrenOfStaticNode(current, alternative) {
@@ -1337,16 +1363,21 @@ function createPortal(children, targetNativeNode) {
             }
         }
         
-        portal = new VirtualNode(Portal, {}, null);
+        portal = new VirtualNode(Portal, null, null);
 
         // Determine the namespace (we only support SVG and HTML namespaces)
         portal.namespace_ = ('ownerSVGElement' in targetNativeNode) ? NAMESPACE_SVG : NAMESPACE_HTML;
         
-        linkNativeNode(portal, targetNativeNode);
+        // Do not use linkNativeNode method
+        // As we passed the props is null
+        portal.nativeNode_ = targetNativeNode;
+
         attachVirtualNode(targetNativeNode, portal);
     }
 
-    portal.props_.children = children;
+    // Assign children directly to props
+    // See Portal
+    portal.props_ = children;
 
     return portal;
 }
