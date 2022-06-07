@@ -493,7 +493,7 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
         }
     }
 
-    // Finally, treat as an attribute
+    // Anything else, treat as attributes
     element.setAttribute(attrName, newAttrValue);
 }
 
@@ -525,7 +525,7 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
         }
     }
 
-    // Finally, treat as an attribute
+    // Anything else, treat as attributes
     element.removeAttribute(attrName);
 }
 
