@@ -5,7 +5,7 @@ import {Form} from "../components/Form";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
-bench([render0, render1], 100);
+bench([render1, render0], 100);
 
 function render0(onFinish) {
     root.render(<App0 onFinish={onFinish} />);
