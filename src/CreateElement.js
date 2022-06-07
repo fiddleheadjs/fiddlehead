@@ -3,7 +3,7 @@ import {isArray, isFunction, isNumber, isString, slice} from './Util';
 import {Fragment, TextNode, VirtualNode} from './VirtualNode';
 
 // Use the same object for every empty props to save memory
-const EmptyProps = {};
+const emptyProps = {};
 
 /**
  *
@@ -17,7 +17,7 @@ export function createElement(type, props, content) {
 
     // props never undefined here
     if (props === null) {
-        props = EmptyProps;
+        props = emptyProps;
     } else {
         // Normalize key
         // Accept any data type, except number and undefined
@@ -55,25 +55,19 @@ export function createElement(type, props, content) {
     
         if (isFunction(type)) {
             // JSX children
-            if (virtualNode.props_ === EmptyProps) {
+            if (virtualNode.props_ === emptyProps) {
                 virtualNode.props_ = {};
             }
             virtualNode.props_.children = content;
         } else if (type === TextNode) {
             // Place TextNode after Function
             // because this way is much less frequently used
-            if (virtualNode.props_ === EmptyProps) {
+            if (virtualNode.props_ === emptyProps) {
                 virtualNode.props_ = {};
             }
-            if (multiple) {
-                let text = '', i = 0;
-                for (; i < content.length; ++i) {
-                    text += _normalizeText(content[i]);
-                }
-                virtualNode.props_.children = text;
-            } else {
-                virtualNode.props_.children = _normalizeText(content);
-            }
+            // Accept only one child
+            // Or convert the children to the text content directly
+            virtualNode.props_.children = '' + content;
         } else {
             // Append children directly with static nodes
             _appendChildrenFromContent(virtualNode, multiple ? content : [content]);
@@ -102,29 +96,12 @@ export function createElement(type, props, content) {
     }
 
     if (isArray(content)) {
-        const fragment = new VirtualNode(Fragment, EmptyProps, null);
+        const fragment = new VirtualNode(Fragment, emptyProps, null);
         _appendChildrenFromContent(fragment, content);
         return fragment;
     }
 
     return null;
-}
-
-/**
- * 
- * @param {*} text 
- * @returns {string}
- */
-function _normalizeText(text) {
-    if (isString(text)) {
-        return text;
-    }
-
-    if (isNumber(text)) {
-        return '' + text;
-    }
-    
-    return '';
 }
 
 /**

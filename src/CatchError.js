@@ -19,9 +19,7 @@ export function catchError(error, virtualNode) {
     }
 
     if (__DEV__) {
-        setTimeout(function () {
-            console.info('You can catch this error by implementing an error boundary with the useError hook');
-        });
+        console.info('You can catch the following error by implementing an error boundary with the useError hook');
     }
 
     throw error;

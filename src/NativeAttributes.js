@@ -25,21 +25,18 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
         return;
     }
 
-    if (isString(newAttrValue) || isNumber(newAttrValue)) {
-        element.setAttribute(attrName, newAttrValue);
-        return;
-    }
-
     // Set properties and event listeners
     if (attrName in element) {
         try {
             element[attrName] = newAttrValue;
+            return;
         } catch (x) {
-            if (__DEV__) {
-                console.error(`Property \`${attrName}\` is not writable`);
-            }
+            // Property may not writable
         }
     }
+
+    // Finally, treat as an attribute
+    element.setAttribute(attrName, newAttrValue);
 }
 
 function _removeElementAttribute(element, attrName, oldAttrValue) {
@@ -59,22 +56,19 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
         element.removeAttribute(attrName);
         return;
     }
-    
-    if (isString(oldAttrValue) || isNumber(oldAttrValue)) {
-        element.removeAttribute(attrName);
-        return;
-    }
-    
+
     // Remove properties and event listeners
     if (attrName in element) {
         try {
             element[attrName] = null;
+            return;
         } catch (x) {
-            if (__DEV__) {
-                console.error(`Property \`${attrName}\` is not writable`);
-            }
+            // Property may not writable
         }
     }
+
+    // Finally, treat as an attribute
+    element.removeAttribute(attrName);
 }
 
 function _normalizeElementAttributeName(attrName) {

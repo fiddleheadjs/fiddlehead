@@ -29,9 +29,7 @@ function Root() {
 function FullName({firstName, lastName, ref, inputRef}) {
     return (
         <TextNode ref={ref}>
-            {firstName}
-            {' '}
-            {lastName}
+            {firstName + ' ' + lastName}
         </TextNode>
     );
 }

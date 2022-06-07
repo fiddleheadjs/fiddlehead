@@ -275,7 +275,7 @@ function linkNativeNode(virtualNode, nativeNode) {
 }
 
 // Use the same object for every empty props to save memory
-const EmptyProps = {};
+const emptyProps = {};
 
 /**
  *
@@ -289,7 +289,7 @@ function createElement(type, props, content) {
 
     // props never undefined here
     if (props === null) {
-        props = EmptyProps;
+        props = emptyProps;
     } else {
         // Normalize key
         // Accept any data type, except number and undefined
@@ -327,25 +327,19 @@ function createElement(type, props, content) {
     
         if (isFunction(type)) {
             // JSX children
-            if (virtualNode.props_ === EmptyProps) {
+            if (virtualNode.props_ === emptyProps) {
                 virtualNode.props_ = {};
             }
             virtualNode.props_.children = content;
         } else if (type === TextNode) {
             // Place TextNode after Function
             // because this way is much less frequently used
-            if (virtualNode.props_ === EmptyProps) {
+            if (virtualNode.props_ === emptyProps) {
                 virtualNode.props_ = {};
             }
-            if (multiple) {
-                let text = '', i = 0;
-                for (; i < content.length; ++i) {
-                    text += _normalizeText(content[i]);
-                }
-                virtualNode.props_.children = text;
-            } else {
-                virtualNode.props_.children = _normalizeText(content);
-            }
+            // Accept only one child
+            // Or convert the children to the text content directly
+            virtualNode.props_.children = '' + content;
         } else {
             // Append children directly with static nodes
             _appendChildrenFromContent(virtualNode, multiple ? content : [content]);
@@ -374,29 +368,12 @@ function createElement(type, props, content) {
     }
 
     if (isArray(content)) {
-        const fragment = new VirtualNode(Fragment, EmptyProps, null);
+        const fragment = new VirtualNode(Fragment, emptyProps, null);
         _appendChildrenFromContent(fragment, content);
         return fragment;
     }
 
     return null;
-}
-
-/**
- * 
- * @param {*} text 
- * @returns {string}
- */
-function _normalizeText(text) {
-    if (isString(text)) {
-        return text;
-    }
-
-    if (isNumber(text)) {
-        return '' + text;
-    }
-    
-    return '';
 }
 
 /**
@@ -506,21 +483,18 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
         return;
     }
 
-    if (isString(newAttrValue) || isNumber(newAttrValue)) {
-        element.setAttribute(attrName, newAttrValue);
-        return;
-    }
-
     // Set properties and event listeners
     if (attrName in element) {
         try {
             element[attrName] = newAttrValue;
+            return;
         } catch (x) {
-            if (true) {
-                console.error(`Property \`${attrName}\` is not writable`);
-            }
+            // Property may not writable
         }
     }
+
+    // Finally, treat as an attribute
+    element.setAttribute(attrName, newAttrValue);
 }
 
 function _removeElementAttribute(element, attrName, oldAttrValue) {
@@ -540,22 +514,19 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
         element.removeAttribute(attrName);
         return;
     }
-    
-    if (isString(oldAttrValue) || isNumber(oldAttrValue)) {
-        element.removeAttribute(attrName);
-        return;
-    }
-    
+
     // Remove properties and event listeners
     if (attrName in element) {
         try {
             element[attrName] = null;
+            return;
         } catch (x) {
-            if (true) {
-                console.error(`Property \`${attrName}\` is not writable`);
-            }
+            // Property may not writable
         }
     }
+
+    // Finally, treat as an attribute
+    element.removeAttribute(attrName);
 }
 
 function _normalizeElementAttributeName(attrName) {
@@ -915,9 +886,7 @@ function catchError(error, virtualNode) {
     }
 
     if (true) {
-        setTimeout(function () {
-            console.info('You can catch this error by implementing an error boundary with the useError hook');
-        });
+        console.info('You can catch the following error by implementing an error boundary with the useError hook');
     }
 
     throw error;
