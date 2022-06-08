@@ -529,10 +529,12 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
 }
 
 function _normalizeElementAttributeName(attrName) {
+    // Support React className
     if (attrName === 'className') {
         return 'class';
     }
 
+    // Support camelcase event listener bindings
     if (/^on[A-Z]/.test(attrName)) {
         return attrName.toLowerCase();
     }
