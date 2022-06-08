@@ -1,4 +1,4 @@
-import {jsx, mount, useState} from "../../output";
+import {jsx, render, useState} from "../../output";
 
 function YourAd({ count, setCount }) {
     const [layout, setLayout] = useState("cat");
@@ -40,4 +40,4 @@ function MyAd() {
     );
 }
 
-mount(<MyAd />, document.getElementById("sandbox-container"));
+render(<MyAd />, document.getElementById("sandbox-container"));

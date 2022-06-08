@@ -1,4 +1,4 @@
-import {jsx, mount, useState, useEffect, useLayoutEffect, useRef} from "../../output";
+import {jsx, render, useState, useEffect, useLayoutEffect, useRef} from "../../output";
 
 function Wrapper2({children, myRef}) {
     return (
@@ -115,9 +115,9 @@ function DemoFinalWrapper() {
 console.time('stack');
 console.time('mount');
 
-mount(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));
+render(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));
 setTimeout(() => {
-    mount(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));
+    render(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));
 }, 6000);
 
 console.timeEnd('stack');

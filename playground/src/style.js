@@ -1,4 +1,4 @@
-import {jsx, mount, useState, useEffect, useRef} from "../../output";
+import {jsx, render, useState, useEffect, useRef} from "../../output";
 
 function Wrapper({children}) {
     return (
@@ -50,4 +50,4 @@ function DemoWrapperWrapper() {
     );
 }
 
-mount(<DemoWrapperWrapper />, document.getElementById('sandbox-container'));
+render(<DemoWrapperWrapper />, document.getElementById('sandbox-container'));

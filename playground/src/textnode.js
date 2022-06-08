@@ -1,6 +1,6 @@
-import {jsx, mount, useState, useEffect, useRef, TextNode} from '../../output';
+import {jsx, render, useState, useEffect, useRef, TextNode} from '../../output';
 
-mount(<Root/>, document.getElementById('sandbox-container'));
+render(<Root/>, document.getElementById('sandbox-container'));
 
 function Root() {
     const [firstName, setFirstName] = useState('');

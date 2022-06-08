@@ -1,6 +1,6 @@
 import {
     jsx,
-    mount,
+    render,
     useState,
     useEffect,
     useLayoutEffect,
@@ -18,11 +18,11 @@ console.log('Rows: ', TABLE_ROWS);
 bench([renderFn2, renderFn1], 100);
 
 function renderFn1(onFinish) {
-    mount(<App1 onFinish={onFinish} />, root);
+    render(<App1 onFinish={onFinish} />, root);
 }
 
 function renderFn2(onFinish) {
-    mount(<App2 onFinish={onFinish} />, root);
+    render(<App2 onFinish={onFinish} />, root);
 }
 
 function App1({onFinish}) {

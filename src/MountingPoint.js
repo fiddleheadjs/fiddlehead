@@ -1,5 +1,5 @@
 // Find the virtual node in the parent chain which its native node is not null
-export function findHostVirtualNode(current) {
+export function resolveMountingPoint(current) {
     while (true) {
         if (current === null) {
             return null;
@@ -11,7 +11,7 @@ export function findHostVirtualNode(current) {
     }
 }
 
-export function loopClientNativeNodes(current, callback) {
+export function walkNativeSubtrees(current, callback) {
     const root = current;
 
     while (true) {

@@ -1,7 +1,7 @@
-import {jsx, mount, useState, useEffect} from '../../output'; 
+import {jsx, render, useState, useEffect} from '../../output'; 
 
 console.time('mount');
-mount(<Tree/>, document.getElementById('sandbox-container'));
+render(<Tree/>, document.getElementById('sandbox-container'));
 console.timeEnd('mount');
 
 function Tree() {

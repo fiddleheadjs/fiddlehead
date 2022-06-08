@@ -1,10 +1,10 @@
-import {jsx, mount} from '../../output';
+import {jsx, render} from '../../output';
 import {BigSvg} from './bigsvg';
 
 console.time('stack');
 console.time('mount');
 
-mount([<Svg0 />, <Svg1 />, <Svg2 />, <Svg3 />, <BigSvg />, <TimeEnd />], document.getElementById('sandbox-container'));
+render([<Svg0 />, <Svg1 />, <Svg2 />, <Svg3 />, <BigSvg />, <TimeEnd />], document.getElementById('sandbox-container'));
 
 console.timeEnd('stack');
 

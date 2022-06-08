@@ -108,7 +108,7 @@ export function VirtualNode(type, props, key) {
     /**
      * @type {Node|null}
      */
-    this.lastManipulatedClient_ = null;
+    this.lastManipulatedNativeChild_ = null;
 }
 
 /**

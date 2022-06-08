@@ -1,6 +1,6 @@
-import {jsx, mount, createPortal, useRef, useEffect, useState} from '../../output';
+import {jsx, render, createPortal, useRef, useEffect, useState} from '../../output';
 
-mount(<Root/>, document.getElementById('sandbox-container'));
+render(<Root/>, document.getElementById('sandbox-container'));
 
 function Root() {
     const [count, setCount] = useState(0);

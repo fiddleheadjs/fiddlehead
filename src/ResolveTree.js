@@ -1,6 +1,6 @@
 import {insertView, updateView, deleteView} from './CommitView';
 import {destroyEffects, EFFECT_LAYOUT, EFFECT_NORMAL, mountEffects} from './EffectHook';
-import {findHostVirtualNode} from './HostClient';
+import {resolveMountingPoint} from './MountingPoint';
 import {reconcileChildren} from './Reconciliation';
 import {Portal} from './VirtualNode';
 
@@ -14,15 +14,15 @@ export function resolveTree(current) {
     const effectDestroyNodes = new Map();
     
     // Main work
-    const host = findHostVirtualNode(current);
-    const hostNative = host.nativeNode_;
-    host.nativeNode_ = domFragment;
+    const mp = resolveMountingPoint(current);
+    const mpNative = mp.nativeNode_;
+    mp.nativeNode_ = domFragment;
     _workLoop(
         _performUnitOfWork, _onReturn, current,
         effectMountNodes, effectDestroyNodes
     );
-    hostNative.appendChild(domFragment);
-    host.nativeNode_ = hostNative;
+    mpNative.appendChild(domFragment);
+    mp.nativeNode_ = mpNative;
 
     // Layout effects
     effectDestroyNodes.forEach(function (isUnmounted, vnode) {
@@ -89,8 +89,8 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
 // Callback called after walking through a node and all of its ascendants
 function _onReturn(current) {
     // This is when we cleanup the remaining temp props
-    if (current.lastManipulatedClient_ !== null) {
-        current.lastManipulatedClient_ = null;
+    if (current.lastManipulatedNativeChild_ !== null) {
+        current.lastManipulatedNativeChild_ = null;
     }
 }
 

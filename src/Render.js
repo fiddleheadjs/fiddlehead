@@ -7,7 +7,7 @@ import {resolveTree} from './ResolveTree';
  * @param {*} children 
  * @param {Element} targetNativeNode
  */
- export function mount(children, targetNativeNode) {
+ export function render(children, targetNativeNode) {
     const portal = createPortal(children, targetNativeNode);
 
     // Render view

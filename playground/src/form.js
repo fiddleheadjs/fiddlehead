@@ -1,4 +1,4 @@
-import {jsx, mount, useState, useEffect, useRef, Fragment} from "../../output";
+import {jsx, render, useState, useEffect, useRef, Fragment} from "../../output";
 
 
 function Cat({text, setText}) {
@@ -269,5 +269,5 @@ function DemoWrapperWrapper() {
 }
 
 console.time('stack');
-mount(<DemoWrapperWrapper/>, document.getElementById('sandbox-container'));
+render(<DemoWrapperWrapper/>, document.getElementById('sandbox-container'));
 console.timeEnd('stack');

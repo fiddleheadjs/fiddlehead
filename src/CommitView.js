@@ -1,4 +1,4 @@
-import {findHostVirtualNode, loopClientNativeNodes} from './HostClient';
+import {resolveMountingPoint, walkNativeSubtrees} from './MountingPoint';
 import {hydrateView, rehydrateView} from './HydrateView';
 
 // Important!!!
@@ -8,9 +8,9 @@ export function updateView(newVirtualNode, oldVirtualNode) {
     rehydrateView(newVirtualNode, oldVirtualNode);
 
     if (newVirtualNode.nativeNode_ !== null) {
-        const host = findHostVirtualNode(newVirtualNode.parent_);
-        if (host !== null) {
-            host.lastManipulatedClient_ = newVirtualNode.nativeNode_;
+        const mp = resolveMountingPoint(newVirtualNode.parent_);
+        if (mp !== null) {
+            mp.lastManipulatedNativeChild_ = newVirtualNode.nativeNode_;
         }
     }
 }
@@ -19,23 +19,22 @@ export function insertView(virtualNode) {
     hydrateView(virtualNode);
 
     if (virtualNode.nativeNode_ !== null) {
-        const host = findHostVirtualNode(virtualNode.parent_);
-        if (host !== null) {
-            const nativeNodeAfter = (
-                host.lastManipulatedClient_ !== null
-                    ? host.lastManipulatedClient_.nextSibling
-                    : host.nativeNode_.firstChild
+        const mp = resolveMountingPoint(virtualNode.parent_);
+        if (mp !== null) {
+            const nativeNodeAfter = (mp.lastManipulatedNativeChild_ !== null
+                ? mp.lastManipulatedNativeChild_.nextSibling
+                : mp.nativeNode_.firstChild
             );
-            host.nativeNode_.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
-            host.lastManipulatedClient_ = virtualNode.nativeNode_;
+            mp.nativeNode_.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
+            mp.lastManipulatedNativeChild_ = virtualNode.nativeNode_;
         }
     }
 }
 
-export function deleteView(subtree) {
-    loopClientNativeNodes(subtree, function (nativeNode) {
-        if (nativeNode.parentNode !== null) {
-            nativeNode.parentNode.removeChild(nativeNode);
+export function deleteView(virtualNode) {
+    walkNativeSubtrees(virtualNode, function (nativeSubtree) {
+        if (nativeSubtree.parentNode !== null) {
+            nativeSubtree.parentNode.removeChild(nativeSubtree);
         }
     });
 }

@@ -9,11 +9,11 @@ console.log('Rows: ', TABLE_ROWS);
 bench([renderFn1, renderFn2], 50);
 
 function renderFn1(onFinish) {
-    mount(App1(), root, {onFinish});
+    render(App1(), root, {onFinish});
 }
 
 function renderFn2(onFinish) {
-    mount(App2(), root, {onFinish});
+    render(App2(), root, {onFinish});
 }
 
 function App1() {

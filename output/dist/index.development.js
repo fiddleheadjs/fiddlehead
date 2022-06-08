@@ -260,7 +260,7 @@ function VirtualNode(type, props, key) {
     /**
      * @type {Node|null}
      */
-    this.lastManipulatedClient_ = null;
+    this.lastManipulatedNativeChild_ = null;
 }
 
 /**
@@ -422,7 +422,7 @@ function extractVirtualNode(nativeNode) {
 }
 
 // Find the virtual node in the parent chain which its native node is not null
-function findHostVirtualNode(current) {
+function resolveMountingPoint(current) {
     while (true) {
         if (current === null) {
             return null;
@@ -434,7 +434,7 @@ function findHostVirtualNode(current) {
     }
 }
 
-function loopClientNativeNodes(current, callback) {
+function walkNativeSubtrees(current, callback) {
     const root = current;
 
     while (true) {
@@ -483,7 +483,10 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
         return;
     }
 
-    // Set properties and event listeners
+    if (_canBeAttribute(attrName, newAttrValue)) {
+        element.setAttribute(attrName, newAttrValue);
+        // Continue handle as properties
+    }
     if (attrName in element) {
         try {
             element[attrName] = newAttrValue;
@@ -492,9 +495,6 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
             // Property may not writable
         }
     }
-
-    // Anything else, treat as attributes
-    element.setAttribute(attrName, newAttrValue);
 }
 
 function _removeElementAttribute(element, attrName, oldAttrValue) {
@@ -514,18 +514,17 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
         return;
     }
 
-    // Remove properties and event listeners
+    if (_canBeAttribute(attrName, oldAttrValue)) {
+        element.removeAttribute(attrName);
+        // Continue handle as properties
+    }
     if (attrName in element) {
         try {
             element[attrName] = null;
-            return;
         } catch (x) {
             // Property may not writable
         }
     }
-
-    // Anything else, treat as attributes
-    element.removeAttribute(attrName);
 }
 
 function _normalizeElementAttributeName(attrName) {
@@ -581,6 +580,18 @@ function _hasOwnNonEmpty(target, prop) {
         target[prop] !== undefined &&
         target[prop] !== null
     );
+}
+
+function _canBeAttribute(name, value) {
+    if (name === 'innerHTML' || name === 'innerText' || name === 'textContent') {
+        return false;
+    }
+
+    if (!(isString(value) || isNumber(value))) {
+        return false;
+    }
+
+    return true;
 }
 
 function createNativeTextNode(text) {
@@ -694,9 +705,9 @@ function updateView(newVirtualNode, oldVirtualNode) {
     rehydrateView(newVirtualNode, oldVirtualNode);
 
     if (newVirtualNode.nativeNode_ !== null) {
-        const host = findHostVirtualNode(newVirtualNode.parent_);
-        if (host !== null) {
-            host.lastManipulatedClient_ = newVirtualNode.nativeNode_;
+        const mp = resolveMountingPoint(newVirtualNode.parent_);
+        if (mp !== null) {
+            mp.lastManipulatedNativeChild_ = newVirtualNode.nativeNode_;
         }
     }
 }
@@ -705,23 +716,22 @@ function insertView(virtualNode) {
     hydrateView(virtualNode);
 
     if (virtualNode.nativeNode_ !== null) {
-        const host = findHostVirtualNode(virtualNode.parent_);
-        if (host !== null) {
-            const nativeNodeAfter = (
-                host.lastManipulatedClient_ !== null
-                    ? host.lastManipulatedClient_.nextSibling
-                    : host.nativeNode_.firstChild
+        const mp = resolveMountingPoint(virtualNode.parent_);
+        if (mp !== null) {
+            const nativeNodeAfter = (mp.lastManipulatedNativeChild_ !== null
+                ? mp.lastManipulatedNativeChild_.nextSibling
+                : mp.nativeNode_.firstChild
             );
-            host.nativeNode_.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
-            host.lastManipulatedClient_ = virtualNode.nativeNode_;
+            mp.nativeNode_.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
+            mp.lastManipulatedNativeChild_ = virtualNode.nativeNode_;
         }
     }
 }
 
-function deleteView(subtree) {
-    loopClientNativeNodes(subtree, function (nativeNode) {
-        if (nativeNode.parentNode !== null) {
-            nativeNode.parentNode.removeChild(nativeNode);
+function deleteView(virtualNode) {
+    walkNativeSubtrees(virtualNode, function (nativeSubtree) {
+        if (nativeSubtree.parentNode !== null) {
+            nativeSubtree.parentNode.removeChild(nativeSubtree);
         }
     });
 }
@@ -1181,15 +1191,15 @@ function resolveTree(current) {
     const effectDestroyNodes = new Map();
     
     // Main work
-    const host = findHostVirtualNode(current);
-    const hostNative = host.nativeNode_;
-    host.nativeNode_ = domFragment;
+    const mp = resolveMountingPoint(current);
+    const mpNative = mp.nativeNode_;
+    mp.nativeNode_ = domFragment;
     _workLoop(
         _performUnitOfWork, _onReturn, current,
         effectMountNodes, effectDestroyNodes
     );
-    hostNative.appendChild(domFragment);
-    host.nativeNode_ = hostNative;
+    mpNative.appendChild(domFragment);
+    mp.nativeNode_ = mpNative;
 
     // Layout effects
     effectDestroyNodes.forEach(function (isUnmounted, vnode) {
@@ -1256,8 +1266,8 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
 // Callback called after walking through a node and all of its ascendants
 function _onReturn(current) {
     // This is when we cleanup the remaining temp props
-    if (current.lastManipulatedClient_ !== null) {
-        current.lastManipulatedClient_ = null;
+    if (current.lastManipulatedNativeChild_ !== null) {
+        current.lastManipulatedNativeChild_ = null;
     }
 }
 
@@ -1291,7 +1301,7 @@ function _workLoop(performUnit, onReturn, root, r0, r1) {
  * @param {*} children 
  * @param {Element} targetNativeNode
  */
- function mount(children, targetNativeNode) {
+ function render(children, targetNativeNode) {
     const portal = createPortal(children, targetNativeNode);
 
     // Render view
@@ -1337,7 +1347,7 @@ exports.TextNode = TextNode;
 exports.createElement = createElement;
 exports.createPortal = createPortal;
 exports.jsx = createElement;
-exports.mount = mount;
+exports.render = render;
 exports.useEffect = useEffect;
 exports.useError = useError;
 exports.useLayoutEffect = useLayoutEffect;

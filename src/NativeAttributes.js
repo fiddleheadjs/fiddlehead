@@ -1,5 +1,5 @@
 import {EMPTY_OBJECT} from './Constants';
-import {hasOwnProperty, isObject} from './Util';
+import {hasOwnProperty, isNumber, isObject, isString} from './Util';
 
 export function updateNativeElementAttributes(element, newAttributes, oldAttributes) {
     _updateKeyValues(
@@ -26,7 +26,10 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
         return;
     }
 
-    // Set properties and event listeners
+    if (_canBeAttribute(attrName, newAttrValue)) {
+        element.setAttribute(attrName, newAttrValue);
+        // Continue handle as properties
+    }
     if (attrName in element) {
         try {
             element[attrName] = newAttrValue;
@@ -35,9 +38,6 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
             // Property may not writable
         }
     }
-
-    // Anything else, treat as attributes
-    element.setAttribute(attrName, newAttrValue);
 }
 
 function _removeElementAttribute(element, attrName, oldAttrValue) {
@@ -57,18 +57,17 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
         return;
     }
 
-    // Remove properties and event listeners
+    if (_canBeAttribute(attrName, oldAttrValue)) {
+        element.removeAttribute(attrName);
+        // Continue handle as properties
+    }
     if (attrName in element) {
         try {
             element[attrName] = null;
-            return;
         } catch (x) {
             // Property may not writable
         }
     }
-
-    // Anything else, treat as attributes
-    element.removeAttribute(attrName);
 }
 
 function _normalizeElementAttributeName(attrName) {
@@ -124,4 +123,16 @@ function _hasOwnNonEmpty(target, prop) {
         target[prop] !== undefined &&
         target[prop] !== null
     );
+}
+
+function _canBeAttribute(name, value) {
+    if (name === 'innerHTML' || name === 'innerText' || name === 'textContent') {
+        return false;
+    }
+
+    if (!(isString(value) || isNumber(value))) {
+        return false;
+    }
+
+    return true;
 }

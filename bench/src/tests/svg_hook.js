@@ -1,4 +1,4 @@
-import {jsx, mount, useLayoutEffect} from "../../../output";
+import {jsx, render, useLayoutEffect} from "../../../output";
 
 import {bench} from "../bench";
 import {Svg0} from "../components/Svg0";
@@ -12,23 +12,23 @@ const root = document.getElementById("root");
 bench([render0, render1, render2, render3, render4], 100);
 
 function render0(onFinish) {
-    mount(<App0 onFinish={onFinish} />, root);
+    render(<App0 onFinish={onFinish} />, root);
 }
 
 function render1(onFinish) {
-    mount(<App1 onFinish={onFinish} />, root);
+    render(<App1 onFinish={onFinish} />, root);
 }
 
 function render2(onFinish) {
-    mount(<App2 onFinish={onFinish} />, root);
+    render(<App2 onFinish={onFinish} />, root);
 }
 
 function render3(onFinish) {
-    mount(<App3 onFinish={onFinish} />, root);
+    render(<App3 onFinish={onFinish} />, root);
 }
 
 function render4(onFinish) {
-    mount(<App4 onFinish={onFinish} />, root);
+    render(<App4 onFinish={onFinish} />, root);
 }
 
 function App0({onFinish}) {
