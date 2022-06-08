@@ -1,9 +1,7 @@
+import {EMPTY_OBJECT} from './Constants';
 import {Ref} from './RefHook';
 import {isArray, isFunction, isNumber, isString, slice} from './Util';
 import {Fragment, TextNode, VirtualNode} from './VirtualNode';
-
-// Use the same object for every empty props to save memory
-const emptyProps = {};
 
 /**
  *
@@ -17,7 +15,8 @@ export function createElement(type, props, content) {
 
     // props never undefined here
     if (props === null) {
-        props = emptyProps;
+        // Use the same object for every empty props to save memory
+        props = EMPTY_OBJECT;
     } else {
         // Normalize key
         // Accept any data type, except number and undefined
@@ -55,14 +54,14 @@ export function createElement(type, props, content) {
     
         if (isFunction(type)) {
             // JSX children
-            if (virtualNode.props_ === emptyProps) {
+            if (virtualNode.props_ === EMPTY_OBJECT) {
                 virtualNode.props_ = {};
             }
             virtualNode.props_.children = content;
         } else if (type === TextNode) {
             // Place TextNode after Function
             // because this way is much less frequently used
-            if (virtualNode.props_ === emptyProps) {
+            if (virtualNode.props_ === EMPTY_OBJECT) {
                 virtualNode.props_ = {};
             }
             // Accept only one child
@@ -96,7 +95,7 @@ export function createElement(type, props, content) {
     }
 
     if (isArray(content)) {
-        const fragment = new VirtualNode(Fragment, emptyProps, null);
+        const fragment = new VirtualNode(Fragment, EMPTY_OBJECT, null);
         _appendChildrenFromContent(fragment, content);
         return fragment;
     }

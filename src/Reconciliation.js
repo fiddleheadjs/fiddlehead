@@ -17,7 +17,6 @@ function _reconcileChildOfDynamicNode(current, isSubtreeRoot) {
     );
 
     let newContent;
-
     prepareCurrentlyProcessing(current);
     try {
         newContent = current.type_(current.props_);

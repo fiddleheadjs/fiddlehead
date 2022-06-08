@@ -1,3 +1,4 @@
+import {EMPTY_OBJECT} from './Constants';
 import {hasOwnProperty, isObject} from './Util';
 
 export function updateNativeElementAttributes(element, newAttributes, oldAttributes) {
@@ -16,10 +17,10 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
 
     if (attrName === 'style') {
         if (!isObject(newAttrValue)) {
-            newAttrValue = {};
+            newAttrValue = EMPTY_OBJECT;
         }
         if (!isObject(oldAttrValue)) {
-            oldAttrValue = {};
+            oldAttrValue = EMPTY_OBJECT;
         }
         _updateStyleProperties(element[attrName], newAttrValue, oldAttrValue);
         return;
@@ -47,10 +48,9 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
     }
 
     if (attrName === 'style') {
-        if (!isObject(oldAttrValue)) {
-            oldAttrValue = {};
+        if (isObject(oldAttrValue)) {
+            _updateStyleProperties(element[attrName], EMPTY_OBJECT, oldAttrValue);
         }
-        _updateStyleProperties(element[attrName], {}, oldAttrValue);
 
         // Clean up HTML code
         element.removeAttribute(attrName);
@@ -72,13 +72,6 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
 }
 
 function _normalizeElementAttributeName(attrName) {
-    if (attrName === 'class') {
-        if (__DEV__) {
-            console.error('Use `className` instead of `class`');
-        }
-        return '';
-    }
-
     if (attrName === 'className') {
         return 'class';
     }

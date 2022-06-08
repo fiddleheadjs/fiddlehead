@@ -9,13 +9,9 @@
     "playground:start": "cd playground && npm run start",
     "playground:build": "cd playground && npm run build",
     "playground:watch": "cd playground && npm run watch",
-    "playground:build:prod": "NODE_ENV=production cd playground && npm run build",
-    "playground:watch:prod": "NODE_ENV=production cd playground && npm run watch",
     "bench:start": "cd bench && npm run start",
     "bench:build": "cd bench && npm run build",
     "bench:watch": "cd bench && npm run watch",
-    "bench:build:prod": "NODE_ENV=production cd bench && npm run build",
-    "bench:watch:prod": "NODE_ENV=production cd bench && npm run watch",
     "lint": "eslint ./src --config .eslintrc"
   },
   "repository": {

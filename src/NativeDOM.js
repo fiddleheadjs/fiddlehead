@@ -1,5 +1,6 @@
 import {NAMESPACE_SVG} from './VirtualNode';
 import {updateNativeElementAttributes} from './NativeAttributes';
+import {EMPTY_OBJECT} from './Constants';
 
 export function createNativeTextNode(text) {
     return document.createTextNode(text);
@@ -15,7 +16,7 @@ export function createNativeElementWithNS(ns, type, attributes) {
         : document.createElement(type)
     );
 
-    updateNativeElementAttributes(element, attributes, {});
+    updateNativeElementAttributes(element, attributes, EMPTY_OBJECT);
     
     return element;
 }

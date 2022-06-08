@@ -2,6 +2,8 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+const EMPTY_OBJECT = Object.create(null);
+
 let currentNode = null;
 let currentRefHook = null;
 let currentStateHook = null;
@@ -274,9 +276,6 @@ function linkNativeNode(virtualNode, nativeNode) {
     }
 }
 
-// Use the same object for every empty props to save memory
-const emptyProps = {};
-
 /**
  *
  * @param {string|function} type
@@ -289,7 +288,8 @@ function createElement(type, props, content) {
 
     // props never undefined here
     if (props === null) {
-        props = emptyProps;
+        // Use the same object for every empty props to save memory
+        props = EMPTY_OBJECT;
     } else {
         // Normalize key
         // Accept any data type, except number and undefined
@@ -327,14 +327,14 @@ function createElement(type, props, content) {
     
         if (isFunction(type)) {
             // JSX children
-            if (virtualNode.props_ === emptyProps) {
+            if (virtualNode.props_ === EMPTY_OBJECT) {
                 virtualNode.props_ = {};
             }
             virtualNode.props_.children = content;
         } else if (type === TextNode) {
             // Place TextNode after Function
             // because this way is much less frequently used
-            if (virtualNode.props_ === emptyProps) {
+            if (virtualNode.props_ === EMPTY_OBJECT) {
                 virtualNode.props_ = {};
             }
             // Accept only one child
@@ -368,7 +368,7 @@ function createElement(type, props, content) {
     }
 
     if (isArray(content)) {
-        const fragment = new VirtualNode(Fragment, emptyProps, null);
+        const fragment = new VirtualNode(Fragment, EMPTY_OBJECT, null);
         _appendChildrenFromContent(fragment, content);
         return fragment;
     }
@@ -474,10 +474,10 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
 
     if (attrName === 'style') {
         if (!isObject(newAttrValue)) {
-            newAttrValue = {};
+            newAttrValue = EMPTY_OBJECT;
         }
         if (!isObject(oldAttrValue)) {
-            oldAttrValue = {};
+            oldAttrValue = EMPTY_OBJECT;
         }
         _updateStyleProperties(element[attrName], newAttrValue, oldAttrValue);
         return;
@@ -505,10 +505,9 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
     }
 
     if (attrName === 'style') {
-        if (!isObject(oldAttrValue)) {
-            oldAttrValue = {};
+        if (isObject(oldAttrValue)) {
+            _updateStyleProperties(element[attrName], EMPTY_OBJECT, oldAttrValue);
         }
-        _updateStyleProperties(element[attrName], {}, oldAttrValue);
 
         // Clean up HTML code
         element.removeAttribute(attrName);
@@ -530,13 +529,6 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
 }
 
 function _normalizeElementAttributeName(attrName) {
-    if (attrName === 'class') {
-        if (true) {
-            console.error('Use `className` instead of `class`');
-        }
-        return '';
-    }
-
     if (attrName === 'className') {
         return 'class';
     }
@@ -603,7 +595,7 @@ function createNativeElementWithNS(ns, type, attributes) {
         : document.createElement(type)
     );
 
-    updateNativeElementAttributes(element, attributes, {});
+    updateNativeElementAttributes(element, attributes, EMPTY_OBJECT);
     
     return element;
 }
@@ -1093,7 +1085,6 @@ function _reconcileChildOfDynamicNode(current, isSubtreeRoot) {
     );
 
     let newContent;
-
     prepareCurrentlyProcessing(current);
     try {
         newContent = current.type_(current.props_);
