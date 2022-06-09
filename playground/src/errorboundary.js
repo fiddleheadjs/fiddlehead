@@ -125,7 +125,7 @@ function Content3({children, setClicks, setShows}) {
             {children}
             <div>
                 <button onClick={() => {
-                    setCount(t => {console.log('---return count'); return count += 1;});
+                    setCount(t => {console.log('---return count'); return t < 10 ? t + 1 : bug_count += 1;});
                     setClicks(t => {console.log('---return clicks'); return t + 1;});
                     setShows(t => {console.log('---return shows =', t); return t + 1;});
                 }}>Click me {count}</button>
