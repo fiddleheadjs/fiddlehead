@@ -705,9 +705,9 @@ function updateView(newVirtualNode, oldVirtualNode) {
     rehydrateView(newVirtualNode, oldVirtualNode);
 
     if (newVirtualNode.nativeNode_ !== null) {
-        const mp = resolveMountingPoint(newVirtualNode.parent_);
-        if (mp !== null) {
-            mp.lastManipulatedNativeChild_ = newVirtualNode.nativeNode_;
+        const mpt = resolveMountingPoint(newVirtualNode.parent_);
+        if (mpt !== null) {
+            mpt.lastManipulatedNativeChild_ = newVirtualNode.nativeNode_;
         }
     }
 }
@@ -716,14 +716,14 @@ function insertView(virtualNode) {
     hydrateView(virtualNode);
 
     if (virtualNode.nativeNode_ !== null) {
-        const mp = resolveMountingPoint(virtualNode.parent_);
-        if (mp !== null) {
-            const nativeNodeAfter = (mp.lastManipulatedNativeChild_ !== null
-                ? mp.lastManipulatedNativeChild_.nextSibling
-                : mp.nativeNode_.firstChild
+        const mpt = resolveMountingPoint(virtualNode.parent_);
+        if (mpt !== null) {
+            const nativeNodeAfter = (mpt.lastManipulatedNativeChild_ !== null
+                ? mpt.lastManipulatedNativeChild_.nextSibling
+                : mpt.nativeNode_.firstChild
             );
-            mp.nativeNode_.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
-            mp.lastManipulatedNativeChild_ = virtualNode.nativeNode_;
+            mpt.nativeNode_.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
+            mpt.lastManipulatedNativeChild_ = virtualNode.nativeNode_;
         }
     }
 }
@@ -1191,31 +1191,31 @@ function resolveTree(current) {
     const effectDestroyNodes = new Map();
     
     // Main work
-    const mp = resolveMountingPoint(current);
-    const mpNative = mp.nativeNode_;
-    mp.nativeNode_ = domFragment;
+    const mpt = resolveMountingPoint(current);
+    const mptNative = mpt.nativeNode_;
+    mpt.nativeNode_ = domFragment;
     _workLoop(
         _performUnitOfWork, _onReturn, current,
         effectMountNodes, effectDestroyNodes
     );
-    mpNative.appendChild(domFragment);
-    mp.nativeNode_ = mpNative;
+    mptNative.appendChild(domFragment);
+    mpt.nativeNode_ = mptNative;
 
     // Layout effects
-    effectDestroyNodes.forEach(function (isUnmounted, vnode) {
-        destroyEffects(EFFECT_LAYOUT, vnode, isUnmounted);
+    effectDestroyNodes.forEach(function (isUnmounted, node) {
+        destroyEffects(EFFECT_LAYOUT, node, isUnmounted);
     });
-    effectMountNodes.forEach(function (isNewlyMounted, vnode) {
-        mountEffects(EFFECT_LAYOUT, vnode, isNewlyMounted);
+    effectMountNodes.forEach(function (isNewlyMounted, node) {
+        mountEffects(EFFECT_LAYOUT, node, isNewlyMounted);
     });
 
     // Effects
     setTimeout(function () {
-        effectDestroyNodes.forEach(function (isUnmounted, vnode) {
-            destroyEffects(EFFECT_NORMAL, vnode, isUnmounted);
+        effectDestroyNodes.forEach(function (isUnmounted, node) {
+            destroyEffects(EFFECT_NORMAL, node, isUnmounted);
         });
-        effectMountNodes.forEach(function (isNewlyMounted, vnode) {
-            mountEffects(EFFECT_NORMAL, vnode, isNewlyMounted);
+        effectMountNodes.forEach(function (isNewlyMounted, node) {
+            mountEffects(EFFECT_NORMAL, node, isNewlyMounted);
         });
     });
 }
@@ -1253,9 +1253,9 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
     if (current.deletions_ !== null) {
         for (let i = 0; i < current.deletions_.length; ++i) {
             deleteView(current.deletions_[i]);
-            _workLoop(function (vnode) {
-                if (vnode.effectHook_ !== null) {
-                    effectDestroyNodes.set(vnode, true);
+            _workLoop(function (node) {
+                if (node.effectHook_ !== null) {
+                    effectDestroyNodes.set(node, true);
                 }
             }, null, current.deletions_[i]);
         }

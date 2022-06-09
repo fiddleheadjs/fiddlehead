@@ -14,31 +14,31 @@ export function resolveTree(current) {
     const effectDestroyNodes = new Map();
     
     // Main work
-    const mp = resolveMountingPoint(current);
-    const mpNative = mp.nativeNode_;
-    mp.nativeNode_ = domFragment;
+    const mpt = resolveMountingPoint(current);
+    const mptNative = mpt.nativeNode_;
+    mpt.nativeNode_ = domFragment;
     _workLoop(
         _performUnitOfWork, _onReturn, current,
         effectMountNodes, effectDestroyNodes
     );
-    mpNative.appendChild(domFragment);
-    mp.nativeNode_ = mpNative;
+    mptNative.appendChild(domFragment);
+    mpt.nativeNode_ = mptNative;
 
     // Layout effects
-    effectDestroyNodes.forEach(function (isUnmounted, vnode) {
-        destroyEffects(EFFECT_LAYOUT, vnode, isUnmounted);
+    effectDestroyNodes.forEach(function (isUnmounted, node) {
+        destroyEffects(EFFECT_LAYOUT, node, isUnmounted);
     });
-    effectMountNodes.forEach(function (isNewlyMounted, vnode) {
-        mountEffects(EFFECT_LAYOUT, vnode, isNewlyMounted);
+    effectMountNodes.forEach(function (isNewlyMounted, node) {
+        mountEffects(EFFECT_LAYOUT, node, isNewlyMounted);
     });
 
     // Effects
     setTimeout(function () {
-        effectDestroyNodes.forEach(function (isUnmounted, vnode) {
-            destroyEffects(EFFECT_NORMAL, vnode, isUnmounted);
+        effectDestroyNodes.forEach(function (isUnmounted, node) {
+            destroyEffects(EFFECT_NORMAL, node, isUnmounted);
         });
-        effectMountNodes.forEach(function (isNewlyMounted, vnode) {
-            mountEffects(EFFECT_NORMAL, vnode, isNewlyMounted);
+        effectMountNodes.forEach(function (isNewlyMounted, node) {
+            mountEffects(EFFECT_NORMAL, node, isNewlyMounted);
         });
     });
 }
@@ -76,9 +76,9 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
     if (current.deletions_ !== null) {
         for (let i = 0; i < current.deletions_.length; ++i) {
             deleteView(current.deletions_[i]);
-            _workLoop(function (vnode) {
-                if (vnode.effectHook_ !== null) {
-                    effectDestroyNodes.set(vnode, true);
+            _workLoop(function (node) {
+                if (node.effectHook_ !== null) {
+                    effectDestroyNodes.set(node, true);
                 }
             }, null, current.deletions_[i]);
         }
