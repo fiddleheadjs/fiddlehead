@@ -798,6 +798,7 @@ const queueMap = new Map();
 let timeoutId = null;
 
 function _setState(value) {
+    console.log('--', this.context_.type_.name, 'setState');
     let queue = queueMap.get(this.context_);
 
     if (queue === undefined) {
@@ -852,6 +853,7 @@ function _flushQueues() {
         }
 
         if (hasChanges) {
+            console.log('--', hook.context_.type_.name, 'updateTree');
             resolveTree(hook.context_);
         }
     });
@@ -916,6 +918,7 @@ const FLAG_DEPS_CHANGED = 3;
 function EffectHook(callback, deps, tag, flag) {
     this.callback_ = callback;
     this.deps_ = deps;
+    this.pendingDeps_ = null;
     this.tag_ = tag;
     this.flag_ = flag;
     this.destroy_ = null;
@@ -953,26 +956,28 @@ function _useEffectImpl(callback, deps, tag) {
                 // and consider it is changed
             }
     
-            const flag = _determineFlag(deps, currentHook.deps_);
+            // const flag = _determineFlag(deps, currentHook.deps_);
 
-            if (flag === FLAG_LAZY) {
-                return;
-            }
+            // if (flag === FLAG_LAZY) {
+            //     currentHook.pendingDeps_ = deps;
+            //     return;
+            // }
     
-            if (flag === FLAG_DEPS) {
-                currentHook.flag_ = flag;
-                return;
-            }
+            // if (flag === FLAG_DEPS) {
+                // currentHook.flag_ = flag;
+                currentHook.pendingDeps_ = deps;
+            //     return;
+            // }
     
-            if (flag === FLAG_ALWAYS || flag === FLAG_DEPS_CHANGED) {
-                currentHook.callback_ = callback;
-                currentHook.deps_ = deps;
-                currentHook.flag_ = flag;
+            // if (flag === FLAG_ALWAYS) {
+            //     currentHook.callback_ = callback;
+            //     // currentHook.deps_ = deps;
+            //     currentHook.flag_ = flag;
 
-                currentHook.lastDestroy_ = currentHook.destroy_;
-                currentHook.destroy_ = null;
-                return;
-            }
+            //     currentHook.lastDestroy_ = currentHook.destroy_;
+            //     currentHook.destroy_ = null;
+            //     return;
+            // }
         }
     );
 }
@@ -984,10 +989,15 @@ function _useEffectImpl(callback, deps, tag) {
  * @param {boolean} isNewlyMounted
  */
 function mountEffects(effectTag, virtualNode, isNewlyMounted) {
+    if (effectTag === EFFECT_NORMAL) {
+        console.log('--', virtualNode.type_.name, 'mountEffects');
+    }
     let hook = virtualNode.effectHook_;
     while (hook !== null) {
         if (hook.tag_ === effectTag) {
-            if (isNewlyMounted || hook.flag_ === FLAG_ALWAYS || hook.flag_ === FLAG_DEPS_CHANGED) {
+
+            const flag = _determineFlag(hook.deps_, hook.pendingDeps_);
+            if (isNewlyMounted || flag === FLAG_ALWAYS || flag === FLAG_DEPS_CHANGED) {
                 try {
                     _mountEffect(hook);
                 } catch (error) {
@@ -1009,7 +1019,8 @@ function destroyEffects(effectTag, virtualNode, isUnmounted) {
     while (hook !== null) {
         if (hook.tag_ === effectTag) {
             if (hook.lastDestroy_ !== null || hook.destroy_ !== null) {
-                if (isUnmounted || hook.flag_ === FLAG_ALWAYS || hook.flag_ === FLAG_DEPS_CHANGED) {
+                const flag = _determineFlag(hook.deps_, hook.pendingDeps_);
+                if (isUnmounted || flag === FLAG_ALWAYS || flag === FLAG_DEPS_CHANGED) {
                     try {
                         _destroyEffect(hook, isUnmounted);
                     } catch (error) {
@@ -1024,13 +1035,14 @@ function destroyEffects(effectTag, virtualNode, isUnmounted) {
 
 /**
  *
- * @param {EffectHook} effectHook
+ * @param {EffectHook} hook
  */
-function _mountEffect(effectHook) {
-    effectHook.destroy_ = effectHook.callback_();
+function _mountEffect(hook) {
+    hook.destroy_ = hook.callback_();
+    hook.deps_ = hook.pendingDeps_;
 
-    if (effectHook.destroy_ === undefined) {
-        effectHook.destroy_ = null;
+    if (hook.destroy_ === undefined) {
+        hook.destroy_ = null;
     }
 }
 
@@ -1040,6 +1052,8 @@ function _mountEffect(effectHook) {
  * @param {boolean} isUnmounted
  */
 function _destroyEffect(hook, isUnmounted) {
+    hook.deps_ = hook.pendingDeps_;
+
     if (hook.lastDestroy_ !== null && !isUnmounted) {
         hook.lastDestroy_();
         return;
@@ -1148,7 +1162,7 @@ function _makeAlternative(newChild, oldChild) {
         // Copy hooks
         newChild.refHook_ = oldChild.refHook_;
         newChild.stateHook_ = oldChild.stateHook_;
-        newChild.effectHook_ = oldChild.effectHook_;
+        // newChild.effectHook_ = oldChild.effectHook_;
 
         // Update contexts of state hooks
         let hook = newChild.stateHook_;
@@ -1156,6 +1170,20 @@ function _makeAlternative(newChild, oldChild) {
             hook.context_ = newChild;
             hook = hook.next_;
         }
+
+        
+        // Update contexts of state hooks
+        let newEffect = newChild.effectHook_;
+        let oldEffect = oldChild.effectHook_;
+        while (newEffect !== null) {
+            // newEffect.deps_ = oldEffect.deps_;
+            newEffect.pendingDeps_ = oldEffect.pendingDeps_;
+            // newEffect.lastDestroy_ = oldEffect.lastDestroy_;
+            newEffect = newEffect.next_;
+            oldEffect = oldEffect.next_;
+        }
+
+
     }
 }
 
@@ -1187,6 +1215,7 @@ function _mapChildren(node) {
 const domFragment = new DocumentFragment();
 
 function resolveTree(current) {
+    console.log('==================================', current.type_.name);
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
     
@@ -1211,6 +1240,7 @@ function resolveTree(current) {
 
     // Effects
     setTimeout(function () {
+        console.log('-- ======= mountEffects');
         effectDestroyNodes.forEach(function (isUnmounted, node) {
             destroyEffects(EFFECT_NORMAL, node, isUnmounted);
         });

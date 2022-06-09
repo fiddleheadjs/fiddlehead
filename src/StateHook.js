@@ -65,6 +65,7 @@ const queueMap = new Map();
 let timeoutId = null;
 
 export function _setState(value) {
+    console.log('--', this.context_.type_.name, 'setState');
     let queue = queueMap.get(this.context_);
 
     if (queue === undefined) {
@@ -119,6 +120,7 @@ function _flushQueues() {
         }
 
         if (hasChanges) {
+            console.log('--', hook.context_.type_.name, 'updateTree');
             resolveTree(hook.context_);
         }
     });

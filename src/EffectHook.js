@@ -22,6 +22,7 @@ const FLAG_DEPS_CHANGED = 3;
 export function EffectHook(callback, deps, tag, flag) {
     this.callback_ = callback;
     this.deps_ = deps;
+    this.pendingDeps_ = null;
     this.tag_ = tag;
     this.flag_ = flag;
     this.destroy_ = null;
@@ -59,26 +60,28 @@ function _useEffectImpl(callback, deps, tag) {
                 // and consider it is changed
             }
     
-            const flag = _determineFlag(deps, currentHook.deps_);
+            // const flag = _determineFlag(deps, currentHook.deps_);
 
-            if (flag === FLAG_LAZY) {
-                return;
-            }
+            // if (flag === FLAG_LAZY) {
+            //     currentHook.pendingDeps_ = deps;
+            //     return;
+            // }
     
-            if (flag === FLAG_DEPS) {
-                currentHook.flag_ = flag;
-                return;
-            }
+            // if (flag === FLAG_DEPS) {
+                // currentHook.flag_ = flag;
+                currentHook.pendingDeps_ = deps;
+            //     return;
+            // }
     
-            if (flag === FLAG_ALWAYS || flag === FLAG_DEPS_CHANGED) {
-                currentHook.callback_ = callback;
-                currentHook.deps_ = deps;
-                currentHook.flag_ = flag;
+            // if (flag === FLAG_ALWAYS) {
+            //     currentHook.callback_ = callback;
+            //     // currentHook.deps_ = deps;
+            //     currentHook.flag_ = flag;
 
-                currentHook.lastDestroy_ = currentHook.destroy_;
-                currentHook.destroy_ = null;
-                return;
-            }
+            //     currentHook.lastDestroy_ = currentHook.destroy_;
+            //     currentHook.destroy_ = null;
+            //     return;
+            // }
         }
     );
 }
@@ -90,10 +93,15 @@ function _useEffectImpl(callback, deps, tag) {
  * @param {boolean} isNewlyMounted
  */
 export function mountEffects(effectTag, virtualNode, isNewlyMounted) {
+    if (effectTag === EFFECT_NORMAL) {
+        console.log('--', virtualNode.type_.name, 'mountEffects');
+    }
     let hook = virtualNode.effectHook_;
     while (hook !== null) {
         if (hook.tag_ === effectTag) {
-            if (isNewlyMounted || hook.flag_ === FLAG_ALWAYS || hook.flag_ === FLAG_DEPS_CHANGED) {
+
+            const flag = _determineFlag(hook.deps_, hook.pendingDeps_);
+            if (isNewlyMounted || flag === FLAG_ALWAYS || flag === FLAG_DEPS_CHANGED) {
                 try {
                     _mountEffect(hook);
                 } catch (error) {
@@ -115,7 +123,8 @@ export function destroyEffects(effectTag, virtualNode, isUnmounted) {
     while (hook !== null) {
         if (hook.tag_ === effectTag) {
             if (hook.lastDestroy_ !== null || hook.destroy_ !== null) {
-                if (isUnmounted || hook.flag_ === FLAG_ALWAYS || hook.flag_ === FLAG_DEPS_CHANGED) {
+                const flag = _determineFlag(hook.deps_, hook.pendingDeps_);
+                if (isUnmounted || flag === FLAG_ALWAYS || flag === FLAG_DEPS_CHANGED) {
                     try {
                         _destroyEffect(hook, isUnmounted);
                     } catch (error) {
@@ -130,13 +139,14 @@ export function destroyEffects(effectTag, virtualNode, isUnmounted) {
 
 /**
  *
- * @param {EffectHook} effectHook
+ * @param {EffectHook} hook
  */
-function _mountEffect(effectHook) {
-    effectHook.destroy_ = effectHook.callback_();
+function _mountEffect(hook) {
+    hook.destroy_ = hook.callback_();
+    hook.deps_ = hook.pendingDeps_;
 
-    if (effectHook.destroy_ === undefined) {
-        effectHook.destroy_ = null;
+    if (hook.destroy_ === undefined) {
+        hook.destroy_ = null;
     }
 }
 
@@ -146,6 +156,8 @@ function _mountEffect(effectHook) {
  * @param {boolean} isUnmounted
  */
 function _destroyEffect(hook, isUnmounted) {
+    hook.deps_ = hook.pendingDeps_;
+
     if (hook.lastDestroy_ !== null && !isUnmounted) {
         hook.lastDestroy_();
         return;

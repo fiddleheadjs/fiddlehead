@@ -68,7 +68,7 @@ function _makeAlternative(newChild, oldChild) {
         // Copy hooks
         newChild.refHook_ = oldChild.refHook_;
         newChild.stateHook_ = oldChild.stateHook_;
-        newChild.effectHook_ = oldChild.effectHook_;
+        // newChild.effectHook_ = oldChild.effectHook_;
 
         // Update contexts of state hooks
         let hook = newChild.stateHook_;
@@ -76,6 +76,20 @@ function _makeAlternative(newChild, oldChild) {
             hook.context_ = newChild;
             hook = hook.next_;
         }
+
+        
+        // Update contexts of state hooks
+        let newEffect = newChild.effectHook_;
+        let oldEffect = oldChild.effectHook_;
+        while (newEffect !== null) {
+            // newEffect.deps_ = oldEffect.deps_;
+            newEffect.pendingDeps_ = oldEffect.pendingDeps_;
+            // newEffect.lastDestroy_ = oldEffect.lastDestroy_;
+            newEffect = newEffect.next_;
+            oldEffect = oldEffect.next_;
+        }
+
+
     }
 }
 
