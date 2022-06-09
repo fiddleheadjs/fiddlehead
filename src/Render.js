@@ -1,6 +1,6 @@
 import {VirtualNode, linkNativeNode, NAMESPACE_HTML, NAMESPACE_SVG, Portal} from './VirtualNode';
 import {attachVirtualNode, extractVirtualNode} from './Externals';
-import {resolveTree} from './ResolveTree';
+import {renderTree} from './RenderTree';
 
 /**
  * 
@@ -10,8 +10,7 @@ import {resolveTree} from './ResolveTree';
  export function render(children, targetNativeNode) {
     const portal = createPortal(children, targetNativeNode);
 
-    // Render view
-    resolveTree(portal);
+    renderTree(portal);
 }
 
 /**

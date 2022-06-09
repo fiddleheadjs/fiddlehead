@@ -838,7 +838,7 @@ function _flushQueues() {
         // Use hook.context_ instead of contextAsKey
         // as it may be outdated due to the reconciliation process
         
-        resolveTree(hook.context_);
+        renderTree(hook.context_);
     });
 
     updateQueue.clear();
@@ -1148,7 +1148,7 @@ function _mapChildren(node) {
 // This will improve the performance because the browser only reflows once
 const domFragment = new DocumentFragment();
 
-function resolveTree(current) {
+function renderTree(current) {
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
     
@@ -1266,8 +1266,7 @@ function _workLoop(performUnit, onReturn, root, r0, r1) {
  function render(children, targetNativeNode) {
     const portal = createPortal(children, targetNativeNode);
 
-    // Render view
-    resolveTree(portal);
+    renderTree(portal);
 }
 
 /**

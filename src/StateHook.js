@@ -1,6 +1,6 @@
 import {catchError} from './CatchError';
 import {resolveCurrentStateHook} from './CurrentlyProcessing';
-import {resolveTree} from './ResolveTree';
+import {renderTree} from './RenderTree';
 import {isFunction} from './Util';
 
 export const STATE_NORMAL = 0;
@@ -105,7 +105,7 @@ function _flushQueues() {
         // Use hook.context_ instead of contextAsKey
         // as it may be outdated due to the reconciliation process
         
-        resolveTree(hook.context_);
+        renderTree(hook.context_);
     });
 
     updateQueue.clear();

@@ -9,7 +9,7 @@ import {Portal} from './VirtualNode';
 // This will improve the performance because the browser only reflows once
 const domFragment = new DocumentFragment();
 
-export function resolveTree(current) {
+export function renderTree(current) {
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
     
