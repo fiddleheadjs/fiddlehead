@@ -247,7 +247,7 @@ function VirtualNode(type, props, key) {
     /**
      * @type {VirtualNode|null}
      */
-    this.alternative_ = null;
+    this.alternate_ = null;
 
     // The children (and their subtrees, of course) are marked to be deleted
     /**
@@ -794,91 +794,54 @@ function useError(initialError) {
     );
 }
 
-const queueMap = new Map();
+const updateQueue = new Map();
 let timeoutId = null;
 
 function _setState(value) {
-    console.log('--', this.context_.type_.name, 'setState');
-    let hook = this, newValue;
+    let newValue;
+
     if (isFunction(value)) {
         try {
-            newValue = value(hook.value_);
+            newValue = value(this.value_);
         } catch (error) {
-            catchError(error, hook.context_);
+            catchError(error, this.context_);
             return;
         }
     } else {
         newValue = value;
     }
 
-    if (hook.tag_ === STATE_ERROR && !_validateError(newValue)) {
+    if (this.tag_ === STATE_ERROR && !_validateError(newValue)) {
         // If the new error is invalid,
         // keep the current error unchanged
         return;
     }
 
-    if (newValue !== hook.value_) {
-        hook.value_ = newValue;
-        let queue = queueMap.get(this.context_);
-    
-        if (queue === undefined) {
-            queue = [[value, this]];
-            queueMap.set(this.context_, queue);
-        } else {
-            queue.unshift([value, this]);
-        }
-    
+    if (this.value_ !== newValue) {
+        // Set value synchronously
+        this.value_ = newValue;
+
+        // Enqueue update
+        updateQueue.set(this.context_, this);
+
+        // Reset timer
         if (timeoutId !== null) {
             clearTimeout(timeoutId);
         }
-    
         timeoutId = setTimeout(_flushQueues);
     }
-
 }
 
 function _flushQueues() {
-    queueMap.forEach(function (queue, contextAsKey) {
+    updateQueue.forEach(function (hook, contextAsKey) {
         // Important!!!
         // Use hook.context_ instead of contextAsKey
         // as it may be outdated due to the reconciliation process
-
-        let unit, hook;
         
-        while (queue.length > 0) {
-            unit = queue.pop();
-            hook = unit[1];
-            
-            // if (isFunction(value)) {
-            //     try {
-            //         newValue = value(hook.value_);
-            //     } catch (error) {
-            //         catchError(error, hook.context_);
-            //         continue;
-            //     }
-            // } else {
-            //     newValue = value;
-            // }
-
-            // if (hook.tag_ === STATE_ERROR && !_validateError(newValue)) {
-            //     // If the new error is invalid,
-            //     // keep the current error unchanged
-            //     continue;
-            // }
-            
-            // if (newValue !== hook.value_) {
-            //     hook.value_ = newValue;
-            //     hasChanges = true;
-            // }
-        }
-
-        // if (hasChanges) {
-            console.log('--', hook.context_.type_.name, 'updateTree');
-            resolveTree(hook.context_);
-        // }
+        resolveTree(hook.context_);
     });
 
-    queueMap.clear();
+    updateQueue.clear();
     timeoutId = null;
 }
 
@@ -921,28 +884,21 @@ function catchError(error, virtualNode) {
 const EFFECT_NORMAL = 0;
 const EFFECT_LAYOUT = 1;
 
-const FLAG_ALWAYS = 0;
-const FLAG_LAZY = 1;
-const FLAG_DEPS = 2;
-const FLAG_DEPS_CHANGED = 3;
-
 /**
  *
  * @param {function} callback
  * @param {[]|null} deps
  * @param {number} tag
- * @param {number} flag
  * @return {EffectHook}
  * @constructor
  */
-function EffectHook(callback, deps, tag, flag) {
+function EffectHook(callback, deps, tag) {
     this.callback_ = callback;
     this.deps_ = deps;
-    this.pendingDeps_ = null;
-    this.tag_ = tag;
-    this.flag_ = flag;
     this.destroy_ = null;
+    this.lastDeps_ = null;
     this.lastDestroy_ = null;
+    this.tag_ = tag;
     this.next_ = null;
 }
 
@@ -961,8 +917,7 @@ function _useEffectImpl(callback, deps, tag) {
 
     return resolveCurrentEffectHook(
         function (currentNode) {
-            const flag = _determineFlag(deps, null);
-            return new EffectHook(callback, deps, tag, flag);
+            return new EffectHook(callback, deps, tag);
         },
         function (currentHook) {
             if (true) {
@@ -975,29 +930,9 @@ function _useEffectImpl(callback, deps, tag) {
                 // On the production, we accept the deps change its length
                 // and consider it is changed
             }
-    
-            // const flag = _determineFlag(deps, currentHook.deps_);
 
-            // if (flag === FLAG_LAZY) {
-            //     currentHook.pendingDeps_ = deps;
-            //     return;
-            // }
-    
-            // if (flag === FLAG_DEPS) {
-                // currentHook.flag_ = flag;
-                currentHook.pendingDeps_ = deps;
-            //     return;
-            // }
-    
-            // if (flag === FLAG_ALWAYS) {
-            //     currentHook.callback_ = callback;
-            //     // currentHook.deps_ = deps;
-            //     currentHook.flag_ = flag;
-
-            //     currentHook.lastDestroy_ = currentHook.destroy_;
-            //     currentHook.destroy_ = null;
-            //     return;
-            // }
+            currentHook.callback_ = callback;
+            currentHook.deps_ = deps;
         }
     );
 }
@@ -1009,15 +944,10 @@ function _useEffectImpl(callback, deps, tag) {
  * @param {boolean} isNewlyMounted
  */
 function mountEffects(effectTag, virtualNode, isNewlyMounted) {
-    if (effectTag === EFFECT_NORMAL) {
-        console.log('--', virtualNode.type_.name, 'mountEffects');
-    }
     let hook = virtualNode.effectHook_;
     while (hook !== null) {
         if (hook.tag_ === effectTag) {
-
-            const flag = _determineFlag(hook.deps_, hook.pendingDeps_);
-            if (isNewlyMounted || flag === FLAG_ALWAYS || flag === FLAG_DEPS_CHANGED) {
+            if (isNewlyMounted || !_matchDeps(hook.deps_, hook.lastDeps_)) {
                 try {
                     _mountEffect(hook);
                 } catch (error) {
@@ -1039,8 +969,7 @@ function destroyEffects(effectTag, virtualNode, isUnmounted) {
     while (hook !== null) {
         if (hook.tag_ === effectTag) {
             if (hook.lastDestroy_ !== null || hook.destroy_ !== null) {
-                const flag = _determineFlag(hook.deps_, hook.pendingDeps_);
-                if (isUnmounted || flag === FLAG_ALWAYS || flag === FLAG_DEPS_CHANGED) {
+                if (isUnmounted || !_matchDeps(hook.deps_, hook.lastDeps_)) {
                     try {
                         _destroyEffect(hook, isUnmounted);
                     } catch (error) {
@@ -1058,9 +987,10 @@ function destroyEffects(effectTag, virtualNode, isUnmounted) {
  * @param {EffectHook} hook
  */
 function _mountEffect(hook) {
+    hook.lastDeps_ = hook.deps_;
+    hook.lastDestroy_ = hook.destroy_;
+    
     hook.destroy_ = hook.callback_();
-    hook.deps_ = hook.pendingDeps_;
-
     if (hook.destroy_ === undefined) {
         hook.destroy_ = null;
     }
@@ -1072,8 +1002,6 @@ function _mountEffect(hook) {
  * @param {boolean} isUnmounted
  */
 function _destroyEffect(hook, isUnmounted) {
-    hook.deps_ = hook.pendingDeps_;
-
     if (hook.lastDestroy_ !== null && !isUnmounted) {
         hook.lastDestroy_();
         return;
@@ -1090,45 +1018,55 @@ function _destroyEffect(hook, isUnmounted) {
  * @param {[]|null} lastDeps 
  * @returns 
  */
-function _determineFlag(deps, lastDeps) {
+function _matchDeps(deps, lastDeps) {
     // Always
     if (deps === null) {
-        return FLAG_ALWAYS;
+        return false;
     }
 
     // Lazy
     if (deps.length === 0) {
-        return FLAG_LAZY;
+        return true;
     }
 
     // Deps
     // 1. When init effect
     if (lastDeps === null) {
-        return FLAG_DEPS;
+        return true;
     }
     // 2. Two arrays are equal
     if (compareArrays(deps, lastDeps)) {
-        return FLAG_DEPS;
+        return true;
     }
 
     // DepsChanged
     {
-        return FLAG_DEPS_CHANGED;
+        return false;
     }
 }
 
 function reconcileChildren(current, isSubtreeRoot) {
     if (isFunction(current.type_)) {
-        _reconcileChildOfDynamicNode(current, isSubtreeRoot);
-    } else if (current.alternative_ !== null) {
-        _reconcileChildrenOfStaticNode(current, current.alternative_);
+        _reconcileChildOfDynamicNode(current, current.alternate_, isSubtreeRoot);
+    } else if (current.alternate_ !== null) {
+        _reconcileChildrenOfStaticNode(current, current.alternate_);
     }
 }
 
-function _reconcileChildOfDynamicNode(current, isSubtreeRoot) {
-    const oldChild = isSubtreeRoot ? current.child_ : (
-        current.alternative_ !== null ? current.alternative_.child_ : null
-    );
+function _reconcileChildOfDynamicNode(current, alternate, isSubtreeRoot) {
+    if (alternate !== null) {
+        // Copy hooks
+        current.refHook_ = alternate.refHook_;
+        current.stateHook_ = alternate.stateHook_;
+        current.effectHook_ = alternate.effectHook_;
+
+        // Update contexts of state hooks
+        let stateHook = current.stateHook_;
+        while (stateHook !== null) {
+            stateHook.context_ = current;
+            stateHook = stateHook.next_;
+        }
+    }
 
     let newContent;
     prepareCurrentlyProcessing(current);
@@ -1139,7 +1077,7 @@ function _reconcileChildOfDynamicNode(current, isSubtreeRoot) {
         newContent = null;
     }
     flushCurrentlyProcessing();
-    
+
     const newChild = createVirtualNodeFromContent(newContent);
     
     if (newChild !== null) {
@@ -1148,10 +1086,14 @@ function _reconcileChildOfDynamicNode(current, isSubtreeRoot) {
         // Don't need to set the slot property
         // as a dynamic node can have only one child
     }
+
+    const oldChild = isSubtreeRoot ? current.child_ : (
+        alternate !== null ? alternate.child_ : null
+    );
     
     if (oldChild !== null) {
         if (newChild !== null && newChild.type_ === oldChild.type_ && newChild.key_ === oldChild.key_) {
-            _makeAlternative(newChild, oldChild);
+            _markAlternate(newChild, oldChild);
         } else {
             _addDeletion(current, oldChild);
         }
@@ -1160,49 +1102,23 @@ function _reconcileChildOfDynamicNode(current, isSubtreeRoot) {
     current.child_ = newChild;
 }
 
-function _reconcileChildrenOfStaticNode(current, alternative) {
-    const oldChildren = _mapChildren(alternative);
+function _reconcileChildrenOfStaticNode(current, alternate) {
+    const oldChildren = _mapChildren(alternate);
     const newChildren = _mapChildren(current);
 
     let newChild;
     oldChildren.forEach(function (oldChild, mapKey) {
         newChild = newChildren.get(mapKey);
         if (newChild !== undefined && newChild.type_ === oldChild.type_) {
-            _makeAlternative(newChild, oldChild);
+            _markAlternate(newChild, oldChild);
         } else {
             _addDeletion(current, oldChild);
         }
     });
 }
 
-function _makeAlternative(newChild, oldChild) {
-    newChild.alternative_ = oldChild;
-
-    if (isFunction(newChild.type_)) {
-        // Copy hooks
-        newChild.refHook_ = oldChild.refHook_;
-        newChild.stateHook_ = oldChild.stateHook_;
-        
-
-        // Update contexts of state hooks
-        let hook = newChild.stateHook_;
-        while (hook !== null) {
-            hook.context_ = newChild;
-            hook = hook.next_;
-        }
-
-        
-        // Update contexts of state hooks
-        let newEffect = newChild.effectHook_;
-        let oldEffect = oldChild.effectHook_;
-        while (newEffect !== null) {
-            oldEffect.callback_ = newEffect.callback_;
-            newEffect = newEffect.next_;
-            oldEffect = oldEffect.next_;
-        }
-        newChild.effectHook_ = oldChild.effectHook_;
-
-    }
+function _markAlternate(newChild, oldChild) {
+    newChild.alternate_ = oldChild;
 }
 
 function _addDeletion(current, childToDelete) {
@@ -1233,7 +1149,6 @@ function _mapChildren(node) {
 const domFragment = new DocumentFragment();
 
 function resolveTree(current) {
-    console.log('==================================', current.type_.name);
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
     
@@ -1258,7 +1173,6 @@ function resolveTree(current) {
 
     // Effects
     setTimeout(function () {
-        console.log('-- ======= mountEffects');
         effectDestroyNodes.forEach(function (isUnmounted, node) {
             destroyEffects(EFFECT_NORMAL, node, isUnmounted);
         });
@@ -1281,13 +1195,13 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
                 effectMountNodes.set(current, false);
             }
         } else {
-            if (current.alternative_ !== null) {
-                updateView(current, current.alternative_);
+            if (current.alternate_ !== null) {
+                updateView(current, current.alternate_);
                 if (current.effectHook_ !== null) {
-                    effectDestroyNodes.set(current.alternative_, false);
+                    effectDestroyNodes.set(current.alternate_, false);
                     effectMountNodes.set(current, false);
                 }
-                current.alternative_ = null;
+                current.alternate_ = null;
             } else {
                 insertView(current);
                 if (current.effectHook_ !== null) {

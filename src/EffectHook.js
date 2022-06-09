@@ -5,28 +5,21 @@ import {compareArrays} from './Util';
 export const EFFECT_NORMAL = 0;
 export const EFFECT_LAYOUT = 1;
 
-const FLAG_ALWAYS = 0;
-const FLAG_LAZY = 1;
-const FLAG_DEPS = 2;
-const FLAG_DEPS_CHANGED = 3;
-
 /**
  *
  * @param {function} callback
  * @param {[]|null} deps
  * @param {number} tag
- * @param {number} flag
  * @return {EffectHook}
  * @constructor
  */
-export function EffectHook(callback, deps, tag, flag) {
+export function EffectHook(callback, deps, tag) {
     this.callback_ = callback;
     this.deps_ = deps;
-    this.pendingDeps_ = null;
-    this.tag_ = tag;
-    this.flag_ = flag;
     this.destroy_ = null;
+    this.lastDeps_ = null;
     this.lastDestroy_ = null;
+    this.tag_ = tag;
     this.next_ = null;
 }
 
@@ -45,8 +38,7 @@ function _useEffectImpl(callback, deps, tag) {
 
     return resolveCurrentEffectHook(
         function (currentNode) {
-            const flag = _determineFlag(deps, null);
-            return new EffectHook(callback, deps, tag, flag);
+            return new EffectHook(callback, deps, tag);
         },
         function (currentHook) {
             if (__DEV__) {
@@ -59,29 +51,9 @@ function _useEffectImpl(callback, deps, tag) {
                 // On the production, we accept the deps change its length
                 // and consider it is changed
             }
-    
-            // const flag = _determineFlag(deps, currentHook.deps_);
 
-            // if (flag === FLAG_LAZY) {
-            //     currentHook.pendingDeps_ = deps;
-            //     return;
-            // }
-    
-            // if (flag === FLAG_DEPS) {
-                // currentHook.flag_ = flag;
-                currentHook.pendingDeps_ = deps;
-            //     return;
-            // }
-    
-            // if (flag === FLAG_ALWAYS) {
-            //     currentHook.callback_ = callback;
-            //     // currentHook.deps_ = deps;
-            //     currentHook.flag_ = flag;
-
-            //     currentHook.lastDestroy_ = currentHook.destroy_;
-            //     currentHook.destroy_ = null;
-            //     return;
-            // }
+            currentHook.callback_ = callback;
+            currentHook.deps_ = deps;
         }
     );
 }
@@ -93,15 +65,10 @@ function _useEffectImpl(callback, deps, tag) {
  * @param {boolean} isNewlyMounted
  */
 export function mountEffects(effectTag, virtualNode, isNewlyMounted) {
-    if (effectTag === EFFECT_NORMAL) {
-        console.log('--', virtualNode.type_.name, 'mountEffects');
-    }
     let hook = virtualNode.effectHook_;
     while (hook !== null) {
         if (hook.tag_ === effectTag) {
-
-            const flag = _determineFlag(hook.deps_, hook.pendingDeps_);
-            if (isNewlyMounted || flag === FLAG_ALWAYS || flag === FLAG_DEPS_CHANGED) {
+            if (isNewlyMounted || !_matchDeps(hook.deps_, hook.lastDeps_)) {
                 try {
                     _mountEffect(hook);
                 } catch (error) {
@@ -123,8 +90,7 @@ export function destroyEffects(effectTag, virtualNode, isUnmounted) {
     while (hook !== null) {
         if (hook.tag_ === effectTag) {
             if (hook.lastDestroy_ !== null || hook.destroy_ !== null) {
-                const flag = _determineFlag(hook.deps_, hook.pendingDeps_);
-                if (isUnmounted || flag === FLAG_ALWAYS || flag === FLAG_DEPS_CHANGED) {
+                if (isUnmounted || !_matchDeps(hook.deps_, hook.lastDeps_)) {
                     try {
                         _destroyEffect(hook, isUnmounted);
                     } catch (error) {
@@ -142,9 +108,10 @@ export function destroyEffects(effectTag, virtualNode, isUnmounted) {
  * @param {EffectHook} hook
  */
 function _mountEffect(hook) {
+    hook.lastDeps_ = hook.deps_;
+    hook.lastDestroy_ = hook.destroy_;
+    
     hook.destroy_ = hook.callback_();
-    hook.deps_ = hook.pendingDeps_;
-
     if (hook.destroy_ === undefined) {
         hook.destroy_ = null;
     }
@@ -156,8 +123,6 @@ function _mountEffect(hook) {
  * @param {boolean} isUnmounted
  */
 function _destroyEffect(hook, isUnmounted) {
-    hook.deps_ = hook.pendingDeps_;
-
     if (hook.lastDestroy_ !== null && !isUnmounted) {
         hook.lastDestroy_();
         return;
@@ -174,29 +139,29 @@ function _destroyEffect(hook, isUnmounted) {
  * @param {[]|null} lastDeps 
  * @returns 
  */
-function _determineFlag(deps, lastDeps) {
+function _matchDeps(deps, lastDeps) {
     // Always
     if (deps === null) {
-        return FLAG_ALWAYS;
+        return false;
     }
 
     // Lazy
     if (deps.length === 0) {
-        return FLAG_LAZY;
+        return true;
     }
 
     // Deps
     // 1. When init effect
     if (lastDeps === null) {
-        return FLAG_DEPS;
+        return true;
     }
     // 2. Two arrays are equal
     if (compareArrays(deps, lastDeps)) {
-        return FLAG_DEPS;
+        return true;
     }
 
     // DepsChanged
     {
-        return FLAG_DEPS_CHANGED;
+        return false;
     }
 }

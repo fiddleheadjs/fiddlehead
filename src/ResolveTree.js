@@ -10,7 +10,6 @@ import {Portal} from './VirtualNode';
 const domFragment = new DocumentFragment();
 
 export function resolveTree(current) {
-    console.log('==================================', current.type_.name);
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
     
@@ -35,7 +34,6 @@ export function resolveTree(current) {
 
     // Effects
     setTimeout(function () {
-        console.log('-- ======= mountEffects');
         effectDestroyNodes.forEach(function (isUnmounted, node) {
             destroyEffects(EFFECT_NORMAL, node, isUnmounted);
         });
@@ -58,13 +56,13 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
                 effectMountNodes.set(current, false);
             }
         } else {
-            if (current.alternative_ !== null) {
-                updateView(current, current.alternative_);
+            if (current.alternate_ !== null) {
+                updateView(current, current.alternate_);
                 if (current.effectHook_ !== null) {
-                    effectDestroyNodes.set(current.alternative_, false);
+                    effectDestroyNodes.set(current.alternate_, false);
                     effectMountNodes.set(current, false);
                 }
-                current.alternative_ = null;
+                current.alternate_ = null;
             } else {
                 insertView(current);
                 if (current.effectHook_ !== null) {

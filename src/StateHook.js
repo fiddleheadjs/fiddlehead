@@ -61,93 +61,54 @@ export function useError(initialError) {
     );
 }
 
-const queueMap = new Map();
+const updateQueue = new Map();
 let timeoutId = null;
 
 export function _setState(value) {
-    console.log('--', this.context_.type_.name, 'setState');
-    let unit, hook = this, newValue, hasChanges = false;
+    let newValue;
+
     if (isFunction(value)) {
         try {
-            newValue = value(hook.value_);
+            newValue = value(this.value_);
         } catch (error) {
-            catchError(error, hook.context_);
+            catchError(error, this.context_);
             return;
         }
     } else {
         newValue = value;
     }
 
-    if (hook.tag_ === STATE_ERROR && !_validateError(newValue)) {
+    if (this.tag_ === STATE_ERROR && !_validateError(newValue)) {
         // If the new error is invalid,
         // keep the current error unchanged
         return;
     }
 
-    if (newValue !== hook.value_) {
-        hook.value_ = newValue;
-        let queue = queueMap.get(this.context_);
-    
-        if (queue === undefined) {
-            queue = [[value, this]];
-            queueMap.set(this.context_, queue);
-        } else {
-            queue.unshift([value, this]);
-        }
-    
+    if (this.value_ !== newValue) {
+        // Set value synchronously
+        this.value_ = newValue;
+
+        // Enqueue update
+        updateQueue.set(this.context_, this);
+
+        // Reset timer
         if (timeoutId !== null) {
             clearTimeout(timeoutId);
         }
-    
         timeoutId = setTimeout(_flushQueues);
     }
-
 }
 
 function _flushQueues() {
-    queueMap.forEach(function (queue, contextAsKey) {
+    updateQueue.forEach(function (hook, contextAsKey) {
         // Important!!!
         // Use hook.context_ instead of contextAsKey
         // as it may be outdated due to the reconciliation process
-
-        let unit, value, hook, newValue, hasChanges = false;
         
-        while (queue.length > 0) {
-            unit = queue.pop();
-            
-            value = unit[0];
-            hook = unit[1];
-            
-            // if (isFunction(value)) {
-            //     try {
-            //         newValue = value(hook.value_);
-            //     } catch (error) {
-            //         catchError(error, hook.context_);
-            //         continue;
-            //     }
-            // } else {
-            //     newValue = value;
-            // }
-
-            // if (hook.tag_ === STATE_ERROR && !_validateError(newValue)) {
-            //     // If the new error is invalid,
-            //     // keep the current error unchanged
-            //     continue;
-            // }
-            
-            // if (newValue !== hook.value_) {
-            //     hook.value_ = newValue;
-            //     hasChanges = true;
-            // }
-        }
-
-        // if (hasChanges) {
-            console.log('--', hook.context_.type_.name, 'updateTree');
-            resolveTree(hook.context_);
-        // }
+        resolveTree(hook.context_);
     });
 
-    queueMap.clear();
+    updateQueue.clear();
     timeoutId = null;
 }
 

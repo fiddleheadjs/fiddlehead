@@ -95,7 +95,7 @@ export function VirtualNode(type, props, key) {
     /**
      * @type {VirtualNode|null}
      */
-    this.alternative_ = null;
+    this.alternate_ = null;
 
     // The children (and their subtrees, of course) are marked to be deleted
     /**
