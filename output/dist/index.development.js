@@ -799,20 +799,42 @@ let timeoutId = null;
 
 function _setState(value) {
     console.log('--', this.context_.type_.name, 'setState');
-    let queue = queueMap.get(this.context_);
-
-    if (queue === undefined) {
-        queue = [[value, this]];
-        queueMap.set(this.context_, queue);
+    let hook = this, newValue;
+    if (isFunction(value)) {
+        try {
+            newValue = value(hook.value_);
+        } catch (error) {
+            catchError(error, hook.context_);
+            return;
+        }
     } else {
-        queue.unshift([value, this]);
+        newValue = value;
     }
 
-    if (timeoutId !== null) {
-        clearTimeout(timeoutId);
+    if (hook.tag_ === STATE_ERROR && !_validateError(newValue)) {
+        // If the new error is invalid,
+        // keep the current error unchanged
+        return;
     }
 
-    timeoutId = setTimeout(_flushQueues);
+    if (newValue !== hook.value_) {
+        hook.value_ = newValue;
+        let queue = queueMap.get(this.context_);
+    
+        if (queue === undefined) {
+            queue = [[value, this]];
+            queueMap.set(this.context_, queue);
+        } else {
+            queue.unshift([value, this]);
+        }
+    
+        if (timeoutId !== null) {
+            clearTimeout(timeoutId);
+        }
+    
+        timeoutId = setTimeout(_flushQueues);
+    }
+
 }
 
 function _flushQueues() {
@@ -821,41 +843,39 @@ function _flushQueues() {
         // Use hook.context_ instead of contextAsKey
         // as it may be outdated due to the reconciliation process
 
-        let unit, value, hook, newValue, hasChanges = false;
+        let unit, hook;
         
         while (queue.length > 0) {
             unit = queue.pop();
-            
-            value = unit[0];
             hook = unit[1];
             
-            if (isFunction(value)) {
-                try {
-                    newValue = value(hook.value_);
-                } catch (error) {
-                    catchError(error, hook.context_);
-                    continue;
-                }
-            } else {
-                newValue = value;
-            }
+            // if (isFunction(value)) {
+            //     try {
+            //         newValue = value(hook.value_);
+            //     } catch (error) {
+            //         catchError(error, hook.context_);
+            //         continue;
+            //     }
+            // } else {
+            //     newValue = value;
+            // }
 
-            if (hook.tag_ === STATE_ERROR && !_validateError(newValue)) {
-                // If the new error is invalid,
-                // keep the current error unchanged
-                continue;
-            }
+            // if (hook.tag_ === STATE_ERROR && !_validateError(newValue)) {
+            //     // If the new error is invalid,
+            //     // keep the current error unchanged
+            //     continue;
+            // }
             
-            if (newValue !== hook.value_) {
-                hook.value_ = newValue;
-                hasChanges = true;
-            }
+            // if (newValue !== hook.value_) {
+            //     hook.value_ = newValue;
+            //     hasChanges = true;
+            // }
         }
 
-        if (hasChanges) {
+        // if (hasChanges) {
             console.log('--', hook.context_.type_.name, 'updateTree');
             resolveTree(hook.context_);
-        }
+        // }
     });
 
     queueMap.clear();
@@ -1162,7 +1182,7 @@ function _makeAlternative(newChild, oldChild) {
         // Copy hooks
         newChild.refHook_ = oldChild.refHook_;
         newChild.stateHook_ = oldChild.stateHook_;
-        // newChild.effectHook_ = oldChild.effectHook_;
+        
 
         // Update contexts of state hooks
         let hook = newChild.stateHook_;
@@ -1176,13 +1196,11 @@ function _makeAlternative(newChild, oldChild) {
         let newEffect = newChild.effectHook_;
         let oldEffect = oldChild.effectHook_;
         while (newEffect !== null) {
-            // newEffect.deps_ = oldEffect.deps_;
-            newEffect.pendingDeps_ = oldEffect.pendingDeps_;
-            // newEffect.lastDestroy_ = oldEffect.lastDestroy_;
+            oldEffect.callback_ = newEffect.callback_;
             newEffect = newEffect.next_;
             oldEffect = oldEffect.next_;
         }
-
+        newChild.effectHook_ = oldChild.effectHook_;
 
     }
 }

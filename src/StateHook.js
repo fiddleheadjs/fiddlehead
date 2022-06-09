@@ -66,20 +66,42 @@ let timeoutId = null;
 
 export function _setState(value) {
     console.log('--', this.context_.type_.name, 'setState');
-    let queue = queueMap.get(this.context_);
-
-    if (queue === undefined) {
-        queue = [[value, this]];
-        queueMap.set(this.context_, queue);
+    let unit, hook = this, newValue, hasChanges = false;
+    if (isFunction(value)) {
+        try {
+            newValue = value(hook.value_);
+        } catch (error) {
+            catchError(error, hook.context_);
+            return;
+        }
     } else {
-        queue.unshift([value, this]);
+        newValue = value;
     }
 
-    if (timeoutId !== null) {
-        clearTimeout(timeoutId);
+    if (hook.tag_ === STATE_ERROR && !_validateError(newValue)) {
+        // If the new error is invalid,
+        // keep the current error unchanged
+        return;
     }
 
-    timeoutId = setTimeout(_flushQueues);
+    if (newValue !== hook.value_) {
+        hook.value_ = newValue;
+        let queue = queueMap.get(this.context_);
+    
+        if (queue === undefined) {
+            queue = [[value, this]];
+            queueMap.set(this.context_, queue);
+        } else {
+            queue.unshift([value, this]);
+        }
+    
+        if (timeoutId !== null) {
+            clearTimeout(timeoutId);
+        }
+    
+        timeoutId = setTimeout(_flushQueues);
+    }
+
 }
 
 function _flushQueues() {
@@ -96,33 +118,33 @@ function _flushQueues() {
             value = unit[0];
             hook = unit[1];
             
-            if (isFunction(value)) {
-                try {
-                    newValue = value(hook.value_);
-                } catch (error) {
-                    catchError(error, hook.context_);
-                    continue;
-                }
-            } else {
-                newValue = value;
-            }
+            // if (isFunction(value)) {
+            //     try {
+            //         newValue = value(hook.value_);
+            //     } catch (error) {
+            //         catchError(error, hook.context_);
+            //         continue;
+            //     }
+            // } else {
+            //     newValue = value;
+            // }
 
-            if (hook.tag_ === STATE_ERROR && !_validateError(newValue)) {
-                // If the new error is invalid,
-                // keep the current error unchanged
-                continue;
-            }
+            // if (hook.tag_ === STATE_ERROR && !_validateError(newValue)) {
+            //     // If the new error is invalid,
+            //     // keep the current error unchanged
+            //     continue;
+            // }
             
-            if (newValue !== hook.value_) {
-                hook.value_ = newValue;
-                hasChanges = true;
-            }
+            // if (newValue !== hook.value_) {
+            //     hook.value_ = newValue;
+            //     hasChanges = true;
+            // }
         }
 
-        if (hasChanges) {
+        // if (hasChanges) {
             console.log('--', hook.context_.type_.name, 'updateTree');
             resolveTree(hook.context_);
-        }
+        // }
     });
 
     queueMap.clear();
