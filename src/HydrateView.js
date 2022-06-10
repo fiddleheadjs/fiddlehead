@@ -18,8 +18,9 @@ export function hydrateView(virtualNode) {
     if (virtualNode.type_ === TextNode) {
         nativeNode = createNativeTextNode(virtualNode.props_);
         
-        // Remove text content from the virtual text node to save memory
-        // Later, we will compare the new text with the text content of the native node
+        // Remove text content from the virtual text node to save memory.
+        // Later, we will compare the new text with the text content of the native node,
+        // though it is not a perfect way to compare
         virtualNode.props_ = null;
     } else {
         nativeNode = createNativeElementWithNS(
@@ -56,7 +57,6 @@ export function rehydrateView(newVirtualNode, oldVirtualNode) {
         );
         
         // Remove text content from the virtual text node to save memory
-        // Later, we will compare the new text with the text content of the native node
         newVirtualNode.props_ = null;
     } else {
         updateNativeElementAttributes(
