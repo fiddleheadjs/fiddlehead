@@ -167,7 +167,7 @@ function Image() {
 
 ### Forward refs
 
-Don't like React, ref property can be accessed inside the component. You also don't need `forwardRef()` at all.
+Don't like React, `ref` property can be accessed inside the component. You also don't need `forwardRef()` at all.
 
 ```jsx
 import {jsx, useRef} from 'hook';
