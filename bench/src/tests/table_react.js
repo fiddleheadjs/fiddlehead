@@ -47,8 +47,8 @@ function App1({onFinish}) {
             <tbody>
                 {arr.map((_, i) => (
                     <tr key={i}>
-                        <td>{i}</td>
-                        <td>{arr[i]}</td>
+                        <td>{i + '-aaa'}</td>
+                        <td>{i + '-bbb'}</td>
                     </tr>
                 ))}
             </tbody>
@@ -68,8 +68,8 @@ function App2({onFinish}) {
             <tbody>
                 {arr.map((_, i) => (
                     <tr key={i}>
-                        <td>{i}<i></i></td>
-                        <td>{arr[i]}<i></i></td>
+                        <td>{i + '-aaa'}<i></i></td>
+                        <td>{i + '-bbb'}<i></i></td>
                     </tr>
                 ))}
             </tbody>

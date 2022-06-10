@@ -1,5 +1,10 @@
-import {EMPTY_OBJECT} from './Constants';
-import {hasOwnProperty, isNumber, isObject, isString} from './Util';
+import {hasOwnProperty, isNullish, isNumber, isString} from './Util';
+
+export function updateNativeTextContent(node, text) {
+    if (node.textContent !== text) {
+        node.textContent = text;
+    }
+}
 
 export function updateNativeElementAttributes(element, newAttributes, oldAttributes) {
     _updateKeyValues(
@@ -16,12 +21,6 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
     }
 
     if (attrName === 'style') {
-        if (!isObject(newAttrValue)) {
-            newAttrValue = EMPTY_OBJECT;
-        }
-        if (!isObject(oldAttrValue)) {
-            oldAttrValue = EMPTY_OBJECT;
-        }
         _updateStyleProperties(element[attrName], newAttrValue, oldAttrValue);
         return;
     }
@@ -48,9 +47,7 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
     }
 
     if (attrName === 'style') {
-        if (isObject(oldAttrValue)) {
-            _updateStyleProperties(element[attrName], EMPTY_OBJECT, oldAttrValue);
-        }
+        _updateStyleProperties(element[attrName], null, oldAttrValue);
 
         // Clean up HTML code
         element.removeAttribute(attrName);
@@ -100,28 +97,53 @@ function _removeStyleProperty(style, propName) {
 }
 
 function _updateKeyValues(target, newKeyValues, oldKeyValues, updateFn, removeFn) {
-    let key;
+    const newEmpty = isNullish(newKeyValues);
+    const oldEmpty = isNullish(oldKeyValues);
     
-    for (key in oldKeyValues) {
-        if (_hasOwnNonEmpty(oldKeyValues, key)) {
-            if (!_hasOwnNonEmpty(newKeyValues, key)) {
+    if (newEmpty && oldEmpty) {
+        return;
+    }
+
+    let key;
+
+    if (newEmpty) {
+        for (key in oldKeyValues) {
+            if (_hasOwnNonEmpty(oldKeyValues, key)) {
                 removeFn(target, key, oldKeyValues[key]);
             }
         }
+        return;
     }
 
-    for (key in newKeyValues) {
-        if (_hasOwnNonEmpty(newKeyValues, key)) {
-            updateFn(target, key, newKeyValues[key], oldKeyValues[key]);
+    if (oldEmpty) {
+        for (key in newKeyValues) {
+            if (_hasOwnNonEmpty(newKeyValues, key)) {
+                updateFn(target, key, newKeyValues[key]);
+            }
+        }
+        return;
+    }
+    
+    {
+        for (key in oldKeyValues) {
+            if (_hasOwnNonEmpty(oldKeyValues, key)) {
+                if (!_hasOwnNonEmpty(newKeyValues, key)) {
+                    removeFn(target, key, oldKeyValues[key]);
+                }
+            }
+        }
+        for (key in newKeyValues) {
+            if (_hasOwnNonEmpty(newKeyValues, key)) {
+                updateFn(target, key, newKeyValues[key], oldKeyValues[key]);
+            }
         }
     }
 }
 
 function _hasOwnNonEmpty(target, prop) {
     return (
-        hasOwnProperty.call(target, prop) &&
-        target[prop] !== undefined &&
-        target[prop] !== null
+        hasOwnProperty.call(target, prop)
+        && !isNullish(target[prop])
     );
 }
 

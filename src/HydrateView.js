@@ -1,5 +1,5 @@
 import {linkNativeNode, Fragment, TextNode, NAMESPACE_HTML, NAMESPACE_SVG} from './VirtualNode';
-import {createNativeElementWithNS, createNativeTextNode, updateNativeTextNode, updateNativeElementAttributes} from './NativeDOM';
+import {createNativeElementWithNS, updateNativeElementAttributes, createNativeTextNode, updateNativeTextContent} from './NativeDOM';
 import {attachVirtualNode} from './Externals';
 import {isFunction} from './Util';
 
@@ -14,7 +14,20 @@ export function hydrateView(virtualNode) {
         return;
     }
 
-    const nativeNode = _createNativeNode(virtualNode);
+    let nativeNode;
+    if (virtualNode.type_ === TextNode) {
+        nativeNode = createNativeTextNode(virtualNode.props_);
+        
+        // Remove text content from the virtual text node to save memory
+        // Later, we will compare the new text with the text content of the native node
+        virtualNode.props_ = null;
+    } else {
+        nativeNode = createNativeElementWithNS(
+            virtualNode.namespace_,
+            virtualNode.type_,
+            virtualNode.props_
+        );
+    }
 
     linkNativeNode(virtualNode, nativeNode);
     if (__DEV__) {
@@ -37,12 +50,14 @@ export function rehydrateView(newVirtualNode, oldVirtualNode) {
     }
 
     if (newVirtualNode.type_ === TextNode) {
-        if (newVirtualNode.props_.children !== oldVirtualNode.props_.children) {
-            updateNativeTextNode(
-                newVirtualNode.nativeNode_,
-                newVirtualNode.props_.children
-            );
-        }
+        updateNativeTextContent(
+            newVirtualNode.nativeNode_,
+            newVirtualNode.props_
+        );
+        
+        // Remove text content from the virtual text node to save memory
+        // Later, we will compare the new text with the text content of the native node
+        newVirtualNode.props_ = null;
     } else {
         updateNativeElementAttributes(
             newVirtualNode.nativeNode_,
@@ -50,18 +65,6 @@ export function rehydrateView(newVirtualNode, oldVirtualNode) {
             oldVirtualNode.props_
         );
     }
-}
-
-function _createNativeNode(virtualNode) {
-    if (virtualNode.type_ === TextNode) {
-        return createNativeTextNode(virtualNode.props_.children);
-    }
-
-    return createNativeElementWithNS(
-        virtualNode.namespace_,
-        virtualNode.type_,
-        virtualNode.props_
-    );
 }
 
 // We only support HTML and SVG namespaces
@@ -84,7 +87,6 @@ function _determineNS(virtualNode) {
     return virtualNode.parent_.namespace_;
 }
 
-// Check if a type of nodes which cannot be hydrated
 function _isDry(type) {
     return type === Fragment || isFunction(type);
 }

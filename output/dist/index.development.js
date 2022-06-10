@@ -2,8 +2,6 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-const EMPTY_OBJECT = {};
-
 let currentNode = null;
 let currentRefHook = null;
 let currentStateHook = null;
@@ -126,8 +124,8 @@ function isArray(value) {
     return value instanceof Array;
 }
 
-function isObject(value) {
-    return value !== null && typeof value === 'object';
+function isNullish(value) {
+    return value === null || value === undefined;
 }
 
 /**
@@ -164,10 +162,9 @@ function Portal(props) {
 /**
  * 
  * @param {function|string} type
- * @param {{}} props
- * @param {string|null} key
+ * @param {{}|string|null} props
  */
-function VirtualNode(type, props, key) {
+function VirtualNode(type, props) {
     // Identification
     // ==============
 
@@ -179,7 +176,7 @@ function VirtualNode(type, props, key) {
     /**
      * @type {string|null}
      */
-    this.key_ = key;
+    this.key_ = null;
 
     /**
      * @type {number|null}
@@ -190,7 +187,7 @@ function VirtualNode(type, props, key) {
     // ===============
 
     /**
-     * @type {{}}
+     * @type {{}|string|null}
      */
     this.props_ = props;
 
@@ -221,6 +218,11 @@ function VirtualNode(type, props, key) {
      * @type {string|null}
      */
     this.namespace_ = null;
+
+    /**
+     * @type {Ref|null}
+     */
+    this.ref_ = null;
 
     // Linked-list pointers
     // ====================
@@ -271,10 +273,14 @@ function VirtualNode(type, props, key) {
 function linkNativeNode(virtualNode, nativeNode) {
     virtualNode.nativeNode_ = nativeNode;
 
-    if (virtualNode.props_.ref !== undefined) {
-        virtualNode.props_.ref.current = nativeNode;
+    if (virtualNode.ref_ !== null) {
+        virtualNode.ref_.current = nativeNode;
     }
 }
+
+// Use the same empty object to save memory
+// Do not mutate it
+const emptyProps = {};
 
 /**
  *
@@ -285,11 +291,15 @@ function linkNativeNode(virtualNode, nativeNode) {
  */
 function createElement(type, props, content) {
     let key = null;
+    let ref = null;
 
-    // props never undefined here
+    const isTypeFunctional = isFunction(type);
+
     if (props === null) {
-        // Use the same object for every empty props to save memory
-        props = EMPTY_OBJECT;
+        // Functional type always need the props is an object
+        if (isTypeFunctional) {
+            props = emptyProps;
+        }
     } else {
         // Normalize key
         // Accept any data type, except number and undefined
@@ -306,7 +316,12 @@ function createElement(type, props, content) {
         }
     
         // Normalize ref
-        if (!(props.ref === undefined || props.ref instanceof Ref)) {
+        if (props.ref instanceof Ref) {
+            if (isTypeFunctional) ; else {
+                ref = props.ref;
+                delete props.ref;
+            }
+        } else if (props.ref !== undefined) {
             if (true) {
                 console.error('The ref value must be created by the useRef hook');
             }
@@ -315,33 +330,34 @@ function createElement(type, props, content) {
     }
     
     // Create the node
-    const virtualNode = new VirtualNode(type, props, key);
+    const virtualNode = new VirtualNode(type, props);
 
-    // Append children
+    // Set key and ref
+    virtualNode.key_ = key;
+    virtualNode.ref_ = ref;
+
+    // Initialize children
     if (arguments.length > 2) {
         const isContentMultiple = arguments.length > 3;
 
         if (isContentMultiple) {
             content = slice.call(arguments, 2);
         }
-    
-        if (isFunction(type)) {
+
+        if (isTypeFunctional) {
             // JSX children
-            if (virtualNode.props_ === EMPTY_OBJECT) {
-                virtualNode.props_ = {};
+            if (virtualNode.props_ === emptyProps) {
+                virtualNode.props_ = {children: content};
+            } else {
+                virtualNode.props_.children = content;
             }
-            virtualNode.props_.children = content;
         } else if (type === TextNode) {
-            // Place TextNode after Function
-            // because this way is much less frequently used
-            if (virtualNode.props_ === EMPTY_OBJECT) {
-                virtualNode.props_ = {};
-            }
             // Accept only one child
             // Or convert the children to the text content directly
-            virtualNode.props_.children = '' + content;
+            virtualNode.props_ = '' + content;
         } else {
-            // Append children directly with static nodes
+            // Static node
+            // Set children directly with static nodes
             if (isContentMultiple) {
                 _initializeChildrenFromContent(virtualNode, content);
             } else {
@@ -364,15 +380,15 @@ function createVirtualNodeFromContent(content) {
     }
         
     if (isString(content)) {
-        return new VirtualNode(TextNode, {children: content}, null);
+        return new VirtualNode(TextNode, content);
     }
 
     if (isNumber(content)) {
-        return new VirtualNode(TextNode, {children: '' + content}, null);
+        return new VirtualNode(TextNode, '' + content);
     }
 
     if (isArray(content)) {
-        const fragment = new VirtualNode(Fragment, EMPTY_OBJECT, null);
+        const fragment = new VirtualNode(Fragment, null);
         _initializeChildrenFromContent(fragment, content);
         return fragment;
     }
@@ -477,6 +493,12 @@ function walkNativeSubtrees(current, callback) {
     }
 }
 
+function updateNativeTextContent(node, text) {
+    if (node.textContent !== text) {
+        node.textContent = text;
+    }
+}
+
 function updateNativeElementAttributes(element, newAttributes, oldAttributes) {
     _updateKeyValues(
         element, newAttributes, oldAttributes,
@@ -492,12 +514,6 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
     }
 
     if (attrName === 'style') {
-        if (!isObject(newAttrValue)) {
-            newAttrValue = EMPTY_OBJECT;
-        }
-        if (!isObject(oldAttrValue)) {
-            oldAttrValue = EMPTY_OBJECT;
-        }
         _updateStyleProperties(element[attrName], newAttrValue, oldAttrValue);
         return;
     }
@@ -524,9 +540,7 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
     }
 
     if (attrName === 'style') {
-        if (isObject(oldAttrValue)) {
-            _updateStyleProperties(element[attrName], EMPTY_OBJECT, oldAttrValue);
-        }
+        _updateStyleProperties(element[attrName], null, oldAttrValue);
 
         // Clean up HTML code
         element.removeAttribute(attrName);
@@ -576,28 +590,53 @@ function _removeStyleProperty(style, propName) {
 }
 
 function _updateKeyValues(target, newKeyValues, oldKeyValues, updateFn, removeFn) {
-    let key;
+    const newEmpty = isNullish(newKeyValues);
+    const oldEmpty = isNullish(oldKeyValues);
     
-    for (key in oldKeyValues) {
-        if (_hasOwnNonEmpty(oldKeyValues, key)) {
-            if (!_hasOwnNonEmpty(newKeyValues, key)) {
+    if (newEmpty && oldEmpty) {
+        return;
+    }
+
+    let key;
+
+    if (newEmpty) {
+        for (key in oldKeyValues) {
+            if (_hasOwnNonEmpty(oldKeyValues, key)) {
                 removeFn(target, key, oldKeyValues[key]);
             }
         }
+        return;
     }
 
-    for (key in newKeyValues) {
-        if (_hasOwnNonEmpty(newKeyValues, key)) {
-            updateFn(target, key, newKeyValues[key], oldKeyValues[key]);
+    if (oldEmpty) {
+        for (key in newKeyValues) {
+            if (_hasOwnNonEmpty(newKeyValues, key)) {
+                updateFn(target, key, newKeyValues[key]);
+            }
+        }
+        return;
+    }
+    
+    {
+        for (key in oldKeyValues) {
+            if (_hasOwnNonEmpty(oldKeyValues, key)) {
+                if (!_hasOwnNonEmpty(newKeyValues, key)) {
+                    removeFn(target, key, oldKeyValues[key]);
+                }
+            }
+        }
+        for (key in newKeyValues) {
+            if (_hasOwnNonEmpty(newKeyValues, key)) {
+                updateFn(target, key, newKeyValues[key], oldKeyValues[key]);
+            }
         }
     }
 }
 
 function _hasOwnNonEmpty(target, prop) {
     return (
-        hasOwnProperty.call(target, prop) &&
-        target[prop] !== undefined &&
-        target[prop] !== null
+        hasOwnProperty.call(target, prop)
+        && !isNullish(target[prop])
     );
 }
 
@@ -617,17 +656,13 @@ function createNativeTextNode(text) {
     return document.createTextNode(text);
 }
 
-function updateNativeTextNode(node, text) {
-    node.textContent = text;
-}
-
 function createNativeElementWithNS(ns, type, attributes) {
     const element = (ns === NAMESPACE_SVG
         ? document.createElementNS('http://www.w3.org/2000/svg', type)
         : document.createElement(type)
     );
 
-    updateNativeElementAttributes(element, attributes, EMPTY_OBJECT);
+    updateNativeElementAttributes(element, attributes);
     
     return element;
 }
@@ -643,7 +678,20 @@ function hydrateView(virtualNode) {
         return;
     }
 
-    const nativeNode = _createNativeNode(virtualNode);
+    let nativeNode;
+    if (virtualNode.type_ === TextNode) {
+        nativeNode = createNativeTextNode(virtualNode.props_);
+        
+        // Remove text content from the virtual text node to save memory
+        // Later, we will compare the new text with the text content of the native node
+        virtualNode.props_ = null;
+    } else {
+        nativeNode = createNativeElementWithNS(
+            virtualNode.namespace_,
+            virtualNode.type_,
+            virtualNode.props_
+        );
+    }
 
     linkNativeNode(virtualNode, nativeNode);
     if (true) {
@@ -666,12 +714,14 @@ function rehydrateView(newVirtualNode, oldVirtualNode) {
     }
 
     if (newVirtualNode.type_ === TextNode) {
-        if (newVirtualNode.props_.children !== oldVirtualNode.props_.children) {
-            updateNativeTextNode(
-                newVirtualNode.nativeNode_,
-                newVirtualNode.props_.children
-            );
-        }
+        updateNativeTextContent(
+            newVirtualNode.nativeNode_,
+            newVirtualNode.props_
+        );
+        
+        // Remove text content from the virtual text node to save memory
+        // Later, we will compare the new text with the text content of the native node
+        newVirtualNode.props_ = null;
     } else {
         updateNativeElementAttributes(
             newVirtualNode.nativeNode_,
@@ -679,18 +729,6 @@ function rehydrateView(newVirtualNode, oldVirtualNode) {
             oldVirtualNode.props_
         );
     }
-}
-
-function _createNativeNode(virtualNode) {
-    if (virtualNode.type_ === TextNode) {
-        return createNativeTextNode(virtualNode.props_.children);
-    }
-
-    return createNativeElementWithNS(
-        virtualNode.namespace_,
-        virtualNode.type_,
-        virtualNode.props_
-    );
 }
 
 // We only support HTML and SVG namespaces
@@ -713,7 +751,6 @@ function _determineNS(virtualNode) {
     return virtualNode.parent_.namespace_;
 }
 
-// Check if a type of nodes which cannot be hydrated
 function _isDry(type) {
     return type === Fragment || isFunction(type);
 }
@@ -1314,7 +1351,7 @@ function createPortal(children, targetNativeNode) {
             }
         }
         
-        portal = new VirtualNode(Portal, {}, null);
+        portal = new VirtualNode(Portal, {});
 
         // Determine the namespace (we only support SVG and HTML namespaces)
         portal.namespace_ = ('ownerSVGElement' in targetNativeNode) ? NAMESPACE_SVG : NAMESPACE_HTML;

@@ -32,7 +32,7 @@ export function createPortal(children, targetNativeNode) {
             }
         }
         
-        portal = new VirtualNode(Portal, {}, null);
+        portal = new VirtualNode(Portal, {});
 
         // Determine the namespace (we only support SVG and HTML namespaces)
         portal.namespace_ = ('ownerSVGElement' in targetNativeNode) ? NAMESPACE_SVG : NAMESPACE_HTML;

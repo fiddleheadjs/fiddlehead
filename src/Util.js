@@ -22,6 +22,10 @@ export function isObject(value) {
     return value !== null && typeof value === 'object';
 }
 
+export function isNullish(value) {
+    return value === null || value === undefined;
+}
+
 /**
  * 
  * @param {Array} a 

@@ -12,10 +12,9 @@ export function Portal(props) {
 /**
  * 
  * @param {function|string} type
- * @param {{}} props
- * @param {string|null} key
+ * @param {{}|string|null} props
  */
-export function VirtualNode(type, props, key) {
+export function VirtualNode(type, props) {
     // Identification
     // ==============
 
@@ -27,7 +26,7 @@ export function VirtualNode(type, props, key) {
     /**
      * @type {string|null}
      */
-    this.key_ = key;
+    this.key_ = null;
 
     /**
      * @type {number|null}
@@ -38,7 +37,7 @@ export function VirtualNode(type, props, key) {
     // ===============
 
     /**
-     * @type {{}}
+     * @type {{}|string|null}
      */
     this.props_ = props;
 
@@ -69,6 +68,11 @@ export function VirtualNode(type, props, key) {
      * @type {string|null}
      */
     this.namespace_ = null;
+
+    /**
+     * @type {Ref|null}
+     */
+    this.ref_ = null;
 
     // Linked-list pointers
     // ====================
@@ -119,7 +123,7 @@ export function VirtualNode(type, props, key) {
 export function linkNativeNode(virtualNode, nativeNode) {
     virtualNode.nativeNode_ = nativeNode;
 
-    if (virtualNode.props_.ref !== undefined) {
-        virtualNode.props_.ref.current = nativeNode;
+    if (virtualNode.ref_ !== null) {
+        virtualNode.ref_.current = nativeNode;
     }
 }
