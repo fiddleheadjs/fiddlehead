@@ -4,8 +4,9 @@ A lightweight library renders HTML by JS. It replicates some key features of Rea
 
 - Declarative programming
 - One-way data binding
-- State management with hooks: useState, useEffect, useRef
 - Reconcilication
+- Batch update
+- Error boundary
 
 ## Install
 

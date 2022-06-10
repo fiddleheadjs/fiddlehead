@@ -1,8 +1,11 @@
 {
   "name": "hook",
   "version": "1.0.0",
-  "description": "A lightweight library renders HTML by JS",
+  "description": "A lightweight UI library",
   "main": "index.js",
+  "exports": {
+    ".": "./output/index.js"
+  },
   "scripts": {
     "output:build": "cd output && npm run build",
     "output:watch": "cd output && npm run watch",
