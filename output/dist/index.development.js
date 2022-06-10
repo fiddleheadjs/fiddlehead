@@ -842,6 +842,9 @@ function _setState(value) {
         this.value_ = newValue;
 
         // Enqueue update
+        // We store the hook itself with the purpose of referring to
+        // the up-to-date context when flushing updates.
+        // So, we don't need to store all pending hooks inside a context.
         pendingUpdates.set(this.context_, this);
 
         // Reset timer
