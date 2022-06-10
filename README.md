@@ -1,6 +1,6 @@
 # Hook
 
-A lightweight library renders HTML by JS. It replicates some key features of React:
+Hook is a lightweight UI library. It replicates some key features of React:
 
 - Declarative programming
 - One-way data binding
@@ -10,50 +10,49 @@ A lightweight library renders HTML by JS. It replicates some key features of Rea
 
 ## Install
 
-Let's say we will locate the library in: path/to/hook
+Install the library:
 
 ```
-git submodule add git@git.itim.vn:ads-frontend/hook.git path/to/hook
+npm install git+ssh://git@git.itim.vn:ads-frontend/hook.git
 ```
 
-To use JSX syntax:
+Install Babel's packages to use JSX syntax:
 
 ```
 npm install babel-loader @babel/core @babel/plugin-transform-react-jsx @babel/preset-env
 ```
 
-Webpack config:
+## Configuration
+
+### babel.config.json
+
+```json
+{
+    "presets": ["@babel/preset-env"],
+    "plugins": [
+        ["@babel/plugin-transform-react-jsx", {
+            "pragma": "jsx",
+            "pragmaFrag": "'['"
+        }],
+    ],
+}
+```
+
+### webpack.config.js
 
 ```js
-function getJsLoaders() {
-    return [
-        {
-            loader: 'babel-loader',
-            options: {
-                presets: [
-                    '@babel/preset-env',
-                ],
-                plugins: [
-                    [
-                        "@babel/plugin-transform-react-jsx",
-                        {
-                            "pragma": "Hook.$",
-                            "pragmaFrag": "null"
-                        }
-                    ],
-                ],
-            }
-        }
-    ];
-}
-
 module.exports = {
     //...
     module: {
         rules: [
             {
-                test: /\.js$/,
-                use: getJsLoaders()
+                test: /\.jsx?$/,
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: require('./babel.config.json')
+                    }
+                ]
             },
             //...
         ],
@@ -66,67 +65,96 @@ module.exports = {
 ### Basic usage
 
 ```jsx
-import Hook from 'path/to/hook';
+import {jsx, render} from 'hook';
 
-export default function HelloWorld() {
-
-    return <div className="HelloWorld">
-        <h1>Hello World!</h1>
-    </div>;
+// Declare your component
+function HelloWorld() {
+    return (
+        <div className="HelloWorld">
+            <h1>Hello World!</h1>
+        </div>
+    );
 }
+
+// Render your component into a DOM element (#root)
+render(<HelloWorld/>, document.getElementById('root'));
 ```
 
-### State management
+### useState
 
 ```jsx
-import Hook, {useState} from 'path/to/hook';
+import {jsx, useState} from 'hook';
 
-export default function Counter() {
+function Counter() {
     const [count, setCount] = useState(0);
     
-    return <div className="Counter">
-        <div>Count: {count}</div>
-        <div>
-            <button
-                type="button"
-                onClick={ev => {
-                    setCount(count => count + 1);
-                }}
-            />
+    return (
+        <div className="Counter">
+            <div>Count: {count}</div>
+            <div>
+                <button
+                    type="button"
+                    onClick={() => {
+                        setCount(count => count + 1);
+                    }}
+                />
+            </div>
         </div>
-    </div>;
+    );
 }
 ```
 
-```jsx
-import Hook, {useState, useEffect} from 'path/to/hook';
+### useEffect
 
-export default function UserInfo() {
+```jsx
+import {jsx, useState, useEffect} from 'hook';
+
+function UserInfo() {
     const [email, setEmail] = useState('');
     const [info, setInfo] = useState(null);
     
-    useEffect(() => {
+    useEffect(function () {
         const xhr = new XMLHttpRequest();
-        xhr.open('GET', 'https://...');
+        xhr.open('GET', '/api/user/info');
         xhr.onload = () => {
             setInfo(xhr.responseText);
         };
         xhr.send('email=' + email);
     }, [email]);
     
-    return <div className="UserInfo">
-        <input
-            type="text"
-            onChange={ev => {
-                setEmail(ev.target.value);
-            }}
-        />
-        {
-            info !== null &&
-            <div>
-                {info}
-            </div>
-        }
-    </div>;
+    return (
+        <div className="UserInfo">
+            <input
+                type="text"
+                onChange={ev => {
+                    setEmail(ev.target.value);
+                }}
+            />
+            {info !== null && (
+                <p>{info}</p>
+            )}
+        </div>
+    );
+}
+```
+
+### useRef
+
+```jsx
+import {jsx, useEffect, useRef} from 'hook';
+
+function Image() {
+    const imageRef = useRef(null);
+
+    useEffect(function () {
+        const image = imageRef.current;
+
+        // Do something with the native image element
+        console.log(image.naturalWidth, image.naturalHeight);
+    }, []);
+
+    return (
+        <image ref={imageRef} src="/path/to/image.png"/>
+    );
 }
 ```
