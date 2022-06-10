@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 function getJsLoaders(isReact = false) {
     return [
@@ -52,7 +53,12 @@ fs.readdirSync('./src').map(pathname => {
         plugins: [
             new webpack.DefinePlugin({
                 __DEV__: isDev
-            })
+            }),
+            new HtmlWebpackPlugin({
+                title: filename,
+                filename: `../${filename}.html`,
+                template: './index.html'
+            }),
         ],
     });
 });
