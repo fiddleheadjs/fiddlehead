@@ -7,7 +7,8 @@ import {Portal} from './VirtualNode';
 // Append/remove children into/from a fragment
 // Then finally append the fragment into the live DOM
 // This will improve the performance because the browser only reflows once
-const domFragment = new DocumentFragment();
+// Do not use new DocumentFragment() as IE11 does not support
+const domFragment = document.createDocumentFragment();
 
 export function renderTree(current) {
     const effectMountNodes = new Map();

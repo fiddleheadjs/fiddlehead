@@ -948,7 +948,7 @@ function mountEffects(effectTag, virtualNode, isNewlyMounted) {
     let hook = virtualNode.effectHook_;
     while (hook !== null) {
         if (hook.tag_ === effectTag) {
-            if (isNewlyMounted || !_matchDeps(hook.deps_, hook.lastDeps_)) {
+            if (isNewlyMounted || _mismatchDeps(hook.deps_, hook.lastDeps_)) {
                 try {
                     _mountEffect(hook);
                 } catch (error) {
@@ -970,7 +970,7 @@ function destroyEffects(effectTag, virtualNode, isUnmounted) {
     while (hook !== null) {
         if (hook.tag_ === effectTag) {
             if (hook.lastDestroy_ !== null || hook.destroy_ !== null) {
-                if (isUnmounted || !_matchDeps(hook.deps_, hook.lastDeps_)) {
+                if (isUnmounted || _mismatchDeps(hook.deps_, hook.lastDeps_)) {
                     try {
                         _destroyEffect(hook, isUnmounted);
                     } catch (error) {
@@ -1019,32 +1019,32 @@ function _destroyEffect(hook, isUnmounted) {
  * 
  * @param {[]|null} deps 
  * @param {[]|null} lastDeps 
- * @returns 
+ * @returns {boolean}
  */
-function _matchDeps(deps, lastDeps) {
+function _mismatchDeps(deps, lastDeps) {
     // Always
     if (deps === null) {
-        return false;
+        return true;
     }
 
     // Lazy
     if (deps.length === 0) {
-        return true;
+        return false;
     }
 
     // Deps
     // 1. When init effect
     if (lastDeps === null) {
-        return true;
+        return false;
     }
     // 2. Two arrays are equal
     if (compareArrays(deps, lastDeps)) {
-        return true;
+        return false;
     }
 
     // DepsChanged
     {
-        return false;
+        return true;
     }
 }
 
@@ -1149,7 +1149,8 @@ function _mapChildren(node) {
 // Append/remove children into/from a fragment
 // Then finally append the fragment into the live DOM
 // This will improve the performance because the browser only reflows once
-const domFragment = new DocumentFragment();
+// Do not use new DocumentFragment() as IE11 does not support
+const domFragment = document.createDocumentFragment();
 
 function renderTree(current) {
     const effectMountNodes = new Map();
