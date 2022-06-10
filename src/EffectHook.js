@@ -7,38 +7,38 @@ export const EFFECT_LAYOUT = 1;
 
 /**
  *
+ * @param {number} tag
  * @param {function} callback
  * @param {[]|null} deps
- * @param {number} tag
  * @return {EffectHook}
  * @constructor
  */
-export function EffectHook(callback, deps, tag) {
+export function EffectHook(tag, callback, deps) {
+    this.tag_ = tag;
     this.callback_ = callback;
     this.deps_ = deps;
     this.destroy_ = null;
     this.lastDeps_ = null;
     this.lastDestroy_ = null;
-    this.tag_ = tag;
     this.next_ = null;
 }
 
 export function useEffect(callback, deps) {
-    return _useEffectImpl(callback, deps, EFFECT_NORMAL);
+    return _useEffectImpl(EFFECT_NORMAL, callback, deps);
 }
 
 export function useLayoutEffect(callback, deps) {
-    return _useEffectImpl(callback, deps, EFFECT_LAYOUT);
+    return _useEffectImpl(EFFECT_LAYOUT, callback, deps);
 }
 
-function _useEffectImpl(callback, deps, tag) {
+function _useEffectImpl(tag, callback, deps) {
     if (deps === undefined) {
         deps = null;
     }
 
     return resolveCurrentEffectHook(
         function (currentNode) {
-            return new EffectHook(callback, deps, tag);
+            return new EffectHook(tag, callback, deps);
         },
         function (currentHook) {
             if (__DEV__) {
@@ -108,9 +108,11 @@ export function destroyEffects(effectTag, virtualNode, isUnmounted) {
  * @param {EffectHook} hook
  */
 function _mountEffect(hook) {
+    // Save the last ones for the next time
     hook.lastDeps_ = hook.deps_;
     hook.lastDestroy_ = hook.destroy_;
     
+    // Run effect callback
     hook.destroy_ = hook.callback_();
     if (hook.destroy_ === undefined) {
         hook.destroy_ = null;

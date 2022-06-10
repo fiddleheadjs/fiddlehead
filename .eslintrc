@@ -12,7 +12,9 @@
     },
     "plugins": [],
     "rules": {
-        "object-curly-spacing": ["warn", "never"],
+        "object-curly-spacing": "off",
+        "no-constant-condition": "off",
+        "no-unused-vars": "off",
         "eol-last": ["warn", "always"]
     },
     "ignorePatterns": [],

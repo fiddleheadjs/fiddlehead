@@ -694,6 +694,7 @@ function _determineNS(virtualNode) {
     return virtualNode.parent_.namespace_;
 }
 
+// Check if a type of nodes which cannot be hydrated
 function _isDry(type) {
     return type === Fragment || isFunction(type);
 }
@@ -741,23 +742,23 @@ const STATE_ERROR = 1;
 
 /**
  *
- * @param {VirtualNode} context
- * @param {*} initialValue
  * @param {number} tag
+ * @param {*} initialValue
+ * @param {VirtualNode} context
  * @constructor
  */
-function StateHook(context, initialValue, tag) {
-    this.context_ = context;
+function StateHook(tag, initialValue, context) {
+    this.tag_ = tag;
     this.value_ = initialValue;
     this.setValue_ = _setState.bind(this);
-    this.tag_ = tag;
+    this.context_ = context;
     this.next_ = null;
 }
 
 function useState(initialValue) {
     return resolveCurrentStateHook(
         function (currentNode) {
-            return new StateHook(currentNode, initialValue, STATE_NORMAL);
+            return new StateHook(STATE_NORMAL, initialValue, currentNode);
         },
         function (currentHook) {
             return [currentHook.value_, currentHook.setValue_];
@@ -786,7 +787,7 @@ function useError(initialError) {
                 initialError = null;
             }
             
-            return new StateHook(currentNode, initialError, STATE_ERROR);
+            return new StateHook(STATE_ERROR, initialError, currentNode);
         },
         function (currentHook) {
             return [currentHook.value_, currentHook.setValue_];
@@ -794,7 +795,7 @@ function useError(initialError) {
     );
 }
 
-const updateQueue = new Map();
+const pendingUpdates = new Map();
 let timeoutId = null;
 
 function _setState(value) {
@@ -822,18 +823,18 @@ function _setState(value) {
         this.value_ = newValue;
 
         // Enqueue update
-        updateQueue.set(this.context_, this);
+        pendingUpdates.set(this.context_, this);
 
         // Reset timer
         if (timeoutId !== null) {
             clearTimeout(timeoutId);
         }
-        timeoutId = setTimeout(_flushQueues);
+        timeoutId = setTimeout(_flushUpdates);
     }
 }
 
-function _flushQueues() {
-    updateQueue.forEach(function (hook, contextAsKey) {
+function _flushUpdates() {
+    pendingUpdates.forEach(function (hook, contextAsKey) {
         // Important!!!
         // Use hook.context_ instead of contextAsKey
         // as it may be outdated due to the reconciliation process
@@ -841,7 +842,7 @@ function _flushQueues() {
         renderTree(hook.context_);
     });
 
-    updateQueue.clear();
+    pendingUpdates.clear();
     timeoutId = null;
 }
 
@@ -886,38 +887,38 @@ const EFFECT_LAYOUT = 1;
 
 /**
  *
+ * @param {number} tag
  * @param {function} callback
  * @param {[]|null} deps
- * @param {number} tag
  * @return {EffectHook}
  * @constructor
  */
-function EffectHook(callback, deps, tag) {
+function EffectHook(tag, callback, deps) {
+    this.tag_ = tag;
     this.callback_ = callback;
     this.deps_ = deps;
     this.destroy_ = null;
     this.lastDeps_ = null;
     this.lastDestroy_ = null;
-    this.tag_ = tag;
     this.next_ = null;
 }
 
 function useEffect(callback, deps) {
-    return _useEffectImpl(callback, deps, EFFECT_NORMAL);
+    return _useEffectImpl(EFFECT_NORMAL, callback, deps);
 }
 
 function useLayoutEffect(callback, deps) {
-    return _useEffectImpl(callback, deps, EFFECT_LAYOUT);
+    return _useEffectImpl(EFFECT_LAYOUT, callback, deps);
 }
 
-function _useEffectImpl(callback, deps, tag) {
+function _useEffectImpl(tag, callback, deps) {
     if (deps === undefined) {
         deps = null;
     }
 
     return resolveCurrentEffectHook(
         function (currentNode) {
-            return new EffectHook(callback, deps, tag);
+            return new EffectHook(tag, callback, deps);
         },
         function (currentHook) {
             if (true) {
@@ -987,9 +988,11 @@ function destroyEffects(effectTag, virtualNode, isUnmounted) {
  * @param {EffectHook} hook
  */
 function _mountEffect(hook) {
+    // Save the last ones for the next time
     hook.lastDeps_ = hook.deps_;
     hook.lastDestroy_ = hook.destroy_;
     
+    // Run effect callback
     hook.destroy_ = hook.callback_();
     if (hook.destroy_ === undefined) {
         hook.destroy_ = null;

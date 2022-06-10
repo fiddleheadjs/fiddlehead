@@ -84,6 +84,7 @@ function _determineNS(virtualNode) {
     return virtualNode.parent_.namespace_;
 }
 
+// Check if a type of nodes which cannot be hydrated
 function _isDry(type) {
     return type === Fragment || isFunction(type);
 }

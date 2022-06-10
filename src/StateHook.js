@@ -8,23 +8,23 @@ export const STATE_ERROR = 1;
 
 /**
  *
- * @param {VirtualNode} context
- * @param {*} initialValue
  * @param {number} tag
+ * @param {*} initialValue
+ * @param {VirtualNode} context
  * @constructor
  */
-export function StateHook(context, initialValue, tag) {
-    this.context_ = context;
+export function StateHook(tag, initialValue, context) {
+    this.tag_ = tag;
     this.value_ = initialValue;
     this.setValue_ = _setState.bind(this);
-    this.tag_ = tag;
+    this.context_ = context;
     this.next_ = null;
 }
 
 export function useState(initialValue) {
     return resolveCurrentStateHook(
         function (currentNode) {
-            return new StateHook(currentNode, initialValue, STATE_NORMAL);
+            return new StateHook(STATE_NORMAL, initialValue, currentNode);
         },
         function (currentHook) {
             return [currentHook.value_, currentHook.setValue_];
@@ -53,7 +53,7 @@ export function useError(initialError) {
                 initialError = null;
             }
             
-            return new StateHook(currentNode, initialError, STATE_ERROR);
+            return new StateHook(STATE_ERROR, initialError, currentNode);
         },
         function (currentHook) {
             return [currentHook.value_, currentHook.setValue_];
@@ -61,7 +61,7 @@ export function useError(initialError) {
     );
 }
 
-const updateQueue = new Map();
+const pendingUpdates = new Map();
 let timeoutId = null;
 
 export function _setState(value) {
@@ -89,18 +89,18 @@ export function _setState(value) {
         this.value_ = newValue;
 
         // Enqueue update
-        updateQueue.set(this.context_, this);
+        pendingUpdates.set(this.context_, this);
 
         // Reset timer
         if (timeoutId !== null) {
             clearTimeout(timeoutId);
         }
-        timeoutId = setTimeout(_flushQueues);
+        timeoutId = setTimeout(_flushUpdates);
     }
 }
 
-function _flushQueues() {
-    updateQueue.forEach(function (hook, contextAsKey) {
+function _flushUpdates() {
+    pendingUpdates.forEach(function (hook, contextAsKey) {
         // Important!!!
         // Use hook.context_ instead of contextAsKey
         // as it may be outdated due to the reconciliation process
@@ -108,7 +108,7 @@ function _flushQueues() {
         renderTree(hook.context_);
     });
 
-    updateQueue.clear();
+    pendingUpdates.clear();
     timeoutId = null;
 }
 
