@@ -81,6 +81,18 @@ function _normalizeElementAttributeName(attrName) {
     return attrName;
 }
 
+function _canBeAttribute(name, value) {
+    if (name === 'innerHTML' || name === 'innerText' || name === 'textContent') {
+        return false;
+    }
+
+    if (!(isString(value) || isNumber(value))) {
+        return false;
+    }
+
+    return true;
+}
+
 function _updateStyleProperties(style, newProperties, oldProperties) {
     _updateKeyValues(
         style, newProperties, oldProperties,
@@ -145,16 +157,4 @@ function _hasOwnNonEmpty(target, prop) {
         hasOwnProperty.call(target, prop)
         && !isNullish(target[prop])
     );
-}
-
-function _canBeAttribute(name, value) {
-    if (name === 'innerHTML' || name === 'innerText' || name === 'textContent') {
-        return false;
-    }
-
-    if (!(isString(value) || isNumber(value))) {
-        return false;
-    }
-
-    return true;
 }
