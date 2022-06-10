@@ -165,6 +165,32 @@ function Image() {
 }
 ```
 
+### Forward refs
+
+Don't like React, ref property can be accessed inside the component. You also don't need `forwardRef()` at all.
+
+```jsx
+import {jsx, useRef} from 'hook';
+
+function TextInput({ref}) {
+    return (
+        <input ref={ref}/>
+    );
+}
+
+function App() {
+    const inputRef = useRef(null);
+    
+    useEffect(() => {
+        console.log('Input element', inputRef.current);
+    }, []);
+
+    return (
+        <TextInput ref={inputRef}/>
+    );
+}
+```
+
 ### Error boundaries
 
 ```jsx
