@@ -29,14 +29,14 @@ const configs = [];
 
 const isDev = process.env.NODE_ENV !== 'production';
 
-fs.readdirSync('./src').map(pathname => {
+fs.readdirSync('./src/apps').map(pathname => {
     const extension = path.extname(pathname);  
     const basename = path.basename(pathname);
     const filename = basename.substring(0, basename.length - extension.length);
 
     configs.push({
         mode: isDev ? 'development' : 'production',
-        entry: `./src/${filename}.js`,
+        entry: `./src/apps/${filename}.js`,
         output: {
             path: path.resolve(__dirname, 'public/assets'),
             filename: `${filename}.js`
@@ -57,7 +57,7 @@ fs.readdirSync('./src').map(pathname => {
             new HtmlWebpackPlugin({
                 title: filename,
                 filename: `../${filename}.html`,
-                template: './index.html'
+                template: './src/index.html'
             }),
         ],
     });

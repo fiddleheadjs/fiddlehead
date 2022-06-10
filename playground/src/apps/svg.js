@@ -1,5 +1,5 @@
-import {jsx, render} from '../../output';
-import {BigSvg} from './bigsvg';
+import {jsx, render} from '../../../output';
+import {BigSvg} from '../components/BigSvg';
 
 console.time('stack');
 console.time('mount');

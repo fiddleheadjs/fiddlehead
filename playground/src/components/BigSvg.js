@@ -1,4 +1,4 @@
-import {jsx} from '../../output';
+import {jsx} from '../../../output';
 import React from 'react';
 
 export function BigSvg() {

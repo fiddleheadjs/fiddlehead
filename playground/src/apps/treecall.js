@@ -1,4 +1,4 @@
-import {jsx, render, useState, useEffect} from '../../output'; 
+import {jsx, render, useState, useEffect} from '../../../output'; 
 
 console.time('mount');
 render(<Tree/>, document.getElementById('sandbox-container'));

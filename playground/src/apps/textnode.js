@@ -1,4 +1,4 @@
-import {jsx, render, useState, useEffect, useRef, TextNode} from '../../output';
+import {jsx, render, useState, useEffect, useRef, TextNode} from '../../../output';
 
 render(<Root/>, document.getElementById('sandbox-container'));
 

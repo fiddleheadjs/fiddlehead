@@ -1,4 +1,4 @@
-import {jsx, render, useState} from "../../output";
+import {jsx, render, useState} from "../../../output";
 
 function YourAd({ count, setCount }) {
     const [layout, setLayout] = useState("cat");

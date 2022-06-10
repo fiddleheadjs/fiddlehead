@@ -1,6 +1,6 @@
 import React, {useRef, useState, useEffect} from 'react';
 import ReactDOM from 'react-dom/client';
-import {BigSvg} from './bigsvg';
+import {BigSvg} from '../components/BigSvg';
 
 console.time('stack');
 console.time('mount');

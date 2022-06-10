@@ -42,7 +42,7 @@ fs.readdirSync('./src/tests').map(pathname => {
         mode: isDev ? 'development' : 'production',
         entry: `./src/tests/${filename}.js`,
         output: {
-            path: path.resolve(__dirname, 'public'),
+            path: path.resolve(__dirname, 'public/assets'),
             filename: `${filename}.js`
         },
         target: ['web', 'es5'],
@@ -61,7 +61,7 @@ fs.readdirSync('./src/tests').map(pathname => {
             }),
             new HtmlWebpackPlugin({
                 title: filename,
-                filename: `${filename}.html`,
+                filename: `../${filename}.html`,
                 template: './src/index.html'
             })
         ],

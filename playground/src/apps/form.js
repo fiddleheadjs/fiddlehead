@@ -1,4 +1,4 @@
-import {jsx, render, useState, useEffect, useRef, Fragment} from "../../output";
+import {jsx, render, useState, useEffect, useRef, Fragment} from "../../../output";
 
 
 function Cat({text, setText}) {
