@@ -81,7 +81,7 @@ export function createElement(type, props, content) {
  * @param {*} content
  * @return {null|VirtualNode}
  */
- export function createVirtualNodeFromContent(content) {
+export function createVirtualNodeFromContent(content) {
     if (content instanceof VirtualNode) {
         return content;
     }
