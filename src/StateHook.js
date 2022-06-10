@@ -64,7 +64,7 @@ export function useError(initialError) {
 const pendingUpdates = new Map();
 let timeoutId = null;
 
-export function _setState(value) {
+function _setState(value) {
     let newValue;
 
     if (isFunction(value)) {
