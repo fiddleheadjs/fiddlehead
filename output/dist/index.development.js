@@ -2,7 +2,7 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-const EMPTY_OBJECT = Object.create(null);
+const EMPTY_OBJECT = {};
 
 let currentNode = null;
 let currentRefHook = null;
@@ -73,7 +73,7 @@ function _throwIfCallInvalid() {
 
 /**
  *
- * @param {*} current
+ * @param {any} current
  * @constructor
  */
  function Ref(current) {
@@ -82,7 +82,7 @@ function _throwIfCallInvalid() {
 
 /**
  *
- * @param {*} current
+ * @param {any} current
  * @constructor
  */
 function RefHook(current) {
@@ -92,7 +92,7 @@ function RefHook(current) {
 
 /**
  *
- * @param {*} initialValue
+ * @param {any} initialValue
  * @constructor
  */
 function useRef(initialValue) {
@@ -280,7 +280,7 @@ function linkNativeNode(virtualNode, nativeNode) {
  *
  * @param {string|function} type
  * @param {{}|null} props
- * @param {*} content
+ * @param {any} content
  * @return {VirtualNode}
  */
 function createElement(type, props, content) {
@@ -319,9 +319,9 @@ function createElement(type, props, content) {
 
     // Append children
     if (arguments.length > 2) {
-        const multiple = arguments.length > 3;
+        const isContentMultiple = arguments.length > 3;
 
-        if (multiple) {
+        if (isContentMultiple) {
             content = slice.call(arguments, 2);
         }
     
@@ -342,7 +342,11 @@ function createElement(type, props, content) {
             virtualNode.props_.children = '' + content;
         } else {
             // Append children directly with static nodes
-            _appendChildrenFromContent(virtualNode, multiple ? content : [content]);
+            if (isContentMultiple) {
+                _initializeChildrenFromContent(virtualNode, content);
+            } else {
+                _initializeChildFromContent(virtualNode, content);
+            }
         }
     }
 
@@ -351,10 +355,10 @@ function createElement(type, props, content) {
 
 /**
  *
- * @param {*} content
+ * @param {any} content
  * @return {null|VirtualNode}
  */
- function createVirtualNodeFromContent(content) {
+function createVirtualNodeFromContent(content) {
     if (content instanceof VirtualNode) {
         return content;
     }
@@ -369,7 +373,7 @@ function createElement(type, props, content) {
 
     if (isArray(content)) {
         const fragment = new VirtualNode(Fragment, EMPTY_OBJECT, null);
-        _appendChildrenFromContent(fragment, content);
+        _initializeChildrenFromContent(fragment, content);
         return fragment;
     }
 
@@ -379,13 +383,12 @@ function createElement(type, props, content) {
 /**
  * 
  * @param {VirtualNode} current 
- * @param {Array} content
+ * @param {any[]} content
  */
-function _appendChildrenFromContent(current, content) {
+function _initializeChildrenFromContent(current, content) {
     let child, prevChild = null, i = 0;
     for (; i < content.length; ++i) {
         child = createVirtualNodeFromContent(content[i]);
-        
         if (child !== null) {
             child.parent_ = current;
             child.slot_ = i;
@@ -398,6 +401,22 @@ function _appendChildrenFromContent(current, content) {
 
             prevChild = child;
         }
+    }
+}
+
+/**
+ * 
+ * @param {VirtualNode} current 
+ * @param {any} content
+ */
+function _initializeChildFromContent(current, content) {
+    const child = createVirtualNodeFromContent(content);
+    if (child !== null) {
+        current.child_ = child;
+        child.parent_ = current;
+
+        // Don't need to set the slot property
+        // as this node have only one child
     }
 }
 
@@ -743,7 +762,7 @@ const STATE_ERROR = 1;
 /**
  *
  * @param {number} tag
- * @param {*} initialValue
+ * @param {any} initialValue
  * @param {VirtualNode} context
  * @constructor
  */
@@ -1264,7 +1283,7 @@ function _workLoop(performUnit, onReturn, root, r0, r1) {
 
 /**
  * 
- * @param {*} children 
+ * @param {any} children 
  * @param {Element} targetNativeNode
  */
  function render(children, targetNativeNode) {
@@ -1275,7 +1294,7 @@ function _workLoop(performUnit, onReturn, root, r0, r1) {
 
 /**
  * 
- * @param {*} children 
+ * @param {any} children 
  * @param {Element} targetNativeNode
  * @returns {VirtualNode}
  */

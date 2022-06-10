@@ -9,7 +9,7 @@ export const STATE_ERROR = 1;
 /**
  *
  * @param {number} tag
- * @param {*} initialValue
+ * @param {any} initialValue
  * @param {VirtualNode} context
  * @constructor
  */

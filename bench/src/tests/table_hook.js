@@ -9,13 +9,16 @@ import {
 } from "../../../output";
 import {bench} from "../bench";
 
-const root = document.getElementById("root");
-
 const TABLE_ROWS = 10000;
-
 console.log('Rows: ', TABLE_ROWS);
 
-bench([renderFn2, renderFn1], 100);
+const root = document.getElementById("root");
+
+bench([render0, renderFn1, renderFn2], 50);
+
+function render0(onFinish) {
+    render(<App0 onFinish={onFinish} />, root);
+}
 
 function renderFn1(onFinish) {
     render(<App1 onFinish={onFinish} />, root);
@@ -23,6 +26,14 @@ function renderFn1(onFinish) {
 
 function renderFn2(onFinish) {
     render(<App2 onFinish={onFinish} />, root);
+}
+
+function App0({onFinish}) {
+    useLayoutEffect(() => {
+        onFinish();
+    }, []);
+
+    return 'ABCD';
 }
 
 function App1({onFinish}) {
@@ -51,5 +62,18 @@ function App2({onFinish}) {
         onFinish();
     }, []);
 
-    return 'ABCD';
+    const arr = new Array(TABLE_ROWS).fill(1);
+
+    return (
+        <table>
+            <tbody>
+                {arr.map((_, i) => (
+                    <tr key={i}>
+                        <td>{i}<i></i></td>
+                        <td>{arr[i]}<i></i></td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    );
 }

@@ -5,22 +5,34 @@ import React, {
     useRef,
     Fragment,
 } from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 import {bench} from "../bench";
-
-const root = document.getElementById("root");
 
 const TABLE_ROWS = 10000;
 console.log('Rows: ', TABLE_ROWS);
 
-bench([renderFn2, renderFn1], 100);
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+bench([renderFn0, renderFn1, renderFn2], 50);
+
+function renderFn0(onFinish) {
+    root.render(<App0 onFinish={onFinish} />);
+}
 
 function renderFn1(onFinish) {
-    ReactDOM.render(<App1 onFinish={onFinish} />, root);
+    root.render(<App1 onFinish={onFinish} />);
 }
 
 function renderFn2(onFinish) {
-    ReactDOM.render(<App2 onFinish={onFinish} />, root);
+    root.render(<App2 onFinish={onFinish} />);
+}
+
+function App0({onFinish}) {
+    useLayoutEffect(() => {
+        onFinish();
+    }, []);
+
+    return 'ABCD';
 }
 
 function App1({onFinish}) {
@@ -49,5 +61,18 @@ function App2({onFinish}) {
         onFinish();
     }, []);
 
-    return 'ABCD';
+    const arr = new Array(TABLE_ROWS).fill(1);
+
+    return (
+        <table>
+            <tbody>
+                {arr.map((_, i) => (
+                    <tr key={i}>
+                        <td>{i}<i></i></td>
+                        <td>{arr[i]}<i></i></td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    );
 }

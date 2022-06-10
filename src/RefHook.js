@@ -2,7 +2,7 @@ import {resolveCurrentRefHook} from './CurrentlyProcessing';
 
 /**
  *
- * @param {*} current
+ * @param {any} current
  * @constructor
  */
  export function Ref(current) {
@@ -11,7 +11,7 @@ import {resolveCurrentRefHook} from './CurrentlyProcessing';
 
 /**
  *
- * @param {*} current
+ * @param {any} current
  * @constructor
  */
 export function RefHook(current) {
@@ -21,7 +21,7 @@ export function RefHook(current) {
 
 /**
  *
- * @param {*} initialValue
+ * @param {any} initialValue
  * @constructor
  */
 export function useRef(initialValue) {

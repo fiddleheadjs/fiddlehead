@@ -37,6 +37,7 @@ function printOutput(timeTable) {
         });
     });
     console.table(tableData);
+    console.log(tableData);
     console.log(timeTable);
 }
 

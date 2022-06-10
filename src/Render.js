@@ -4,7 +4,7 @@ import {renderTree} from './RenderTree';
 
 /**
  * 
- * @param {*} children 
+ * @param {any} children 
  * @param {Element} targetNativeNode
  */
  export function render(children, targetNativeNode) {
@@ -15,7 +15,7 @@ import {renderTree} from './RenderTree';
 
 /**
  * 
- * @param {*} children 
+ * @param {any} children 
  * @param {Element} targetNativeNode
  * @returns {VirtualNode}
  */

@@ -7,7 +7,7 @@ import {Fragment, TextNode, VirtualNode} from './VirtualNode';
  *
  * @param {string|function} type
  * @param {{}|null} props
- * @param {*} content
+ * @param {any} content
  * @return {VirtualNode}
  */
 export function createElement(type, props, content) {
@@ -46,9 +46,9 @@ export function createElement(type, props, content) {
 
     // Append children
     if (arguments.length > 2) {
-        const multiple = arguments.length > 3;
+        const isContentMultiple = arguments.length > 3;
 
-        if (multiple) {
+        if (isContentMultiple) {
             content = slice.call(arguments, 2);
         }
     
@@ -69,7 +69,11 @@ export function createElement(type, props, content) {
             virtualNode.props_.children = '' + content;
         } else {
             // Append children directly with static nodes
-            _appendChildrenFromContent(virtualNode, multiple ? content : [content]);
+            if (isContentMultiple) {
+                _initializeChildrenFromContent(virtualNode, content);
+            } else {
+                _initializeChildFromContent(virtualNode, content);
+            }
         }
     }
 
@@ -78,7 +82,7 @@ export function createElement(type, props, content) {
 
 /**
  *
- * @param {*} content
+ * @param {any} content
  * @return {null|VirtualNode}
  */
 export function createVirtualNodeFromContent(content) {
@@ -96,7 +100,7 @@ export function createVirtualNodeFromContent(content) {
 
     if (isArray(content)) {
         const fragment = new VirtualNode(Fragment, EMPTY_OBJECT, null);
-        _appendChildrenFromContent(fragment, content);
+        _initializeChildrenFromContent(fragment, content);
         return fragment;
     }
 
@@ -106,13 +110,12 @@ export function createVirtualNodeFromContent(content) {
 /**
  * 
  * @param {VirtualNode} current 
- * @param {Array} content
+ * @param {any[]} content
  */
-function _appendChildrenFromContent(current, content) {
+function _initializeChildrenFromContent(current, content) {
     let child, prevChild = null, i = 0;
     for (; i < content.length; ++i) {
         child = createVirtualNodeFromContent(content[i]);
-        
         if (child !== null) {
             child.parent_ = current;
             child.slot_ = i;
@@ -125,5 +128,21 @@ function _appendChildrenFromContent(current, content) {
 
             prevChild = child;
         }
+    }
+}
+
+/**
+ * 
+ * @param {VirtualNode} current 
+ * @param {any} content
+ */
+function _initializeChildFromContent(current, content) {
+    const child = createVirtualNodeFromContent(content);
+    if (child !== null) {
+        current.child_ = child;
+        child.parent_ = current;
+
+        // Don't need to set the slot property
+        // as this node have only one child
     }
 }
