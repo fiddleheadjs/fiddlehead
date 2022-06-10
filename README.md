@@ -113,7 +113,7 @@ function UserInfo() {
     const [email, setEmail] = useState('');
     const [info, setInfo] = useState(null);
     
-    useEffect(function () {
+    useEffect(() => {
         const xhr = new XMLHttpRequest();
         xhr.open('GET', '/api/user/info');
         xhr.onload = () => {
@@ -138,6 +138,12 @@ function UserInfo() {
 }
 ```
 
+### useLayoutEffect
+
+The signature is identical to `useEffect`, but it fires synchronously after all DOM mutations. Use this to read layout from the DOM and synchronously re-render. Updates scheduled inside `useLayoutEffect` will be flushed synchronously, before the browser has a chance to paint.
+
+Prefer the standard `useEffect` when possible to avoid blocking visual updates.
+
 ### useRef
 
 ```jsx
@@ -146,7 +152,7 @@ import {jsx, useEffect, useRef} from 'hook';
 function Image() {
     const imageRef = useRef(null);
 
-    useEffect(function () {
+    useEffect(() => {
         const image = imageRef.current;
 
         // Do something with the native image element
@@ -154,7 +160,68 @@ function Image() {
     }, []);
 
     return (
-        <image ref={imageRef} src="/path/to/image.png"/>
+        <img ref={imageRef} src="/path/to/image.png"/>
+    );
+}
+```
+
+### Error boundaries
+
+```jsx
+import {jsx, useError} from 'hook';
+
+function ErrorBoundary({children}) {
+    const [error, setError] = useError(null);
+
+    if (error !== null) {
+        return 'Oops... Something went wrong!';
+    }
+
+    return children;
+}
+```
+
+Error boundaries catch errors during rendering, in hooks and in the whole tree below them. Error boundaries allow only one `useError` inside.
+
+### Portal
+
+```jsx
+import {jsx, createPortal} from 'hook';
+
+function DocumentPortal({children}) {
+    const elRef = useRef(document.createElement('div'));
+    elRef.current.style.display = 'contents';
+    
+    useEffect(() => {
+        if (elRef.current.parentNode === null) {
+            document.body.appendChild(elRef.current);
+        }
+        return () => {
+            if (elRef.current.parentNode !== null) {
+                elRef.current.parentNode.removeChild(elRef.current);
+            }
+        };
+    }, []);
+
+    return createPortal(children, elRef.current);
+}
+
+function App() {
+    const [showsImage, setShowsImage] = useState(false);
+
+    return (
+        <div>
+            <button onClick={() => setShowsImage(true)}>
+                Show Image
+            </button>
+            {showsImage && (
+                <DocumentPortal>
+                    <div className="modal">
+                        <img src="/path/to/image.png"/>
+                    </div>
+                </DocumentPortal>
+            )}
+        </div>
     );
 }
 ```
