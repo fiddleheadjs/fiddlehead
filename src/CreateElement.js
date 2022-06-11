@@ -40,18 +40,20 @@ export function createElement(type, props, content) {
         }
     
         // Normalize ref
-        if (props.ref instanceof Ref) {
-            if (isTypeFunctional) {
-                // We allow functional components to access ref prop like normal props
+        if (props.ref !== undefined) {
+            if (props.ref instanceof Ref) {
+                if (isTypeFunctional) {
+                    // We allow functional components to access ref prop like normal props
+                } else {
+                    ref = props.ref;
+                    delete props.ref;
+                }
             } else {
-                ref = props.ref;
+                if (__DEV__) {
+                    console.error('The ref value must be created by the useRef hook');
+                }
                 delete props.ref;
             }
-        } else if (props.ref !== undefined) {
-            if (__DEV__) {
-                console.error('The ref value must be created by the useRef hook');
-            }
-            delete props.ref;
         }
     }
     
