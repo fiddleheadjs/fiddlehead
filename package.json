@@ -8,6 +8,7 @@
   },
   "scripts": {
     "postinstall": "cd ./output && npm install && cd ../playground && npm install && cd ../bench && npm install",
+    "dev": "concurrently \"npm run output:watch\" \"npm run playground:watch\" \"npm run bench:watch\" \"npm run playground:start\" \"npm run bench:start\"",
     "output:build": "cd output && npm run build",
     "output:watch": "cd output && npm run watch",
     "playground:start": "cd playground && npm run start",
@@ -16,7 +17,6 @@
     "bench:start": "cd bench && npm run start",
     "bench:build": "cd bench && npm run build",
     "bench:watch": "cd bench && npm run watch",
-    "dev": "concurrently \"npm run output:watch\" \"npm run playground:watch\" \"npm run bench:watch\" \"npm run playground:start\" \"npm run bench:start\"",
     "lint": "eslint ./src --config .eslintrc"
   },
   "repository": {
