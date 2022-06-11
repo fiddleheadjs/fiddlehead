@@ -316,16 +316,18 @@ function createElement(type, props, content) {
         }
     
         // Normalize ref
-        if (props.ref instanceof Ref) {
-            if (isTypeFunctional) ; else {
-                ref = props.ref;
+        if (props.ref !== undefined) {
+            if (props.ref instanceof Ref) {
+                if (isTypeFunctional) ; else {
+                    ref = props.ref;
+                    delete props.ref;
+                }
+            } else {
+                if (true) {
+                    console.error('The ref value must be created by the useRef hook');
+                }
                 delete props.ref;
             }
-        } else if (props.ref !== undefined) {
-            if (true) {
-                console.error('The ref value must be created by the useRef hook');
-            }
-            delete props.ref;
         }
     }
     
