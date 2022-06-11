@@ -1,29 +1,17 @@
 import {insertView, updateView, deleteView} from './CommitView';
 import {destroyEffects, EFFECT_LAYOUT, EFFECT_NORMAL, mountEffects} from './EffectHook';
-import {resolveMountingPoint} from './MountingPoint';
 import {reconcileChildren} from './Reconciliation';
 import {Portal} from './VirtualNode';
-
-// Append/remove children into/from a fragment
-// Then finally append the fragment into the live DOM
-// This will improve the performance because the browser only reflows once
-// Do not use new DocumentFragment() as IE11 does not support
-const domFragment = document.createDocumentFragment();
 
 export function renderTree(current) {
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
     
     // Main work
-    const mpt = resolveMountingPoint(current);
-    const mptNative = mpt.nativeNode_;
-    mpt.nativeNode_ = domFragment;
     _workLoop(
         _performUnitOfWork, _onReturn, current,
         effectMountNodes, effectDestroyNodes
     );
-    mptNative.appendChild(domFragment);
-    mpt.nativeNode_ = mptNative;
 
     // Layout effects
     effectDestroyNodes.forEach(function (isUnmounted, node) {

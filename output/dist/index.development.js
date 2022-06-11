@@ -562,6 +562,8 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
     }
 }
 
+const onEventRegex = /^on[A-Z]/;
+
 function _normalizeElementAttributeName(attrName) {
     // Support React className
     if (attrName === 'className') {
@@ -569,7 +571,7 @@ function _normalizeElementAttributeName(attrName) {
     }
 
     // Support camelcase event listener bindings
-    if (/^on[A-Z]/.test(attrName)) {
+    if (onEventRegex.test(attrName)) {
         return attrName.toLowerCase();
     }
 
@@ -604,37 +606,29 @@ function _removeStyleProperty(style, propName) {
 }
 
 function _updateKeyValues(target, newKeyValues, oldKeyValues, updateFn, removeFn) {
-    const newEmpty = isNullish(newKeyValues);
     const oldEmpty = isNullish(oldKeyValues);
-    
-    if (newEmpty && oldEmpty) {
-        return;
-    }
+    const newEmpty = isNullish(newKeyValues);
 
     let key;
 
-    if (newEmpty) {
+    if (oldEmpty) {
+        if (newEmpty) ; else {
+            for (key in newKeyValues) {
+                if (_hasOwnNonEmpty(newKeyValues, key)) {
+                    updateFn(target, key, newKeyValues[key]);
+                }
+            }
+        }
+    } else if (newEmpty) {
         for (key in oldKeyValues) {
             if (_hasOwnNonEmpty(oldKeyValues, key)) {
                 removeFn(target, key, oldKeyValues[key]);
             }
         }
-        return;
-    }
-
-    if (oldEmpty) {
-        for (key in newKeyValues) {
-            if (_hasOwnNonEmpty(newKeyValues, key)) {
-                updateFn(target, key, newKeyValues[key]);
-            }
-        }
-        return;
-    }
-    
-    {
+    } else {
         for (key in oldKeyValues) {
             if (_hasOwnNonEmpty(oldKeyValues, key)) {
-                if (!_hasOwnNonEmpty(newKeyValues, key)) {
+                if (_hasOwnNonEmpty(newKeyValues, key)) ; else {
                     removeFn(target, key, oldKeyValues[key]);
                 }
             }
@@ -753,6 +747,7 @@ function _determineNS(virtualNode) {
     return virtualNode.parent_.namespace_;
 }
 
+// Check if a node type cannot be hydrated
 function _isDry(type) {
     return type === Fragment || isFunction(type);
 }
@@ -1207,26 +1202,15 @@ function _mapChildren(node) {
     return map;
 }
 
-// Append/remove children into/from a fragment
-// Then finally append the fragment into the live DOM
-// This will improve the performance because the browser only reflows once
-// Do not use new DocumentFragment() as IE11 does not support
-const domFragment = document.createDocumentFragment();
-
 function renderTree(current) {
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
     
     // Main work
-    const mpt = resolveMountingPoint(current);
-    const mptNative = mpt.nativeNode_;
-    mpt.nativeNode_ = domFragment;
     _workLoop(
         _performUnitOfWork, _onReturn, current,
         effectMountNodes, effectDestroyNodes
     );
-    mptNative.appendChild(domFragment);
-    mpt.nativeNode_ = mptNative;
 
     // Layout effects
     effectDestroyNodes.forEach(function (isUnmounted, node) {

@@ -67,6 +67,8 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
     }
 }
 
+const onEventRegex = /^on[A-Z]/;
+
 function _normalizeElementAttributeName(attrName) {
     // Support React className
     if (attrName === 'className') {
@@ -74,7 +76,7 @@ function _normalizeElementAttributeName(attrName) {
     }
 
     // Support camelcase event listener bindings
-    if (/^on[A-Z]/.test(attrName)) {
+    if (onEventRegex.test(attrName)) {
         return attrName.toLowerCase();
     }
 
@@ -109,37 +111,33 @@ function _removeStyleProperty(style, propName) {
 }
 
 function _updateKeyValues(target, newKeyValues, oldKeyValues, updateFn, removeFn) {
-    const newEmpty = isNullish(newKeyValues);
     const oldEmpty = isNullish(oldKeyValues);
-    
-    if (newEmpty && oldEmpty) {
-        return;
-    }
+    const newEmpty = isNullish(newKeyValues);
 
     let key;
 
-    if (newEmpty) {
+    if (oldEmpty) {
+        if (newEmpty) {
+            // Do nothing here
+        } else {
+            for (key in newKeyValues) {
+                if (_hasOwnNonEmpty(newKeyValues, key)) {
+                    updateFn(target, key, newKeyValues[key]);
+                }
+            }
+        }
+    } else if (newEmpty) {
         for (key in oldKeyValues) {
             if (_hasOwnNonEmpty(oldKeyValues, key)) {
                 removeFn(target, key, oldKeyValues[key]);
             }
         }
-        return;
-    }
-
-    if (oldEmpty) {
-        for (key in newKeyValues) {
-            if (_hasOwnNonEmpty(newKeyValues, key)) {
-                updateFn(target, key, newKeyValues[key]);
-            }
-        }
-        return;
-    }
-    
-    {
+    } else {
         for (key in oldKeyValues) {
             if (_hasOwnNonEmpty(oldKeyValues, key)) {
-                if (!_hasOwnNonEmpty(newKeyValues, key)) {
+                if (_hasOwnNonEmpty(newKeyValues, key)) {
+                    // Do nothing here
+                } else {
                     removeFn(target, key, oldKeyValues[key]);
                 }
             }
