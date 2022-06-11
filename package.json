@@ -7,6 +7,7 @@
     ".": "./output/index.js"
   },
   "scripts": {
+    "postinstall": "cd ./output && npm install && cd ../playground && npm install && cd ../bench && npm install",
     "output:build": "cd output && npm run build",
     "output:watch": "cd output && npm run watch",
     "playground:start": "cd playground && npm run start",
