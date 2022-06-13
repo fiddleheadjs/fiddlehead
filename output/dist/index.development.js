@@ -914,16 +914,25 @@ function _setState(value) {
 }
 
 function _flushUpdates() {
+    // Clear timeoutId to prepare for new state settings
+    // happened in the renderTree (inside setLayoutEffect)
+    timeoutId = null;
+
+    // Copy the contexts and clear pending updates
+    // to prepare for new state settings
+    const contexts = [];
     pendingUpdates.forEach(function (hook, contextAsKey) {
         // Important!!!
         // Use hook.context_ instead of contextAsKey
         // as it may be outdated due to the reconciliation process
-        
-        renderTree(hook.context_);
+        contexts.push(hook.context_);
     });
-
     pendingUpdates.clear();
-    timeoutId = null;
+    
+    // Re-render trees
+    for (let i = 0; i < contexts.length; ++i) {
+        renderTree(contexts[i]);
+    }
 }
 
 function _validateError(error) {
