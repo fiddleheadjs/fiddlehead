@@ -9,11 +9,11 @@ export function renderTree(current) {
     const effectDestroyNodes = new Map();
     
     // The mounting point of the current
-    // In the tree, it lies at a higher level than the current,
-    // so we need to initialize/cleanup its lastTouchedNativeChild_
-    // at outside of the work loop
     const mpt = resolveMountingPoint(current);
     
+    // In the tree, the mounting point lies at a higher level
+    // than the current, so we need to initialize/cleanup
+    // its temporary properties from outside of the work loop
     walkNativeChildren(function (nativeChild) {
         mpt.lastTouchedNativeChild_ = nativeChild;
     }, mpt, current);
@@ -23,7 +23,7 @@ export function renderTree(current) {
         _performUnitOfWork, _onReturn, current,
         effectMountNodes, effectDestroyNodes
     );
-    
+
     // Cleanup
     mpt.lastTouchedNativeChild_ = null;
 
@@ -91,7 +91,7 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
 
 // Callback called after walking through a node and all of its ascendants
 function _onReturn(current) {
-    // This is when we cleanup the remaining temp props
+    // This is when we cleanup the remaining temporary properties
     current.lastTouchedNativeChild_ = null;
 }
 

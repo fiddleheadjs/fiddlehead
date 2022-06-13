@@ -92,8 +92,8 @@ export function VirtualNode(type, props) {
      */
     this.sibling_ = null;
 
-    // Temp props
-    // ==========
+    // Temporary properties
+    // ====================
     
     // The previous version of this node
     /**
