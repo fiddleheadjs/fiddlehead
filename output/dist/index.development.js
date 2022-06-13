@@ -681,6 +681,18 @@ function createNativeElementWithNS(ns, type, attributes) {
     return element;
 }
 
+function removeNativeNode(nativeNode) {
+    if (nativeNode.parentNode !== null) {
+        nativeNode.parentNode.removeChild(nativeNode);
+    }
+}
+
+function insertNativeNodeAfter(parent, newChild, childBefore) {
+    parent.insertBefore(newChild, (
+        childBefore !== null ? childBefore.nextSibling : parent.firstChild
+    ));
+}
+
 // Important!!!
 // This module does not handle Portal nodes
 
@@ -790,11 +802,7 @@ function insertView(virtualNode) {
     if (virtualNode.nativeNode_ !== null) {
         const mpt = resolveMountingPoint(virtualNode.parent_);
         if (mpt !== null) {
-            const nativeNodeAfter = (mpt.lastTouchedNativeChild_ !== null
-                ? mpt.lastTouchedNativeChild_.nextSibling
-                : mpt.nativeNode_.firstChild
-            );
-            mpt.nativeNode_.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
+            insertNativeNodeAfter(mpt.nativeNode_, virtualNode.nativeNode_, mpt.lastTouchedNativeChild_);
             mpt.lastTouchedNativeChild_ = virtualNode.nativeNode_;
         }
     }
@@ -802,15 +810,9 @@ function insertView(virtualNode) {
 
 function deleteView(virtualNode) {
     if (virtualNode.nativeNode_ !== null) {
-        _removeNativeNode(virtualNode.nativeNode_);
+        removeNativeNode(virtualNode.nativeNode_);
     } else {
-        walkNativeChildren(_removeNativeNode, virtualNode);
-    }
-}
-
-function _removeNativeNode(nativeNode) {
-    if (nativeNode.parentNode !== null) {
-        nativeNode.parentNode.removeChild(nativeNode);
+        walkNativeChildren(removeNativeNode, virtualNode);
     }
 }
 

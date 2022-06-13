@@ -1,5 +1,6 @@
-import {resolveMountingPoint, walkNativeChildren, walkNativeSubtrees} from './MountingPoint';
+import {resolveMountingPoint, walkNativeChildren} from './MountingPoint';
 import {hydrateView, rehydrateView} from './HydrateView';
+import {insertNativeNodeAfter, removeNativeNode} from './NativeDOM';
 
 // Important!!!
 // This module does not handle Portal nodes
@@ -21,11 +22,7 @@ export function insertView(virtualNode) {
     if (virtualNode.nativeNode_ !== null) {
         const mpt = resolveMountingPoint(virtualNode.parent_);
         if (mpt !== null) {
-            const nativeNodeAfter = (mpt.lastTouchedNativeChild_ !== null
-                ? mpt.lastTouchedNativeChild_.nextSibling
-                : mpt.nativeNode_.firstChild
-            );
-            mpt.nativeNode_.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
+            insertNativeNodeAfter(mpt.nativeNode_, virtualNode.nativeNode_, mpt.lastTouchedNativeChild_);
             mpt.lastTouchedNativeChild_ = virtualNode.nativeNode_;
         }
     }
@@ -33,14 +30,8 @@ export function insertView(virtualNode) {
 
 export function deleteView(virtualNode) {
     if (virtualNode.nativeNode_ !== null) {
-        _removeNativeNode(virtualNode.nativeNode_);
+        removeNativeNode(virtualNode.nativeNode_);
     } else {
-        walkNativeChildren(_removeNativeNode, virtualNode);
-    }
-}
-
-function _removeNativeNode(nativeNode) {
-    if (nativeNode.parentNode !== null) {
-        nativeNode.parentNode.removeChild(nativeNode);
+        walkNativeChildren(removeNativeNode, virtualNode);
     }
 }

@@ -16,6 +16,18 @@ export function createNativeElementWithNS(ns, type, attributes) {
     return element;
 }
 
+export function removeNativeNode(nativeNode) {
+    if (nativeNode.parentNode !== null) {
+        nativeNode.parentNode.removeChild(nativeNode);
+    }
+}
+
+export function insertNativeNodeAfter(parent, newChild, childBefore) {
+    parent.insertBefore(newChild, (
+        childBefore !== null ? childBefore.nextSibling : parent.firstChild
+    ));
+}
+
 export {
     updateNativeElementAttributes,
     updateNativeTextContent,
