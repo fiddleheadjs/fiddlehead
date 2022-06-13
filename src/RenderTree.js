@@ -8,18 +8,22 @@ export function renderTree(current) {
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
     
-    // Initialize the lastTouchedNativeChild_
-    // for the mounting point of the current
+    // The mounting point of the current
+    // In the tree, it lies at a higher level than the current,
+    // so we need to initualize/cleanup its lastTouchedNativeChild_
+    // at outside of the work loop
     const mpt = resolveMountingPoint(current);
-    walkNativeChildren(mpt, current, function (nativeChild) {
-        mpt.lastTouchedNativeChild_ = nativeChild;
-    });
 
-    // Main work
+    walkNativeChildren(function (nativeChild) {
+        mpt.lastTouchedNativeChild_ = nativeChild;
+    }, mpt, current);
+    
     _workLoop(
         _performUnitOfWork, _onReturn, current,
         effectMountNodes, effectDestroyNodes
     );
+
+    mpt.lastTouchedNativeChild_ = null;
 
     // Layout effects
     effectDestroyNodes.forEach(function (isUnmounted, node) {
@@ -86,9 +90,7 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
 // Callback called after walking through a node and all of its ascendants
 function _onReturn(current) {
     // This is when we cleanup the remaining temp props
-    if (current.lastTouchedNativeChild_ !== null) {
-        current.lastTouchedNativeChild_ = null;
-    }
+    current.lastTouchedNativeChild_ = null;
 }
 
 // Reference: https://github.com/facebook/react/issues/7942

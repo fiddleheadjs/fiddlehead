@@ -33,10 +33,14 @@ export function insertView(virtualNode) {
 
 export function deleteView(virtualNode) {
     if (virtualNode.nativeNode_ !== null) {
-        virtualNode.nativeNode_.parentNode.removeChild(virtualNode.nativeNode_);
+        _removeNativeNode(virtualNode.nativeNode_);
     } else {
-        walkNativeChildren(virtualNode, null, function (nativeChild) {
-            nativeChild.parentNode.removeChild(nativeChild);
-        });
+        walkNativeChildren(_removeNativeNode, virtualNode);
+    }
+}
+
+function _removeNativeNode(nativeNode) {
+    if (nativeNode.parentNode !== null) {
+        nativeNode.parentNode.removeChild(nativeNode);
     }
 }

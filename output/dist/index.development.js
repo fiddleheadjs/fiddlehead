@@ -459,6 +459,11 @@ function extractVirtualNode(nativeNode) {
 }
 
 // Find the virtual node in the parent chain which its native node is not null
+/**
+ * 
+ * @param {VirtualNode} current 
+ * @returns {Node}
+ */
 function resolveMountingPoint(current) {
     while (true) {
         if (current === null) {
@@ -471,8 +476,15 @@ function resolveMountingPoint(current) {
     }
 }
 
-// Walk through native children of a parent (virtual node)
-function walkNativeChildren(parent, stopBefore, callback) {
+// Walk through native children of a parent
+/**
+ * 
+ * @param {function} callback 
+ * @param {VirtualNode} parent 
+ * @param {VirtualNode} stopBefore 
+ * @returns {void}
+ */
+function walkNativeChildren(callback, parent, stopBefore) {
     let current = parent.child_;
     if (current !== null) {
         while (true) {
@@ -789,11 +801,15 @@ function insertView(virtualNode) {
 
 function deleteView(virtualNode) {
     if (virtualNode.nativeNode_ !== null) {
-        virtualNode.nativeNode_.parentNode.removeChild(virtualNode.nativeNode_);
+        _removeNativeNode(virtualNode.nativeNode_);
     } else {
-        walkNativeChildren(virtualNode, null, function (nativeChild) {
-            nativeChild.parentNode.removeChild(nativeChild);
-        });
+        walkNativeChildren(_removeNativeNode, virtualNode);
+    }
+}
+
+function _removeNativeNode(nativeNode) {
+    if (nativeNode.parentNode !== null) {
+        nativeNode.parentNode.removeChild(nativeNode);
     }
 }
 
@@ -1213,18 +1229,22 @@ function renderTree(current) {
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
     
-    // Initialize the lastTouchedNativeChild_
-    // for the mounting point of the current
+    // The mounting point of the current
+    // In the tree, it lies at a higher level than the current,
+    // so we need to initualize/cleanup its lastTouchedNativeChild_
+    // at outside of the work loop
     const mpt = resolveMountingPoint(current);
-    walkNativeChildren(mpt, current, function (nativeChild) {
-        mpt.lastTouchedNativeChild_ = nativeChild;
-    });
 
-    // Main work
+    walkNativeChildren(function (nativeChild) {
+        mpt.lastTouchedNativeChild_ = nativeChild;
+    }, mpt, current);
+    
     _workLoop(
         _performUnitOfWork, _onReturn, current,
         effectMountNodes, effectDestroyNodes
     );
+
+    mpt.lastTouchedNativeChild_ = null;
 
     // Layout effects
     effectDestroyNodes.forEach(function (isUnmounted, node) {
@@ -1291,9 +1311,7 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
 // Callback called after walking through a node and all of its ascendants
 function _onReturn(current) {
     // This is when we cleanup the remaining temp props
-    if (current.lastTouchedNativeChild_ !== null) {
-        current.lastTouchedNativeChild_ = null;
-    }
+    current.lastTouchedNativeChild_ = null;
 }
 
 // Reference: https://github.com/facebook/react/issues/7942

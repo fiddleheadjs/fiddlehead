@@ -3,7 +3,7 @@ import {jsx, render, useState, useEffect, useRef} from "../../../output";
 render(<App/>, document.getElementById('sandbox-container'));
 
 function App() {
-    return [<A/>, ' ', <B/>, ' ', <C/>, <br/>, <span style={{color: 'red'}}>Press 1, 2 or 3</span>];
+    return [[<A/>, ' ', <B/>, ' ', <C/>], <p style={{color: 'red'}}>Press 1, 2 or 3</p>];
 }
 
 function A() {

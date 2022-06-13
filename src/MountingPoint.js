@@ -1,4 +1,9 @@
 // Find the virtual node in the parent chain which its native node is not null
+/**
+ * 
+ * @param {VirtualNode} current 
+ * @returns {Node}
+ */
 export function resolveMountingPoint(current) {
     while (true) {
         if (current === null) {
@@ -11,8 +16,15 @@ export function resolveMountingPoint(current) {
     }
 }
 
-// Walk through native children of a parent (virtual node)
-export function walkNativeChildren(parent, stopBefore, callback) {
+// Walk through native children of a parent
+/**
+ * 
+ * @param {function} callback 
+ * @param {VirtualNode} parent 
+ * @param {VirtualNode} stopBefore 
+ * @returns {void}
+ */
+export function walkNativeChildren(callback, parent, stopBefore) {
     let current = parent.child_;
     if (current !== null) {
         while (true) {
