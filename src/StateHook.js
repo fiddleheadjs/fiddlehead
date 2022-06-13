@@ -62,7 +62,7 @@ export function useError(initialError) {
 }
 
 const pendingUpdates = new Map();
-let timeoutId = null;
+let currentTimeoutId = null;
 
 function _setState(value) {
     let newValue;
@@ -95,17 +95,17 @@ function _setState(value) {
         pendingUpdates.set(this.context_, this);
 
         // Reset timer
-        if (timeoutId !== null) {
-            clearTimeout(timeoutId);
+        if (currentTimeoutId !== null) {
+            clearTimeout(currentTimeoutId);
         }
-        timeoutId = setTimeout(_flushUpdates);
+        currentTimeoutId = setTimeout(_flushUpdates);
     }
 }
 
 function _flushUpdates() {
-    // Clear timeoutId to prepare for new state settings
+    // Clear timeout ID to prepare for new state settings
     // happened in the renderTree (inside setLayoutEffect)
-    timeoutId = null;
+    currentTimeoutId = null;
 
     // Copy the contexts and clear pending updates
     // to prepare for new state settings
