@@ -103,6 +103,8 @@ function _setState(value) {
 }
 
 function _flushUpdates() {
+    // Copy the contexts and clear pending updates
+    // to prepare for new state settings
     const contexts = [];
     pendingUpdates.forEach(function (hook, contextAsKey) {
         // Important!!!
@@ -111,12 +113,16 @@ function _flushUpdates() {
         contexts.push(hook.context_);
     });
     pendingUpdates.clear();
+    
+    // Clear timeoutId to prepare for new state settings
+    // happened in the renderTree (inside setLayoutEffect)
     timeoutId = null;
+    
+    // Re-render trees
     for (let i = 0; i < contexts.length; ++i) {
         renderTree(contexts[i]);
     }
 }
-
 
 function _validateError(error) {
     if (!(error === null || error instanceof Error)) {
