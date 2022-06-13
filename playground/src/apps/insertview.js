@@ -3,11 +3,11 @@ import {jsx, render, useState, useEffect, useRef} from "../../../output";
 render(<App/>, document.getElementById('sandbox-container'));
 
 function App() {
-    return [[<A/>, ' ', <B/>, ' ', <C/>], <p style={{color: 'red'}}>Press 1, 2 or 3</p>];
+    return [[<A/>, '___', <B/>, ' ... ', <C/>], <p style={{color: 'red'}}>Press 1, 2 or 3</p>];
 }
 
 function A() {
-    return <>{['Hello,', <>{' '}</>, <>{['How', ' ', ['are', ' ', 'you?']]}</>]}</>;
+    return <>{['Hello', <>{', '}</>, <>{['How ', ['are ', 'you?']]}</>]}</>;
 }
 
 function B() {
@@ -28,11 +28,11 @@ function B() {
     }, []);
 
     if (howAreYou === '1') {
-        return ["I'm fine, ", ['thank', ' ', 'you!']];
+        return ["I'm fine, ", ['thank ', 'you!']];
     }
 
     if (howAreYou === '2') {
-        return "I'm tired";
+        return ["I'm tired ", ':('];
     }
 
     return null;

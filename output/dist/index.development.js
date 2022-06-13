@@ -708,10 +708,12 @@ function hydrateView(virtualNode) {
     if (virtualNode.type_ === TextNode) {
         nativeNode = createNativeTextNode(virtualNode.props_);
         
-        // Remove text content from the virtual text node to save memory.
-        // Later, we will compare the new text with the text content of the native node,
-        // though it is not a perfect way to compare
-        virtualNode.props_ = null;
+        if (true) ; else {
+            // Remove text content from the virtual text node to save memory.
+            // Later, we will compare the new text with the text content of the native node,
+            // though it is not a perfect way to compare
+            virtualNode.props_ = null;
+        }
     } else {
         nativeNode = createNativeElementWithNS(
             virtualNode.namespace_,
@@ -746,8 +748,10 @@ function rehydrateView(newVirtualNode, oldVirtualNode) {
             newVirtualNode.props_
         );
         
-        // Remove text content from the virtual text node to save memory
-        newVirtualNode.props_ = null;
+        if (true) ; else {
+            // Remove text content from the virtual text node to save memory
+            newVirtualNode.props_ = null;
+        }
     } else {
         updateNativeElementAttributes(
             newVirtualNode.nativeNode_,
@@ -1238,26 +1242,16 @@ function _mapChildren(node) {
 }
 
 // Using dom fragment produces better performance on Safari
-const usesDomFragment = navigator.vendor === 'Apple Computer, Inc.';
-const domFragment = usesDomFragment ? document.createDocumentFragment() : null;
-
-/**
- * @type {VirtualNode}
- */
-let mpt;
-
-/**
- * @type {Node}
- */
-let mptNative;
+const shouldUseDomFragment = navigator.vendor === 'Apple Computer, Inc.';
+const domFragment = shouldUseDomFragment ? document.createDocumentFragment() : null;
 
 function renderTree(current) {
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
     
     // The mounting point of the current
-    mpt = resolveMountingPoint(current);
-    
+    const mpt = resolveMountingPoint(current);
+
     // In the tree, the mounting point lies at a higher level
     // than the current, so we need to initialize/cleanup
     // its temporary properties from outside of the work loop
@@ -1265,22 +1259,26 @@ function renderTree(current) {
         mpt.lastTouchedNativeChild_ = nativeChild;
     }, mpt, current);
 
-    if (usesDomFragment) {
-        mptNative = mpt.nativeNode_;
-        mpt.nativeNode_ = domFragment;
-    }
-    
     // Main work
-    _workLoop(
-        _performUnitOfWork, _onReturn, current,
-        effectMountNodes, effectDestroyNodes
-    );
-
-    if (usesDomFragment) {
+    if (shouldUseDomFragment) {
+        const mptNative = mpt.nativeNode_;
+        mpt.nativeNode_ = domFragment;
+        while (mptNative.firstChild !== null) {
+            domFragment.appendChild(mptNative.firstChild);
+        }
+        _workLoop(
+            _performUnitOfWork, _onReturn, current,
+            effectMountNodes, effectDestroyNodes
+        );
         mptNative.appendChild(domFragment);
         mpt.nativeNode_ = mptNative;
+    } else {
+        _workLoop(
+            _performUnitOfWork, _onReturn, current,
+            effectMountNodes, effectDestroyNodes
+        );
     }
-
+    
     // Cleanup
     mpt.lastTouchedNativeChild_ = null;
 

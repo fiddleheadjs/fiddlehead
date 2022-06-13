@@ -2,29 +2,19 @@ import {insertView, updateView, deleteView} from './CommitView';
 import {destroyEffects, EFFECT_LAYOUT, EFFECT_NORMAL, mountEffects} from './EffectHook';
 import {resolveMountingPoint, walkNativeChildren} from './MountingPoint';
 import {reconcileChildren} from './Reconciliation';
-import {Portal, VirtualNode} from './VirtualNode';
+import {Portal} from './VirtualNode';
 
 // Using dom fragment produces better performance on Safari
-const usesDomFragment = navigator.vendor === 'Apple Computer, Inc.';
-const domFragment = usesDomFragment ? document.createDocumentFragment() : null;
-
-/**
- * @type {VirtualNode}
- */
-let mpt;
-
-/**
- * @type {Node}
- */
-let mptNative;
+const shouldUseDomFragment = navigator.vendor === 'Apple Computer, Inc.';
+const domFragment = shouldUseDomFragment ? document.createDocumentFragment() : null;
 
 export function renderTree(current) {
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
     
     // The mounting point of the current
-    mpt = resolveMountingPoint(current);
-    
+    const mpt = resolveMountingPoint(current);
+
     // In the tree, the mounting point lies at a higher level
     // than the current, so we need to initialize/cleanup
     // its temporary properties from outside of the work loop
@@ -32,22 +22,26 @@ export function renderTree(current) {
         mpt.lastTouchedNativeChild_ = nativeChild;
     }, mpt, current);
 
-    if (usesDomFragment) {
-        mptNative = mpt.nativeNode_;
-        mpt.nativeNode_ = domFragment;
-    }
-    
     // Main work
-    _workLoop(
-        _performUnitOfWork, _onReturn, current,
-        effectMountNodes, effectDestroyNodes
-    );
-
-    if (usesDomFragment) {
+    if (shouldUseDomFragment) {
+        const mptNative = mpt.nativeNode_;
+        mpt.nativeNode_ = domFragment;
+        while (mptNative.firstChild !== null) {
+            domFragment.appendChild(mptNative.firstChild);
+        }
+        _workLoop(
+            _performUnitOfWork, _onReturn, current,
+            effectMountNodes, effectDestroyNodes
+        );
         mptNative.appendChild(domFragment);
         mpt.nativeNode_ = mptNative;
+    } else {
+        _workLoop(
+            _performUnitOfWork, _onReturn, current,
+            effectMountNodes, effectDestroyNodes
+        );
     }
-
+    
     // Cleanup
     mpt.lastTouchedNativeChild_ = null;
 
