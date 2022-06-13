@@ -1,5 +1,6 @@
 import {insertView, updateView, deleteView} from './CommitView';
 import {destroyEffects, EFFECT_LAYOUT, EFFECT_NORMAL, mountEffects} from './EffectHook';
+import {resolveMountingPoint, walkNativeChildren} from './MountingPoint';
 import {reconcileChildren} from './Reconciliation';
 import {Portal} from './VirtualNode';
 
@@ -7,6 +8,13 @@ export function renderTree(current) {
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
     
+    // Initialize the lastTouchedNativeChild_
+    // for the mounting point of the current
+    const mpt = resolveMountingPoint(current);
+    walkNativeChildren(mpt, current, function (nativeChild) {
+        mpt.lastTouchedNativeChild_ = nativeChild;
+    });
+
     // Main work
     _workLoop(
         _performUnitOfWork, _onReturn, current,
@@ -33,13 +41,13 @@ export function renderTree(current) {
 }
 
 function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes) {
-    const isSubtreeRoot = current === root;
+    const isRenderRoot = current === root;
     
-    reconcileChildren(current, isSubtreeRoot);
+    reconcileChildren(current, isRenderRoot);
 
     // Portal nodes never change the view itself
     if (current.type_ !== Portal) {
-        if (isSubtreeRoot) {
+        if (isRenderRoot) {
             if (current.effectHook_ !== null) {
                 effectDestroyNodes.set(current, false);
                 effectMountNodes.set(current, false);
@@ -78,8 +86,8 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
 // Callback called after walking through a node and all of its ascendants
 function _onReturn(current) {
     // This is when we cleanup the remaining temp props
-    if (current.lastManipulatedNativeChild_ !== null) {
-        current.lastManipulatedNativeChild_ = null;
+    if (current.lastTouchedNativeChild_ !== null) {
+        current.lastTouchedNativeChild_ = null;
     }
 }
 

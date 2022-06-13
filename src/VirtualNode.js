@@ -112,7 +112,7 @@ export function VirtualNode(type, props) {
     /**
      * @type {Node|null}
      */
-    this.lastManipulatedNativeChild_ = null;
+    this.lastTouchedNativeChild_ = null;
 }
 
 /**

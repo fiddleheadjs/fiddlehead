@@ -11,26 +11,31 @@ export function resolveMountingPoint(current) {
     }
 }
 
-export function walkNativeSubtrees(current, callback) {
-    const root = current;
-
-    while (true) {
-        if (current.nativeNode_ !== null) {
-            callback(current.nativeNode_);
-        } else if (current.child_ !== null) {
-            current = current.child_;
-            continue;
-        }
-        if (current === root) {
-            return;
-        }
-        while (current.sibling_ === null) {
-            if (current.parent_ === null || current.parent_ === root) {
+// Walk through native children of a parent (virtual node)
+export function walkNativeChildren(parent, stopBefore, callback) {
+    let current = parent.child_;
+    if (current !== null) {
+        while (true) {
+            if (current === stopBefore) {
                 return;
             }
-            current = current.parent_;
+            if (current.nativeNode_ !== null) {
+                callback(current.nativeNode_);
+            } else if (current.child_ !== null) {
+                current = current.child_;
+                continue;
+            }
+            if (current === parent) {
+                return;
+            }
+            while (current.sibling_ === null) {
+                if (current.parent_ === null || current.parent_ === parent) {
+                    return;
+                }
+                current = current.parent_;
+            }
+            current = current.sibling_;
+            continue;
         }
-        current = current.sibling_;
-        continue;
     }
 }

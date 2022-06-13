@@ -3,15 +3,15 @@ import {createVirtualNodeFromContent} from './CreateElement';
 import {prepareCurrentlyProcessing, flushCurrentlyProcessing} from './CurrentlyProcessing';
 import {catchError} from './CatchError';
 
-export function reconcileChildren(current, isSubtreeRoot) {
+export function reconcileChildren(current, isRenderRoot) {
     if (isFunction(current.type_)) {
-        _reconcileChildOfDynamicNode(current, current.alternate_, isSubtreeRoot);
+        _reconcileChildOfDynamicNode(current, current.alternate_, isRenderRoot);
     } else if (current.alternate_ !== null) {
         _reconcileChildrenOfStaticNode(current, current.alternate_);
     }
 }
 
-function _reconcileChildOfDynamicNode(current, alternate, isSubtreeRoot) {
+function _reconcileChildOfDynamicNode(current, alternate, isRenderRoot) {
     if (alternate !== null) {
         // Copy hooks
         current.refHook_ = alternate.refHook_;
@@ -45,7 +45,7 @@ function _reconcileChildOfDynamicNode(current, alternate, isSubtreeRoot) {
         // as a dynamic node can have only one child
     }
 
-    const oldChild = isSubtreeRoot ? current.child_ : (
+    const oldChild = isRenderRoot ? current.child_ : (
         alternate !== null ? alternate.child_ : null
     );
     

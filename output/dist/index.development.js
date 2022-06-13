@@ -262,7 +262,7 @@ function VirtualNode(type, props) {
     /**
      * @type {Node|null}
      */
-    this.lastManipulatedNativeChild_ = null;
+    this.lastTouchedNativeChild_ = null;
 }
 
 /**
@@ -471,27 +471,32 @@ function resolveMountingPoint(current) {
     }
 }
 
-function walkNativeSubtrees(current, callback) {
-    const root = current;
-
-    while (true) {
-        if (current.nativeNode_ !== null) {
-            callback(current.nativeNode_);
-        } else if (current.child_ !== null) {
-            current = current.child_;
-            continue;
-        }
-        if (current === root) {
-            return;
-        }
-        while (current.sibling_ === null) {
-            if (current.parent_ === null || current.parent_ === root) {
+// Walk through native children of a parent (virtual node)
+function walkNativeChildren(parent, stopBefore, callback) {
+    let current = parent.child_;
+    if (current !== null) {
+        while (true) {
+            if (current === stopBefore) {
                 return;
             }
-            current = current.parent_;
+            if (current.nativeNode_ !== null) {
+                callback(current.nativeNode_);
+            } else if (current.child_ !== null) {
+                current = current.child_;
+                continue;
+            }
+            if (current === parent) {
+                return;
+            }
+            while (current.sibling_ === null) {
+                if (current.parent_ === null || current.parent_ === parent) {
+                    return;
+                }
+                current = current.parent_;
+            }
+            current = current.sibling_;
+            continue;
         }
-        current = current.sibling_;
-        continue;
     }
 }
 
@@ -761,7 +766,7 @@ function updateView(newVirtualNode, oldVirtualNode) {
     if (newVirtualNode.nativeNode_ !== null) {
         const mpt = resolveMountingPoint(newVirtualNode.parent_);
         if (mpt !== null) {
-            mpt.lastManipulatedNativeChild_ = newVirtualNode.nativeNode_;
+            mpt.lastTouchedNativeChild_ = newVirtualNode.nativeNode_;
         }
     }
 }
@@ -772,22 +777,24 @@ function insertView(virtualNode) {
     if (virtualNode.nativeNode_ !== null) {
         const mpt = resolveMountingPoint(virtualNode.parent_);
         if (mpt !== null) {
-            const nativeNodeAfter = (mpt.lastManipulatedNativeChild_ !== null
-                ? mpt.lastManipulatedNativeChild_.nextSibling
+            const nativeNodeAfter = (mpt.lastTouchedNativeChild_ !== null
+                ? mpt.lastTouchedNativeChild_.nextSibling
                 : mpt.nativeNode_.firstChild
             );
             mpt.nativeNode_.insertBefore(virtualNode.nativeNode_, nativeNodeAfter);
-            mpt.lastManipulatedNativeChild_ = virtualNode.nativeNode_;
+            mpt.lastTouchedNativeChild_ = virtualNode.nativeNode_;
         }
     }
 }
 
 function deleteView(virtualNode) {
-    walkNativeSubtrees(virtualNode, function (nativeSubtree) {
-        if (nativeSubtree.parentNode !== null) {
-            nativeSubtree.parentNode.removeChild(nativeSubtree);
-        }
-    });
+    if (virtualNode.nativeNode_ !== null) {
+        virtualNode.nativeNode_.parentNode.removeChild(virtualNode.nativeNode_);
+    } else {
+        walkNativeChildren(virtualNode, null, function (nativeChild) {
+            nativeChild.parentNode.removeChild(nativeChild);
+        });
+    }
 }
 
 const STATE_NORMAL = 0;
@@ -1104,15 +1111,15 @@ function _mismatchDeps(deps, lastDeps) {
     }
 }
 
-function reconcileChildren(current, isSubtreeRoot) {
+function reconcileChildren(current, isRenderRoot) {
     if (isFunction(current.type_)) {
-        _reconcileChildOfDynamicNode(current, current.alternate_, isSubtreeRoot);
+        _reconcileChildOfDynamicNode(current, current.alternate_, isRenderRoot);
     } else if (current.alternate_ !== null) {
         _reconcileChildrenOfStaticNode(current, current.alternate_);
     }
 }
 
-function _reconcileChildOfDynamicNode(current, alternate, isSubtreeRoot) {
+function _reconcileChildOfDynamicNode(current, alternate, isRenderRoot) {
     if (alternate !== null) {
         // Copy hooks
         current.refHook_ = alternate.refHook_;
@@ -1146,7 +1153,7 @@ function _reconcileChildOfDynamicNode(current, alternate, isSubtreeRoot) {
         // as a dynamic node can have only one child
     }
 
-    const oldChild = isSubtreeRoot ? current.child_ : (
+    const oldChild = isRenderRoot ? current.child_ : (
         alternate !== null ? alternate.child_ : null
     );
     
@@ -1206,6 +1213,13 @@ function renderTree(current) {
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
     
+    // Initialize the lastTouchedNativeChild_
+    // for the mounting point of the current
+    const mpt = resolveMountingPoint(current);
+    walkNativeChildren(mpt, current, function (nativeChild) {
+        mpt.lastTouchedNativeChild_ = nativeChild;
+    });
+
     // Main work
     _workLoop(
         _performUnitOfWork, _onReturn, current,
@@ -1232,13 +1246,13 @@ function renderTree(current) {
 }
 
 function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes) {
-    const isSubtreeRoot = current === root;
+    const isRenderRoot = current === root;
     
-    reconcileChildren(current, isSubtreeRoot);
+    reconcileChildren(current, isRenderRoot);
 
     // Portal nodes never change the view itself
     if (current.type_ !== Portal) {
-        if (isSubtreeRoot) {
+        if (isRenderRoot) {
             if (current.effectHook_ !== null) {
                 effectDestroyNodes.set(current, false);
                 effectMountNodes.set(current, false);
@@ -1277,8 +1291,8 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
 // Callback called after walking through a node and all of its ascendants
 function _onReturn(current) {
     // This is when we cleanup the remaining temp props
-    if (current.lastManipulatedNativeChild_ !== null) {
-        current.lastManipulatedNativeChild_ = null;
+    if (current.lastTouchedNativeChild_ !== null) {
+        current.lastTouchedNativeChild_ = null;
     }
 }
 
