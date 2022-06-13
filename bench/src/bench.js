@@ -8,14 +8,14 @@ export function bench(renderFns, repeats) {
                 timeTable[index].push(performance.now() - timeStart);
                 setTimeout(() => {
                     run(index + 1);
-                }, 100);
+                }, 300);
             };
             renderFns[index](onFinish);
         } else {
             if (--repeats > 0) {
                 setTimeout(() => {
                     run(0);
-                }, 100);
+                }, 300);
             } else {
                 printOutput(timeTable);
             }

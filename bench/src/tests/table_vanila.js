@@ -6,7 +6,7 @@ console.log('Rows: ', TABLE_ROWS);
 
 const root = document.getElementById("root");
 
-bench([renderFn0, renderFn1, renderFn2], 50);
+bench([renderFn0, renderFn1, renderFn2], 10);
 
 function renderFn0(onFinish) {
     render(App0(), root, {onFinish});

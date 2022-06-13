@@ -13,7 +13,7 @@ console.log('Rows: ', TABLE_ROWS);
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
-bench([renderFn0, renderFn1, renderFn2], 50);
+bench([renderFn0, renderFn1, renderFn2], 10);
 
 function renderFn0(onFinish) {
     root.render(<App0 onFinish={onFinish} />);

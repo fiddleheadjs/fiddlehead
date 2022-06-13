@@ -14,7 +14,7 @@ console.log('Rows: ', TABLE_ROWS);
 
 const root = document.getElementById("root");
 
-bench([render0, renderFn1, renderFn2], 50);
+bench([render0, renderFn1, renderFn2], 10);
 
 function render0(onFinish) {
     render(<App0 onFinish={onFinish} />, root);
