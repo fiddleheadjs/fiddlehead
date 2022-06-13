@@ -1,4 +1,5 @@
-// Find the virtual node in the parent chain which its native node is not null
+// The mounting point is a virtual node which has a native node (not null)
+// It means that a mounting point can contains native children
 /**
  * 
  * @param {VirtualNode} current 
