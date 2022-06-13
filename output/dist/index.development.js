@@ -1241,19 +1241,21 @@ function renderTree(current) {
     
     // The mounting point of the current
     // In the tree, it lies at a higher level than the current,
-    // so we need to initualize/cleanup its lastTouchedNativeChild_
+    // so we need to initialize/cleanup its lastTouchedNativeChild_
     // at outside of the work loop
     const mpt = resolveMountingPoint(current);
-
+    
     walkNativeChildren(function (nativeChild) {
         mpt.lastTouchedNativeChild_ = nativeChild;
     }, mpt, current);
     
+    // Main work
     _workLoop(
         _performUnitOfWork, _onReturn, current,
         effectMountNodes, effectDestroyNodes
     );
-
+    
+    // Cleanup
     mpt.lastTouchedNativeChild_ = null;
 
     // Layout effects
