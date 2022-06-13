@@ -1237,12 +1237,26 @@ function _mapChildren(node) {
     return map;
 }
 
+// Using dom fragment produces better performance on Safari
+const usesDomFragment = navigator.vendor === 'Apple Computer, Inc.';
+const domFragment = usesDomFragment ? document.createDocumentFragment() : null;
+
+/**
+ * @type {VirtualNode}
+ */
+let mpt;
+
+/**
+ * @type {Node}
+ */
+let mptNative;
+
 function renderTree(current) {
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
     
     // The mounting point of the current
-    const mpt = resolveMountingPoint(current);
+    mpt = resolveMountingPoint(current);
     
     // In the tree, the mounting point lies at a higher level
     // than the current, so we need to initialize/cleanup
@@ -1250,12 +1264,22 @@ function renderTree(current) {
     walkNativeChildren(function (nativeChild) {
         mpt.lastTouchedNativeChild_ = nativeChild;
     }, mpt, current);
+
+    if (usesDomFragment) {
+        mptNative = mpt.nativeNode_;
+        mpt.nativeNode_ = domFragment;
+    }
     
     // Main work
     _workLoop(
         _performUnitOfWork, _onReturn, current,
         effectMountNodes, effectDestroyNodes
     );
+
+    if (usesDomFragment) {
+        mptNative.appendChild(domFragment);
+        mpt.nativeNode_ = mptNative;
+    }
 
     // Cleanup
     mpt.lastTouchedNativeChild_ = null;

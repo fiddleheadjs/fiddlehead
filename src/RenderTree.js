@@ -2,14 +2,28 @@ import {insertView, updateView, deleteView} from './CommitView';
 import {destroyEffects, EFFECT_LAYOUT, EFFECT_NORMAL, mountEffects} from './EffectHook';
 import {resolveMountingPoint, walkNativeChildren} from './MountingPoint';
 import {reconcileChildren} from './Reconciliation';
-import {Portal} from './VirtualNode';
+import {Portal, VirtualNode} from './VirtualNode';
+
+// Using dom fragment produces better performance on Safari
+const usesDomFragment = navigator.vendor === 'Apple Computer, Inc.';
+const domFragment = usesDomFragment ? document.createDocumentFragment() : null;
+
+/**
+ * @type {VirtualNode}
+ */
+let mpt;
+
+/**
+ * @type {Node}
+ */
+let mptNative;
 
 export function renderTree(current) {
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
     
     // The mounting point of the current
-    const mpt = resolveMountingPoint(current);
+    mpt = resolveMountingPoint(current);
     
     // In the tree, the mounting point lies at a higher level
     // than the current, so we need to initialize/cleanup
@@ -17,12 +31,22 @@ export function renderTree(current) {
     walkNativeChildren(function (nativeChild) {
         mpt.lastTouchedNativeChild_ = nativeChild;
     }, mpt, current);
+
+    if (usesDomFragment) {
+        mptNative = mpt.nativeNode_;
+        mpt.nativeNode_ = domFragment;
+    }
     
     // Main work
     _workLoop(
         _performUnitOfWork, _onReturn, current,
         effectMountNodes, effectDestroyNodes
     );
+
+    if (usesDomFragment) {
+        mptNative.appendChild(domFragment);
+        mpt.nativeNode_ = mptNative;
+    }
 
     // Cleanup
     mpt.lastTouchedNativeChild_ = null;
