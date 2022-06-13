@@ -103,17 +103,20 @@ function _setState(value) {
 }
 
 function _flushUpdates() {
+    const contexts = [];
     pendingUpdates.forEach(function (hook, contextAsKey) {
         // Important!!!
         // Use hook.context_ instead of contextAsKey
         // as it may be outdated due to the reconciliation process
-        
-        renderTree(hook.context_);
+        contexts.push(hook.context_);
     });
-
     pendingUpdates.clear();
     timeoutId = null;
+    for (let i = 0; i < contexts.length; ++i) {
+        renderTree(contexts[i]);
+    }
 }
+
 
 function _validateError(error) {
     if (!(error === null || error instanceof Error)) {
