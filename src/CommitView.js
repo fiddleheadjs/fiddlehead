@@ -1,5 +1,5 @@
 import {resolveMountingPoint, walkNativeChildren} from './MountingPoint';
-import {hydrateView, rehydrateView} from './HydrateView';
+import {rehydrateView} from './HydrateView';
 import {insertNativeNodeAfter, removeNativeNode} from './NativeDOM';
 
 // Important!!!

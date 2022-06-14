@@ -91,7 +91,6 @@ function RefHook(current) {
 /**
  *
  * @param {any} initialValue
- * @constructor
  */
 function useRef(initialValue) {
     return resolveCurrentRefHook(
@@ -102,6 +101,14 @@ function useRef(initialValue) {
             return currentHook.ref_;
         }
     );
+}
+
+/**
+ *
+ * @param {any} initialValue
+ */
+function createRef(initialValue) {
+    return new Ref(initialValue);
 }
 
 const hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -1409,10 +1416,10 @@ function createPortal(children, targetNativeNode) {
 }
 
 exports.Fragment = Fragment;
-exports.Ref = Ref;
 exports.TextNode = TextNode;
 exports.createElement = createElement;
 exports.createPortal = createPortal;
+exports.createRef = createRef;
 exports.jsx = createElement;
 exports.render = render;
 exports.useEffect = useEffect;

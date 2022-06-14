@@ -22,7 +22,6 @@ export function RefHook(current) {
 /**
  *
  * @param {any} initialValue
- * @constructor
  */
 export function useRef(initialValue) {
     return resolveCurrentRefHook(
@@ -33,4 +32,12 @@ export function useRef(initialValue) {
             return currentHook.ref_;
         }
     );
+}
+
+/**
+ *
+ * @param {any} initialValue
+ */
+export function createRef(initialValue) {
+    return new Ref(initialValue);
 }
