@@ -113,6 +113,8 @@ export function VirtualNode(type, props) {
      * @type {Node|null}
      */
     this.lastTouchedNativeChild_ = null;
+
+    this.toBeInsertedInReturn_ = 0;
 }
 
 /**

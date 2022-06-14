@@ -263,6 +263,8 @@ function VirtualNode(type, props) {
      * @type {Node|null}
      */
     this.lastTouchedNativeChild_ = null;
+
+    this.toBeInsertedInReturn_ = 0;
 }
 
 /**
@@ -801,7 +803,7 @@ function updateView(newVirtualNode, oldVirtualNode) {
 }
 
 function insertView(virtualNode) {
-    hydrateView(virtualNode);
+    // hydrateView(virtualNode);
 
     if (virtualNode.nativeNode_ !== null) {
         const mpt = resolveMountingPoint(virtualNode.parent_);
@@ -1302,9 +1304,33 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
                     effectDestroyNodes.set(current.alternate_, false);
                     effectMountNodes.set(current, false);
                 }
-                current.alternate_ = null;
             } else {
-                insertView(current);
+                hydrateView(current);
+                if (current.child_ !== null) {
+                    if (current.parent_ === null) {
+                        if (current.nativeNode_ !== null) {
+                            current.toBeInsertedInReturn_ = 1;
+                        } else {
+                            current.toBeInsertedInReturn_ = 0;
+                        }
+                    } else {
+                        if (current.parent_.toBeInsertedInReturn_ === 0) {
+                            if (current.nativeNode_ !== null) {
+                                current.toBeInsertedInReturn_ = 1;
+                            } else {
+                                current.toBeInsertedInReturn_ = 0;
+                            }
+                        } else if (current.parent_.toBeInsertedInReturn_ === 1) {
+                            current.toBeInsertedInReturn_ = 2;
+                            insertView(current);
+                        } else if (current.parent_.toBeInsertedInReturn_ === 2) {
+                            current.toBeInsertedInReturn_ = 2;
+                            insertView(current);
+                        }
+                    }
+                } else {
+                    insertView(current);
+                }
                 if (current.effectHook_ !== null) {
                     effectMountNodes.set(current, true);
                 }
@@ -1330,6 +1356,14 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
 function _onReturn(current) {
     // This is when we cleanup the remaining temporary properties
     current.lastTouchedNativeChild_ = null;
+
+    // console.log(current.toBeInsertedInReturn_);
+    if (current.toBeInsertedInReturn_ === 1) {
+        insertView(current);
+        current.toBeInsertedInReturn_ = 0;
+    } else if (current.toBeInsertedInReturn_ === 2) {
+        current.toBeInsertedInReturn_ = 0;
+    }
 }
 
 // Reference: https://github.com/facebook/react/issues/7942

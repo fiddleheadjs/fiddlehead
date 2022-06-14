@@ -1,5 +1,6 @@
 import {insertView, updateView, deleteView} from './CommitView';
 import {destroyEffects, EFFECT_LAYOUT, EFFECT_NORMAL, mountEffects} from './EffectHook';
+import {hydrateView} from './HydrateView';
 import {resolveMountingPoint, walkNativeChildren} from './MountingPoint';
 import {reconcileChildren} from './Reconciliation';
 import {Portal} from './VirtualNode';
@@ -65,9 +66,33 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
                     effectDestroyNodes.set(current.alternate_, false);
                     effectMountNodes.set(current, false);
                 }
-                current.alternate_ = null;
             } else {
-                insertView(current);
+                hydrateView(current);
+                if (current.child_ !== null) {
+                    if (current.parent_ === null) {
+                        if (current.nativeNode_ !== null) {
+                            current.toBeInsertedInReturn_ = 1;
+                        } else {
+                            current.toBeInsertedInReturn_ = 0;
+                        }
+                    } else {
+                        if (current.parent_.toBeInsertedInReturn_ === 0) {
+                            if (current.nativeNode_ !== null) {
+                                current.toBeInsertedInReturn_ = 1;
+                            } else {
+                                current.toBeInsertedInReturn_ = 0;
+                            }
+                        } else if (current.parent_.toBeInsertedInReturn_ === 1) {
+                            current.toBeInsertedInReturn_ = 2;
+                            insertView(current);
+                        } else if (current.parent_.toBeInsertedInReturn_ === 2) {
+                            current.toBeInsertedInReturn_ = 2;
+                            insertView(current);
+                        }
+                    }
+                } else {
+                    insertView(current);
+                }
                 if (current.effectHook_ !== null) {
                     effectMountNodes.set(current, true);
                 }
@@ -93,6 +118,14 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
 function _onReturn(current) {
     // This is when we cleanup the remaining temporary properties
     current.lastTouchedNativeChild_ = null;
+
+    // console.log(current.toBeInsertedInReturn_);
+    if (current.toBeInsertedInReturn_ === 1) {
+        insertView(current);
+        current.toBeInsertedInReturn_ = 0;
+    } else if (current.toBeInsertedInReturn_ === 2) {
+        current.toBeInsertedInReturn_ = 0;
+    }
 }
 
 // Reference: https://github.com/facebook/react/issues/7942

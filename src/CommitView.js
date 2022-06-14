@@ -17,7 +17,7 @@ export function updateView(newVirtualNode, oldVirtualNode) {
 }
 
 export function insertView(virtualNode) {
-    hydrateView(virtualNode);
+    // hydrateView(virtualNode);
 
     if (virtualNode.nativeNode_ !== null) {
         const mpt = resolveMountingPoint(virtualNode.parent_);
