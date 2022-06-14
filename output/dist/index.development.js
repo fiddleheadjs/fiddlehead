@@ -1311,6 +1311,7 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
                     effectDestroyNodes.set(current.alternate_, false);
                     effectMountNodes.set(current, false);
                 }
+                current.alternate_ = null;
             } else {
                 hydrateView(current);
                 if (current.child_ !== null) {
