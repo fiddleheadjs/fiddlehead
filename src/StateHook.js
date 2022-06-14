@@ -32,7 +32,7 @@ export function useState(initialValue) {
     );
 }
 
-export function useError(initialError) {
+export function useError() {
     return resolveCurrentStateHook(
         function (currentNode) {
             // Make sure we have only one error hook in a component
@@ -45,18 +45,12 @@ export function useError(initialError) {
                     hook = hook.next_;
                 }
             }
-
-            // Make sure the initial error is valid
-            if (!_validateError(initialError)) {
-                // If the initial error is invalid,
-                // use null instead
-                initialError = null;
-            }
-            
-            return new StateHook(STATE_ERROR, initialError, currentNode);
+            return new StateHook(STATE_ERROR, null, currentNode);
         },
         function (currentHook) {
-            return [currentHook.value_, currentHook.setValue_];
+            return [currentHook.value_, function () {
+                currentHook.setValue_(null);
+            }];
         }
     );
 }
@@ -76,12 +70,6 @@ function _setState(value) {
         }
     } else {
         newValue = value;
-    }
-
-    if (this.tag_ === STATE_ERROR && !_validateError(newValue)) {
-        // If the new error is invalid,
-        // keep the current error unchanged
-        return;
     }
 
     if (this.value_ !== newValue) {
@@ -122,15 +110,4 @@ function _flushUpdates() {
     for (let i = 0; i < contexts.length; ++i) {
         renderTree(contexts[i]);
     }
-}
-
-function _validateError(error) {
-    if (!(error === null || error instanceof Error)) {
-        if (__DEV__) {
-            console.error('Error hooks only accept the value is an instance of Error or null');
-        }
-        return false;
-    }
-
-    return true;
 }

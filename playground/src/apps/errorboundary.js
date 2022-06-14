@@ -39,8 +39,7 @@ function Contents({setClicks}) {
 }
 
 function ErrorBoundary({children}) {
-    const [error, setError] = useError(null);
-    // const [error2, setError2] = useError(null);
+    const [error, clearError] = useError();
 
     useEffect(() => {
 
@@ -64,7 +63,7 @@ function ErrorBoundary({children}) {
                 error !== null &&
                 <>
                     <div style={{color: '#f00'}}>Oops: {error.message}</div>
-                    <button onClick={() => setError(null)}>Clear error</button>
+                    <button onClick={() => clearError(null)}>Clear error</button>
                 </>
             }
         </nav>
