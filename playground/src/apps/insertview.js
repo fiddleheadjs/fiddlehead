@@ -28,11 +28,11 @@ function B() {
     }, []);
 
     if (howAreYou === '1') {
-        return ["I'm fine, ", ['thank ', 'you!']];
+        return [<span>{["I'm fine, ", ['thank ', 'you!']]}</span>, '***'];
     }
 
     if (howAreYou === '2') {
-        return ["I'm tired ", ':('];
+        return ["I'm tired ", '@@'];
     }
 
     return null;

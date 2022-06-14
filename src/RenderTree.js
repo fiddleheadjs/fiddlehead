@@ -47,9 +47,14 @@ export function renderTree(current) {
     });
 }
 
+// Optimize insertion to reduce number of reflows on the browser
+const INSERT_IN_RETURN = 0;
+const INSERT_OFFSCREEN = 1;
+
 function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes) {
     const isRenderRoot = current === root;
     
+    // Reconcile current's children
     reconcileChildren(current, isRenderRoot);
 
     // Portal nodes never change the view itself
@@ -69,25 +74,15 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
             } else {
                 hydrateView(current);
                 if (current.child_ !== null) {
-                    if (current.parent_ === null) {
-                        if (current.nativeNode_ !== null) {
-                            current.toBeInsertedInReturn_ = 1;
-                        } else {
-                            current.toBeInsertedInReturn_ = 0;
-                        }
+                    // We always have parent here, because
+                    // this area is under the render root
+                    if (current.parent_.insertion_ !== null) {
+                        current.insertion_ = INSERT_OFFSCREEN;
+                        insertView(current);
                     } else {
-                        if (current.parent_.toBeInsertedInReturn_ === 0) {
-                            if (current.nativeNode_ !== null) {
-                                current.toBeInsertedInReturn_ = 1;
-                            } else {
-                                current.toBeInsertedInReturn_ = 0;
-                            }
-                        } else if (current.parent_.toBeInsertedInReturn_ === 1) {
-                            current.toBeInsertedInReturn_ = 2;
-                            insertView(current);
-                        } else if (current.parent_.toBeInsertedInReturn_ === 2) {
-                            current.toBeInsertedInReturn_ = 2;
-                            insertView(current);
+                        // Insert-in-return node must have native node!
+                        if (current.nativeNode_ !== null) {
+                            current.insertion_ = INSERT_IN_RETURN;
                         }
                     }
                 } else {
@@ -116,16 +111,14 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
 
 // Callback called after walking through a node and all of its ascendants
 function _onReturn(current) {
+    // Process insert-in-return node before walk out of its subtree
+    if (current.insertion_ === INSERT_IN_RETURN) {
+        insertView(current);
+    }
+
     // This is when we cleanup the remaining temporary properties
     current.lastTouchedNativeChild_ = null;
-
-    // console.log(current.toBeInsertedInReturn_);
-    if (current.toBeInsertedInReturn_ === 1) {
-        insertView(current);
-        current.toBeInsertedInReturn_ = 0;
-    } else if (current.toBeInsertedInReturn_ === 2) {
-        current.toBeInsertedInReturn_ = 0;
-    }
+    current.insertion_ = null;
 }
 
 // Reference: https://github.com/facebook/react/issues/7942

@@ -106,6 +106,12 @@ export function VirtualNode(type, props) {
      * @type {VirtualNode[]}
      */
     this.deletions_ = null;
+
+    // Insertion flag
+    /**
+     * @type {number|null}
+     */
+    this.insertion_ = null;
  
     // In the commit phase, the new child will be inserted
     // after the last inserted/updated child
@@ -113,8 +119,6 @@ export function VirtualNode(type, props) {
      * @type {Node|null}
      */
     this.lastTouchedNativeChild_ = null;
-
-    this.toBeInsertedInReturn_ = 0;
 }
 
 /**
