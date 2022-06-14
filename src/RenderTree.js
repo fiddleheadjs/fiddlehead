@@ -81,7 +81,7 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
                         current.insertion_ = INSERT_OFFSCREEN;
                         insertView(current);
                     } else {
-                        // Insert-in-return node must have native node!
+                        // Insert-in-return nodes must have a native node!
                         if (current.nativeNode_ !== null) {
                             current.insertion_ = INSERT_IN_RETURN;
                         }
