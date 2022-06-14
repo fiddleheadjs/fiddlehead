@@ -197,7 +197,7 @@ function App() {
 import {jsx, useError} from 'hook';
 
 function ErrorBoundary({children}) {
-    const [error, setError] = useError(null);
+    const [error, clearError] = useError();
 
     if (error !== null) {
         return 'Oops... Something went wrong!';
