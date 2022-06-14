@@ -1348,10 +1348,10 @@ function _onReturn(current) {
 }
 
 // Reference: https://github.com/facebook/react/issues/7942
-function _workLoop(performUnit, onReturn, root, r0, r1) {
+function _workLoop(performUnit, onReturn, root, D0, D1) {
     let current = root;
     while (true) {
-        performUnit(current, root, r0, r1);
+        performUnit(current, root, D0, D1);
         if (current.child_ !== null) {
             current = current.child_;
             continue;
