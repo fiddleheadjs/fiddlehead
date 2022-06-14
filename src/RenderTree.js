@@ -16,7 +16,7 @@ export function renderTree(current) {
     // than the current, so we need to initialize/cleanup
     // its temporary properties from outside of the work loop
     walkNativeChildren(function (nativeChild) {
-        mpt.lastTouchedNativeChild_ = nativeChild;
+        mpt.mountingRef_ = nativeChild;
     }, mpt, current);
 
     // Main work
@@ -26,7 +26,7 @@ export function renderTree(current) {
     );
     
     // Cleanup
-    mpt.lastTouchedNativeChild_ = null;
+    mpt.mountingRef_ = null;
 
     // Layout effects
     effectDestroyNodes.forEach(function (isUnmounted, node) {
@@ -118,7 +118,7 @@ function _onReturn(current) {
     }
 
     // This is when we cleanup the remaining temporary properties
-    current.lastTouchedNativeChild_ = null;
+    current.mountingRef_ = null;
     current.insertion_ = null;
 }
 

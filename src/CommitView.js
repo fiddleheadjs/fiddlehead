@@ -11,7 +11,7 @@ export function updateView(newVirtualNode, oldVirtualNode) {
     if (newVirtualNode.nativeNode_ !== null) {
         const mpt = resolveMountingPoint(newVirtualNode.parent_);
         if (mpt !== null) {
-            mpt.lastTouchedNativeChild_ = newVirtualNode.nativeNode_;
+            mpt.mountingRef_ = newVirtualNode.nativeNode_;
         }
     }
 }
@@ -20,8 +20,8 @@ export function insertView(virtualNode) {
     if (virtualNode.nativeNode_ !== null) {
         const mpt = resolveMountingPoint(virtualNode.parent_);
         if (mpt !== null) {
-            insertNativeNodeAfter(mpt.nativeNode_, virtualNode.nativeNode_, mpt.lastTouchedNativeChild_);
-            mpt.lastTouchedNativeChild_ = virtualNode.nativeNode_;
+            insertNativeNodeAfter(mpt.nativeNode_, virtualNode.nativeNode_, mpt.mountingRef_);
+            mpt.mountingRef_ = virtualNode.nativeNode_;
         }
     }
 }

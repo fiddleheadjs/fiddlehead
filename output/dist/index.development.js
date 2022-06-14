@@ -265,17 +265,18 @@ function VirtualNode(type, props) {
     this.deletions_ = null;
 
     // Insertion flag
+    // To be used to optimize the painting process
     /**
      * @type {number|null}
      */
     this.insertion_ = null;
  
-    // In the commit phase, the new child will be inserted
-    // after the last inserted/updated child
+    // If this node is a mounting point, this property tracks the native child
+    // that will be used as the reference node to insert the new child after it
     /**
      * @type {Node|null}
      */
-    this.lastTouchedNativeChild_ = null;
+    this.mountingRef_ = null;
 }
 
 /**
@@ -808,7 +809,7 @@ function updateView(newVirtualNode, oldVirtualNode) {
     if (newVirtualNode.nativeNode_ !== null) {
         const mpt = resolveMountingPoint(newVirtualNode.parent_);
         if (mpt !== null) {
-            mpt.lastTouchedNativeChild_ = newVirtualNode.nativeNode_;
+            mpt.mountingRef_ = newVirtualNode.nativeNode_;
         }
     }
 }
@@ -817,8 +818,8 @@ function insertView(virtualNode) {
     if (virtualNode.nativeNode_ !== null) {
         const mpt = resolveMountingPoint(virtualNode.parent_);
         if (mpt !== null) {
-            insertNativeNodeAfter(mpt.nativeNode_, virtualNode.nativeNode_, mpt.lastTouchedNativeChild_);
-            mpt.lastTouchedNativeChild_ = virtualNode.nativeNode_;
+            insertNativeNodeAfter(mpt.nativeNode_, virtualNode.nativeNode_, mpt.mountingRef_);
+            mpt.mountingRef_ = virtualNode.nativeNode_;
         }
     }
 }
@@ -1240,7 +1241,7 @@ function renderTree(current) {
     // than the current, so we need to initialize/cleanup
     // its temporary properties from outside of the work loop
     walkNativeChildren(function (nativeChild) {
-        mpt.lastTouchedNativeChild_ = nativeChild;
+        mpt.mountingRef_ = nativeChild;
     }, mpt, current);
 
     // Main work
@@ -1250,7 +1251,7 @@ function renderTree(current) {
     );
     
     // Cleanup
-    mpt.lastTouchedNativeChild_ = null;
+    mpt.mountingRef_ = null;
 
     // Layout effects
     effectDestroyNodes.forEach(function (isUnmounted, node) {
@@ -1342,7 +1343,7 @@ function _onReturn(current) {
     }
 
     // This is when we cleanup the remaining temporary properties
-    current.lastTouchedNativeChild_ = null;
+    current.mountingRef_ = null;
     current.insertion_ = null;
 }
 

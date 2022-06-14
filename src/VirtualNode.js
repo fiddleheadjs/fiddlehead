@@ -108,17 +108,18 @@ export function VirtualNode(type, props) {
     this.deletions_ = null;
 
     // Insertion flag
+    // To be used to optimize the painting process
     /**
      * @type {number|null}
      */
     this.insertion_ = null;
  
-    // In the commit phase, the new child will be inserted
-    // after the last inserted/updated child
+    // If this node is a mounting point, this property tracks the native child
+    // that will be used as the reference node to insert the new child after it
     /**
      * @type {Node|null}
      */
-    this.lastTouchedNativeChild_ = null;
+    this.mountingRef_ = null;
 }
 
 /**
