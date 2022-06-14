@@ -1241,10 +1241,6 @@ function _mapChildren(node) {
     return map;
 }
 
-// Using dom fragment produces better performance on Safari
-const shouldUseDomFragment = navigator.vendor === 'Apple Computer, Inc.';
-const domFragment = shouldUseDomFragment ? document.createDocumentFragment() : null;
-
 function renderTree(current) {
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
@@ -1260,24 +1256,10 @@ function renderTree(current) {
     }, mpt, current);
 
     // Main work
-    if (shouldUseDomFragment) {
-        const mptNative = mpt.nativeNode_;
-        mpt.nativeNode_ = domFragment;
-        while (mptNative.firstChild !== null) {
-            domFragment.appendChild(mptNative.firstChild);
-        }
-        _workLoop(
-            _performUnitOfWork, _onReturn, current,
-            effectMountNodes, effectDestroyNodes
-        );
-        mptNative.appendChild(domFragment);
-        mpt.nativeNode_ = mptNative;
-    } else {
-        _workLoop(
-            _performUnitOfWork, _onReturn, current,
-            effectMountNodes, effectDestroyNodes
-        );
-    }
+    _workLoop(
+        _performUnitOfWork, _onReturn, current,
+        effectMountNodes, effectDestroyNodes
+    );
     
     // Cleanup
     mpt.lastTouchedNativeChild_ = null;
