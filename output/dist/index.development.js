@@ -1309,7 +1309,7 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
                         current.insertion_ = INSERT_OFFSCREEN;
                         insertView(current);
                     } else {
-                        // Insert-in-return nodes must have a native node!
+                        // Insert-on-return nodes must have a native node!
                         if (current.nativeNode_ !== null) {
                             current.insertion_ = INSERT_ON_RETURN;
                         }
@@ -1340,7 +1340,7 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
 
 // Callback called after walking through a node and all of its ascendants
 function _onReturn(current) {
-    // Process insert-in-return node before walk out of its subtree
+    // Process insert-on-return node before walk out of its subtree
     if (current.insertion_ === INSERT_ON_RETURN) {
         insertView(current);
     }
