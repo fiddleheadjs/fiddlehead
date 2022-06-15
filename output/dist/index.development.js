@@ -722,10 +722,10 @@ function hydrateView(virtualNode) {
     if (virtualNode.type_ === TextNode) {
         nativeNode = createNativeTextNode(virtualNode.props_);
         
-        if (true) ; else {
-            // Remove text content from the virtual text node to save memory.
-            // Later, we will compare the new text with the text content of the native node,
-            // though it is not a perfect way to compare
+        // In the production mode, remove text content from the virtual text node
+        // to save memory. Later, we will compare the new text with the text content
+        // of the native node, though it is not a perfect way to compare.
+        if (!true) {
             virtualNode.props_ = null;
         }
     } else {
@@ -762,8 +762,10 @@ function rehydrateView(newVirtualNode, oldVirtualNode) {
             newVirtualNode.props_
         );
         
-        if (true) ; else {
-            // Remove text content from the virtual text node to save memory
+        // In the production mode, remove text content from the virtual text node
+        // to save memory. Later, we will compare the new text with the text content
+        // of the native node, though it is not a perfect way to compare.
+        if (!true) {
             newVirtualNode.props_ = null;
         }
     } else {
@@ -1274,7 +1276,7 @@ function renderTree(current) {
 }
 
 // Optimize insertion to reduce number of reflows on the browser
-const INSERT_IN_RETURN = 0;
+const INSERT_ON_RETURN = 0;
 const INSERT_OFFSCREEN = 1;
 
 function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes) {
@@ -1309,7 +1311,7 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
                     } else {
                         // Insert-in-return nodes must have a native node!
                         if (current.nativeNode_ !== null) {
-                            current.insertion_ = INSERT_IN_RETURN;
+                            current.insertion_ = INSERT_ON_RETURN;
                         }
                     }
                 } else {
@@ -1339,7 +1341,7 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
 // Callback called after walking through a node and all of its ascendants
 function _onReturn(current) {
     // Process insert-in-return node before walk out of its subtree
-    if (current.insertion_ === INSERT_IN_RETURN) {
+    if (current.insertion_ === INSERT_ON_RETURN) {
         insertView(current);
     }
 

@@ -48,7 +48,7 @@ export function renderTree(current) {
 }
 
 // Optimize insertion to reduce number of reflows on the browser
-const INSERT_IN_RETURN = 0;
+const INSERT_ON_RETURN = 0;
 const INSERT_OFFSCREEN = 1;
 
 function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes) {
@@ -83,7 +83,7 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
                     } else {
                         // Insert-in-return nodes must have a native node!
                         if (current.nativeNode_ !== null) {
-                            current.insertion_ = INSERT_IN_RETURN;
+                            current.insertion_ = INSERT_ON_RETURN;
                         }
                     }
                 } else {
@@ -113,7 +113,7 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
 // Callback called after walking through a node and all of its ascendants
 function _onReturn(current) {
     // Process insert-in-return node before walk out of its subtree
-    if (current.insertion_ === INSERT_IN_RETURN) {
+    if (current.insertion_ === INSERT_ON_RETURN) {
         insertView(current);
     }
 
