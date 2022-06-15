@@ -924,20 +924,21 @@ function _flushUpdates() {
     // happened in the renderTree (inside setLayoutEffect)
     currentTimeoutId = null;
 
-    // Copy the contexts and clear pending updates
+    // Copy the hooks and clear pending updates
     // to prepare for new state settings
-    const contexts = [];
-    pendingUpdates.forEach(function (hook, contextAsKey) {
-        // Important!!!
-        // Use hook.context_ instead of contextAsKey
-        // as it may be outdated due to the reconciliation process
-        contexts.push(hook.context_);
+    const hooksForReference = [];
+
+    // Important!!!
+    // Do NOT copy hook.context_ here as they
+    // can be outdated during the reconciliation process
+    pendingUpdates.forEach(function (hook, outdatedContext) {
+        hooksForReference.push(hook);
     });
     pendingUpdates.clear();
     
     // Re-render trees
-    for (let i = 0; i < contexts.length; ++i) {
-        renderTree(contexts[i]);
+    for (let i = 0; i < hooksForReference.length; ++i) {
+        renderTree(hooksForReference[i].context_);
     }
 }
 
