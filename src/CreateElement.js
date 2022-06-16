@@ -3,7 +3,7 @@ import {isArray, isFunction, isNumber, isString, slice} from './Util';
 import {Fragment, TextNode, VirtualNode} from './VirtualNode';
 
 // Use the same empty object to save memory
-// Do not mutate it
+// Do NOT mutate it
 const emptyProps = {};
 
 /**

@@ -170,6 +170,7 @@ function Portal(props) {
  * 
  * @param {function|string} type
  * @param {{}|string|null} props
+ * @constructor
  */
 function VirtualNode(type, props) {
     // Identification
@@ -293,7 +294,7 @@ function linkNativeNode(virtualNode, nativeNode) {
 }
 
 // Use the same empty object to save memory
-// Do not mutate it
+// Do NOT mutate it
 const emptyProps = {};
 
 /**

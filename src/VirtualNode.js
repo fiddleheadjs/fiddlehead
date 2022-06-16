@@ -13,6 +13,7 @@ export function Portal(props) {
  * 
  * @param {function|string} type
  * @param {{}|string|null} props
+ * @constructor
  */
 export function VirtualNode(type, props) {
     // Identification
