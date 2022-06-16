@@ -102,7 +102,7 @@ function _flushUpdates() {
     // Important!!!
     // Do NOT copy hook.context_ here as they
     // can be outdated during the reconciliation process
-    pendingUpdates.forEach(function (hook, outdatedContext) {
+    pendingUpdates.forEach(function (hook, mayBeOutdatedContext) {
         hooksAsRefs.push(hook);
     });
     pendingUpdates.clear();
