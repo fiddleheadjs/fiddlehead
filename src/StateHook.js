@@ -97,18 +97,18 @@ function _flushUpdates() {
 
     // Copy the hooks and clear pending updates
     // to prepare for new state settings
-    const hooksForReference = [];
+    const hooksAsRefs = [];
 
     // Important!!!
     // Do NOT copy hook.context_ here as they
     // can be outdated during the reconciliation process
     pendingUpdates.forEach(function (hook, outdatedContext) {
-        hooksForReference.push(hook);
+        hooksAsRefs.push(hook);
     });
     pendingUpdates.clear();
     
     // Re-render trees
-    for (let i = 0; i < hooksForReference.length; ++i) {
-        renderTree(hooksForReference[i].context_);
+    for (let i = 0; i < hooksAsRefs.length; ++i) {
+        renderTree(hooksAsRefs[i].context_);
     }
 }
