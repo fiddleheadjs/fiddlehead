@@ -10,7 +10,6 @@ export const EFFECT_LAYOUT = 1;
  * @param {number} tag
  * @param {function} callback
  * @param {[]|null} deps
- * @return {EffectHook}
  * @constructor
  */
 export function EffectHook(tag, callback, deps) {

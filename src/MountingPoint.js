@@ -3,7 +3,7 @@
 /**
  * 
  * @param {VirtualNode} current 
- * @returns {Node}
+ * @returns {VirtualNode}
  */
 export function resolveMountingPoint(current) {
     while (true) {
@@ -22,7 +22,7 @@ export function resolveMountingPoint(current) {
  * 
  * @param {function} callback 
  * @param {VirtualNode} parent 
- * @param {VirtualNode} stopBefore 
+ * @param {VirtualNode?} stopBefore
  * @returns {void}
  */
 export function walkNativeChildren(callback, parent, stopBefore) {
@@ -48,7 +48,6 @@ export function walkNativeChildren(callback, parent, stopBefore) {
                 current = current.parent_;
             }
             current = current.sibling_;
-            continue;
         }
     }
 }

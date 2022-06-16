@@ -477,7 +477,7 @@ function extractVirtualNode(nativeNode) {
 /**
  * 
  * @param {VirtualNode} current 
- * @returns {Node}
+ * @returns {VirtualNode}
  */
 function resolveMountingPoint(current) {
     while (true) {
@@ -496,7 +496,7 @@ function resolveMountingPoint(current) {
  * 
  * @param {function} callback 
  * @param {VirtualNode} parent 
- * @param {VirtualNode} stopBefore 
+ * @param {VirtualNode?} stopBefore
  * @returns {void}
  */
 function walkNativeChildren(callback, parent, stopBefore) {
@@ -522,7 +522,6 @@ function walkNativeChildren(callback, parent, stopBefore) {
                 current = current.parent_;
             }
             current = current.sibling_;
-            continue;
         }
     }
 }
@@ -559,7 +558,6 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
     if (attrName in element) {
         try {
             element[attrName] = newAttrValue;
-            return;
         } catch (x) {
             // Property may not writable
         }
@@ -933,7 +931,7 @@ function _flushUpdates() {
     // Important!!!
     // Do NOT copy hook.context_ here as they
     // can be outdated during the reconciliation process
-    pendingUpdates.forEach(function (hook, outdatedContext) {
+    pendingUpdates.forEach(function (hook, mayBeOutdatedContext) {
         hooksAsRefs.push(hook);
     });
     pendingUpdates.clear();
@@ -977,7 +975,6 @@ const EFFECT_LAYOUT = 1;
  * @param {number} tag
  * @param {function} callback
  * @param {[]|null} deps
- * @return {EffectHook}
  * @constructor
  */
 function EffectHook(tag, callback, deps) {
@@ -1275,7 +1272,7 @@ function renderTree(current) {
     });
 }
 
-// Optimize insertion to reduce number of reflows on the browser
+// Optimize insertion to reduce reflow number
 const INSERT_ON_RETURN = 0;
 const INSERT_OFFSCREEN = 1;
 

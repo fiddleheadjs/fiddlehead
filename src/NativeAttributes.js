@@ -32,7 +32,6 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
     if (attrName in element) {
         try {
             element[attrName] = newAttrValue;
-            return;
         } catch (x) {
             // Property may not writable
         }

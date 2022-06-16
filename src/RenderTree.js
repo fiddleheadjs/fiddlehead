@@ -47,7 +47,7 @@ export function renderTree(current) {
     });
 }
 
-// Optimize insertion to reduce number of reflows on the browser
+// Optimize insertion to reduce reflow number
 const INSERT_ON_RETURN = 0;
 const INSERT_OFFSCREEN = 1;
 
