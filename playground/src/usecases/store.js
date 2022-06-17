@@ -1,5 +1,6 @@
-import {jsx, render, useState, useEffect} from '../../../packages/core/index';
-import {createStore, useReadableStore, useWritableStore} from '../../../packages/store/index';
+// It is required to use the same source with store
+import {jsx, render, useState, useEffect} from 'hook';
+import {createStore, useReadableStore, useWritableStore} from '../../../store';
 
 const store = createStore({
     ids: [],

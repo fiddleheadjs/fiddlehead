@@ -28,6 +28,6 @@
     "chalk": "^5.0.1",
     "concurrently": "^7.2.1",
     "eslint": "^8.15.0",
-    "hook": "git+ssh://git@git.itim.vn:ads-frontend/hook.git"
+    "hook": "file:deps/core"
   }
 }

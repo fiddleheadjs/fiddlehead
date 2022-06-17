@@ -1,4 +1,4 @@
-import {jsx} from '../../../index';
+import {jsx} from 'hook';
 import React from 'react';
 
 export function Svg3() {

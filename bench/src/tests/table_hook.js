@@ -6,7 +6,7 @@ import {
     useLayoutEffect,
     useRef,
     Fragment,
-} from "../../../index";
+} from "hook";
 import {bench} from "../bench";
 
 const TABLE_ROWS = 10000;

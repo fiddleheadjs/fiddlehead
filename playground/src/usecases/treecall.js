@@ -1,4 +1,4 @@
-import {jsx, render, useState, useEffect} from '../../../index'; 
+import {jsx, render, useState, useEffect} from 'hook'; 
 
 console.time('mount');
 render(<Tree/>, document.getElementById('sandbox-container'));

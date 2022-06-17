@@ -1,4 +1,4 @@
-import {jsx, render, useState, useEffect, useLayoutEffect, useRef} from "../../../index";
+import {jsx, render, useState, useEffect, useLayoutEffect, useRef} from "hook";
 
 function Wrapper2({children, myRef}) {
     return (

@@ -1,4 +1,4 @@
-import {jsx, render, useState, useEffect, useRef, Fragment} from "../../../index";
+import {jsx, render, useState, useEffect, useRef, Fragment} from "hook";
 
 
 function Cat({text, setText}) {

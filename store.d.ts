@@ -1,4 +1,4 @@
-function Subscriber(data: object): void;
+type Subscriber = (data: object) => void;
 
 export interface Store {
     readonly data: object,
@@ -12,7 +12,7 @@ export function createStore(initialData: object): Store;
 export function useReadableStore<T>(
     store: Store,
     readFn: (data: object) => T,
-    compareFn: (value1: T, value2: T) => boolean
+    compareFn?: (value1: T, value2: T) => boolean
 ): T;
 
 export function useWritableStore<T>(

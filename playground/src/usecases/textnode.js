@@ -1,4 +1,4 @@
-import {jsx, render, useState, useEffect, useRef, TextNode} from '../../../index';
+import {jsx, render, useState, useEffect, useRef, TextNode} from 'hook';
 
 render(<Root/>, document.getElementById('sandbox-container'));
 
