@@ -12,6 +12,8 @@ export const TextNode: string;
 
 export function render(children: any, target: Element): void;
 
+export function createPortal(children: any, target: Element): VirtualNode;
+
 export function createElement(
     type: string | ((props: Record<string, any>) => VirtualNode),
     props: Record<string, any>,
@@ -20,8 +22,6 @@ export function createElement(
 
 export {createElement as jsx};
 
-export function createPortal(children: any, target: Element): VirtualNode;
-
 export function createRef(initialValue: any): Ref;
 
 export function useState<T>(initialValue: T): [
@@ -29,7 +29,10 @@ export function useState<T>(initialValue: T): [
     setValue: (value: T | ((prevValue: T) => T)) => void
 ];
 
-export function useError(): [error: Error | null, clearError: () => void];
+export function useError(): [
+    error: Error | null,
+    clearError: () => void
+];
 
 export function useEffect(
     callback: () => (() => void) | void,
