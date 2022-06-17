@@ -31,8 +31,14 @@ export function useState<T>(initialValue: T): [
 
 export function useError(): [error: Error | null, clearError: () => void];
 
-export function useEffect(callback: () => (() => void) | void, deps?: any[]): void;
+export function useEffect(
+    callback: () => (() => void) | void,
+    deps?: any[]
+): void;
 
-export function useLayoutEffect(callback: () => (() => void) | void, deps?: any[]): void;
+export function useLayoutEffect(
+    callback: () => (() => void) | void,
+    deps?: any[]
+): void;
 
 export function useRef(initialValue: any): Ref;
