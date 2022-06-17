@@ -1,6 +1,4 @@
 {
     "name": "store",
-    "peerDependencies": {
-        "hook": "*"
-    }
+    "main": "index.js"
 }

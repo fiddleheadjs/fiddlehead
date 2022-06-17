@@ -1,8 +1,10 @@
 import {terser} from 'rollup-plugin-terser';
 import replace from '@rollup/plugin-replace';
+import {name as libraryName} from '../package.json';
 
 export default ['core', 'store'].map((pkg) => ({
     input: `../packages/${pkg}/index.js`,
+    external: pkg !== 'core' ? ['core.pkg'] : [],
     output: [
         {
             file: `../lib/${pkg}/${pkg}.development.js`,
@@ -11,9 +13,9 @@ export default ['core', 'store'].map((pkg) => ({
             plugins: [
                 replace({
                     __DEV__: true,
-                    'core.pkg': 'hook',
+                    'core.pkg': libraryName,
                 }),
-            ]
+            ],
         },
         {
             file: `../lib/${pkg}/${pkg}.production.js`,
@@ -27,7 +29,7 @@ export default ['core', 'store'].map((pkg) => ({
             plugins: [
                 replace({
                     __DEV__: false,
-                    'core.pkg': 'hook',
+                    'core.pkg': libraryName,
                 }),
                 terser({
                     compress: {

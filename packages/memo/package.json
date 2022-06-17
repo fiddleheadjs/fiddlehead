@@ -1,6 +1,0 @@
-{
-    "name": "memo",
-    "peerDependencies": {
-        "hook": "*"
-    }
-}
