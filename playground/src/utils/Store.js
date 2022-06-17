@@ -1,5 +1,10 @@
 import {useEffect, useState} from '../../../output';
 
+/**
+ * 
+ * @param {{}} initialData 
+ * @returns {Store}
+ */
 export function createStore(initialData) {
     if (initialData === null || typeof initialData !== 'object') {
         throw new Error('Store data must be an object');
@@ -23,24 +28,50 @@ export function createStore(initialData) {
     };
 }
 
-export function useReadableStore(store, getFn) {
-    const [value, setValue] = useState(getFn(store.data));
+/**
+ * 
+ * @param {Store} store
+ * @param {function} readFn
+ * @param {function?} compareFn
+ * @returns {any}
+ */
+export function useReadableStore(store, readFn, compareFn) {
+    const [value, setValue] = useState(readFn(store.data));
 
-    useEffect(() => {
-        const subscriber = (data) => {
-            setValue(getFn(data));
+    useEffect(function () {
+        const subscriber = function (data) {
+            if (compareFn === undefined) {
+                setValue(readFn(data));
+            } else {
+                setValue(function (prevValue) {
+                    const newValue = readFn(data);
+                    if (compareFn(prevValue, newValue)) {
+                        return prevValue;
+                    } else {
+                        return newValue;
+                    }
+                });
+            }
         };
         store.subscribe(subscriber);
-        return () => store.unsubscribe(subscriber);
-    }, [store, getFn]);
+        return function () {
+            store.unsubscribe(subscriber);
+        };
+    }, [store, readFn, compareFn]);
 
     return value;
 }
 
-export function useWritableStore(store, setFn) {
-    return (value) => {
-        store.setData(data => {
-            setFn(data, value);
+/**
+ * 
+ * @param {Store} store
+ * @param {function} writeFn
+ * @returns {function}
+ */
+export function useWritableStore(store, writeFn) {
+    return function (value) {
+        store.setData(function (data) {
+            writeFn(data, value);
         });
     };
 }
