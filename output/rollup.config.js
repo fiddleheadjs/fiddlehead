@@ -1,11 +1,11 @@
 import {terser} from 'rollup-plugin-terser';
 import replace from '@rollup/plugin-replace';
 
-export default {
-    input: '../index.js',
+export default ['core', 'store', 'memo'].map((pkg) => ({
+    input: `../packages/${pkg}/index.js`,
     output: [
         {
-            file: 'dist/index.development.js',
+            file: `../packages/${pkg}/lib/dist/${pkg}.development.js`,
             format: 'cjs',
             exports: 'named',
             plugins: [
@@ -15,7 +15,7 @@ export default {
             ]
         },
         {
-            file: 'dist/index.production.js',
+            file: `../packages/${pkg}/lib/dist/${pkg}.production.js`,
             format: 'cjs',
             exports: 'named',
             generatedCode: {
@@ -44,4 +44,4 @@ export default {
             ],
         },
     ]
-};
+}));

@@ -1,0 +1,6 @@
+{
+    "name": "store",
+    "peerDependencies": {
+        "hook": "git+ssh://git@git.itim.vn:ads-frontend/hook.git"
+    }
+}
