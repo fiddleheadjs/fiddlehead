@@ -5,7 +5,7 @@ export default ['core', 'store', 'memo'].map((pkg) => ({
     input: `../packages/${pkg}/index.js`,
     output: [
         {
-            file: `../packages/${pkg}/lib/dist/${pkg}.development.js`,
+            file: `../lib/${pkg}.development.js`,
             format: 'cjs',
             exports: 'named',
             plugins: [
@@ -15,7 +15,7 @@ export default ['core', 'store', 'memo'].map((pkg) => ({
             ]
         },
         {
-            file: `../packages/${pkg}/lib/dist/${pkg}.production.js`,
+            file: `../lib/${pkg}.production.js`,
             format: 'cjs',
             exports: 'named',
             generatedCode: {

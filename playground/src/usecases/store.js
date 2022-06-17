@@ -1,5 +1,5 @@
-import {jsx, render, useState, useEffect} from '../../../output';
-import {createStore, useReadableStore, useWritableStore} from '../utils/Store';
+import {jsx, render, useState, useEffect} from '../../../packages/core/index';
+import {createStore, useReadableStore, useWritableStore} from '../../../packages/store/index';
 
 const store = createStore({
     ids: [],

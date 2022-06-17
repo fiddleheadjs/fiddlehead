@@ -17,7 +17,6 @@
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
-    "hook": "git+ssh://git@git.itim.vn:ads-frontend/hook.git",
     "react": "^18.1.0",
     "react-dom": "^18.1.0"
   },

@@ -1,4 +1,4 @@
-import {jsx, render, useLayoutEffect} from "../../../output";
+import {jsx, render, useLayoutEffect} from "../../../index";
 
 import {bench} from "../bench";
 import {Svg0} from "../components/Svg0";

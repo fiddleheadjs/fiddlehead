@@ -1,4 +1,4 @@
-import {jsx} from '../../../output';
+import {jsx} from '../../../index';
 import React from 'react';
 
 export function Svg2() {

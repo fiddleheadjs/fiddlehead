@@ -1,4 +1,4 @@
-import {jsx, render, useState, useEffect, useLayoutEffect, useRef} from "../../../output";
+import {jsx, render, useState, useEffect, useLayoutEffect, useRef} from "../../../index";
 
 function Wrapper2({children, myRef}) {
     return (

@@ -1,4 +1,4 @@
-import {jsx, render, useState, useEffect} from "../../../output";
+import {jsx, render, useState, useEffect} from "../../../index";
 
 render(<A />, document.getElementById("sandbox-container"));
 

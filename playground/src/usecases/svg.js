@@ -1,4 +1,4 @@
-import {jsx, render} from '../../../output';
+import {jsx, render} from '../../../index';
 import {BigSvg} from '../components/BigSvg';
 
 console.time('stack');

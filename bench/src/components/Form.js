@@ -1,4 +1,4 @@
-import * as Hook from "../../../output";
+import * as Hook from "../../../index";
 import * as React from 'react';
 
 const {jsx} = Hook;
