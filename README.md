@@ -4,7 +4,7 @@ Hook is a lightweight UI library. It replicates some key features of React:
 
 - Declarative programming
 - One-way data binding
-- Reconcilication
+- Reconciliation
 - Batch update
 - Error boundary
 
