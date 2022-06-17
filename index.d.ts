@@ -1,4 +1,4 @@
-interface VNode {
+interface VirtualNode {
 
 }
 
@@ -13,14 +13,14 @@ export const TextNode: string;
 export function render(children: any, target: Element): void;
 
 export function createElement(
-    type: string | ((props: Record<string, any>) => VNode),
+    type: string | ((props: Record<string, any>) => VirtualNode),
     props: Record<string, any>,
     ...children: any[]
-): VNode;
+): VirtualNode;
 
 export {createElement as jsx};
 
-export function createPortal(children: any, target: Element): VNode;
+export function createPortal(children: any, target: Element): VirtualNode;
 
 export function createRef(initialValue: any): Ref;
 
