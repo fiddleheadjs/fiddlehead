@@ -1,4 +1,4 @@
-import {jsx, render, useLayoutEffect} from "hook";
+import {jsx, render, useLayoutEffect} from "core.pkg";
 
 import {bench} from "../bench";
 import {Form} from "../components/Form";

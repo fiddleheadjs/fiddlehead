@@ -1,4 +1,4 @@
-import {jsx, render, useState} from "hook";
+import {jsx, render, useState} from "core.pkg";
 
 function YourAd({ count, setCount }) {
     const [layout, setLayout] = useState("cat");

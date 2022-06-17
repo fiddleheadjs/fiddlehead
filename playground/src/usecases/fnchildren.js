@@ -1,4 +1,4 @@
-import {jsx, render, useState, useEffect, useRef} from "hook";
+import {jsx, render, useState, useEffect, useRef} from "core.pkg";
 
 function Form({children}) {
     return (

@@ -1,4 +1,4 @@
-import {jsx, render, useState, useEffect, useRef, Fragment} from "hook";
+import {jsx, render, useState, useEffect, useRef, Fragment} from "core.pkg";
 
 
 function Cat({text, setText}) {

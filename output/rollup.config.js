@@ -1,21 +1,22 @@
 import {terser} from 'rollup-plugin-terser';
 import replace from '@rollup/plugin-replace';
 
-export default ['core', 'store', 'memo'].map((pkg) => ({
+export default ['core', 'store'].map((pkg) => ({
     input: `../packages/${pkg}/index.js`,
     output: [
         {
-            file: `../lib/${pkg}.development.js`,
+            file: `../lib/${pkg}/${pkg}.development.js`,
             format: 'cjs',
             exports: 'named',
             plugins: [
                 replace({
                     __DEV__: true,
+                    'core.pkg': 'hook',
                 }),
             ]
         },
         {
-            file: `../lib/${pkg}.production.js`,
+            file: `../lib/${pkg}/${pkg}.production.js`,
             format: 'cjs',
             exports: 'named',
             generatedCode: {
@@ -26,6 +27,7 @@ export default ['core', 'store', 'memo'].map((pkg) => ({
             plugins: [
                 replace({
                     __DEV__: false,
+                    'core.pkg': 'hook',
                 }),
                 terser({
                     compress: {

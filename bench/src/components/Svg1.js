@@ -1,4 +1,4 @@
-import {jsx} from 'hook';
+import {jsx} from 'core.pkg';
 import React from 'react';
 
 export function Svg1() {

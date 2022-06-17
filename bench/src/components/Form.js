@@ -1,4 +1,4 @@
-import * as Hook from "hook";
+import * as Hook from 'core.pkg';
 import * as React from 'react';
 
 const {jsx} = Hook;

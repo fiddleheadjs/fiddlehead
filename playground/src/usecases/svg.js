@@ -1,4 +1,4 @@
-import {jsx, render} from 'hook';
+import {jsx, render} from 'core.pkg';
 import {BigSvg} from '../components/BigSvg';
 
 console.time('stack');

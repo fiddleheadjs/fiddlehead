@@ -1,6 +1,6 @@
 // It is required to use the same source with store
-import {jsx, render, useState, useEffect} from 'hook';
-import {createStore, useReadableStore, useWritableStore} from '../../../store';
+import {jsx, render, useState, useEffect} from 'core.pkg';
+import {createStore, useReadableStore, useWritableStore} from 'store.pkg';
 
 const store = createStore({
     ids: [],

@@ -1,4 +1,4 @@
-import {jsx, render, useError, useEffect, useState, useRef, Fragment} from 'hook';
+import {jsx, render, useError, useEffect, useState, useRef, Fragment} from 'core.pkg';
 
 render(<Root/>, document.getElementById('sandbox-container'));
 

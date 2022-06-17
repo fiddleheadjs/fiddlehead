@@ -25,6 +25,8 @@
     "chalk": "^5.0.1",
     "concurrently": "^7.2.1",
     "eslint": "^8.15.0",
-    "hook": "file:deps/core"
+    "hook": "file:lib/core",
+    "core.pkg": "file:lib/core",
+    "store.pkg": "file:lib/store"
   }
 }
