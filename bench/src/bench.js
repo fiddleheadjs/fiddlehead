@@ -8,14 +8,14 @@ export function bench(renderFns, repeats) {
                 timeTable[index].push(performance.now() - timeStart);
                 setTimeout(() => {
                     run(index + 1);
-                }, 0);
+                }, 200);
             };
             renderFns[index](onFinish);
         } else {
             if (--repeats > 0) {
                 setTimeout(() => {
                     run(0);
-                }, 0);
+                }, 200);
             } else {
                 printOutput(timeTable);
             }
@@ -46,7 +46,7 @@ function median(values) {
         return a - b;
     });
 
-    var half = Math.floor(values.length / 2);
+    let half = Math.floor(values.length / 2);
 
     if (values.length % 2 !== 0) {
         return values[half];
