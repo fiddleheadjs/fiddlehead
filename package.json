@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "A lightweight UI library",
   "main": "index.js",
-  "exports": {
-    ".": "./output/index.js"
-  },
   "scripts": {
     "dev": "concurrently \"npm run output:watch\" \"npm run playground:watch\" \"npm run bench:watch\" \"npm run playground:start\" \"npm run bench:start\"",
     "output:build": "cd output && npm run build",
