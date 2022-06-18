@@ -13,7 +13,7 @@
     "bench:start": "cd bench && npm run start",
     "bench:build": "cd bench && npm run build",
     "bench:watch": "cd bench && npm run watch",
-    "lint": "eslint ./src --config .eslintrc"
+    "lint": "eslint ./packages --config .eslintrc"
   },
   "repository": {
     "type": "git",
