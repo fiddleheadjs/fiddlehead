@@ -3,6 +3,20 @@
   "version": "1.0.0",
   "description": "A lightweight UI library",
   "main": "index.js",
+  "exports": {
+    ".": {
+      "types": "./lib/core/index.d.ts",
+      "module": "./lib/core/index.mjs",
+      "import": "./lib/core/index.mjs",
+      "default": "./lib/core/index.js"
+    },
+    "./store": {
+      "types": "./lib/store/index.d.ts",
+      "module": "./lib/store/index.mjs",
+      "import": "./lib/store/index.mjs",
+      "default": "./lib/store/index.js"
+    }
+  },
   "scripts": {
     "dev": "concurrently \"npm run output:watch\" \"npm run playground:watch\" \"npm run bench:watch\" \"npm run playground:start\" \"npm run bench:start\"",
     "output:build": "cd output && npm run build",
