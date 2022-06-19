@@ -1,51 +1,58 @@
-import {terser} from 'rollup-plugin-terser';
-import replace from '@rollup/plugin-replace';
-import {name as libraryName} from '../package.json';
+const {terser} = require('rollup-plugin-terser');
+const replace = require('@rollup/plugin-replace');
+const {name: libraryName} = require('../package.json');
 
-export default ['core', 'store'].map((pkg) => ({
-    input: `../packages/${pkg}/index.js`,
-    external: pkg !== 'core' ? ['core.pkg'] : [],
-    output: [
-        {
-            file: `../lib/${pkg}/${pkg}.development.js`,
-            format: 'cjs',
-            exports: 'named',
-            plugins: [
-                replace({
-                    __DEV__: true,
-                    'core.pkg': libraryName,
-                }),
-            ],
-        },
-        {
-            file: `../lib/${pkg}/${pkg}.production.js`,
-            format: 'cjs',
-            exports: 'named',
-            generatedCode: {
-                preset: 'es5',
-                // TODO not working?
-                arrowFunctions: false,
-            },
-            plugins: [
-                replace({
-                    __DEV__: false,
-                    'core.pkg': libraryName,
-                }),
-                terser({
-                    compress: {
-                        module: true,
-                        booleans_as_integers: true,
-                        keep_infinity: true,
-                        keep_fargs: false,
-                        inline: true,
+const configs = [];
+['core', 'store'].forEach((pkg) => {
+    ['cjs', 'esm'].forEach((moduleType) => {
+        configs.push({
+            input: `../packages/${pkg}/index.js`,
+            external: pkg !== 'core' ? ['core.pkg'] : [],
+            output: [
+                {
+                    file: `../lib/${pkg}/${moduleType}.development.js`,
+                    format: moduleType,
+                    exports: 'named',
+                    plugins: [
+                        replace({
+                            __DEV__: true,
+                            'core.pkg': libraryName,
+                        }),
+                    ],
+                },
+                {
+                    file: `../lib/${pkg}/${moduleType}.production.js`,
+                    format: moduleType,
+                    exports: 'named',
+                    generatedCode: {
+                        preset: 'es5',
+                        // TODO not working?
+                        arrowFunctions: false,
                     },
-                    mangle: {
-                        properties: {
-                            regex: /^[^_].*_$/,
-                        },
-                    },
-                }),
-            ],
-        },
-    ]
-}));
+                    plugins: [
+                        replace({
+                            __DEV__: false,
+                            'core.pkg': libraryName,
+                        }),
+                        terser({
+                            compress: {
+                                module: true,
+                                booleans_as_integers: true,
+                                keep_infinity: true,
+                                keep_fargs: false,
+                                inline: true,
+                            },
+                            mangle: {
+                                properties: {
+                                    regex: /^[^_].*_$/,
+                                },
+                            },
+                        }),
+                    ],
+                },
+            ]
+        });
+    });
+});
+
+module.exports = configs;
