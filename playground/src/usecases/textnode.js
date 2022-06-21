@@ -1,6 +1,6 @@
 import {jsx, render, useState, useEffect, useRef, TextNode} from 'core.pkg';
 
-render(<Root/>, document.getElementById('sandbox-container'));
+render(<Root/>, document.getElementById('root'));
 
 function Root() {
     const [firstName, setFirstName] = useState('');

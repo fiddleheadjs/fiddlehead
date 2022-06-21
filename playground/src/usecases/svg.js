@@ -4,7 +4,7 @@ import {BigSvg} from '../components/BigSvg';
 console.time('stack');
 console.time('mount');
 
-render([<Svg0 />, <Svg1 />, <Svg2 />, <Svg3 />, <BigSvg />, <TimeEnd />], document.getElementById('sandbox-container'));
+render([<Svg0 />, <Svg1 />, <Svg2 />, <Svg3 />, <BigSvg />, <TimeEnd />], document.getElementById('root'));
 
 console.timeEnd('stack');
 

@@ -268,5 +268,5 @@ function DemoWrapperWrapper() {
 }
 
 console.time('stack');
-ReactDOM.render(<DemoWrapperWrapper/>, document.getElementById('sandbox-container'));
+ReactDOM.render(<DemoWrapperWrapper/>, document.getElementById('root'));
 console.timeEnd('stack');

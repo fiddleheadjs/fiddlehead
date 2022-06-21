@@ -1,7 +1,7 @@
 import React, {render, useState, useEffect} from 'react';
 import ReactDOM from 'react-dom/client';
 
-const root = ReactDOM.createRoot(document.getElementById('sandbox-container'));
+const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<A />);
 
 function A() {

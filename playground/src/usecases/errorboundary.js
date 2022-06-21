@@ -1,6 +1,6 @@
 import {jsx, render, useError, useEffect, useState, useRef, Fragment} from 'core.pkg';
 
-render(<Root/>, document.getElementById('sandbox-container'));
+render(<Root/>, document.getElementById('root'));
 
 function Root() {
     const [count, setCount] = useState(0);

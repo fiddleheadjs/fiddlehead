@@ -1,6 +1,6 @@
 import {jsx, render, useState, useEffect, useRef} from "core.pkg";
 
-render(<App/>, document.getElementById('sandbox-container'));
+render(<App/>, document.getElementById('root'));
 
 function App() {
     return [[<A/>, '___', <B/>, ' ... ', <C/>], <p style={{color: 'red'}}>Press 1, 2 or 3</p>];

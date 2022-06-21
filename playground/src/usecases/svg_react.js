@@ -5,7 +5,7 @@ import {BigSvg} from '../components/BigSvg';
 console.time('stack');
 console.time('mount');
 
-const root = ReactDOM.createRoot(document.getElementById('sandbox-container'));
+const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render([<Svg0 />, <Svg1 />, <Svg2 />, <Svg3 />, <BigSvg />, <TimeEnd />]);
 
 console.timeEnd('stack');

@@ -1,6 +1,6 @@
 import {jsx, render, useState, useEffect} from 'core.pkg';
 
-render(<A />, document.getElementById('sandbox-container'));
+render(<A />, document.getElementById('root'));
 
 function A() {
     const [shows, setShows] = useState(0);

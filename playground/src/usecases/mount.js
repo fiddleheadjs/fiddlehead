@@ -115,9 +115,9 @@ function DemoFinalWrapper() {
 console.time('stack');
 console.time('mount');
 
-render(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));
+render(<DemoFinalWrapper/>, document.getElementById('root'));
 setTimeout(() => {
-    render(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));
+    render(<DemoFinalWrapper/>, document.getElementById('root'));
 }, 6000);
 
 console.timeEnd('stack');

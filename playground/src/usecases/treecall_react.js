@@ -2,7 +2,7 @@ import React, {useRef, useState, useEffect} from 'react';
 import ReactDOM from 'react-dom';
 
 console.time('mount');
-ReactDOM.render(<Tree/>, document.getElementById('sandbox-container'));
+ReactDOM.render(<Tree/>, document.getElementById('root'));
 console.timeEnd('mount');
 
 function Tree() {

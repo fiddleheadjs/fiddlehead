@@ -1,7 +1,7 @@
 import {jsx, render, useState, useEffect} from 'core.pkg'; 
 
 console.time('mount');
-render(<Tree/>, document.getElementById('sandbox-container'));
+render(<Tree/>, document.getElementById('root'));
 console.timeEnd('mount');
 
 function Tree() {

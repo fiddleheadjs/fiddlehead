@@ -50,4 +50,4 @@ function DemoWrapperWrapper() {
     );
 }
 
-render(<DemoWrapperWrapper />, document.getElementById('sandbox-container'));
+render(<DemoWrapperWrapper />, document.getElementById('root'));

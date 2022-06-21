@@ -116,9 +116,9 @@ function DemoFinalWrapper() {
 console.time('stack');
 console.time('mount');
 
-ReactDOM.render(<DemoFinalWrapper/>, document.getElementById('sandbox-container'));
+ReactDOM.render(<DemoFinalWrapper/>, document.getElementById('root'));
 setTimeout(() => {
-    ReactDOM.render([<DemoFinalWrapper/>], document.getElementById('sandbox-container'));
+    ReactDOM.render([<DemoFinalWrapper/>], document.getElementById('root'));
 }, 6000);
 
 console.timeEnd('stack');

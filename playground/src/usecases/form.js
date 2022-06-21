@@ -269,5 +269,5 @@ function DemoWrapperWrapper() {
 }
 
 console.time('stack');
-render(<DemoWrapperWrapper/>, document.getElementById('sandbox-container'));
+render(<DemoWrapperWrapper/>, document.getElementById('root'));
 console.timeEnd('stack');

@@ -53,4 +53,4 @@ function B() {
     );
 }
 
-render(<App/>, document.getElementById('sandbox-container'));
+render(<App/>, document.getElementById('root'));

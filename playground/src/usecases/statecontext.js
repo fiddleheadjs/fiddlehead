@@ -40,4 +40,4 @@ function MyAd() {
     );
 }
 
-render(<MyAd />, document.getElementById("sandbox-container"));
+render(<MyAd />, document.getElementById("root"));
