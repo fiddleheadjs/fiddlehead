@@ -1,4 +1,4 @@
-import {NAMESPACE_SVG} from './VirtualNode';
+import {NAMESPACE_SVG} from './VNode';
 import {updateNativeElementAttributes, updateNativeTextContent} from './NativeAttributes';
 
 export function createNativeTextNode(text) {

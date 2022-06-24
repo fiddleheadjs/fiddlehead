@@ -5,31 +5,31 @@ import {insertNativeNodeAfter, removeNativeNode} from './NativeDOM';
 // Important!!!
 // This module does not handle Portal nodes
 
-export function updateView(newVirtualNode, oldVirtualNode) {
-    rehydrateView(newVirtualNode, oldVirtualNode);
+export function updateView(newVNode, oldVNode) {
+    rehydrateView(newVNode, oldVNode);
 
-    if (newVirtualNode.nativeNode_ !== null) {
-        const mpt = resolveMountingPoint(newVirtualNode.parent_);
+    if (newVNode.nativeNode_ !== null) {
+        const mpt = resolveMountingPoint(newVNode.parent_);
         if (mpt !== null) {
-            mpt.mountingRef_ = newVirtualNode.nativeNode_;
+            mpt.mountingRef_ = newVNode.nativeNode_;
         }
     }
 }
 
-export function insertView(virtualNode) {
-    if (virtualNode.nativeNode_ !== null) {
-        const mpt = resolveMountingPoint(virtualNode.parent_);
+export function insertView(vnode) {
+    if (vnode.nativeNode_ !== null) {
+        const mpt = resolveMountingPoint(vnode.parent_);
         if (mpt !== null) {
-            insertNativeNodeAfter(mpt.nativeNode_, virtualNode.nativeNode_, mpt.mountingRef_);
-            mpt.mountingRef_ = virtualNode.nativeNode_;
+            insertNativeNodeAfter(mpt.nativeNode_, vnode.nativeNode_, mpt.mountingRef_);
+            mpt.mountingRef_ = vnode.nativeNode_;
         }
     }
 }
 
-export function deleteView(virtualNode) {
-    if (virtualNode.nativeNode_ !== null) {
-        removeNativeNode(virtualNode.nativeNode_);
+export function deleteView(vnode) {
+    if (vnode.nativeNode_ !== null) {
+        removeNativeNode(vnode.nativeNode_);
     } else {
-        walkNativeChildren(removeNativeNode, virtualNode);
+        walkNativeChildren(removeNativeNode, vnode);
     }
 }

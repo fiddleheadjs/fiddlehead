@@ -1,7 +1,7 @@
 import {STATE_ERROR} from './StateHook';
 
-export function catchError(error, virtualNode) {
-    let parent = virtualNode.parent_;
+export function catchError(error, vnode) {
+    let parent = vnode.parent_;
     let hook;
 
     while (parent !== null) {

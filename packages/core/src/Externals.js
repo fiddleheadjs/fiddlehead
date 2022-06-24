@@ -3,30 +3,30 @@ const PROP_VNODE = '%vnode';
 /**
  * 
  * @param {Node} nativeNode 
- * @param {VirtualNode} virtualNode 
+ * @param {VNode} vnode 
  */
-export function attachVirtualNode(nativeNode, virtualNode) {
-    nativeNode[PROP_VNODE] = virtualNode;
+export function attachVNodeToNativeNode(nativeNode, vnode) {
+    nativeNode[PROP_VNODE] = vnode;
 }
 
 /**
  * 
  * @param {Node} nativeNode 
- * @returns {VirtualNode|undefined}
+ * @returns {VNode|undefined}
  */
-export function extractVirtualNode(nativeNode) {
+export function extractVNodeFromNativeNode(nativeNode) {
     return nativeNode[PROP_VNODE];
 }
 
 /**
  * 
- * @param {VirtualNode} virtualNode 
+ * @param {VNode} vnode 
  * @param {Node} nativeNode
  */
- export function linkNativeNode(virtualNode, nativeNode) {
-    virtualNode.nativeNode_ = nativeNode;
+ export function linkNativeNodeWithVNode(vnode, nativeNode) {
+    vnode.nativeNode_ = nativeNode;
 
-    if (virtualNode.ref_ !== null) {
-        virtualNode.ref_.current = nativeNode;
+    if (vnode.ref_ !== null) {
+        vnode.ref_.current = nativeNode;
     }
 }

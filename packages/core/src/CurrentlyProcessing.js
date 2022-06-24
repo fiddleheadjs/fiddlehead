@@ -3,8 +3,8 @@ let currentRefHook = null;
 let currentStateHook = null;
 let currentEffectHook = null;
 
-export function prepareCurrentlyProcessing(functionalVirtualNode) {
-    currentNode = functionalVirtualNode;
+export function prepareCurrentlyProcessing(functionalVNode) {
+    currentNode = functionalVNode;
 }
 
 export function flushCurrentlyProcessing() {

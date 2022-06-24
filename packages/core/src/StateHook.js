@@ -10,7 +10,7 @@ export const STATE_ERROR = 1;
  *
  * @param {number} tag
  * @param {any} initialValue
- * @param {VirtualNode} context
+ * @param {VNode} context
  * @constructor
  */
 export function StateHook(tag, initialValue, context) {

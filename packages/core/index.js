@@ -1,5 +1,5 @@
 import {createElement} from './src/Element';
-import {Fragment, TextNode} from './src/VirtualNode';
+import {Fragment, TextNode} from './src/VNode';
 import {render, createPortal} from './src/Render';
 import {useState, useError} from './src/StateHook';
 import {useEffect, useLayoutEffect} from './src/EffectHook';

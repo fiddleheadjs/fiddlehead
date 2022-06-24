@@ -1,7 +1,7 @@
 import {Ref} from './RefHook';
 import {Element} from './Element';
 import {isArray, isFunction, isNumber, isString} from './Util';
-import {Fragment, TextNode, VirtualNode} from './VirtualNode';
+import {Fragment, TextNode, VNode} from './VNode';
 
 // Use the same empty object to save memory
 // Do NOT mutate it
@@ -10,23 +10,23 @@ const emptyProps = {};
 /**
  *
  * @param {any} content
- * @return {null|VirtualNode}
+ * @return {null|VNode}
  */
- export function createVirtualNodeFromContent(content) {
+ export function createVNodeFromContent(content) {
     if (content instanceof Element) {
-        return _createVirtualNodeFromElement(content);
+        return _createVNodeFromElement(content);
     }
         
     if (isString(content)) {
-        return new VirtualNode(TextNode, content);
+        return new VNode(TextNode, content);
     }
 
     if (isNumber(content)) {
-        return new VirtualNode(TextNode, '' + content);
+        return new VNode(TextNode, '' + content);
     }
 
     if (isArray(content)) {
-        const fragment = new VirtualNode(Fragment, null);
+        const fragment = new VNode(Fragment, null);
         _initializeChildrenFromContent(fragment, content);
         return fragment;
     }
@@ -37,9 +37,9 @@ const emptyProps = {};
 /**
  * 
  * @param {Element} element 
- * @returns {VirtualNode}
+ * @returns {VNode}
  */
-function _createVirtualNodeFromElement(element) {
+function _createVNodeFromElement(element) {
     let type = element.type_;
     let props = element.props_;
     let content = element.content_;
@@ -87,48 +87,48 @@ function _createVirtualNodeFromElement(element) {
     }
     
     // Create the node
-    const virtualNode = new VirtualNode(type, props);
+    const vnode = new VNode(type, props);
 
     // Set key and ref
-    virtualNode.key_ = key;
-    virtualNode.ref_ = ref;
+    vnode.key_ = key;
+    vnode.ref_ = ref;
 
     // Initialize children
     if (content !== undefined) {
         if (isFunction(type)) {
             // JSX children
-            if (virtualNode.props_ === emptyProps) {
-                virtualNode.props_ = {children: content};
+            if (vnode.props_ === emptyProps) {
+                vnode.props_ = {children: content};
             } else {
-                virtualNode.props_.children = content;
+                vnode.props_.children = content;
             }
         } else if (type === TextNode) {
             // Accept only one child
             // Or convert the children to the text content directly
-            virtualNode.props_ = '' + content;
+            vnode.props_ = '' + content;
         } else {
             // Static node
             // Set children directly with static nodes
             if (isArray(content)) {
-                _initializeChildrenFromContent(virtualNode, content);
+                _initializeChildrenFromContent(vnode, content);
             } else {
-                _initializeChildFromContent(virtualNode, content);
+                _initializeChildFromContent(vnode, content);
             }
         }
     }
 
-    return virtualNode;
+    return vnode;
 }
 
 /**
  * 
- * @param {VirtualNode} current 
+ * @param {VNode} current 
  * @param {any[]} content
  */
 function _initializeChildrenFromContent(current, content) {
     let child, prevChild = null, i = 0;
     for (; i < content.length; ++i) {
-        child = createVirtualNodeFromContent(content[i]);
+        child = createVNodeFromContent(content[i]);
         if (child !== null) {
             child.parent_ = current;
             child.slot_ = i;
@@ -146,11 +146,11 @@ function _initializeChildrenFromContent(current, content) {
 
 /**
  * 
- * @param {VirtualNode} current 
+ * @param {VNode} current 
  * @param {any} content
  */
 function _initializeChildFromContent(current, content) {
-    const child = createVirtualNodeFromContent(content);
+    const child = createVNodeFromContent(content);
     if (child !== null) {
         current.child_ = child;
         child.parent_ = current;

@@ -1,5 +1,5 @@
 import {isFunction} from './Util';
-import {createVirtualNodeFromContent} from './CreateVirtualNode';
+import {createVNodeFromContent} from './CreateVNode';
 import {prepareCurrentlyProcessing, flushCurrentlyProcessing} from './CurrentlyProcessing';
 import {catchError} from './CatchError';
 
@@ -36,7 +36,7 @@ function _reconcileChildOfDynamicNode(current, alternate, isRenderRoot) {
     }
     flushCurrentlyProcessing();
 
-    const newChild = createVirtualNodeFromContent(newContent);
+    const newChild = createVNodeFromContent(newContent);
     
     if (newChild !== null) {
         newChild.parent_ = current;

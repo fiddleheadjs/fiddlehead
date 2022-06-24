@@ -3,7 +3,7 @@ import {destroyEffects, EFFECT_LAYOUT, EFFECT_NORMAL, mountEffects} from './Effe
 import {hydrateView} from './HydrateView';
 import {resolveMountingPoint, walkNativeChildren} from './MountingPoint';
 import {reconcileChildren} from './Reconciliation';
-import {Portal} from './VirtualNode';
+import {Portal} from './VNode';
 
 export function renderTree(current) {
     const effectMountNodes = new Map();
@@ -29,20 +29,20 @@ export function renderTree(current) {
     mpt.mountingRef_ = null;
 
     // Layout effects
-    effectDestroyNodes.forEach(function (isUnmounted, node) {
-        destroyEffects(EFFECT_LAYOUT, node, isUnmounted);
+    effectDestroyNodes.forEach(function (isUnmounted, vnode) {
+        destroyEffects(EFFECT_LAYOUT, vnode, isUnmounted);
     });
-    effectMountNodes.forEach(function (isNewlyMounted, node) {
-        mountEffects(EFFECT_LAYOUT, node, isNewlyMounted);
+    effectMountNodes.forEach(function (isNewlyMounted, vnode) {
+        mountEffects(EFFECT_LAYOUT, vnode, isNewlyMounted);
     });
 
     // Effects
     setTimeout(function () {
-        effectDestroyNodes.forEach(function (isUnmounted, node) {
-            destroyEffects(EFFECT_NORMAL, node, isUnmounted);
+        effectDestroyNodes.forEach(function (isUnmounted, vnode) {
+            destroyEffects(EFFECT_NORMAL, vnode, isUnmounted);
         });
-        effectMountNodes.forEach(function (isNewlyMounted, node) {
-            mountEffects(EFFECT_NORMAL, node, isNewlyMounted);
+        effectMountNodes.forEach(function (isNewlyMounted, vnode) {
+            mountEffects(EFFECT_NORMAL, vnode, isNewlyMounted);
         });
     });
 }

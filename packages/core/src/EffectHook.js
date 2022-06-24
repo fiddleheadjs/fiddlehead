@@ -60,18 +60,18 @@ function _useEffectImpl(tag, callback, deps) {
 /**
  *
  * @param {number} effectTag
- * @param {VirtualNode} virtualNode
+ * @param {VNode} vnode
  * @param {boolean} isNewlyMounted
  */
-export function mountEffects(effectTag, virtualNode, isNewlyMounted) {
-    let hook = virtualNode.effectHook_;
+export function mountEffects(effectTag, vnode, isNewlyMounted) {
+    let hook = vnode.effectHook_;
     while (hook !== null) {
         if (hook.tag_ === effectTag) {
             if (isNewlyMounted || _mismatchDeps(hook.deps_, hook.lastDeps_)) {
                 try {
                     _mountEffect(hook);
                 } catch (error) {
-                    catchError(error, virtualNode);
+                    catchError(error, vnode);
                 }
             }
         }
@@ -81,11 +81,11 @@ export function mountEffects(effectTag, virtualNode, isNewlyMounted) {
 
 /**
  * @param {number} effectTag
- * @param {VirtualNode} virtualNode
+ * @param {VNode} vnode
  * @param {boolean} isUnmounted
  */
-export function destroyEffects(effectTag, virtualNode, isUnmounted) {
-    let hook = virtualNode.effectHook_;
+export function destroyEffects(effectTag, vnode, isUnmounted) {
+    let hook = vnode.effectHook_;
     while (hook !== null) {
         if (hook.tag_ === effectTag) {
             if (hook.lastDestroy_ !== null || hook.destroy_ !== null) {
@@ -93,7 +93,7 @@ export function destroyEffects(effectTag, virtualNode, isUnmounted) {
                     try {
                         _destroyEffect(hook, isUnmounted);
                     } catch (error) {
-                        catchError(error, virtualNode);
+                        catchError(error, vnode);
                     }
                 }
             }

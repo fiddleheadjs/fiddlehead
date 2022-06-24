@@ -15,7 +15,7 @@ export function Portal(props) {
  * @param {{}|string|null} props
  * @constructor
  */
-export function VirtualNode(type, props) {
+export function VNode(type, props) {
     // Identification
     // ==============
 
@@ -79,17 +79,17 @@ export function VirtualNode(type, props) {
     // ====================
 
     /**
-     * @type {VirtualNode|null}
+     * @type {VNode|null}
      */
     this.parent_ = null;
     
     /**
-     * @type {VirtualNode|null}
+     * @type {VNode|null}
      */
     this.child_ = null;
 
     /**
-     * @type {VirtualNode|null}
+     * @type {VNode|null}
      */
     this.sibling_ = null;
 
@@ -98,13 +98,13 @@ export function VirtualNode(type, props) {
     
     // The previous version of this node
     /**
-     * @type {VirtualNode|null}
+     * @type {VNode|null}
      */
     this.alternate_ = null;
 
     // The children (and their subtrees, of course) are marked to be deleted
     /**
-     * @type {VirtualNode[]}
+     * @type {VNode[]}
      */
     this.deletions_ = null;
 

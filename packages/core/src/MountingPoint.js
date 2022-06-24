@@ -2,8 +2,8 @@
 // It means that a mounting point can contains native children
 /**
  * 
- * @param {VirtualNode} current 
- * @returns {VirtualNode}
+ * @param {VNode} current 
+ * @returns {VNode}
  */
 export function resolveMountingPoint(current) {
     while (true) {
@@ -21,8 +21,8 @@ export function resolveMountingPoint(current) {
 /**
  * 
  * @param {function} callback 
- * @param {VirtualNode} parent 
- * @param {VirtualNode?} stopBefore
+ * @param {VNode} parent 
+ * @param {VNode?} stopBefore
  * @returns {void}
  */
 export function walkNativeChildren(callback, parent, stopBefore) {
