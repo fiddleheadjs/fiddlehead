@@ -18,15 +18,17 @@
     }
   },
   "scripts": {
-    "dev": "concurrently \"npm run output:watch\" \"npm run playground:watch\" \"npm run bench:watch\" \"npm run playground:start\" \"npm run bench:start\"",
+    "dev": "concurrently \"npm run output:watch\" \"npm run playground:dev:watch\" \"npm run playground:start\" \"npm run bench:watch\" \"npm run bench:start\"",
     "output:build": "cd output && npm run build",
     "output:watch": "cd output && npm run watch",
     "playground:start": "cd playground && npm run start",
-    "playground:build": "cd playground && npm run build",
-    "playground:watch": "cd playground && npm run watch",
+    "playground:build": "cross-env NODE_ENV=production cd playground && npm run build",
+    "playground:watch": "cross-env NODE_ENV=production cd playground && npm run watch",
+    "playground:dev:build": "cross-env NODE_ENV=development cd playground && npm run build",
+    "playground:dev:watch": "cross-env NODE_ENV=development cd playground && npm run watch",
     "bench:start": "cd bench && npm run start",
-    "bench:build": "cd bench && npm run build",
-    "bench:watch": "cd bench && npm run watch",
+    "bench:build": "cross-env NODE_ENV=production cd bench && npm run build",
+    "bench:watch": "cross-env NODE_ENV=production cd bench && npm run watch",
     "lint": "eslint ./packages --config .eslintrc"
   },
   "repository": {
@@ -38,9 +40,10 @@
   "devDependencies": {
     "chalk": "^5.0.1",
     "concurrently": "^7.2.1",
+    "core.pkg": "file:lib/core",
+    "cross-env": "^7.0.3",
     "eslint": "^8.15.0",
     "hook": "file:lib/core",
-    "core.pkg": "file:lib/core",
     "store.pkg": "file:lib/store"
   }
 }
