@@ -4,7 +4,7 @@ import {render} from 'react-dom';
 const memoizedVNode = <em>Memoized<C/></em>;
 
 function Root() {
-    // return <A/>;
+    return <A/>;
 
     const [el, setEl] = useState('A');
 
@@ -25,6 +25,7 @@ function A() {
         <div onClick={() => setClicks(t => t + 1)}>
             {memoizedVNode}
             <span>.A</span>
+            {memoizedVNode}
         </div>
     );
 }
@@ -42,13 +43,13 @@ function B() {
     );
 }
 
-function C() {
+function C({children}) {
     console.log('C');
 
     const [clicks, setClicks] = useState(0);
 
     useEffect(() => {
-        console.log('effect C')
+        console.log('effect C');
     })
 
     return <b onClick={ev => setClicks(t => t + 1)}>.C {clicks}</b>

@@ -3,7 +3,7 @@ import {jsx, render, useState, useEffect} from 'core.pkg';
 const memoizedVNode = <em>Memoized<C/></em>;
 
 function Root() {
-    // return <A/>;
+    return <A/>;
 
     const [el, setEl] = useState('A');
 
@@ -22,8 +22,9 @@ function A() {
 
     return (
         <div onClick={() => setClicks(t => t + 1)}>
-            <i/>{memoizedVNode}
+            {memoizedVNode}
             <span>.A</span>
+            {memoizedVNode}
         </div>
     );
 }

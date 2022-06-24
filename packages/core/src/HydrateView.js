@@ -1,6 +1,6 @@
-import {linkNativeNode, Fragment, TextNode, NAMESPACE_HTML, NAMESPACE_SVG} from './VirtualNode';
+import {Fragment, TextNode, NAMESPACE_HTML, NAMESPACE_SVG} from './VirtualNode';
 import {createNativeElementWithNS, updateNativeElementAttributes, createNativeTextNode, updateNativeTextContent} from './NativeDOM';
-import {attachVirtualNode} from './Externals';
+import {linkNativeNode, attachVirtualNode} from './Externals';
 import {isFunction} from './Util';
 
 // Important!!!

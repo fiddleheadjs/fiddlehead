@@ -1,5 +1,6 @@
 import {Ref} from './RefHook';
-import {isArray, isFunction, isNumber, isString, slice} from './Util';
+import {Element} from './Element';
+import {isArray, isFunction, isNumber, isString} from './Util';
 import {Fragment, TextNode, VirtualNode} from './VirtualNode';
 
 // Use the same empty object to save memory
@@ -8,20 +9,48 @@ const emptyProps = {};
 
 /**
  *
- * @param {string|function} type
- * @param {{}|null} props
  * @param {any} content
- * @return {VirtualNode}
+ * @return {null|VirtualNode}
  */
-export function createElement(type, props, content) {
+ export function createVirtualNodeFromContent(content) {
+    if (content instanceof Element) {
+        return _createVirtualNodeFromElement(content);
+    }
+        
+    if (isString(content)) {
+        return new VirtualNode(TextNode, content);
+    }
+
+    if (isNumber(content)) {
+        return new VirtualNode(TextNode, '' + content);
+    }
+
+    if (isArray(content)) {
+        const fragment = new VirtualNode(Fragment, null);
+        _initializeChildrenFromContent(fragment, content);
+        return fragment;
+    }
+
+    return null;
+}
+
+/**
+ * 
+ * @param {Element} element 
+ * @returns {VirtualNode}
+ */
+function _createVirtualNodeFromElement(element) {
+    let type = element.type_;
+    let props = element.props_;
+    let content = element.content_;
+    
+    // Resolve props, key and ref
     let key = null;
     let ref = null;
-
-    const isTypeFunctional = isFunction(type);
-
+    
     if (props === null) {
         // Functional type always need the props is an object
-        if (isTypeFunctional) {
+        if (isFunction(type)) {
             props = emptyProps;
         }
     } else {
@@ -42,7 +71,7 @@ export function createElement(type, props, content) {
         // Normalize ref
         if (props.ref !== undefined) {
             if (props.ref instanceof Ref) {
-                if (isTypeFunctional) {
+                if (isFunction(type)) {
                     // We allow functional components to access ref prop like normal props
                 } else {
                     ref = props.ref;
@@ -65,14 +94,8 @@ export function createElement(type, props, content) {
     virtualNode.ref_ = ref;
 
     // Initialize children
-    if (arguments.length > 2) {
-        const isContentMultiple = arguments.length > 3;
-
-        if (isContentMultiple) {
-            content = slice.call(arguments, 2);
-        }
-
-        if (isTypeFunctional) {
+    if (content !== undefined) {
+        if (isFunction(type)) {
             // JSX children
             if (virtualNode.props_ === emptyProps) {
                 virtualNode.props_ = {children: content};
@@ -86,7 +109,7 @@ export function createElement(type, props, content) {
         } else {
             // Static node
             // Set children directly with static nodes
-            if (isContentMultiple) {
+            if (isArray(content)) {
                 _initializeChildrenFromContent(virtualNode, content);
             } else {
                 _initializeChildFromContent(virtualNode, content);
@@ -95,33 +118,6 @@ export function createElement(type, props, content) {
     }
 
     return virtualNode;
-}
-
-/**
- *
- * @param {any} content
- * @return {null|VirtualNode}
- */
-export function createVirtualNodeFromContent(content) {
-    if (content instanceof VirtualNode) {
-        return content;
-    }
-        
-    if (isString(content)) {
-        return new VirtualNode(TextNode, content);
-    }
-
-    if (isNumber(content)) {
-        return new VirtualNode(TextNode, '' + content);
-    }
-
-    if (isArray(content)) {
-        const fragment = new VirtualNode(Fragment, null);
-        _initializeChildrenFromContent(fragment, content);
-        return fragment;
-    }
-
-    return null;
 }
 
 /**

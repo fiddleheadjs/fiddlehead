@@ -122,16 +122,3 @@ export function VirtualNode(type, props) {
      */
     this.mountingRef_ = null;
 }
-
-/**
- * 
- * @param {VirtualNode} virtualNode 
- * @param {Node} nativeNode
- */
-export function linkNativeNode(virtualNode, nativeNode) {
-    virtualNode.nativeNode_ = nativeNode;
-
-    if (virtualNode.ref_ !== null) {
-        virtualNode.ref_.current = nativeNode;
-    }
-}

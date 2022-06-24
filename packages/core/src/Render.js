@@ -1,5 +1,5 @@
-import {VirtualNode, linkNativeNode, NAMESPACE_HTML, NAMESPACE_SVG, Portal} from './VirtualNode';
-import {attachVirtualNode, extractVirtualNode} from './Externals';
+import {VirtualNode, NAMESPACE_HTML, NAMESPACE_SVG, Portal} from './VirtualNode';
+import {linkNativeNode, attachVirtualNode, extractVirtualNode} from './Externals';
 import {renderTree} from './RenderTree';
 
 /**
