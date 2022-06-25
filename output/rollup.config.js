@@ -37,7 +37,7 @@ const configs = [];
                         terser({
                             compress: {
                                 module: true,
-                                booleans_as_integers: true,
+                                booleans_as_integers: false,
                                 keep_infinity: true,
                                 keep_fargs: false,
                                 inline: true,
