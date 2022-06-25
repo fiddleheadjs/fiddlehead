@@ -1,4 +1,4 @@
-import {createElement} from './src/Element';
+import {createElement} from './src/JSXElement';
 import {Fragment, TextNode} from './src/VNode';
 import {render, createPortal} from './src/Render';
 import {useState, useError} from './src/StateHook';

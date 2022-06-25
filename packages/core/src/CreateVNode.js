@@ -1,5 +1,5 @@
 import {Ref} from './RefHook';
-import {Element} from './Element';
+import {JSXElement} from './JSXElement';
 import {isArray, isFunction, isNumber, isString} from './Util';
 import {Fragment, TextNode, VNode} from './VNode';
 
@@ -13,7 +13,7 @@ const emptyProps = {};
  * @return {null|VNode}
  */
  export function createVNodeFromContent(content) {
-    if (content instanceof Element) {
+    if (content instanceof JSXElement) {
         return _createVNodeFromElement(content);
     }
         
@@ -36,7 +36,7 @@ const emptyProps = {};
 
 /**
  * 
- * @param {Element} element 
+ * @param {JSXElement} element 
  * @returns {VNode}
  */
 function _createVNodeFromElement(element) {
@@ -98,21 +98,26 @@ function _createVNodeFromElement(element) {
         if (isFunction(type)) {
             // JSX children
             if (vnode.props_ === emptyProps) {
-                vnode.props_ = {children: content};
-            } else {
-                vnode.props_.children = content;
+                vnode.props_ = {};
             }
+            vnode.props_.children = content;
         } else if (type === TextNode) {
             // Accept only one child
             // Or convert the children to the text content directly
-            vnode.props_ = '' + content;
+            vnode.props_ = content;
         } else {
-            // Static node
-            // Set children directly with static nodes
+            // Fragments or DOM nodes
             if (isArray(content)) {
                 _initializeChildrenFromContent(vnode, content);
             } else {
-                _initializeChildFromContent(vnode, content);
+                if (type !== Fragment && (isString(content) || isNumber(content))) {
+                    if (vnode.props_ === null) {
+                        vnode.props_ = {};
+                    }
+                    vnode.props_.textContent = content;
+                } else {
+                    _initializeChildFromContent(vnode, content);
+                }
             }
         }
     }
@@ -122,7 +127,7 @@ function _createVNodeFromElement(element) {
 
 /**
  * 
- * @param {VNode} current 
+ * @param {VNode} current
  * @param {any[]} content
  */
 function _initializeChildrenFromContent(current, content) {
