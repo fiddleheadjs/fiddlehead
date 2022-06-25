@@ -4,35 +4,39 @@ render(<Root/>, document.getElementById('root'));
 
 function Root() {
     const [count, setCount] = useState(0);
-    const [shows, setShows] = useState(false);
-
-    console.log('render root', count, shows);
 
     return (
         <div className="Root">
             <button
                 onClick={() => {
                     setCount(t => t + 1);
-                    setShows(t => !t);
                 }}
             >
                 Click me {count}
             </button>
             {
-                (shows || count % 3 > 0) &&
+                (count % 4 >= 1) &&
                 <DocumentPortal>
-                    <Modal {...{count, setCount, shows, setShows}}>
+                    <Modal {...{count, setCount}}>
                         Xin chao {count}
                     </Modal>
                 </DocumentPortal>
             }
+            {
+                (count % 4 <= 2) &&
+                <DocumentPortal>
+                    <Modal {...{count, setCount}}>
+                        Hello {count}
+                    </Modal>
+                </DocumentPortal>
+            }
         </div>
-    )
+    );
 }
 
-function Modal({children, count, setCount, shows, setShows}) {
+function Modal({children, count, setCount}) {
     const [clicks, setClicks] = useState(0);
-    console.log('render modal', clicks);
+    console.log('render modal', clicks, children);
 
     return (
         <div
@@ -43,7 +47,7 @@ function Modal({children, count, setCount, shows, setShows}) {
                 height: '300px',
                 inset: '0px',
                 margin: 'auto',
-                background: '#FFF',
+                background: '#FFFFFF80',
                 padding: '16px',
                 borderRadius: '4px',
                 boxShadow: '0 6px 12px rgba(0, 0, 0, 0.3)',
@@ -54,7 +58,6 @@ function Modal({children, count, setCount, shows, setShows}) {
             <button
                 onClick={() => {
                     setCount(t => t + 1);
-                    setShows(t => !t);
                     setClicks(t => t + 1);
                 }}
             >

@@ -3,20 +3,51 @@ import {JSXElement} from './JSXElement';
 import {isArray, isFunction, isNumber, isString} from './Util';
 import {Fragment, TextNode, VNode} from './VNode';
 
-// Use the same empty object to save memory
+// Use the same empty object to save memory.
 // Do NOT mutate it
 const emptyProps = {};
+Object.freeze(emptyProps);
+
+/**
+ * 
+ * @param {any} content 
+ * @returns {boolean}
+ */
+export function isValidElement(content) {
+    if (content instanceof JSXElement) {
+        return true;
+    }
+
+    if (isString(content)) {
+        return true;
+    }
+
+    if (isNumber(content)) {
+        return true;
+    }
+
+    if (isArray(content)) {
+        return true;
+    }
+
+    if (content instanceof VNode) {
+        // Support rendering portal nodes
+        return true;
+    }
+
+    return false;
+}
 
 /**
  *
  * @param {any} content
  * @return {null|VNode}
  */
- export function createVNodeFromContent(content) {
+export function createVNodeFromContent(content) {
     if (content instanceof JSXElement) {
         return _createVNodeFromElement(content);
     }
-        
+
     if (isString(content)) {
         return new VNode(TextNode, content);
     }
@@ -27,8 +58,13 @@ const emptyProps = {};
 
     if (isArray(content)) {
         const fragment = new VNode(Fragment, null);
-        _initializeChildrenFromContent(fragment, content);
+        _setChildrenFromContent(fragment, content);
         return fragment;
+    }
+
+    if (content instanceof VNode) {
+        // Support rendering portal nodes
+        return content;
     }
 
     return null;
@@ -40,18 +76,26 @@ const emptyProps = {};
  * @returns {VNode}
  */
 function _createVNodeFromElement(element) {
-    let type = element.type_;
+    // Type and content
+    const type = element.type_;
+    const content = element.content_;
+    const isFunctionalType = isFunction(type);
+    const hasContent = content !== undefined;
+
+    // Resolve props
     let props = element.props_;
-    let content = element.content_;
-    
-    // Resolve props, key and ref
     let key = null;
     let ref = null;
-    
+
     if (props === null) {
-        // Functional type always need the props is an object
-        if (isFunction(type)) {
-            props = emptyProps;
+        // Functional types always need the props to be an object
+        if (isFunctionalType) {
+            if (hasContent) {
+                props = {children: content};
+                Object.freeze(props);
+            } else {
+                props = emptyProps;
+            }
         }
     } else {
         // Normalize key
@@ -67,11 +111,11 @@ function _createVNodeFromElement(element) {
             // we don't try to delete undefined property
             delete props.key;
         }
-    
+
         // Normalize ref
         if (props.ref !== undefined) {
             if (props.ref instanceof Ref) {
-                if (isFunction(type)) {
+                if (isFunctionalType) {
                     // We allow functional components to access ref prop like normal props
                 } else {
                     ref = props.ref;
@@ -84,40 +128,43 @@ function _createVNodeFromElement(element) {
                 delete props.ref;
             }
         }
+
+        // Set children for functional types
+        if (isFunctionalType) {
+            if (hasContent) {
+                props.children = content;
+            }
+            Object.freeze(props);
+        }
     }
-    
-    // Create the node
+
+    // Initialize the node
     const vnode = new VNode(type, props);
 
     // Set key and ref
     vnode.key_ = key;
     vnode.ref_ = ref;
 
-    // Initialize children
-    if (content !== undefined) {
-        if (isFunction(type)) {
-            // JSX children
-            if (vnode.props_ === emptyProps) {
-                vnode.props_ = {};
-            }
-            vnode.props_.children = content;
+    // Set children
+    if (hasContent) {
+        if (isFunctionalType) {
+            // Do nothing here 
         } else if (type === TextNode) {
-            // Accept only one child
-            // Or convert the children to the text content directly
-            vnode.props_ = content;
-        } else {
-            // Fragments or DOM nodes
-            if (isArray(content)) {
-                _initializeChildrenFromContent(vnode, content);
+            // Text nodes accept only one string as the child.
+            // Everything else will be converted to string
+            if (isString(content)) {
+                vnode.props_ = content;
             } else {
-                if (type !== Fragment && (isString(content) || isNumber(content))) {
-                    if (vnode.props_ === null) {
-                        vnode.props_ = {};
-                    }
-                    vnode.props_.textContent = content;
-                } else {
-                    _initializeChildFromContent(vnode, content);
-                }
+                vnode.props_ = '' + content;
+            }
+        } else {
+            // For fragments and HTML elements
+            if (isArray(content)) {
+                // Multiple children.
+                // If the only child is an array, treat its elements as the children of the node
+                _setChildrenFromContent(vnode, content);
+            } else {
+                _setChildFromContent(vnode, content);
             }
         }
     }
@@ -130,7 +177,7 @@ function _createVNodeFromElement(element) {
  * @param {VNode} current
  * @param {any[]} content
  */
-function _initializeChildrenFromContent(current, content) {
+function _setChildrenFromContent(current, content) {
     let child, prevChild = null, i = 0;
     for (; i < content.length; ++i) {
         child = createVNodeFromContent(content[i]);
@@ -154,7 +201,7 @@ function _initializeChildrenFromContent(current, content) {
  * @param {VNode} current 
  * @param {any} content
  */
-function _initializeChildFromContent(current, content) {
+function _setChildFromContent(current, content) {
     const child = createVNodeFromContent(content);
     if (child !== null) {
         current.child_ = child;

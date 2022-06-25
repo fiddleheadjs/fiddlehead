@@ -1,7 +1,12 @@
 import {Fragment, TextNode, NAMESPACE_HTML, NAMESPACE_SVG} from './VNode';
-import {createNativeElementWithNS, updateNativeElementAttributes, createNativeTextNode, updateNativeTextContent} from './NativeDOM';
 import {linkNativeNodeWithVNode, attachVNodeToNativeNode} from './Externals';
 import {isFunction} from './Util';
+import {
+    createNativeElementWithNS,
+    updateNativeElementAttributes,
+    createNativeTextNode,
+    updateNativeTextContent
+} from './NativeDOM';
 
 // Important!!!
 // This module does not handle Portal nodes
@@ -17,7 +22,7 @@ export function hydrateView(vnode) {
     let nativeNode;
     if (vnode.type_ === TextNode) {
         nativeNode = createNativeTextNode(vnode.props_);
-        
+
         // In the production mode, remove text content from the virtual text node
         // to save memory. Later, we will compare the new text with the text content
         // of the native node, though it is not a perfect way to compare.
@@ -57,7 +62,7 @@ export function rehydrateView(newVNode, oldVNode) {
             newVNode.nativeNode_,
             newVNode.props_
         );
-        
+
         // In the production mode, remove text content from the virtual text node
         // to save memory. Later, we will compare the new text with the text content
         // of the native node, though it is not a perfect way to compare.

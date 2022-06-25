@@ -22,6 +22,8 @@ export function createElement(
 
 export {createElement as jsx};
 
+export function isValidElement(content: any): boolean;
+
 export function createRef(initialValue: any): Ref;
 
 export function useState<T>(initialValue: T): [
