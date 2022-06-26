@@ -33,6 +33,7 @@ export function createVNodeFromPortalElement(element) {
     portalVNode.namespace_ = ('ownerSVGElement' in element.nativeNode_) ? NAMESPACE_SVG : NAMESPACE_HTML;
     
     linkNativeNodeWithVNode(portalVNode, element.nativeNode_);
+    
     // Do not attach the vnode to the native node,
     // Because many portals can share the same native node.
 
