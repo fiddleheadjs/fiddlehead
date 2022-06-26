@@ -11,7 +11,7 @@ import {renderTree} from './RenderTree';
     let root = extractVNodeFromNativeNode(targetNativeNode);
 
     if (root) {
-        // Update children
+        // Update the children
         root.props_.children = children;
     } else {
         // Create a new root
