@@ -1,6 +1,6 @@
 import {catchError} from './CatchError';
 import {resolveCurrentStateHook} from './CurrentlyProcessing';
-import {renderTree} from './Render';
+import {renderTree} from './RenderTree';
 import {isFunction} from './Util';
 
 export const STATE_NORMAL = 0;

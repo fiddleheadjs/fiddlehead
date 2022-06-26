@@ -1,4 +1,5 @@
-import {jsx, render, createPortal, useRef, useEffect, useState} from 'core.pkg';
+import React, {useRef, useEffect, useState} from 'react';
+import {render, createPortal} from 'react-dom';
 
 render(<Root/>, document.getElementById('root'));
 
