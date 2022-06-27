@@ -1,4 +1,4 @@
-import {jsx, useError, useState, useEffect} from 'hook';
+import {jsx, useError, useState, useEffect} from 'core.pkg';
 
 function ErrorBoundary({children, errorType}) {
     const [error, clearError] = useError(null);

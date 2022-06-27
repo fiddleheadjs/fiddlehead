@@ -1,5 +1,5 @@
 import {Root} from './effectCalledTimes';
-import {jsx, useEffect} from 'hook';
+import {jsx, useEffect} from 'core.pkg';
 import {renderView, cleanupView} from '../../../testUtils';
 import {waitFor, screen} from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';

@@ -1,4 +1,4 @@
-import {jsx, useState} from "hook";
+import {jsx, useState} from 'core.pkg';
 
 const memoizedNode = (
     <p data-testid='memoized-node'>

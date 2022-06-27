@@ -1,4 +1,4 @@
-import {jsx, useError} from 'hook';
+import {jsx, useError} from 'core.pkg';
 import {screen, waitFor} from '@testing-library/dom';
 import {renderView, cleanupView} from '../../../testUtils';
 import {Root} from './resetStateAfterRemove';

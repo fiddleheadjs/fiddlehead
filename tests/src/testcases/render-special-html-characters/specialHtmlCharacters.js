@@ -1,4 +1,4 @@
-import {jsx, useState} from 'hook';
+import {jsx, useState} from 'core.pkg';
 
 export function Root() {
     const [show, setShow] = useState(true);

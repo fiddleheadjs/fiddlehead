@@ -1,6 +1,6 @@
 import {Root} from './refInEffect';
 import {renderView, cleanupView} from '../../../testUtils';
-import {jsx} from 'hook';
+import {jsx} from 'core.pkg';
 import {screen, waitFor} from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
 

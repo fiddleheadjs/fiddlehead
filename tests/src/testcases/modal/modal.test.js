@@ -1,5 +1,5 @@
 import {Root} from './modal';
-import {jsx} from 'hook';
+import {jsx} from 'core.pkg';
 import {renderView, cleanupView} from '../../../testUtils';
 import {screen, queryByTestId, waitFor} from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';

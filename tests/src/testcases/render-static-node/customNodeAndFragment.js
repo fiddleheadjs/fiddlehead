@@ -1,4 +1,4 @@
-import {jsx, Fragment, useState} from "hook";
+import {jsx, Fragment, useState} from 'core.pkg';
 
 export function Root() {
     const [show, setShow] = useState(true);

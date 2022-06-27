@@ -1,6 +1,6 @@
 import {Root} from './ref';
 import {renderView, cleanupView} from '../../../testUtils';
-import {jsx, useRef} from 'hook';
+import {jsx, useRef} from 'core.pkg';
 import {screen} from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
 

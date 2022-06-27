@@ -1,4 +1,4 @@
-import {jsx, useRef} from 'hook';
+import {jsx, useRef} from 'core.pkg';
 
 export function Root({getMockValue}) {
     const buttonRef = getMockValue ? useRef(null) : {current: null};

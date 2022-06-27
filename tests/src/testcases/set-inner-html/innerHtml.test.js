@@ -1,4 +1,4 @@
-import {jsx, render} from 'hook';
+import {jsx, render} from 'core.pkg';
 import {screen} from '@testing-library/dom';
 
 describe('innerHtml.test.js', () => {

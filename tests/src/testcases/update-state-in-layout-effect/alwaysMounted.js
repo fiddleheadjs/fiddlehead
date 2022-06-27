@@ -1,4 +1,4 @@
-import {jsx, useLayoutEffect, useState} from 'hook';
+import {jsx, useLayoutEffect, useState} from 'core.pkg';
 
 export function Root({
     renderCount,

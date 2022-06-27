@@ -1,5 +1,5 @@
 import {Root} from './mountedAndUpdated';
-import {jsx} from 'hook';
+import {jsx} from 'core.pkg';
 import {renderView, cleanupView} from '../../../testUtils';
 import {screen, waitFor} from '@testing-library/dom';
 import userEvent from '@testing-library/user-event'

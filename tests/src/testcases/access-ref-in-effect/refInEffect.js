@@ -1,4 +1,4 @@
-import {jsx, useRef, useEffect, useState} from 'hook';
+import {jsx, useRef, useEffect, useState} from 'core.pkg';
 
 export function Root({ refCallTimes }) {
     const buttonRef = useRef(null);

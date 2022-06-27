@@ -1,4 +1,4 @@
-import {jsx, createPortal, useState, useRef, useEffect} from 'hook';
+import {jsx, createPortal, useState, useRef, useEffect} from 'core.pkg';
 
 export function Root({
     getMockValue,

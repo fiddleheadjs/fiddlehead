@@ -1,5 +1,5 @@
 import {Root} from './staticNode';
-import {jsx} from 'hook';
+import {jsx} from 'core.pkg';
 import {renderView, cleanupView} from '../../../testUtils';
 import {screen} from '@testing-library/dom';
 

@@ -1,4 +1,4 @@
-import {jsx, useState} from 'hook';
+import {jsx, useState} from 'core.pkg';
 
 export function Root({getMockValue}) {
     const [state1, setState1] = useState(false);

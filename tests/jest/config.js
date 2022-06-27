@@ -31,9 +31,5 @@ module.exports = {
         'jsx',
         'json',
     ],
-    moduleNameMapper: {
-        '\\.(css|less)$': '<rootDir>/jest/__mocks__/styleMock.js',
-        '\\.(gif|ttf|eot|svg)$': '<rootDir>/jest/__mocks__/fileMock.js',
-    },
     resetMocks: true,
 };

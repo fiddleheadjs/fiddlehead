@@ -1,4 +1,4 @@
-import {jsx, useEffect, useState} from 'hook';
+import {jsx, useEffect, useState} from 'core.pkg';
 
 export function Root({unmountedCb1, unmountedCb2}) {
     const [show, setShow] = useState(true);

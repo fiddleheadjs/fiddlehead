@@ -1,4 +1,4 @@
-import {jsx, useState, Fragment} from 'hook';
+import {jsx, useState, Fragment} from 'core.pkg';
 
 function Wrapper({children}) {
    return <>

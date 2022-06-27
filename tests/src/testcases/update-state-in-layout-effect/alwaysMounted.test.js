@@ -1,5 +1,5 @@
 import {Root} from './alwaysMounted';
-import {jsx} from 'hook';
+import {jsx} from 'core.pkg';
 import {renderView, cleanupView} from '../../../testUtils';
 import {waitFor} from '@testing-library/dom';
 

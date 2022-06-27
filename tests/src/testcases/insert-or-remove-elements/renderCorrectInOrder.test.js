@@ -1,5 +1,5 @@
 import {Root} from './renderCorrectInOrder';
-import {jsx} from 'hook';
+import {jsx} from 'core.pkg';
 import {renderView, cleanupView} from '../../../testUtils';
 import {waitFor, screen} from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';

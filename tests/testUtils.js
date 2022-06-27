@@ -1,4 +1,4 @@
-import {render} from 'hook';
+import {render} from 'core.pkg';
 
 export function  renderView(component) {
     const container = document.createElement('div');
