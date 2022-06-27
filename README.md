@@ -32,7 +32,7 @@ npm install babel-loader @babel/core @babel/plugin-transform-react-jsx @babel/pr
     "plugins": [
         ["@babel/plugin-transform-react-jsx", {
             "pragma": "jsx",
-            "pragmaFrag": "'['"
+            "pragmaFrag": "'.'"
         }],
     ],
 }
