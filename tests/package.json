@@ -1,5 +1,5 @@
 {
-    "name": "test",
+    "name": "tests",
     "version": "1.0.0",
     "description": "A lightweight library renders HTML by JS",
     "main": "index.js",
