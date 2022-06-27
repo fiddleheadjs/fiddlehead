@@ -2,7 +2,7 @@ import {insertView, updateView, deleteView} from './CommitView';
 import {destroyEffects, EFFECT_LAYOUT, EFFECT_NORMAL, mountEffects} from './EffectHook';
 import {hydrateView} from './HydrateView';
 import {resolveMountingPoint, walkNativeChildren} from './MountingPoint';
-import {reconcileChildren} from './Reconciliation';
+import {reconcileChildren} from './ReconcileChildren';
 import {Portal} from './VNode';
 
 /**

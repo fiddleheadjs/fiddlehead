@@ -1,11 +1,9 @@
 import {Fragment, TextNode, NAMESPACE_HTML, NAMESPACE_SVG} from './VNode';
-import {linkNativeNodeWithVNode, attachVNodeToNativeNode} from './Externals';
+import {linkNativeNodeWithVNode, attachVNodeToNativeNode} from './NodeToNode';
 import {isFunction} from './Util';
 import {
-    createNativeElementWithNS,
-    updateNativeElementAttributes,
-    createNativeTextNode,
-    updateNativeTextContent
+    createNativeElementWithNS, updateNativeElementAttributes,
+    createNativeTextNode, updateNativeTextContent
 } from './NativeDOM';
 
 // Important!!!

@@ -23,8 +23,8 @@ export function StateHook(tag, initialValue, context) {
 
 export function useState(initialValue) {
     return resolveCurrentStateHook(
-        function (currentNode) {
-            return new StateHook(STATE_NORMAL, initialValue, currentNode);
+        function (currentVNode) {
+            return new StateHook(STATE_NORMAL, initialValue, currentVNode);
         },
         function (currentHook) {
             return [currentHook.value_, currentHook.setValue_];
@@ -34,10 +34,10 @@ export function useState(initialValue) {
 
 export function useError() {
     return resolveCurrentStateHook(
-        function (currentNode) {
+        function (currentVNode) {
             // Make sure we have only one error hook in a component
             if (__DEV__) {
-                let hook = currentNode.stateHook_;
+                let hook = currentVNode.stateHook_;
                 while (hook !== null) {
                     if (hook.tag_ === STATE_ERROR) {
                         console.error('A component accepts only one useError hook');
@@ -45,7 +45,7 @@ export function useError() {
                     hook = hook.next_;
                 }
             }
-            return new StateHook(STATE_ERROR, null, currentNode);
+            return new StateHook(STATE_ERROR, null, currentVNode);
         },
         function (currentHook) {
             return [currentHook.value_, function () {

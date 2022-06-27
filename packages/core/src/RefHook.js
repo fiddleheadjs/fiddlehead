@@ -25,7 +25,7 @@ export function RefHook(current) {
  */
 export function useRef(initialValue) {
     return resolveCurrentRefHook(
-        function (currentNode) {
+        function (currentVNode) {
             return new RefHook(initialValue);
         },
         function (currentHook) {

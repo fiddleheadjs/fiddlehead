@@ -1,6 +1,6 @@
 import {Ref} from './RefHook';
 import {TextNode, VNode} from './VNode';
-import {setChildFromContent, setChildrenFromContent} from './Children';
+import {setChildFromContent, setChildrenFromContent} from './SetChildren';
 import {isArray, isFunction, isNumber, isString, slice} from './Util';
 
 // Use the same empty object to save memory.

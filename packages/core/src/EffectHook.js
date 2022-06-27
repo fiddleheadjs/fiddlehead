@@ -36,7 +36,7 @@ function _useEffectImpl(tag, callback, deps) {
     }
 
     return resolveCurrentEffectHook(
-        function (currentNode) {
+        function (currentVNode) {
             return new EffectHook(tag, callback, deps);
         },
         function (currentHook) {

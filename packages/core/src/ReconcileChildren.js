@@ -50,7 +50,10 @@ function _reconcileChildOfDynamicNode(current, alternate, isRenderRoot) {
     );
     
     if (oldChild !== null) {
-        if (newChild !== null && newChild.type_ === oldChild.type_ && newChild.key_ === oldChild.key_) {
+        if (newChild !== null &&
+            newChild.type_ === oldChild.type_ &&
+            newChild.key_ === oldChild.key_
+        ) {
             _markAlternate(newChild, oldChild);
         } else {
             _addDeletion(current, oldChild);

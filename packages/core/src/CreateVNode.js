@@ -2,7 +2,7 @@ import {createVNodeFromJSXElement, JSXElement} from './JSXElement';
 import {createVNodeFromPortalElement, PortalElement} from './PortalElement';
 import {isArray, isNumber, isString} from './Util';
 import {Fragment, TextNode, VNode} from './VNode';
-import {setChildrenFromContent} from './Children';
+import {setChildrenFromContent} from './SetChildren';
 
 /**
  *

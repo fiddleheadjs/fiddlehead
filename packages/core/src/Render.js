@@ -1,5 +1,5 @@
 import {createPortal, createVNodeFromPortalElement} from './PortalElement';
-import {attachVNodeToNativeNode, extractVNodeFromNativeNode} from './Externals';
+import {attachVNodeToNativeNode, extractVNodeFromNativeNode} from './NodeToNode';
 import {renderTree} from './RenderTree';
 
 /**
