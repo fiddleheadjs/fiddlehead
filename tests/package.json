@@ -1,0 +1,27 @@
+{
+    "name": "test",
+    "version": "1.0.0",
+    "description": "A lightweight library renders HTML by JS",
+    "main": "index.js",
+    "scripts": {
+        "test": "jest --config jest/config.js --no-cache",
+        "test:watch": "jest --config jest/config.js --no-cache --watch"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@git.itim.vn:ads-frontend/hook.git"
+    },
+    "author": "CocCoc Ad Platform",
+    "license": "MIT",
+    "devDependencies": {
+        "@babel/plugin-transform-react-jsx": "^7.17.12",
+        "@babel/preset-env": "^7.18.0",
+        "@testing-library/dom": "^8.13.0",
+        "@testing-library/jest-dom": "^5.16.4",
+        "@testing-library/user-event": "^13.5.0",
+        "babel-jest": "^28.1.0",
+        "jest": "^28.1.0",
+        "jest-environment-jsdom": "^28.1.0",
+        "regenerator-runtime": "^0.13.9"
+    }
+}
