@@ -25,17 +25,9 @@ function _reconcileChildOfDynamicNode(current, alternate, isRenderRoot) {
             stateHook = stateHook.next_;
         }
 
-        // Transfer the update ID.
-        // Don't forget to clean up the alternate,
-        // otherwise, it will cause errors
+        // Transfer the update ID
         current.updateId_ = alternate.updateId_;
         alternate.updateId_ = null;
-    }
-
-    // Cancel the update schedule on the current node
-    if (current.updateId_ !== null) {
-        clearTimeout(current.updateId_);
-        current.updateId_ = null;
     }
 
     let newContent;

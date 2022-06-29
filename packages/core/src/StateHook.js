@@ -82,15 +82,17 @@ function _setState(value) {
 
 function _flushUpdates(hook) {
     // Find the highest node also has pending updates
-    let highestContext;
+    let highestContext = null;
     let current = hook.context_;
-    do {
+    while (current !== null) {
         if (current.updateId_ !== null) {
             highestContext = current;
         }
         current = current.parent_;
-    } while (current !== null);
+    }
 
     // Re-render tree from the highest node
-    renderTree(highestContext);
+    if (highestContext !== null) {
+        renderTree(highestContext);
+    }
 }

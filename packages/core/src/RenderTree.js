@@ -104,13 +104,26 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
     if (current.deletions_ !== null) {
         for (let i = 0; i < current.deletions_.length; ++i) {
             deleteView(current.deletions_[i]);
-            _workLoop(function (node) {
-                if (node.effectHook_ !== null) {
-                    effectDestroyNodes.set(node, true);
+            _workLoop(function (deleted) {
+                if (deleted.effectHook_ !== null) {
+                    effectDestroyNodes.set(deleted, true);
+                }
+                
+                // Important!!!
+                // Cancel the update schedule on the deleted nodes
+                if (deleted.updateId_ !== null) {
+                    clearTimeout(deleted.updateId_);
+                    deleted.updateId_ = null;
                 }
             }, null, current.deletions_[i]);
         }
         current.deletions_ = null;
+    }
+
+    // Cancel the update schedule on the current node
+    if (current.updateId_ !== null) {
+        clearTimeout(current.updateId_);
+        current.updateId_ = null;
     }
 }
 
