@@ -1,21 +1,23 @@
-import {jsx, render, useState, useEffect} from "core.pkg";
+import {jsx, render, useState, useEffect, useRef} from "core.pkg";
+
 
 render(<A />, document.getElementById("root"));
 
 function A() {
     const [shows, setShows] = useState(0);
+    const btn = useRef(null);
 
     console.log('shows in render A', shows);
 
     useEffect(() => {
-        console.log('click in effect A');
-        document.querySelector(".btn-set-state").click();
+        console.log('simulate click in effect A');
+        btn.current.click();
     }, []);
 
     return (
         <div>
             <button
-                class="btn-set-state"
+                ref={btn}
                 onClick={() => {
                     setShows(1);
                 }}
@@ -33,6 +35,7 @@ function B({ shows }) {
     console.log('shows in render B', shows);
 
     useEffect(() => {
+        console.log('clicks++ in effect B');
         setClicks((c) => c + 1);
     }, []);
 
