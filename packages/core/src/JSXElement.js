@@ -100,7 +100,7 @@ export function createElement(type, props, content) {
             if (hasContent) {
                 props.children = content;
             }
-            // Object.freeze(props);
+            Object.freeze(props);
         }
     }
 

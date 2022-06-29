@@ -27,9 +27,7 @@ function _reconcileChildOfDynamicNode(current, alternate, isRenderRoot) {
 
         // Transfer the update ID
         current.updateId_ = alternate.updateId_;
-
-        // Don't need to reset the update ID of the alternate
-        // The alternate itself will be removed
+        alternate.updateId_ = null; // This is NOT redundant
     }
 
     // Cancel the update schedule on the current node
