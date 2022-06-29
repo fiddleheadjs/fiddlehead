@@ -127,7 +127,7 @@ export function VNode(type, props) {
     // But when we batching updates, we use this property to re-render only highest node
     // which also needs re-rendering
     /**
-     * @type {number}
+     * @type {number|null}
      */
     this.updateId_ = null;
 }
