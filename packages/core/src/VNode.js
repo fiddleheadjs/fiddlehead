@@ -104,7 +104,7 @@ export function VNode(type, props) {
 
     // The children (and their subtrees, of course) are marked to be deleted
     /**
-     * @type {VNode[]}
+     * @type {VNode[]|null}
      */
     this.deletions_ = null;
 
