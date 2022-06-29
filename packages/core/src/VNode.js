@@ -108,7 +108,7 @@ export function VNode(type, props) {
      */
     this.deletions_ = null;
 
-    // Insertion flag
+    // Insertion flag.
     // To be used to optimize the painting process
     /**
      * @type {number|null}
