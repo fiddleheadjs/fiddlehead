@@ -112,12 +112,6 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
         }
         current.deletions_ = null;
     }
-
-    // Reset the update ID
-    if (current.updateId_ !== null) {
-        clearTimeout(current.updateId_);
-        current.updateId_ = null;
-    }
 }
 
 // Callback called after walking through a node and all of its ascendants
