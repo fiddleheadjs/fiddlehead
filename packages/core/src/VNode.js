@@ -121,4 +121,13 @@ export function VNode(type, props) {
      * @type {Node|null}
      */
     this.mountingRef_ = null;
+
+    // Timeout ID.
+    // After updating states, we need to re-render the subtree to display the up-to-date UI.
+    // But when we batching updates, we use this property to re-render only highest node
+    // which also needs re-rendering
+    /**
+     * @type {number}
+     */
+    this.updateId_ = null;
 }

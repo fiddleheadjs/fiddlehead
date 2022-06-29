@@ -55,9 +55,6 @@ export function useError() {
     );
 }
 
-const pendingUpdates = new Map();
-let currentTimeoutId = null;
-
 function _setState(value) {
     let newValue;
 
@@ -76,39 +73,24 @@ function _setState(value) {
         // Set value synchronously
         this.value_ = newValue;
 
-        // Enqueue update
-        // We store the hook itself with the purpose of referring to
-        // the up-to-date context when flushing updates.
-        // So, we don't need to store all pending hooks inside a context.
-        pendingUpdates.set(this.context_, this);
-
-        // Reset timer
-        if (currentTimeoutId !== null) {
-            clearTimeout(currentTimeoutId);
+        // Schedule a work to update the UI
+        if (this.context_.updateId_ === null) {
+            this.context_.updateId_ = setTimeout(_flushUpdates, 0, this);
         }
-        currentTimeoutId = setTimeout(_flushUpdates);
     }
 }
 
-function _flushUpdates() {
-    // Clear timeout ID to prepare for new state settings
-    // happened in the renderTree (inside setLayoutEffect)
-    currentTimeoutId = null;
+function _flushUpdates(hook) {
+    // Find the highest node also has pending updates
+    let highestContext;
+    let current = hook.context_;
+    do {
+        if (current.updateId_ !== null) {
+            highestContext = current;
+        }
+        current = current.parent_;
+    } while (current !== null);
 
-    // Copy the hooks and clear pending updates
-    // to prepare for new state settings
-    const hooksAsRefs = [];
-
-    // Important!!!
-    // Do NOT copy hook.context_ here as they
-    // can be outdated during the reconciliation process
-    pendingUpdates.forEach(function (hook, mayBeOutdatedContext) {
-        hooksAsRefs.push(hook);
-    });
-    pendingUpdates.clear();
-    
-    // Re-render trees
-    for (let i = 0; i < hooksAsRefs.length; ++i) {
-        renderTree(hooksAsRefs[i].context_);
-    }
+    // Re-render tree from the highest node
+    renderTree(highestContext);
 }

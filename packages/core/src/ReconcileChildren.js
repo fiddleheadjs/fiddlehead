@@ -24,6 +24,9 @@ function _reconcileChildOfDynamicNode(current, alternate, isRenderRoot) {
             stateHook.context_ = current;
             stateHook = stateHook.next_;
         }
+
+        // Copy the update ID
+        current.updateId_ = alternate.updateId_;
     }
 
     let newContent;

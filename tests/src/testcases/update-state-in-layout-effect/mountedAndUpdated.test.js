@@ -84,7 +84,7 @@ describe('mountedAndUpdated.test.js', () => {
             //change object state 
             expect(updatedCallback1).toBeCalledTimes(2);
             expect(updatedCallback2).toBeCalledTimes(2);
-            expect(updatedCallback3).toBeCalledTimes(3);
+            expect(updatedCallback3).toBeCalledTimes(2);
         });
     });
 
