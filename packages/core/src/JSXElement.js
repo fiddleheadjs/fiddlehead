@@ -1,6 +1,6 @@
 import {Ref} from './RefHook';
 import {TextNode, VNode} from './VNode';
-import {setChildFromContent, setChildrenFromContent} from './SetChildren';
+import {setOnlyChildFromContent, setChildrenFromContent} from './SetChildren';
 import {isArray, isFunction, isNumber, isString, slice} from './Util';
 
 // Use the same empty object to save memory.
@@ -130,7 +130,7 @@ export function createElement(type, props, content) {
                 // If the only child is an array, treat its elements as the children of the node
                 setChildrenFromContent(vnode, content);
             } else {
-                setChildFromContent(vnode, content);
+                setOnlyChildFromContent(vnode, content);
             }
         }
     }

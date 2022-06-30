@@ -30,7 +30,7 @@ import {createVNodeFromContent} from './CreateVNode';
  * @param {VNode} current 
  * @param {any} content
  */
-export function setChildFromContent(current, content) {
+export function setOnlyChildFromContent(current, content) {
     const child = createVNodeFromContent(content);
     if (child !== null) {
         current.child_ = child;
