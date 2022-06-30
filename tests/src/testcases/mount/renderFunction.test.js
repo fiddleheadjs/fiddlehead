@@ -13,12 +13,6 @@ describe('mount.test.js', () => {
         document.body.append(container);
     });
 
-    it('Error logged when container was null', () => {
-        const mountFallback = () => render(<p></p>, null);
-
-        expect(mountFallback).toThrow(new TypeError(`Cannot read property '%vnode' of null`));
-    });
-
     it('Rendering correct doms in innerHtml attribute', () => {
         render(<div data-testid='parent' innerHTML="<p class='child-text' data-testid='child-text'>Child</p>">Parent </div>, container);
 
