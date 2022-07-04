@@ -1,6 +1,6 @@
 /*
 !/lib
 !/index.js
-!/index.d.ts
+!/index.mjs
 !/store.js
-!/store.d.ts
+!/store.mjs
