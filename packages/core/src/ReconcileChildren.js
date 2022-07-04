@@ -5,13 +5,13 @@ import {catchError} from './CatchError';
 
 export function reconcileChildren(current, isRenderRoot) {
     if (isFunction(current.type_)) {
-        _reconcileChildOfDynamicNode(current, current.alternate_, isRenderRoot);
+        _reconcileOnlyChildOfDynamicNode(current, current.alternate_, isRenderRoot);
     } else if (current.alternate_ !== null) {
         _reconcileChildrenOfStaticNode(current, current.alternate_);
     }
 }
 
-function _reconcileChildOfDynamicNode(current, alternate, isRenderRoot) {
+function _reconcileOnlyChildOfDynamicNode(current, alternate, isRenderRoot) {
     if (alternate !== null) {
         // Copy hooks
         current.refHook_ = alternate.refHook_;
