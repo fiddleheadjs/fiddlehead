@@ -7,7 +7,7 @@ import {renderTree} from './RenderTree';
  * @param {any} children 
  * @param {Element} targetNativeNode
  */
- export function render(children, targetNativeNode) {
+ export const render = (children, targetNativeNode) => {
     let root = extractVNodeFromNativeNode(targetNativeNode);
 
     if (root) {

@@ -41,7 +41,7 @@ export function createElement(type, props, content) {
  * @param {JSXElement} element 
  * @returns {VNode}
  */
- export function createVNodeFromJSXElement(element) {
+ export const createVNodeFromJSXElement = (element) => {
     // Type and content
     const type = element.type_;
     const content = element.content_;

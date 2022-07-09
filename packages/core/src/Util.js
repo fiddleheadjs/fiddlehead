@@ -2,27 +2,27 @@ export const hasOwnProperty = Object.prototype.hasOwnProperty;
 
 export const slice = Array.prototype.slice;
 
-export function isString(value) {
+export const isString = (value) => {
     return typeof value === 'string'/* || value instanceof String*/;
 }
 
-export function isNumber(value) {
+export const isNumber = (value) => {
     return typeof value === 'number'/* || value instanceof Number*/;
 }
 
-export function isFunction(value) {
+export const isFunction = (value) => {
     return typeof value === 'function';
 }
 
-export function isArray(value) {
+export const isArray = (value) => {
     return value instanceof Array;
 }
 
-export function isObject(value) {
+export const isObject = (value) => {
     return value !== null && typeof value === 'object';
 }
 
-export function isNullish(value) {
+export const isNullish = (value) => {
     return value === null || value === undefined;
 }
 
@@ -32,7 +32,7 @@ export function isNullish(value) {
  * @param {Array} b 
  * @returns {boolean}
  */
-export function compareArrays(a, b) {
+export const compareArrays = (a, b) => {
     if (a.length !== b.length) {
         return false;
     }

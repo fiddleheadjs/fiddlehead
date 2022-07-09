@@ -21,20 +21,20 @@ export function StateHook(tag, initialValue, context) {
     this.next_ = null;
 }
 
-export function useState(initialValue) {
+export const useState = (initialValue) => {
     return resolveCurrentStateHook(
-        function (currentVNode) {
+        (currentVNode) => {
             return new StateHook(STATE_NORMAL, initialValue, currentVNode);
         },
-        function (currentHook) {
+        (currentHook) => {
             return [currentHook.value_, currentHook.setValue_];
         }
     );
 }
 
-export function useError() {
+export const useError = () => {
     return resolveCurrentStateHook(
-        function (currentVNode) {
+        (currentVNode) => {
             // Make sure we have only one error hook in a component
             if (__DEV__) {
                 let hook = currentVNode.stateHook_;
@@ -47,8 +47,8 @@ export function useError() {
             }
             return new StateHook(STATE_ERROR, null, currentVNode);
         },
-        function (currentHook) {
-            return [currentHook.value_, function () {
+        (currentHook) => {
+            return [currentHook.value_, () => {
                 currentHook.setValue_(null);
             }];
         }
@@ -80,7 +80,7 @@ function _setState(value) {
     }
 }
 
-function _flushUpdates(hook) {
+const _flushUpdates = (hook) => {
     // Find the highest node also has pending updates
     let highestContext = null;
     let current = hook.context_;

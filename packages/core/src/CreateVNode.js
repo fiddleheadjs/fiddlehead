@@ -9,7 +9,7 @@ import {setChildrenFromContent} from './SetChildren';
  * @param {any} content
  * @return {VNode|null}
  */
-export function createVNodeFromContent(content) {
+export const createVNodeFromContent = (content) => {
     if (content instanceof JSXElement) {
         return createVNodeFromJSXElement(content);
     }

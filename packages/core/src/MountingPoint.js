@@ -5,7 +5,7 @@
  * @param {VNode} current 
  * @returns {VNode}
  */
-export function resolveMountingPoint(current) {
+export const resolveMountingPoint = (current) => {
     while (true) {
         if (current === null) {
             return null;
@@ -25,7 +25,7 @@ export function resolveMountingPoint(current) {
  * @param {VNode?} stopBefore
  * @returns {void}
  */
-export function walkNativeChildren(callback, parent, stopBefore) {
+export const walkNativeChildren = (callback, parent, stopBefore) => {
     let current = parent.child_;
     if (current !== null) {
         while (true) {

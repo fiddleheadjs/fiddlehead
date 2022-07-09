@@ -1,19 +1,19 @@
 import {hasOwnProperty, isNullish, isNumber, isString} from './Util';
 
-export function updateNativeTextContent(node, text) {
+export const updateNativeTextContent = (node, text) => {
     if (node.textContent !== text) {
         node.textContent = text;
     }
 }
 
-export function updateNativeElementAttributes(element, newAttributes, oldAttributes) {
+export const updateNativeElementAttributes = (element, newAttributes, oldAttributes) => {
     _updateKeyValues(
         element, newAttributes, oldAttributes,
         _updateElementAttribute, _removeElementAttribute
     );
 }
 
-function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) {
+const _updateElementAttribute = (element, attrName, newAttrValue, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(attrName);
 
     if (attrName === '') {
@@ -38,7 +38,7 @@ function _updateElementAttribute(element, attrName, newAttrValue, oldAttrValue) 
     }
 }
 
-function _removeElementAttribute(element, attrName, oldAttrValue) {
+const _removeElementAttribute = (element, attrName, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(attrName);
     
     if (attrName === '') {
@@ -68,7 +68,7 @@ function _removeElementAttribute(element, attrName, oldAttrValue) {
 
 const onEventRegex = /^on[A-Z]/;
 
-function _normalizeElementAttributeName(attrName) {
+const _normalizeElementAttributeName = (attrName) => {
     // Support React className
     if (attrName === 'className') {
         return 'class';
@@ -82,7 +82,7 @@ function _normalizeElementAttributeName(attrName) {
     return attrName;
 }
 
-function _canBeAttribute(name, value) {
+const _canBeAttribute = (name, value) => {
     if (name === 'innerHTML' || name === 'innerText' || name === 'textContent') {
         return false;
     }
@@ -94,22 +94,22 @@ function _canBeAttribute(name, value) {
     return true;
 }
 
-function _updateStyleProperties(style, newProperties, oldProperties) {
+const _updateStyleProperties = (style, newProperties, oldProperties) => {
     _updateKeyValues(
         style, newProperties, oldProperties,
         _updateStyleProperty, _removeStyleProperty
     );
 }
 
-function _updateStyleProperty(style, propName, newPropValue) {
+const _updateStyleProperty = (style, propName, newPropValue) => {
     style[propName] = newPropValue;
 }
 
-function _removeStyleProperty(style, propName) {
+const _removeStyleProperty = (style, propName) => {
     style[propName] = '';
 }
 
-function _updateKeyValues(target, newKeyValues, oldKeyValues, updateFn, removeFn) {
+const _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn) => {
     const oldEmpty = isNullish(oldKeyValues);
     const newEmpty = isNullish(newKeyValues);
 
@@ -149,7 +149,7 @@ function _updateKeyValues(target, newKeyValues, oldKeyValues, updateFn, removeFn
     }
 }
 
-function _hasOwnNonEmpty(target, prop) {
+const _hasOwnNonEmpty = (target, prop) => {
     return (
         hasOwnProperty.call(target, prop)
         && !isNullish(target[prop])

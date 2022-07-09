@@ -1,6 +1,6 @@
 import {STATE_ERROR} from './StateHook';
 
-export function catchError(error, vnode) {
+export const catchError = (error, vnode) => {
     let parent = vnode.parent_;
     let hook;
 
@@ -8,7 +8,7 @@ export function catchError(error, vnode) {
         hook = parent.stateHook_;
         while (hook !== null) {
             if (hook.tag_ === STATE_ERROR) {
-                hook.setValue_(function (prevError) {
+                hook.setValue_((prevError) => {
                     return prevError || error;
                 });
                 return;

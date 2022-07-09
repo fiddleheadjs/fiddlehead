@@ -17,7 +17,7 @@ export function PortalElement(content, nativeNode) {
  * @param {Element} nativeNode 
  * @returns {PortalElement}
  */
-export function createPortal(content, nativeNode) {
+export const createPortal = (content, nativeNode) => {
     return new PortalElement(content, nativeNode);
 }
 
@@ -26,7 +26,7 @@ export function createPortal(content, nativeNode) {
  * @param {PortalElement} element
  * @returns {VNode}
  */
-export function createVNodeFromPortalElement(element) {
+export const createVNodeFromPortalElement = (element) => {
     const vnode = new VNode(Portal, {children: element.content_});
 
     // Determine the namespace (we only support SVG and HTML namespaces)

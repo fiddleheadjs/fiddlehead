@@ -5,7 +5,7 @@ export const NAMESPACE_SVG = 1;
 // Special node types
 export const TextNode = '#';
 export const Fragment = '[';
-export function Portal(props) {
+export const Portal = (props) => {
     return props.children;
 }
 

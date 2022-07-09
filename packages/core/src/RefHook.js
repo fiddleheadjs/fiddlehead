@@ -23,21 +23,21 @@ export function RefHook(current) {
  *
  * @param {any} initialValue
  */
-export function useRef(initialValue) {
-    return resolveCurrentRefHook(
-        function (currentVNode) {
-            return new RefHook(initialValue);
-        },
-        function (currentHook) {
-            return currentHook.ref_;
-        }
-    );
+ export const createRef = (initialValue) => {
+    return new Ref(initialValue);
 }
 
 /**
  *
  * @param {any} initialValue
  */
-export function createRef(initialValue) {
-    return new Ref(initialValue);
+export const useRef = (initialValue) => {
+    return resolveCurrentRefHook(
+        (currentVNode) => {
+            return new RefHook(initialValue);
+        },
+        (currentHook) => {
+            return currentHook.ref_;
+        }
+    );
 }

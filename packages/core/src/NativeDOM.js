@@ -1,11 +1,11 @@
 import {NAMESPACE_SVG} from './VNode';
 import {updateNativeElementAttributes, updateNativeTextContent} from './NativeAttributes';
 
-export function createNativeTextNode(text) {
+export const createNativeTextNode = (text) => {
     return document.createTextNode(text);
 }
 
-export function createNativeElementWithNS(ns, type, attributes) {
+export const createNativeElementWithNS = (ns, type, attributes) => {
     const element = (ns === NAMESPACE_SVG
         ? document.createElementNS('http://www.w3.org/2000/svg', type)
         : document.createElement(type)
@@ -16,13 +16,13 @@ export function createNativeElementWithNS(ns, type, attributes) {
     return element;
 }
 
-export function removeNativeNode(nativeNode) {
+export const removeNativeNode = (nativeNode) => {
     if (nativeNode.parentNode !== null) {
         nativeNode.parentNode.removeChild(nativeNode);
     }
 }
 
-export function insertNativeNodeAfter(parent, newChild, childBefore) {
+export const insertNativeNodeAfter = (parent, newChild, childBefore) => {
     parent.insertBefore(newChild, (
         childBefore !== null ? childBefore.nextSibling : parent.firstChild
     ));

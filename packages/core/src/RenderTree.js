@@ -9,7 +9,7 @@ import {Portal} from './VNode';
  * 
  * @param {VNode} current
  */
-export function renderTree(current) {
+export const renderTree = (current) => {
     const effectMountNodes = new Map();
     const effectDestroyNodes = new Map();
     
@@ -19,7 +19,7 @@ export function renderTree(current) {
     // In the tree, the mounting point lies at a higher level
     // than the current, so we need to initialize/cleanup
     // its temporary properties from outside of the work loop
-    walkNativeChildren(function (nativeChild) {
+    walkNativeChildren((nativeChild) => {
         mpt.mountingRef_ = nativeChild;
     }, mpt, current);
 
@@ -33,19 +33,19 @@ export function renderTree(current) {
     mpt.mountingRef_ = null;
 
     // Layout effects
-    effectDestroyNodes.forEach(function (isUnmounted, vnode) {
+    effectDestroyNodes.forEach((isUnmounted, vnode) => {
         destroyEffects(EFFECT_LAYOUT, vnode, isUnmounted);
     });
-    effectMountNodes.forEach(function (isNewlyMounted, vnode) {
+    effectMountNodes.forEach((isNewlyMounted, vnode) => {
         mountEffects(EFFECT_LAYOUT, vnode, isNewlyMounted);
     });
 
     // Effects
-    setTimeout(function () {
-        effectDestroyNodes.forEach(function (isUnmounted, vnode) {
+    setTimeout(() => {
+        effectDestroyNodes.forEach((isUnmounted, vnode) => {
             destroyEffects(EFFECT_NORMAL, vnode, isUnmounted);
         });
-        effectMountNodes.forEach(function (isNewlyMounted, vnode) {
+        effectMountNodes.forEach((isNewlyMounted, vnode) => {
             mountEffects(EFFECT_NORMAL, vnode, isNewlyMounted);
         });
     });
@@ -55,7 +55,7 @@ export function renderTree(current) {
 const INSERT_ON_RETURN = 0;
 const INSERT_OFFSCREEN = 1;
 
-function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes) {
+const _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) => {
     const isRenderRoot = current === root;
     
     // Reconcile current's children
@@ -104,7 +104,7 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
     if (current.deletions_ !== null) {
         for (let i = 0; i < current.deletions_.length; ++i) {
             deleteView(current.deletions_[i]);
-            _workLoop(function (deleted) {
+            _workLoop((deleted) => {
                 if (deleted.effectHook_ !== null) {
                     effectDestroyNodes.set(deleted, true);
                 }
@@ -128,7 +128,7 @@ function _performUnitOfWork(current, root, effectMountNodes, effectDestroyNodes)
 }
 
 // Callback called after walking through a node and all of its ascendants
-function _onReturn(current) {
+const _onReturn = (current) => {
     // Process the insert-on-return node before walk out of its subtree
     if (current.insertion_ === INSERT_ON_RETURN) {
         insertView(current);
@@ -140,7 +140,7 @@ function _onReturn(current) {
 }
 
 // Reference: https://github.com/facebook/react/issues/7942
-function _workLoop(performUnit, onReturn, root, D0, D1) {
+const _workLoop = (performUnit, onReturn, root, D0, D1) => {
     let current = root;
     while (true) {
         performUnit(current, root, D0, D1);

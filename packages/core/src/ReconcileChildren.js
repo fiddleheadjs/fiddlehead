@@ -3,7 +3,7 @@ import {createVNodeFromContent} from './CreateVNode';
 import {prepareCurrentlyProcessing, flushCurrentlyProcessing} from './CurrentlyProcessing';
 import {catchError} from './CatchError';
 
-export function reconcileChildren(current, isRenderRoot) {
+export const reconcileChildren = (current, isRenderRoot) => {
     if (isFunction(current.type_)) {
         _reconcileOnlyChildOfDynamicNode(current, current.alternate_, isRenderRoot);
     } else if (current.alternate_ !== null) {
@@ -11,7 +11,7 @@ export function reconcileChildren(current, isRenderRoot) {
     }
 }
 
-function _reconcileOnlyChildOfDynamicNode(current, alternate, isRenderRoot) {
+const _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
     if (alternate !== null) {
         // Copy hooks
         current.refHook_ = alternate.refHook_;
@@ -67,12 +67,12 @@ function _reconcileOnlyChildOfDynamicNode(current, alternate, isRenderRoot) {
     current.child_ = newChild;
 }
 
-function _reconcileChildrenOfStaticNode(current, alternate) {
+const _reconcileChildrenOfStaticNode = (current, alternate) => {
     const oldChildren = _mapChildren(alternate);
     const newChildren = _mapChildren(current);
 
     let newChild;
-    oldChildren.forEach(function (oldChild, mapKey) {
+    oldChildren.forEach((oldChild, mapKey) => {
         newChild = newChildren.get(mapKey);
         if (newChild !== undefined && newChild.type_ === oldChild.type_) {
             _markAlternate(newChild, oldChild);
@@ -82,11 +82,11 @@ function _reconcileChildrenOfStaticNode(current, alternate) {
     });
 }
 
-function _markAlternate(newChild, oldChild) {
+const _markAlternate = (newChild, oldChild) => {
     newChild.alternate_ = oldChild;
 }
 
-function _addDeletion(current, childToDelete) {
+const _addDeletion = (current, childToDelete) => {
     if (current.deletions_ === null) {
         current.deletions_ = [childToDelete];
     } else {
@@ -94,7 +94,7 @@ function _addDeletion(current, childToDelete) {
     }
 }
 
-function _mapChildren(node) {
+const _mapChildren = (node) => {
     const map = new Map();
     let child = node.child_;
     while (child !== null) {

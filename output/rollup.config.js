@@ -1,5 +1,6 @@
 const {terser} = require('rollup-plugin-terser');
 const replace = require('@rollup/plugin-replace');
+const {getBabelOutputPlugin} = require('@rollup/plugin-babel');
 const {name: libraryName} = require('../package.json');
 
 const configs = [];
@@ -33,6 +34,39 @@ const configs = [];
                         replace({
                             __DEV__: false,
                             'core.pkg': libraryName,
+                        }),
+                        terser({
+                            compress: {
+                                module: true,
+                                booleans_as_integers: false,
+                                keep_infinity: true,
+                                keep_fargs: false,
+                                inline: true,
+                            },
+                            mangle: {
+                                properties: {
+                                    regex: /^[^_].*_$/,
+                                },
+                            },
+                        }),
+                    ],
+                },
+                {
+                    file: `../lib/${pkg}/${moduleType}.production.legacy.js`,
+                    format: moduleType,
+                    exports: 'named',
+                    generatedCode: {
+                        preset: 'es5',
+                        // TODO not working?
+                        arrowFunctions: false,
+                    },
+                    plugins: [
+                        replace({
+                            __DEV__: false,
+                            'core.pkg': libraryName,
+                        }),
+                        getBabelOutputPlugin({
+                            presets: ['@babel/preset-env'],
                         }),
                         terser({
                             compress: {

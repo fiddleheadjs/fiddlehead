@@ -5,7 +5,7 @@ const PROP_VNODE = '%vnode';
  * @param {Node} nativeNode 
  * @param {VNode} vnode 
  */
-export function attachVNodeToNativeNode(nativeNode, vnode) {
+export const attachVNodeToNativeNode = (nativeNode, vnode) => {
     nativeNode[PROP_VNODE] = vnode;
 }
 
@@ -14,7 +14,7 @@ export function attachVNodeToNativeNode(nativeNode, vnode) {
  * @param {Node} nativeNode 
  * @returns {VNode|undefined}
  */
-export function extractVNodeFromNativeNode(nativeNode) {
+export const extractVNodeFromNativeNode = (nativeNode) => {
     return nativeNode[PROP_VNODE];
 }
 
@@ -23,7 +23,7 @@ export function extractVNodeFromNativeNode(nativeNode) {
  * @param {VNode} vnode 
  * @param {Node} nativeNode
  */
- export function linkNativeNodeWithVNode(vnode, nativeNode) {
+ export const linkNativeNodeWithVNode = (vnode, nativeNode) => {
     vnode.nativeNode_ = nativeNode;
 
     if (vnode.ref_ !== null) {
