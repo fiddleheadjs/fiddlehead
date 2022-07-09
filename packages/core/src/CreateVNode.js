@@ -9,7 +9,7 @@ import {setChildrenFromContent} from './SetChildren';
  * @param {any} content
  * @return {VNode|null}
  */
-export const createVNodeFromContent = (content) => {
+export let createVNodeFromContent = (content) => {
     if (content instanceof JSXElement) {
         return createVNodeFromJSXElement(content);
     }
@@ -23,7 +23,7 @@ export const createVNodeFromContent = (content) => {
     }
 
     if (isArray(content)) {
-        const fragment = new VNode(Fragment, null);
+        let fragment = new VNode(Fragment, null);
         setChildrenFromContent(fragment, content);
         return fragment;
     }

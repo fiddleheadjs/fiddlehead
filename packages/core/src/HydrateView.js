@@ -9,7 +9,7 @@ import {
 // Important!!!
 // This module does not handle Portal nodes
 
-export const hydrateView = (vnode) => {
+export let hydrateView = (vnode) => {
     vnode.namespace_ = _determineNS(vnode);
 
     // Do nothing more with fragments
@@ -41,7 +41,7 @@ export const hydrateView = (vnode) => {
     }
 }
 
-export const rehydrateView = (newVNode, oldVNode) => {
+export let rehydrateView = (newVNode, oldVNode) => {
     newVNode.namespace_ = _determineNS(newVNode);
 
     // Do nothing more with fragments
@@ -78,7 +78,7 @@ export const rehydrateView = (newVNode, oldVNode) => {
 
 // We only support HTML and SVG namespaces
 // as the most of browsers support
-const _determineNS = (vnode) => {
+let _determineNS = (vnode) => {
     // Intrinsic namespace
     if (vnode.type_ === 'svg') {
         return NAMESPACE_SVG;
@@ -97,6 +97,6 @@ const _determineNS = (vnode) => {
 }
 
 // Check if a node type cannot be hydrated
-const _isDry = (type) => {
+let _isDry = (type) => {
     return type === Fragment || isFunction(type);
 }

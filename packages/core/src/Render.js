@@ -7,7 +7,7 @@ import {renderTree} from './RenderTree';
  * @param {any} children 
  * @param {Element} targetNativeNode
  */
- export const render = (children, targetNativeNode) => {
+ export let render = (children, targetNativeNode) => {
     let root = extractVNodeFromNativeNode(targetNativeNode);
 
     if (root) {
@@ -20,7 +20,7 @@ import {renderTree} from './RenderTree';
                 console.error('Target node must be empty');
             }
         }
-        const portalElement = createPortal(children, targetNativeNode);
+        let portalElement = createPortal(children, targetNativeNode);
         root = createVNodeFromPortalElement(portalElement);
         attachVNodeToNativeNode(targetNativeNode, root);
     }

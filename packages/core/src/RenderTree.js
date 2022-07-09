@@ -9,12 +9,12 @@ import {Portal} from './VNode';
  * 
  * @param {VNode} current
  */
-export const renderTree = (current) => {
-    const effectMountNodes = new Map();
-    const effectDestroyNodes = new Map();
+export let renderTree = (current) => {
+    let effectMountNodes = new Map();
+    let effectDestroyNodes = new Map();
     
     // The mounting point of the current
-    const mpt = resolveMountingPoint(current);
+    let mpt = resolveMountingPoint(current);
 
     // In the tree, the mounting point lies at a higher level
     // than the current, so we need to initialize/cleanup
@@ -55,8 +55,8 @@ export const renderTree = (current) => {
 const INSERT_ON_RETURN = 0;
 const INSERT_OFFSCREEN = 1;
 
-const _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) => {
-    const isRenderRoot = current === root;
+let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) => {
+    let isRenderRoot = current === root;
     
     // Reconcile current's children
     reconcileChildren(current, isRenderRoot);
@@ -128,7 +128,7 @@ const _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes)
 }
 
 // Callback called after walking through a node and all of its ascendants
-const _onReturn = (current) => {
+let _onReturn = (current) => {
     // Process the insert-on-return node before walk out of its subtree
     if (current.insertion_ === INSERT_ON_RETURN) {
         insertView(current);
@@ -140,7 +140,7 @@ const _onReturn = (current) => {
 }
 
 // Reference: https://github.com/facebook/react/issues/7942
-const _workLoop = (performUnit, onReturn, root, D0, D1) => {
+let _workLoop = (performUnit, onReturn, root, D0, D1) => {
     let current = root;
     while (true) {
         performUnit(current, root, D0, D1);

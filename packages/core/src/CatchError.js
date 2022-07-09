@@ -1,6 +1,6 @@
 import {STATE_ERROR} from './StateHook';
 
-export const catchError = (error, vnode) => {
+export let catchError = (error, vnode) => {
     let parent = vnode.parent_;
     let hook;
 

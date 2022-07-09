@@ -3,7 +3,7 @@ import {createVNodeFromContent} from './CreateVNode';
 import {prepareCurrentlyProcessing, flushCurrentlyProcessing} from './CurrentlyProcessing';
 import {catchError} from './CatchError';
 
-export const reconcileChildren = (current, isRenderRoot) => {
+export let reconcileChildren = (current, isRenderRoot) => {
     if (isFunction(current.type_)) {
         _reconcileOnlyChildOfDynamicNode(current, current.alternate_, isRenderRoot);
     } else if (current.alternate_ !== null) {
@@ -11,7 +11,7 @@ export const reconcileChildren = (current, isRenderRoot) => {
     }
 }
 
-const _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
+let _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
     if (alternate !== null) {
         // Copy hooks
         current.refHook_ = alternate.refHook_;
@@ -40,7 +40,7 @@ const _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
     }
     flushCurrentlyProcessing();
 
-    const newChild = createVNodeFromContent(newContent);
+    let newChild = createVNodeFromContent(newContent);
     
     if (newChild !== null) {
         newChild.parent_ = current;
@@ -49,7 +49,7 @@ const _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
         // as a dynamic node can have only one child
     }
 
-    const oldChild = isRenderRoot ? current.child_ : (
+    let oldChild = isRenderRoot ? current.child_ : (
         alternate !== null ? alternate.child_ : null
     );
     
@@ -67,9 +67,9 @@ const _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
     current.child_ = newChild;
 }
 
-const _reconcileChildrenOfStaticNode = (current, alternate) => {
-    const oldChildren = _mapChildren(alternate);
-    const newChildren = _mapChildren(current);
+let _reconcileChildrenOfStaticNode = (current, alternate) => {
+    let oldChildren = _mapChildren(alternate);
+    let newChildren = _mapChildren(current);
 
     let newChild;
     oldChildren.forEach((oldChild, mapKey) => {
@@ -82,11 +82,11 @@ const _reconcileChildrenOfStaticNode = (current, alternate) => {
     });
 }
 
-const _markAlternate = (newChild, oldChild) => {
+let _markAlternate = (newChild, oldChild) => {
     newChild.alternate_ = oldChild;
 }
 
-const _addDeletion = (current, childToDelete) => {
+let _addDeletion = (current, childToDelete) => {
     if (current.deletions_ === null) {
         current.deletions_ = [childToDelete];
     } else {
@@ -94,8 +94,8 @@ const _addDeletion = (current, childToDelete) => {
     }
 }
 
-const _mapChildren = (node) => {
-    const map = new Map();
+let _mapChildren = (node) => {
+    let map = new Map();
     let child = node.child_;
     while (child !== null) {
         if (child.key_ !== null) {

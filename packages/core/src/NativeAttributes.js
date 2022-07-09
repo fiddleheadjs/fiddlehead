@@ -1,19 +1,19 @@
-import {hasOwnProperty, isNullish, isNumber, isString} from './Util';
+import {hasOwnProperty, isNumber, isString} from './Util';
 
-export const updateNativeTextContent = (node, text) => {
+export let updateNativeTextContent = (node, text) => {
     if (node.textContent !== text) {
         node.textContent = text;
     }
 }
 
-export const updateNativeElementAttributes = (element, newAttributes, oldAttributes) => {
+export let updateNativeElementAttributes = (element, newAttributes, oldAttributes) => {
     _updateKeyValues(
         element, newAttributes, oldAttributes,
         _updateElementAttribute, _removeElementAttribute
     );
 }
 
-const _updateElementAttribute = (element, attrName, newAttrValue, oldAttrValue) => {
+let _updateElementAttribute = (element, attrName, newAttrValue, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(attrName);
 
     if (attrName === '') {
@@ -38,7 +38,7 @@ const _updateElementAttribute = (element, attrName, newAttrValue, oldAttrValue) 
     }
 }
 
-const _removeElementAttribute = (element, attrName, oldAttrValue) => {
+let _removeElementAttribute = (element, attrName, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(attrName);
     
     if (attrName === '') {
@@ -66,23 +66,21 @@ const _removeElementAttribute = (element, attrName, oldAttrValue) => {
     }
 }
 
-const onEventRegex = /^on[A-Z]/;
-
-const _normalizeElementAttributeName = (attrName) => {
+let _normalizeElementAttributeName = (attrName) => {
     // Support React className
     if (attrName === 'className') {
         return 'class';
     }
 
     // Support camelcase event listener bindings
-    if (onEventRegex.test(attrName)) {
+    if (/^on[A-Z]/.test(attrName)) {
         return attrName.toLowerCase();
     }
 
     return attrName;
 }
 
-const _canBeAttribute = (name, value) => {
+let _canBeAttribute = (name, value) => {
     if (name === 'innerHTML' || name === 'innerText' || name === 'textContent') {
         return false;
     }
@@ -94,24 +92,24 @@ const _canBeAttribute = (name, value) => {
     return true;
 }
 
-const _updateStyleProperties = (style, newProperties, oldProperties) => {
+let _updateStyleProperties = (style, newProperties, oldProperties) => {
     _updateKeyValues(
         style, newProperties, oldProperties,
         _updateStyleProperty, _removeStyleProperty
     );
 }
 
-const _updateStyleProperty = (style, propName, newPropValue) => {
+let _updateStyleProperty = (style, propName, newPropValue) => {
     style[propName] = newPropValue;
 }
 
-const _removeStyleProperty = (style, propName) => {
+let _removeStyleProperty = (style, propName) => {
     style[propName] = '';
 }
 
-const _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn) => {
-    const oldEmpty = isNullish(oldKeyValues);
-    const newEmpty = isNullish(newKeyValues);
+let _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn) => {
+    let oldEmpty = oldKeyValues == null; // is nullish
+    let newEmpty = newKeyValues == null; // is nullish
 
     let key;
 
@@ -149,9 +147,9 @@ const _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn
     }
 }
 
-const _hasOwnNonEmpty = (target, prop) => {
+let _hasOwnNonEmpty = (target, prop) => {
     return (
         hasOwnProperty.call(target, prop)
-        && !isNullish(target[prop])
+        && target[prop] != null // is not nulllish
     );
 }

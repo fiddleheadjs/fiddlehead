@@ -3,18 +3,18 @@ let currentRefHook = null;
 let currentStateHook = null;
 let currentEffectHook = null;
 
-export const prepareCurrentlyProcessing = (functionalVNode) => {
+export let prepareCurrentlyProcessing = (functionalVNode) => {
     currentVNode = functionalVNode;
 }
 
-export const flushCurrentlyProcessing = () => {
+export let flushCurrentlyProcessing = () => {
     currentVNode = null;
     currentRefHook = null;
     currentStateHook = null;
     currentEffectHook = null;
 }
 
-export const resolveCurrentRefHook = (createHookFn, processFn) => {
+export let resolveCurrentRefHook = (createHookFn, processFn) => {
     _throwIfCallInvalid();
     currentRefHook = _resolveCurrentHookImpl(createHookFn, currentRefHook, currentVNode.refHook_);
     if (currentVNode.refHook_ === null) {
@@ -23,7 +23,7 @@ export const resolveCurrentRefHook = (createHookFn, processFn) => {
     return processFn(currentRefHook);
 }
 
-export const resolveCurrentStateHook = (createHookFn, processFn) => {
+export let resolveCurrentStateHook = (createHookFn, processFn) => {
     _throwIfCallInvalid();
     currentStateHook = _resolveCurrentHookImpl(createHookFn, currentStateHook, currentVNode.stateHook_);
     if (currentVNode.stateHook_ === null) {
@@ -32,7 +32,7 @@ export const resolveCurrentStateHook = (createHookFn, processFn) => {
     return processFn(currentStateHook);
 }
 
-export const resolveCurrentEffectHook = (createHookFn, processFn) => {
+export let resolveCurrentEffectHook = (createHookFn, processFn) => {
     _throwIfCallInvalid();
     currentEffectHook = _resolveCurrentHookImpl(createHookFn, currentEffectHook, currentVNode.effectHook_);
     if (currentVNode.effectHook_ === null) {
@@ -41,7 +41,7 @@ export const resolveCurrentEffectHook = (createHookFn, processFn) => {
     return processFn(currentEffectHook);
 }
 
-const _resolveCurrentHookImpl = (createHookFn, currentHook, firstHookOfNode) => {
+let _resolveCurrentHookImpl = (createHookFn, currentHook, firstHookOfNode) => {
     if (currentHook === null) {
         if (firstHookOfNode === null) {
             return createHookFn(currentVNode);
@@ -50,7 +50,7 @@ const _resolveCurrentHookImpl = (createHookFn, currentHook, firstHookOfNode) => 
         }
     } else {
         if (currentHook.next_ === null) {
-            const nextHook = createHookFn(currentVNode);
+            let nextHook = createHookFn(currentVNode);
             currentHook.next_ = nextHook;
             return nextHook;
         } else {
@@ -59,7 +59,7 @@ const _resolveCurrentHookImpl = (createHookFn, currentHook, firstHookOfNode) => 
     }
 }
 
-const _throwIfCallInvalid = () => {
+let _throwIfCallInvalid = () => {
     if (currentVNode === null) {
         throw new Error('Cannot use hooks from outside of components');
     }

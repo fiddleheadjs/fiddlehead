@@ -5,20 +5,20 @@ import {insertNativeNodeAfter, removeNativeNode} from './NativeDOM';
 // Important!!!
 // This module does not handle Portal nodes
 
-export const updateView = (newVNode, oldVNode) => {
+export let updateView = (newVNode, oldVNode) => {
     rehydrateView(newVNode, oldVNode);
 
     if (newVNode.nativeNode_ !== null) {
-        const mpt = resolveMountingPoint(newVNode.parent_);
+        let mpt = resolveMountingPoint(newVNode.parent_);
         if (mpt !== null) {
             mpt.mountingRef_ = newVNode.nativeNode_;
         }
     }
 }
 
-export const insertView = (vnode) => {
+export let insertView = (vnode) => {
     if (vnode.nativeNode_ !== null) {
-        const mpt = resolveMountingPoint(vnode.parent_);
+        let mpt = resolveMountingPoint(vnode.parent_);
         if (mpt !== null) {
             insertNativeNodeAfter(mpt.nativeNode_, vnode.nativeNode_, mpt.mountingRef_);
             mpt.mountingRef_ = vnode.nativeNode_;
@@ -26,7 +26,7 @@ export const insertView = (vnode) => {
     }
 }
 
-export const deleteView = (vnode) => {
+export let deleteView = (vnode) => {
     if (vnode.nativeNode_ !== null) {
         removeNativeNode(vnode.nativeNode_);
     } else {

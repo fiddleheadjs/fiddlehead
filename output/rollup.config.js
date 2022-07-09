@@ -6,85 +6,57 @@ const {name: libraryName} = require('../package.json');
 const configs = [];
 ['core', 'store'].forEach((pkg) => {
     ['cjs', 'esm'].forEach((moduleType) => {
-        configs.push({
-            input: `../packages/${pkg}/index.js`,
-            external: pkg !== 'core' ? ['core.pkg'] : [],
-            output: [
-                {
-                    file: `../lib/${pkg}/${moduleType}.development.js`,
-                    format: moduleType,
-                    exports: 'named',
-                    plugins: [
-                        replace({
-                            __DEV__: true,
-                            'core.pkg': libraryName,
-                        }),
-                    ],
-                },
-                {
-                    file: `../lib/${pkg}/${moduleType}.production.js`,
-                    format: moduleType,
-                    exports: 'named',
-                    generatedCode: {
-                        preset: 'es5',
-                        // TODO not working?
-                        arrowFunctions: false,
+        [false, true].forEach((supportsLegacy) => {
+            const __legacy = supportsLegacy ? '.legacy' : '';
+            
+            configs.push({
+                input: `../packages/${pkg}/index.js`,
+                external: pkg !== 'core' ? ['core.pkg'] : [],
+                output: [
+                    {
+                        file: `../lib/${pkg}/${moduleType}.development${__legacy}.js`,
+                        format: moduleType,
+                        exports: 'named',
+                        plugins: [
+                            replace({
+                                __DEV__: true,
+                                'core.pkg': libraryName,
+                            }),
+                            supportsLegacy ? getBabelOutputPlugin({
+                                presets: ['@babel/preset-env'],
+                            }) : null,
+                        ],
                     },
-                    plugins: [
-                        replace({
-                            __DEV__: false,
-                            'core.pkg': libraryName,
-                        }),
-                        terser({
-                            compress: {
-                                module: true,
-                                booleans_as_integers: false,
-                                keep_infinity: true,
-                                keep_fargs: false,
-                                inline: true,
-                            },
-                            mangle: {
-                                properties: {
-                                    regex: /^[^_].*_$/,
+                    {
+                        file: `../lib/${pkg}/${moduleType}.production${__legacy}.js`,
+                        format: moduleType,
+                        exports: 'named',
+                        plugins: [
+                            replace({
+                                __DEV__: false,
+                                'core.pkg': libraryName,
+                            }),
+                            supportsLegacy ? getBabelOutputPlugin({
+                                presets: ['@babel/preset-env'],
+                            }) : null,
+                            terser({
+                                compress: {
+                                    module: true,
+                                    booleans_as_integers: false,
+                                    keep_infinity: true,
+                                    keep_fargs: false,
+                                    inline: true,
                                 },
-                            },
-                        }),
-                    ],
-                },
-                {
-                    file: `../lib/${pkg}/${moduleType}.production.legacy.js`,
-                    format: moduleType,
-                    exports: 'named',
-                    generatedCode: {
-                        preset: 'es5',
-                        // TODO not working?
-                        arrowFunctions: false,
+                                mangle: {
+                                    properties: {
+                                        regex: /^[^_].*_$/,
+                                    },
+                                },
+                            }),
+                        ],
                     },
-                    plugins: [
-                        replace({
-                            __DEV__: false,
-                            'core.pkg': libraryName,
-                        }),
-                        getBabelOutputPlugin({
-                            presets: ['@babel/preset-env'],
-                        }),
-                        terser({
-                            compress: {
-                                module: true,
-                                booleans_as_integers: false,
-                                keep_infinity: true,
-                                keep_fargs: false,
-                                inline: true,
-                            },
-                            mangle: {
-                                properties: {
-                                    regex: /^[^_].*_$/,
-                                },
-                            },
-                        }),
-                    ],
-                },
-            ]
+                ]
+            });
         });
     });
 });

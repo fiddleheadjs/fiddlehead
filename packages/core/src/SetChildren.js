@@ -6,7 +6,7 @@ import {createVNodeFromContent} from './CreateVNode';
  * @param {VNode} current
  * @param {any[]} content
  */
- export const setChildrenFromContent = (current, content) => {
+ export let setChildrenFromContent = (current, content) => {
     let child, prevChild = null, i = 0;
     for (; i < content.length; ++i) {
         child = createVNodeFromContent(content[i]);
@@ -30,8 +30,8 @@ import {createVNodeFromContent} from './CreateVNode';
  * @param {VNode} current 
  * @param {any} content
  */
-export const setOnlyChildFromContent = (current, content) => {
-    const child = createVNodeFromContent(content);
+export let setOnlyChildFromContent = (current, content) => {
+    let child = createVNodeFromContent(content);
     if (child !== null) {
         current.child_ = child;
         child.parent_ = current;

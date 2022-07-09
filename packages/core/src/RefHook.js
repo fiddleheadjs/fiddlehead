@@ -23,7 +23,7 @@ export function RefHook(current) {
  *
  * @param {any} initialValue
  */
- export const createRef = (initialValue) => {
+ export let createRef = (initialValue) => {
     return new Ref(initialValue);
 }
 
@@ -31,7 +31,7 @@ export function RefHook(current) {
  *
  * @param {any} initialValue
  */
-export const useRef = (initialValue) => {
+export let useRef = (initialValue) => {
     return resolveCurrentRefHook(
         (currentVNode) => {
             return new RefHook(initialValue);

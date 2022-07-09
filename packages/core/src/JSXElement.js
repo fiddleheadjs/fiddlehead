@@ -41,12 +41,12 @@ export function createElement(type, props, content) {
  * @param {JSXElement} element 
  * @returns {VNode}
  */
- export const createVNodeFromJSXElement = (element) => {
+ export let createVNodeFromJSXElement = (element) => {
     // Type and content
-    const type = element.type_;
-    const content = element.content_;
-    const isFunctionalType = isFunction(type);
-    const hasContent = content !== undefined;
+    let type = element.type_;
+    let content = element.content_;
+    let isFunctionalType = isFunction(type);
+    let hasContent = content !== undefined;
 
     // Resolve props
     let props = element.props_;
@@ -98,7 +98,7 @@ export function createElement(type, props, content) {
     }
 
     // Initialize the node
-    const vnode = new VNode(type, props);
+    let vnode = new VNode(type, props);
 
     // Set key and ref
     vnode.key_ = key;

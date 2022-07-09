@@ -21,7 +21,7 @@ export function StateHook(tag, initialValue, context) {
     this.next_ = null;
 }
 
-export const useState = (initialValue) => {
+export let useState = (initialValue) => {
     return resolveCurrentStateHook(
         (currentVNode) => {
             return new StateHook(STATE_NORMAL, initialValue, currentVNode);
@@ -32,7 +32,7 @@ export const useState = (initialValue) => {
     );
 }
 
-export const useError = () => {
+export let useError = () => {
     return resolveCurrentStateHook(
         (currentVNode) => {
             // Make sure we have only one error hook in a component
@@ -80,7 +80,7 @@ function _setState(value) {
     }
 }
 
-const _flushUpdates = (hook) => {
+let _flushUpdates = (hook) => {
     // Find the highest node also has pending updates
     let highestContext = null;
     let current = hook.context_;

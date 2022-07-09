@@ -22,15 +22,15 @@ export function EffectHook(tag, callback, deps) {
     this.next_ = null;
 }
 
-export const useEffect = (callback, deps) => {
+export let useEffect = (callback, deps) => {
     return _useEffectImpl(EFFECT_NORMAL, callback, deps);
 }
 
-export const useLayoutEffect = (callback, deps) => {
+export let useLayoutEffect = (callback, deps) => {
     return _useEffectImpl(EFFECT_LAYOUT, callback, deps);
 }
 
-const _useEffectImpl = (tag, callback, deps) => {
+let _useEffectImpl = (tag, callback, deps) => {
     if (deps === undefined) {
         deps = null;
     }
@@ -63,7 +63,7 @@ const _useEffectImpl = (tag, callback, deps) => {
  * @param {VNode} vnode
  * @param {boolean} isNewlyMounted
  */
-export const mountEffects = (effectTag, vnode, isNewlyMounted) => {
+export let mountEffects = (effectTag, vnode, isNewlyMounted) => {
     let hook = vnode.effectHook_;
     while (hook !== null) {
         if (hook.tag_ === effectTag) {
@@ -84,7 +84,7 @@ export const mountEffects = (effectTag, vnode, isNewlyMounted) => {
  * @param {VNode} vnode
  * @param {boolean} isUnmounted
  */
-export const destroyEffects = (effectTag, vnode, isUnmounted) => {
+export let destroyEffects = (effectTag, vnode, isUnmounted) => {
     let hook = vnode.effectHook_;
     while (hook !== null) {
         if (hook.tag_ === effectTag) {
@@ -106,7 +106,7 @@ export const destroyEffects = (effectTag, vnode, isUnmounted) => {
  *
  * @param {EffectHook} hook
  */
-const _mountEffect = (hook) => {
+let _mountEffect = (hook) => {
     // Save the last ones for the next time
     hook.lastDeps_ = hook.deps_;
     hook.lastDestroy_ = hook.destroy_;
@@ -123,7 +123,7 @@ const _mountEffect = (hook) => {
  * @param {EffectHook} hook
  * @param {boolean} isUnmounted
  */
-const _destroyEffect = (hook, isUnmounted) => {
+let _destroyEffect = (hook, isUnmounted) => {
     if (hook.lastDestroy_ !== null && !isUnmounted) {
         hook.lastDestroy_();
         return;
@@ -140,7 +140,7 @@ const _destroyEffect = (hook, isUnmounted) => {
  * @param {[]|null} lastDeps 
  * @returns {boolean}
  */
-const _mismatchDeps = (deps, lastDeps) => {
+let _mismatchDeps = (deps, lastDeps) => {
     // Always
     if (deps === null) {
         return true;

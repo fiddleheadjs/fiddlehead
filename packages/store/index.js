@@ -5,13 +5,16 @@ import {useEffect, useState} from 'core.pkg';
  * @param {{}} initialData 
  * @returns {Store}
  */
-export function createStore(initialData) {
-    if (initialData === null || typeof initialData !== 'object') {
-        throw new Error('Store data must be an object');
+export let createStore = (initialData) => {
+    if (!(
+        initialData != null && // is not nullish
+        initialData.constructor === Object
+    )) {
+        throw new Error('Store data must be a plain object');
     }
     
-    const data = initialData;
-    const subscribers = new Set();
+    let data = initialData;
+    let subscribers = new Set();
 
     return {
         get data() {
@@ -19,7 +22,7 @@ export function createStore(initialData) {
         },
         setData(setFn) {
             setFn(data);
-            subscribers.forEach(function (subscriber) {
+            subscribers.forEach((subscriber) => {
                 subscriber(data);
             });
         },
@@ -35,16 +38,16 @@ export function createStore(initialData) {
  * @param {function?} compareFn
  * @returns {any}
  */
-export function useReadableStore(store, readFn, compareFn) {
-    const [value, setValue] = useState(readFn(store.data));
+export let useReadableStore = (store, readFn, compareFn) => {
+    let datum = useState(readFn(store.data));
 
-    useEffect(function () {
-        const subscriber = function (data) {
+    useEffect(() => {
+        let subscriber = (data) => {
             if (compareFn === undefined) {
-                setValue(readFn(data));
+                datum[1](readFn(data));
             } else {
-                setValue(function (prevValue) {
-                    const newValue = readFn(data);
+                datum[1]((prevValue) => {
+                    let newValue = readFn(data);
                     if (compareFn(prevValue, newValue)) {
                         return prevValue;
                     } else {
@@ -54,12 +57,12 @@ export function useReadableStore(store, readFn, compareFn) {
             }
         };
         store.subscribe(subscriber);
-        return function () {
+        return () => {
             store.unsubscribe(subscriber);
         };
     }, [store, readFn, compareFn]);
 
-    return value;
+    return datum[0];
 }
 
 /**
@@ -68,9 +71,9 @@ export function useReadableStore(store, readFn, compareFn) {
  * @param {function} writeFn
  * @returns {function}
  */
-export function useWritableStore(store, writeFn) {
-    return function (value) {
-        store.setData(function (data) {
+export let useWritableStore = (store, writeFn) => {
+    return (value) => {
+        store.setData((data) => {
             writeFn(data, value);
         });
     };
