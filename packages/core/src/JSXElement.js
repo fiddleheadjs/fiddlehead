@@ -65,42 +65,35 @@ export function createElement(type, props, content) {
         }
     } else {
         // Normalize key
-        // Accept any data type, except number and undefined
+        // Accept any data type, except number (convert to string) and undefined
         if (props.key !== undefined) {
             if (isNumber(props.key)) {
                 key = '' + props.key;
             } else {
                 key = props.key;
             }
-
-            // Delete key from props, but for performance,
-            // we don't try to delete undefined property
             delete props.key;
         }
 
-        // Normalize ref
-        if (props.ref !== undefined) {
-            if (props.ref instanceof Ref) {
-                if (isFunctionalType) {
-                    // We allow functional components to access ref prop like normal props
-                } else {
-                    ref = props.ref;
-                    delete props.ref;
-                }
-            } else {
-                if (__DEV__) {
-                    console.error('The ref value must be created by the useRef hook');
-                }
-                delete props.ref;
-            }
-        }
-
         // Set children for functional types
+        // and set ref for static types.
+        // Allow functional types to access ref normally
         if (isFunctionalType) {
             if (hasContent) {
                 props.children = content;
             }
             Object.freeze(props);
+        } else {
+            if (props.ref !== undefined) {
+                if (props.ref instanceof Ref) {
+                    ref = props.ref;
+                } else {
+                    if (__DEV__) {
+                        console.error('The ref property is invalid');
+                    }
+                }
+                delete props.ref;
+            }
         }
     }
 
