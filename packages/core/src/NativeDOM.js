@@ -3,7 +3,7 @@ import {updateNativeElementAttributes, updateNativeTextContent} from './NativeAt
 
 export let createNativeTextNode = (text) => {
     return document.createTextNode(text);
-}
+};
 
 export let createNativeElementWithNS = (ns, type, attributes) => {
     let element = (ns === NAMESPACE_SVG
@@ -14,21 +14,21 @@ export let createNativeElementWithNS = (ns, type, attributes) => {
     updateNativeElementAttributes(element, attributes);
     
     return element;
-}
+};
 
 export let removeNativeNode = (nativeNode) => {
     if (nativeNode.parentNode !== null) {
         nativeNode.parentNode.removeChild(nativeNode);
     }
-}
+};
 
 export let insertNativeNodeAfter = (parent, newChild, childBefore) => {
     parent.insertBefore(newChild, (
         childBefore !== null ? childBefore.nextSibling : parent.firstChild
     ));
-}
+};
 
 export {
     updateNativeElementAttributes,
     updateNativeTextContent,
-}
+};

@@ -4,14 +4,14 @@ export let updateNativeTextContent = (node, text) => {
     if (node.textContent !== text) {
         node.textContent = text;
     }
-}
+};
 
 export let updateNativeElementAttributes = (element, newAttributes, oldAttributes) => {
     _updateKeyValues(
         element, newAttributes, oldAttributes,
         _updateElementAttribute, _removeElementAttribute
     );
-}
+};
 
 let _updateElementAttribute = (element, attrName, newAttrValue, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(attrName);
@@ -36,7 +36,7 @@ let _updateElementAttribute = (element, attrName, newAttrValue, oldAttrValue) =>
             // Property may not writable
         }
     }
-}
+};
 
 let _removeElementAttribute = (element, attrName, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(attrName);
@@ -64,7 +64,7 @@ let _removeElementAttribute = (element, attrName, oldAttrValue) => {
             // Property may not writable
         }
     }
-}
+};
 
 let _normalizeElementAttributeName = (attrName) => {
     // Support React className
@@ -78,7 +78,7 @@ let _normalizeElementAttributeName = (attrName) => {
     }
 
     return attrName;
-}
+};
 
 let _canBeAttribute = (name, value) => {
     if (name === 'innerHTML' || name === 'innerText' || name === 'textContent') {
@@ -90,22 +90,22 @@ let _canBeAttribute = (name, value) => {
     }
 
     return true;
-}
+};
 
 let _updateStyleProperties = (style, newProperties, oldProperties) => {
     _updateKeyValues(
         style, newProperties, oldProperties,
         _updateStyleProperty, _removeStyleProperty
     );
-}
+};
 
 let _updateStyleProperty = (style, propName, newPropValue) => {
     style[propName] = newPropValue;
-}
+};
 
 let _removeStyleProperty = (style, propName) => {
     style[propName] = '';
-}
+};
 
 let _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn) => {
     let oldEmpty = oldKeyValues == null; // is nullish
@@ -145,11 +145,11 @@ let _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn) 
             }
         }
     }
-}
+};
 
 let _hasOwnNonEmpty = (target, prop) => {
     return (
         hasOwnProperty.call(target, prop)
         && target[prop] != null // is not nulllish
     );
-}
+};

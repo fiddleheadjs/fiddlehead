@@ -49,7 +49,7 @@ export let renderTree = (current) => {
             mountEffects(EFFECT_NORMAL, vnode, isNewlyMounted);
         });
     });
-}
+};
 
 // Optimize insertion to reduce reflow number
 const INSERT_ON_RETURN = 0;
@@ -125,7 +125,7 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
         clearTimeout(current.updateId_);
         current.updateId_ = null;
     }
-}
+};
 
 // Callback called after walking through a node and all of its ascendants
 let _onReturn = (current) => {
@@ -137,7 +137,7 @@ let _onReturn = (current) => {
     // This is when we cleanup the remaining temporary properties
     current.mountingRef_ = null;
     current.insertion_ = null;
-}
+};
 
 // Reference: https://github.com/facebook/react/issues/7942
 let _workLoop = (performUnit, onReturn, root, D0, D1) => {
@@ -162,4 +162,4 @@ let _workLoop = (performUnit, onReturn, root, D0, D1) => {
         }
         current = current.sibling_;
     }
-}
+};

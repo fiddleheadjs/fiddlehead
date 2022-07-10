@@ -7,7 +7,7 @@ export const TextNode = '#';
 export const Fragment = '[';
 export const Portal = (props) => {
     return props.children;
-}
+};
 
 /**
  * 

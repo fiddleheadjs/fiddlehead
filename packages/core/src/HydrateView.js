@@ -39,7 +39,7 @@ export let hydrateView = (vnode) => {
     if (__DEV__) {
         attachVNodeToNativeNode(nativeNode, vnode);
     }
-}
+};
 
 export let rehydrateView = (newVNode, oldVNode) => {
     newVNode.namespace_ = _determineNS(newVNode);
@@ -74,7 +74,7 @@ export let rehydrateView = (newVNode, oldVNode) => {
             oldVNode.props_
         );
     }
-}
+};
 
 // We only support HTML and SVG namespaces
 // as the most of browsers support
@@ -94,9 +94,9 @@ let _determineNS = (vnode) => {
 
     // By default, pass namespace below.
     return vnode.parent_.namespace_;
-}
+};
 
 // Check if a node type cannot be hydrated
 let _isDry = (type) => {
     return type === Fragment || isFunction(type);
-}
+};

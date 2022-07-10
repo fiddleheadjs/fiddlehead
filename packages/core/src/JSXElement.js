@@ -28,20 +28,20 @@ export function JSXElement(type, props, content) {
  * @param {any} content
  * @returns {JSXElement}
  */
-export function createElement(type, props, content) {
+export let createElement = function (type, props, content) {
     if (arguments.length > 3) {
         content = slice.call(arguments, 2);
     }
     
     return new JSXElement(type, props, content);
-}
+};
 
 /**
  * 
  * @param {JSXElement} element 
  * @returns {VNode}
  */
- export let createVNodeFromJSXElement = (element) => {
+export let createVNodeFromJSXElement = (element) => {
     // Type and content
     let type = element.type_;
     let content = element.content_;
@@ -129,4 +129,4 @@ export function createElement(type, props, content) {
     }
 
     return vnode;
-}
+};

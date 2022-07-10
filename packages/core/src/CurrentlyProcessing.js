@@ -5,14 +5,14 @@ let currentEffectHook = null;
 
 export let prepareCurrentlyProcessing = (functionalVNode) => {
     currentVNode = functionalVNode;
-}
+};
 
 export let flushCurrentlyProcessing = () => {
     currentVNode = null;
     currentRefHook = null;
     currentStateHook = null;
     currentEffectHook = null;
-}
+};
 
 export let resolveCurrentRefHook = (createHookFn, processFn) => {
     _throwIfCallInvalid();
@@ -21,7 +21,7 @@ export let resolveCurrentRefHook = (createHookFn, processFn) => {
         currentVNode.refHook_ = currentRefHook;
     }
     return processFn(currentRefHook);
-}
+};
 
 export let resolveCurrentStateHook = (createHookFn, processFn) => {
     _throwIfCallInvalid();
@@ -30,7 +30,7 @@ export let resolveCurrentStateHook = (createHookFn, processFn) => {
         currentVNode.stateHook_ = currentStateHook;
     }
     return processFn(currentStateHook);
-}
+};
 
 export let resolveCurrentEffectHook = (createHookFn, processFn) => {
     _throwIfCallInvalid();
@@ -39,7 +39,7 @@ export let resolveCurrentEffectHook = (createHookFn, processFn) => {
         currentVNode.effectHook_ = currentEffectHook;
     }
     return processFn(currentEffectHook);
-}
+};
 
 let _resolveCurrentHookImpl = (createHookFn, currentHook, firstHookOfNode) => {
     if (currentHook === null) {
@@ -57,10 +57,10 @@ let _resolveCurrentHookImpl = (createHookFn, currentHook, firstHookOfNode) => {
             return currentHook.next_;
         }
     }
-}
+};
 
 let _throwIfCallInvalid = () => {
     if (currentVNode === null) {
         throw new Error('Cannot use hooks from outside of components');
     }
-}
+};

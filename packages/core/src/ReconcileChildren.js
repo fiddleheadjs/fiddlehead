@@ -9,7 +9,7 @@ export let reconcileChildren = (current, isRenderRoot) => {
     } else if (current.alternate_ !== null) {
         _reconcileChildrenOfStaticNode(current, current.alternate_);
     }
-}
+};
 
 let _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
     if (alternate !== null) {
@@ -65,7 +65,7 @@ let _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
     }
     
     current.child_ = newChild;
-}
+};
 
 let _reconcileChildrenOfStaticNode = (current, alternate) => {
     let oldChildren = _mapChildren(alternate);
@@ -80,11 +80,11 @@ let _reconcileChildrenOfStaticNode = (current, alternate) => {
             _addDeletion(current, oldChild);
         }
     });
-}
+};
 
 let _markAlternate = (newChild, oldChild) => {
     newChild.alternate_ = oldChild;
-}
+};
 
 let _addDeletion = (current, childToDelete) => {
     if (current.deletions_ === null) {
@@ -92,7 +92,7 @@ let _addDeletion = (current, childToDelete) => {
     } else {
         current.deletions_.push(childToDelete);
     }
-}
+};
 
 let _mapChildren = (node) => {
     let map = new Map();
@@ -106,4 +106,4 @@ let _mapChildren = (node) => {
         child = child.sibling_;
     }
     return map;
-}
+};

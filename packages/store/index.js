@@ -29,7 +29,7 @@ export let createStore = (initialData) => {
         subscribe: subscribers.add.bind(subscribers),
         unsubscribe: subscribers.delete.bind(subscribers),
     };
-}
+};
 
 /**
  * 
@@ -63,7 +63,7 @@ export let useReadableStore = (store, readFn, compareFn) => {
     }, [store, readFn, compareFn]);
 
     return datum[0];
-}
+};
 
 /**
  * 
@@ -77,4 +77,4 @@ export let useWritableStore = (store, writeFn) => {
             writeFn(data, value);
         });
     };
-}
+};

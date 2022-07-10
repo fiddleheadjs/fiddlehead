@@ -33,4 +33,4 @@ export let createVNodeFromContent = (content) => {
     }
 
     return null;
-}
+};

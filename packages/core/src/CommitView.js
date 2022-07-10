@@ -14,7 +14,7 @@ export let updateView = (newVNode, oldVNode) => {
             mpt.mountingRef_ = newVNode.nativeNode_;
         }
     }
-}
+};
 
 export let insertView = (vnode) => {
     if (vnode.nativeNode_ !== null) {
@@ -24,7 +24,7 @@ export let insertView = (vnode) => {
             mpt.mountingRef_ = vnode.nativeNode_;
         }
     }
-}
+};
 
 export let deleteView = (vnode) => {
     if (vnode.nativeNode_ !== null) {
@@ -32,4 +32,4 @@ export let deleteView = (vnode) => {
     } else {
         walkNativeChildren(removeNativeNode, vnode);
     }
-}
+};

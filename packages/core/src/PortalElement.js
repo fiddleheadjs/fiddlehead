@@ -4,7 +4,8 @@ import {linkNativeNodeWithVNode} from './NodeToNode';
 /**
  * 
  * @param {any} content 
- * @param {Element} nativeNode 
+ * @param {Element} nativeNode
+ * @constructor
  */
 export function PortalElement(content, nativeNode) {
     this.content_ = content;
@@ -19,7 +20,7 @@ export function PortalElement(content, nativeNode) {
  */
 export let createPortal = (content, nativeNode) => {
     return new PortalElement(content, nativeNode);
-}
+};
 
 /**
  * 
@@ -38,4 +39,4 @@ export let createVNodeFromPortalElement = (element) => {
     // Because many portals can share the same native node.
 
     return vnode;
-}
+};

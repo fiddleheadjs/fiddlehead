@@ -24,11 +24,11 @@ export function EffectHook(tag, callback, deps) {
 
 export let useEffect = (callback, deps) => {
     return _useEffectImpl(EFFECT_NORMAL, callback, deps);
-}
+};
 
 export let useLayoutEffect = (callback, deps) => {
     return _useEffectImpl(EFFECT_LAYOUT, callback, deps);
-}
+};
 
 let _useEffectImpl = (tag, callback, deps) => {
     if (deps === undefined) {
@@ -55,7 +55,7 @@ let _useEffectImpl = (tag, callback, deps) => {
             currentHook.deps_ = deps;
         }
     );
-}
+};
 
 /**
  *
@@ -77,7 +77,7 @@ export let mountEffects = (effectTag, vnode, isNewlyMounted) => {
         }
         hook = hook.next_;
     }
-}
+};
 
 /**
  * @param {number} effectTag
@@ -100,7 +100,7 @@ export let destroyEffects = (effectTag, vnode, isUnmounted) => {
         }
         hook = hook.next_;
     }
-}
+};
 
 /**
  *
@@ -116,7 +116,7 @@ let _mountEffect = (hook) => {
     if (hook.destroy_ === undefined) {
         hook.destroy_ = null;
     }
-}
+};
 
 /**
  *
@@ -132,7 +132,7 @@ let _destroyEffect = (hook, isUnmounted) => {
     if (hook.destroy_ !== null) {
         hook.destroy_();
     }
-}
+};
 
 /**
  * 
@@ -165,4 +165,4 @@ let _mismatchDeps = (deps, lastDeps) => {
     {
         return true;
     }
-}
+};

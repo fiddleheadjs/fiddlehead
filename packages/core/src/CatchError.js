@@ -23,4 +23,4 @@ export let catchError = (error, vnode) => {
     }
 
     throw error;
-}
+};

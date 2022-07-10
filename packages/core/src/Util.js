@@ -4,19 +4,19 @@ export let slice = Array.prototype.slice;
 
 export let isString = (value) => {
     return typeof value === 'string'/* || value instanceof String*/;
-}
+};
 
 export let isNumber = (value) => {
     return typeof value === 'number'/* || value instanceof Number*/;
-}
+};
 
 export let isFunction = (value) => {
     return typeof value === 'function';
-}
+};
 
 export let isArray = (value) => {
     return value instanceof Array;
-}
+};
 
 /**
  * 
@@ -36,4 +36,4 @@ export let compareArrays = (a, b) => {
     }
 
     return true;
-}
+};

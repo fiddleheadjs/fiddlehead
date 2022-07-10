@@ -5,7 +5,7 @@ import {resolveCurrentRefHook} from './CurrentlyProcessing';
  * @param {any} current
  * @constructor
  */
- export function Ref(current) {
+export function Ref(current) {
     this.current = current;
 }
 
@@ -23,9 +23,9 @@ export function RefHook(current) {
  *
  * @param {any} initialValue
  */
- export let createRef = (initialValue) => {
+export let createRef = (initialValue) => {
     return new Ref(initialValue);
-}
+};
 
 /**
  *
@@ -40,4 +40,4 @@ export let useRef = (initialValue) => {
             return currentHook.ref_;
         }
     );
-}
+};

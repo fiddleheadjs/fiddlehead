@@ -15,7 +15,7 @@ export let resolveMountingPoint = (current) => {
         }
         current = current.parent_;
     }
-}
+};
 
 // Walk through native children of a parent
 /**
@@ -50,4 +50,4 @@ export let walkNativeChildren = (callback, parent, stopBefore) => {
             current = current.sibling_;
         }
     }
-}
+};

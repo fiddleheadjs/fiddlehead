@@ -9,7 +9,7 @@ import {Svg4} from "../components/Svg4";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
-bench([render0, render1, render2, render3, render4], 100);
+bench([render0, render1, render2, render3, render4], 10);
 
 function render0(onFinish) {
     root.render(<App0 onFinish={onFinish} />);

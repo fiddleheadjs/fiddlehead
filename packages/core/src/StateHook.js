@@ -30,7 +30,7 @@ export let useState = (initialValue) => {
             return [currentHook.value_, currentHook.setValue_];
         }
     );
-}
+};
 
 export let useError = () => {
     return resolveCurrentStateHook(
@@ -53,9 +53,9 @@ export let useError = () => {
             }];
         }
     );
-}
+};
 
-function _setState(value) {
+let _setState = function (value) {
     let newValue;
 
     if (isFunction(value)) {
@@ -78,7 +78,7 @@ function _setState(value) {
             this.context_.updateId_ = setTimeout(_flushUpdates, 0, this);
         }
     }
-}
+};
 
 let _flushUpdates = (hook) => {
     // Find the highest node also has pending updates
@@ -95,4 +95,4 @@ let _flushUpdates = (hook) => {
     if (highestContext !== null) {
         renderTree(highestContext);
     }
-}
+};

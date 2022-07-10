@@ -6,7 +6,7 @@ import {createVNodeFromContent} from './CreateVNode';
  * @param {VNode} current
  * @param {any[]} content
  */
- export let setChildrenFromContent = (current, content) => {
+export let setChildrenFromContent = (current, content) => {
     let child, prevChild = null, i = 0;
     for (; i < content.length; ++i) {
         child = createVNodeFromContent(content[i]);
@@ -23,7 +23,7 @@ import {createVNodeFromContent} from './CreateVNode';
             prevChild = child;
         }
     }
-}
+};
 
 /**
  * 
@@ -39,4 +39,4 @@ export let setOnlyChildFromContent = (current, content) => {
         // Don't need to set the slot property
         // as this node have only one child
     }
-}
+};
