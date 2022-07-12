@@ -1,8 +1,8 @@
 import {hasOwnProperty, isNumber, isString} from './Util';
 
-export let updateNativeTextContent = (node, text) => {
-    if (node.textContent !== text) {
-        node.textContent = text;
+export let updateNativeTextContent = (node, newText, oldText) => {
+    if (newText !== oldText) {
+        node.textContent = newText;
     }
 };
 
@@ -73,7 +73,11 @@ let _normalizeElementAttributeName = (attrName) => {
     }
 
     // Support camelcase event listener bindings
-    if (/^on[A-Z]/.test(attrName)) {
+    if (attrName.length >= 4 &&                                      // at least 4 chars
+        attrName.charCodeAt(0) === 111 &&                            // 1st char is o
+        attrName.charCodeAt(1) === 110 &&                            // 2nd char is n
+        attrName.charCodeAt(2) <= 90 && attrName.charCodeAt(2) >= 65 // 3rd char is [A-Z]
+    ) {
         return attrName.toLowerCase();
     }
 

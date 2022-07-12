@@ -20,13 +20,6 @@ export let hydrateView = (vnode) => {
     let nativeNode;
     if (vnode.type_ === TextNode) {
         nativeNode = createNativeTextNode(vnode.props_);
-
-        // In the production mode, remove text content from the virtual text node
-        // to save memory. Later, we will compare the new text with the text content
-        // of the native node, though it is not a perfect way to compare.
-        if (!__DEV__) {
-            vnode.props_ = null;
-        }
     } else {
         nativeNode = createNativeElementWithNS(
             vnode.namespace_,
@@ -58,15 +51,9 @@ export let rehydrateView = (newVNode, oldVNode) => {
     if (newVNode.type_ === TextNode) {
         updateNativeTextContent(
             newVNode.nativeNode_,
-            newVNode.props_
+            newVNode.props_,
+            oldVNode.props_
         );
-
-        // In the production mode, remove text content from the virtual text node
-        // to save memory. Later, we will compare the new text with the text content
-        // of the native node, though it is not a perfect way to compare.
-        if (!__DEV__) {
-            newVNode.props_ = null;
-        }
     } else {
         updateNativeElementAttributes(
             newVNode.nativeNode_,
