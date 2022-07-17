@@ -4,8 +4,8 @@ interface JSXElement {
 interface PortalElement {
 }
 
-export interface Ref {
-    current: any
+export interface Ref<T> {
+    current: T
 }
 
 export const Fragment: string;
@@ -24,7 +24,7 @@ export function createElement(
 
 export {createElement as jsx};
 
-export function createRef(initialValue: any): Ref;
+export function createRef<T>(initialValue: T): Ref<T>;
 
 export function useState<T>(initialValue: T): [
     value: T,
@@ -46,4 +46,4 @@ export function useLayoutEffect(
     deps?: any[]
 ): void;
 
-export function useRef(initialValue: any): Ref;
+export function useRef<T>(initialValue: T): Ref<T>;
