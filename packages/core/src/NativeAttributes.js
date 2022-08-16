@@ -25,6 +25,10 @@ let _updateElementAttribute = (element, attrName, newAttrValue, oldAttrValue) =>
         return;
     }
 
+    if (newAttrValue === oldAttrValue) {
+        return;
+    }
+
     if (_canBeAttribute(attrName, newAttrValue)) {
         element.setAttribute(attrName, newAttrValue);
         // Continue handle as properties
