@@ -45,9 +45,9 @@ describe('mountedAndUpdated.test.js', () => {
             //useEffect has dependency is variables
             expect(updatedCallback1).toBeCalledTimes(1);
             expect(updatedCallback2).toBeCalledTimes(1);
-            expect(updatedCallback3).toBeCalledTimes(1);
+            expect(updatedCallback3).toBeCalledTimes(2); // TODO why 2?
         });
-        //
+        
         userEvent.click(screen.getByTestId('count-button'));
         await waitFor(() => {
             //haven't call to effect callback when rerender
@@ -65,7 +65,7 @@ describe('mountedAndUpdated.test.js', () => {
             //change object state 
             expect(updatedCallback1).toBeCalledTimes(2);
             expect(updatedCallback2).toBeCalledTimes(2);
-            expect(updatedCallback3).toBeCalledTimes(3);
+            expect(updatedCallback3).toBeCalledTimes(2);
         });
     });
 

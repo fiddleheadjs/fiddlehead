@@ -29,16 +29,16 @@ let _updateElementAttribute = (element, attrName, newAttrValue, oldAttrValue) =>
         return;
     }
 
-    if (_canBeAttribute(attrName, newAttrValue)) {
-        element.setAttribute(attrName, newAttrValue);
-        // Continue handle as properties
-    }
     if (attrName in element) {
+        // Handles as properties first
         try {
             element[attrName] = newAttrValue;
         } catch (x) {
             // Property may not writable
         }
+    }
+    if (_canBeAttribute(attrName, newAttrValue)) {
+        element.setAttribute(attrName, newAttrValue);
     }
 };
 
@@ -57,16 +57,16 @@ let _removeElementAttribute = (element, attrName, oldAttrValue) => {
         return;
     }
 
-    if (_canBeAttribute(attrName, oldAttrValue)) {
-        element.removeAttribute(attrName);
-        // Continue handle as properties
-    }
     if (attrName in element) {
+        // Handles as properties first
         try {
             element[attrName] = null;
         } catch (x) {
             // Property may not writable
         }
+    }
+    if (_canBeAttribute(attrName, oldAttrValue)) {
+        element.removeAttribute(attrName);
     }
 };
 
@@ -89,7 +89,10 @@ let _normalizeElementAttributeName = (attrName) => {
 };
 
 let _canBeAttribute = (name, value) => {
-    if (name === 'innerHTML' || name === 'innerText' || name === 'textContent') {
+    if (name === 'innerHTML' ||
+        name === 'innerText' ||
+        name === 'textContent'
+    ) {
         return false;
     }
 
