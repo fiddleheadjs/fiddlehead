@@ -14,6 +14,15 @@ export let flushCurrentlyProcessing = () => {
     currentEffectHook = null;
 };
 
+export let resolveRootVNode = () => {
+    _throwIfCallInvalid();
+    let vnode = currentVNode;
+    while (vnode.parent_ !== null) {
+        vnode = vnode.parent_;
+    }
+    return vnode;
+};
+
 export let resolveCurrentRefHook = (createHookFn, processFn) => {
     _throwIfCallInvalid();
     currentRefHook = _resolveCurrentHookImpl(createHookFn, currentRefHook, currentVNode.refHook_);

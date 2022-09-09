@@ -1,18 +1,14 @@
-// It is required to use the same source with store
-import {jsx, useEffect} from "core.pkg";
-import {createStore, useReadableStore, useWritableStore} from "store.pkg";
-
-const store = createStore({
-    byId: {},
-});
+import {applyStore, jsx, useEffect, useReadableStore, useWritableStore} from "core.pkg";
 
 export function Root({setMockValue}) {
+    applyStore({
+        byId: {}
+    });
     return [<Header setMockValue={setMockValue} />, <Main setMockValue={setMockValue} />, <Footer />];
 }
 
 function Header({setMockValue}) {
     const headerTitle = useReadableStore(
-        store,
         (data) => data.byId['header-title']
     );
 
@@ -26,7 +22,6 @@ function Header({setMockValue}) {
 
 function Menu({setMockValue}) {
     const setHeaderTitle = useWritableStore(
-        store,
         (data, value) => (data.byId['header-title'] = value)
     );
 
@@ -48,15 +43,13 @@ function Main({setMockValue}) {
 
 function Sidebar({setMockValue}) {
     const setHeaderTitle = useWritableStore(
-        store,
         (data, value) => (data.byId['header-title'] = value)
     );
     const setNavList = useWritableStore(
-        store,
         (data, value) => (data.byId['nav-list'] = value)
     );
 
-    const navList = useReadableStore(store, (data) => data.byId['nav-list']);
+    const navList = useReadableStore((data) => data.byId['nav-list']);
 
     return [
         <button
@@ -86,9 +79,8 @@ function Nav({navList, setNavList, setMockValue}) {
 }
 
 function NavItem({setMockValue}) {
-    const navItem = useReadableStore(store, (data) => data.byId['nav-item']);
+    const navItem = useReadableStore((data) => data.byId['nav-item']);
     const setNav = useWritableStore(
-        store,
         (data, value) => (data.byId['nav-item'] = value)
     );
 
@@ -111,14 +103,12 @@ function NavItem({setMockValue}) {
 
 function Footer() {
     const headerTitle = useReadableStore(
-        store,
         (data) => data.byId['header-title']
     );
-    const navList = useReadableStore(store, (data) => data.byId['nav-list']);
-    const navItem = useReadableStore(store, (data) => data.byId['nav-item']);
+    const navList = useReadableStore((data) => data.byId['nav-list']);
+    const navItem = useReadableStore((data) => data.byId['nav-item']);
 
     const resetById = useWritableStore(
-        store,
         (data, value) => (data.byId = value)
     );
 

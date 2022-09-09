@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'hook';
+import {useEffect} from './EffectHook';
+import {useState} from './StateHook';
 
 /**
  * 
  * @param {{}} initialData 
  * @returns {Store}
  */
-let createStore = (initialData) => {
+export let createStore = (initialData) => {
     if (!(
         initialData != null && // is not nullish
         initialData.constructor === Object
@@ -38,7 +39,7 @@ let createStore = (initialData) => {
  * @param {function?} compareFn
  * @returns {any}
  */
-let useReadableStore = (store, readFn, compareFn) => {
+export let useGlobalReadableStore = (store, readFn, compareFn) => {
     let datum = useState(readFn(store.data));
 
     useEffect(() => {
@@ -71,12 +72,10 @@ let useReadableStore = (store, readFn, compareFn) => {
  * @param {function} writeFn
  * @returns {function}
  */
-let useWritableStore = (store, writeFn) => {
+export let useGlobalWritableStore = (store, writeFn) => {
     return (value) => {
         store.setData((data) => {
             writeFn(data, value);
         });
     };
 };
-
-export { createStore, useReadableStore, useWritableStore };

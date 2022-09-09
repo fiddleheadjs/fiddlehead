@@ -47,7 +47,6 @@
     "core.pkg": "file:lib/core",
     "cross-env": "^7.0.3",
     "eslint": "^8.15.0",
-    "hook": "file:lib/core",
-    "store.pkg": "file:lib/store"
+    "hook": "file:lib/core"
   }
 }
