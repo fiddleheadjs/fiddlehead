@@ -13,9 +13,12 @@ let storeMap = new WeakMap();
 export let applyStore = (initialData) => {
     let rootVNode = resolveRootVNode();
     if (storeMap.has(rootVNode)) {
-        throw new Error('Store already has been applied');
+        if (__DEV__) {
+            console.error('Store already has been applied');
+        }
+    } else {
+        storeMap.set(rootVNode, createStore(initialData));
     }
-    storeMap.set(rootVNode, createStore(initialData));
 };
 
 /**
