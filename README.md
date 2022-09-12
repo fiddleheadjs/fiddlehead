@@ -251,3 +251,15 @@ function App() {
     );
 }
 ```
+
+### Store
+
+```
+import {applyStore} from 'hook';
+
+function Root() {
+    applyStore({
+        product: []
+    });
+}
+```
