@@ -47,14 +47,3 @@ export function useLayoutEffect(
 ): void;
 
 export function useRef<T>(initialValue: T): Ref<T>;
-
-export function applyStore(initialData: object): void;
-
-export function useReadableStore<T>(
-    readFn: (data: object) => T,
-    compareFn?: (value1: T, value2: T) => boolean
-): T;
-
-export function useWritableStore<T>(
-    writeFn: (data: object, value: T) => void
-): (value: T) => void;
