@@ -4,6 +4,9 @@ interface JSXElement {
 interface PortalElement {
 }
 
+interface VNode {
+}
+
 export interface Ref<T> {
     current: T
 }
@@ -47,3 +50,5 @@ export function useLayoutEffect(
 ): void;
 
 export function useRef<T>(initialValue: T): Ref<T>;
+
+export function resolveRootVNode(): VNode;
