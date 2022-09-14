@@ -1,4 +1,5 @@
-import {applyStore, jsx, useEffect, useReadableStore, useWritableStore} from "core.pkg";
+import {jsx, useEffect} from "core.pkg";
+import {applyStore, useReadableStore, useWritableStore} from "store.pkg";
 
 export function Root({setMockValue}) {
     applyStore({

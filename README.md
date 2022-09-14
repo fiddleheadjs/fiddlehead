@@ -255,11 +255,11 @@ function App() {
 ### Store
 
 ```
-import {applyStore} from 'hook';
+import {applyStore} from 'hook/store';
 
 function Root() {
     applyStore({
-        product: []
+        // Initial values
     });
 }
 ```

@@ -4,7 +4,7 @@ const {getBabelOutputPlugin} = require('@rollup/plugin-babel');
 const {name: libraryName} = require('../package.json');
 
 const configs = [];
-['core'].forEach((pkg) => {
+['core', 'store'].forEach((pkg) => {
     ['cjs', 'esm'].forEach((moduleType) => {
         [false, true].forEach((supportsLegacy) => {
             const __legacy = supportsLegacy ? '.legacy' : '';

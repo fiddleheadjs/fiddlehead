@@ -1,4 +1,4 @@
-import {resolveRootVNode} from './CurrentlyProcessing';
+import {resolveRootVNode} from 'core.pkg';
 import {createStore, useGlobalReadableStore, useGlobalWritableStore} from './Store';
 
 /**

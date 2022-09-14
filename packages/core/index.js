@@ -5,7 +5,7 @@ import {createPortal} from './src/PortalElement';
 import {useState, useError} from './src/StateHook';
 import {useEffect, useLayoutEffect} from './src/EffectHook';
 import {useRef, createRef} from './src/RefHook';
-import {applyStore, useReadableStore, useWritableStore} from './src/StoreHook';
+import {resolveRootVNode} from './src/CurrentlyProcessing';
 
 export {
     Fragment,
@@ -20,7 +20,5 @@ export {
     useEffect,
     useLayoutEffect,
     useRef,
-    applyStore,
-    useReadableStore,
-    useWritableStore,
+    resolveRootVNode,
 };

@@ -1,5 +1,5 @@
 import {jsx, useEffect} from "core.pkg";
-import {createStore, useReadableStore, useWritableStore} from "store.pkg";
+import {createStore, useGlobalReadableStore, useGlobalWritableStore} from "store.pkg";
 
 const colorStore = createStore({
     color: ''
@@ -18,7 +18,7 @@ export function Root({setMockValue1, setMockValue2}) {
 }
 
 function Header() {
-    const color = useReadableStore(
+    const color = useGlobalReadableStore(
         colorStore,
         (data) => data["color"]
     );
@@ -43,16 +43,16 @@ function Main({setMockValue1, setMockValue2}) {
 }
 
 function Sidebar({setMockValue1, setMockValue2}) {
-    const setColor = useWritableStore(
+    const setColor = useGlobalWritableStore(
         colorStore,
         (data, value) => (data["color"] = value)
     );
-    const setRouteName = useWritableStore(
+    const setRouteName = useGlobalWritableStore(
         routeStore,
         (data, value) => (data["route-name"] = value)
     );
 
-    const routeName = useReadableStore(
+    const routeName = useGlobalReadableStore(
         routeStore,
         (data) => data["route-name"]
     );
@@ -79,11 +79,11 @@ function Sidebar({setMockValue1, setMockValue2}) {
 }
 
 function Content() {
-    const routeName = useReadableStore(
+    const routeName = useGlobalReadableStore(
         routeStore,
         (data) => data["route-name"]
     );
-    const color = useReadableStore(
+    const color = useGlobalReadableStore(
         colorStore,
         (data) => data["color"]
     );
@@ -95,20 +95,20 @@ function Content() {
 }
 
 function Footer() {
-    const routeName = useReadableStore(
+    const routeName = useGlobalReadableStore(
         routeStore,
         (data) => data["route-name"]
     );
-    const color = useReadableStore(
+    const color = useGlobalReadableStore(
         colorStore,
         (data) => data["color"]
     );
 
-    const resetColorStore = useWritableStore(
+    const resetColorStore = useGlobalWritableStore(
         colorStore,
         (data, value) => (data['color'] = value)
     );
-    const resetRouteStore = useWritableStore(
+    const resetRouteStore = useGlobalWritableStore(
         routeStore,
         (data, value) => (data['route-name'] = value)
     );

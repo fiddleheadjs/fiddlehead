@@ -1,5 +1,4 @@
-import {useEffect} from './EffectHook';
-import {useState} from './StateHook';
+import {useEffect, useState} from 'core.pkg';
 
 /**
  * 
