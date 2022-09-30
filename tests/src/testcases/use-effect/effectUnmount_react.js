@@ -8,7 +8,11 @@ export function Root({onUnmount}) {
     useEffect(() => {
         if (checked === false) {
             console.log('--remove unmount');
-            return;
+            if (count % 2 === 0) {
+                return () => {};
+            } else {
+                return;
+            }
         }
 
         console.log('--add unmount');
