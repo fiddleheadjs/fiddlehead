@@ -1,6 +1,6 @@
 {
   "name": "hook",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A lightweight UI library",
   "main": "index.js",
   "exports": {

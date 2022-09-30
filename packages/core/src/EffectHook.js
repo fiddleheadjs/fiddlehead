@@ -115,6 +115,7 @@ let _mountEffect = (hook) => {
     hook.destroy_ = hook.callback_();
     if (hook.destroy_ === undefined) {
         hook.destroy_ = null;
+        hook.lastDestroy_ = null;
     }
 };
 
@@ -128,7 +129,7 @@ let _destroyEffect = (hook, isUnmounted) => {
         hook.lastDestroy_();
         return;
     }
-
+    
     if (hook.destroy_ !== null) {
         hook.destroy_();
     }
