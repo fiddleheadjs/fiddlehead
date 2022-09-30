@@ -86,7 +86,7 @@ render(<HelloWorld/>, document.getElementById('root'));
 import {jsx, useState} from 'hook';
 
 function Counter() {
-    const [count, setCount] = useState(0);
+    let [count, setCount] = useState(0);
     
     return (
         <div className="Counter">
@@ -110,11 +110,11 @@ function Counter() {
 import {jsx, useState, useEffect} from 'hook';
 
 function UserInfo() {
-    const [email, setEmail] = useState('');
-    const [info, setInfo] = useState(null);
+    let [email, setEmail] = useState('');
+    let [info, setInfo] = useState(null);
     
     useEffect(() => {
-        const xhr = new XMLHttpRequest();
+        let xhr = new XMLHttpRequest();
         xhr.open('GET', '/api/user/info');
         xhr.onload = () => {
             setInfo(xhr.responseText);
@@ -150,10 +150,10 @@ Prefer the standard `useEffect` when possible to avoid blocking visual updates.
 import {jsx, useEffect, useRef} from 'hook';
 
 function Image() {
-    const imageRef = useRef(null);
+    let imageRef = useRef(null);
 
     useEffect(() => {
-        const image = imageRef.current;
+        let image = imageRef.current;
 
         // Do something with the native image element
         console.log(image.naturalWidth, image.naturalHeight);
@@ -179,7 +179,7 @@ function TextInput({ref}) {
 }
 
 function App() {
-    const inputRef = useRef(null);
+    let inputRef = useRef(null);
     
     useEffect(() => {
         console.log('Input element', inputRef.current);
@@ -197,7 +197,7 @@ function App() {
 import {jsx, useError} from 'hook';
 
 function ErrorBoundary({children}) {
-    const [error, clearError] = useError();
+    let [error, clearError] = useError();
 
     if (error !== null) {
         return 'Oops... Something went wrong!';
@@ -215,7 +215,7 @@ Error boundaries catch errors during rendering, in hooks and in the whole tree b
 import {jsx, createPortal} from 'hook';
 
 function DocumentPortal({children}) {
-    const elRef = useRef(document.createElement('div'));
+    let elRef = useRef(document.createElement('div'));
     elRef.current.style.display = 'contents';
     
     useEffect(() => {
@@ -233,7 +233,7 @@ function DocumentPortal({children}) {
 }
 
 function App() {
-    const [showsImage, setShowsImage] = useState(false);
+    let [showsImage, setShowsImage] = useState(false);
 
     return (
         <div>
@@ -254,12 +254,43 @@ function App() {
 
 ### Store
 
-```
-import {applyStore} from 'hook/store';
+```jsx
+import {applyStore, useReadableStore, useWritableStore} from 'hook/store';
 
 function Root() {
     applyStore({
         // Initial values
+        title: 'Store usage example',
     });
+
+    return (
+        <main>
+            <Header/>
+            <section>
+                <Form/>
+            </section>
+        </main>
+    );
+}
+
+function Header() {
+    let title = useReadableStore((data) => data.title);
+
+    return (
+        <h1>{title}</h1>
+    );
+}
+
+function Form() {
+    let title = useReadableStore((data) => data.title);
+    let setTitle = useWritableStore((data, value) => data.title = value);
+
+    return (
+        <input
+            type="text"
+            value={title}
+            onChange={ev => setTitle(ev.target.value)}
+        />
+    );
 }
 ```
