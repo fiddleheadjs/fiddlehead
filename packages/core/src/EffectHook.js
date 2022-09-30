@@ -113,6 +113,8 @@ let _mountEffect = (hook) => {
     
     // Run effect callback
     hook.destroy_ = hook.callback_();
+
+    // Remove the last destroy if the current destroy is empty
     if (hook.destroy_ === undefined) {
         hook.destroy_ = null;
         hook.lastDestroy_ = null;
