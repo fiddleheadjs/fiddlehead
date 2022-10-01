@@ -19,7 +19,7 @@ npm install git+ssh://git@git.itim.vn:ads-frontend/hook.git
 Install Babel's packages to use JSX syntax:
 
 ```
-npm install babel-loader @babel/core @babel/plugin-transform-react-jsx @babel/preset-env
+npm install babel-loader @babel/core @babel/preset-env @babel/plugin-transform-react-jsx
 ```
 
 ## Configuration
