@@ -261,8 +261,7 @@ import {jsx} from 'hook';
 import {applyStore, useReadableStore, useWritableStore} from 'hook/store';
 
 function Root() {
-    applyStore({
-        // Initial values
+    applyStore({ // Initial data
         title: 'Store usage example',
     });
 
