@@ -262,7 +262,7 @@ import {applyStore, useReadableStore, useWritableStore} from 'hook/store';
 
 function Root() {
     applyStore({ // Initial data
-        title: 'Store usage example',
+        title: 'Store usage example'
     });
 
     return (
