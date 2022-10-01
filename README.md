@@ -1,6 +1,6 @@
-# H2K
+# Hook
 
-H2K is a lightweight UI library. It replicates some key features of React:
+Hook is a lightweight UI library. It replicates some key features of React:
 
 - Declarative programming
 - One-way data binding
