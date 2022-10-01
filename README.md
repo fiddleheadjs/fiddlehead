@@ -1,6 +1,6 @@
-# Hook
+# H2K
 
-Hook is a lightweight UI library. It replicates some key features of React:
+H2K is a lightweight UI library. It replicates some key features of React:
 
 - Declarative programming
 - One-way data binding
@@ -257,6 +257,7 @@ function App() {
 Store is a separate package. It is helpful when we want to use some global states, which can be read/written from anywhere in the DOM tree, with no need to pass props through all levels of elements. 
 
 ```jsx
+import {jsx} from 'hook';
 import {applyStore, useReadableStore, useWritableStore} from 'hook/store';
 
 function Root() {
