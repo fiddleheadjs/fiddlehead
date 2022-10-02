@@ -120,6 +120,10 @@ function UserInfo() {
             setInfo(xhr.responseText);
         };
         xhr.send('email=' + email);
+        
+        return () => {
+            xhr.abort();
+        };
     }, [email]);
     
     return (
