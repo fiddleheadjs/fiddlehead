@@ -262,12 +262,13 @@ Store is a separate package. It is helpful when we want to use some global state
 
 ```jsx
 import {jsx} from 'hook';
-import {applyStore, useReadableStore, useWritableStore} from 'hook/store';
+import {useStoreInit, useStoreRead, useStoreWrite} from 'hook/store';
 
-function Root() {
-    applyStore({ // Initial data
-        title: 'Store usage example'
-    });
+function App() {
+    useStoreInit(
+        App, // Scope
+        {title: 'Store usage example'} // Initial data
+    );
 
     return (
         <main>
@@ -280,7 +281,10 @@ function Root() {
 }
 
 function Header() {
-    let title = useReadableStore((data) => data.title);
+    let title = useStoreRead(
+        App, // Scope
+        (data) => data.title // Reading function
+    );
 
     return (
         <h1>{title}</h1>
@@ -288,8 +292,11 @@ function Header() {
 }
 
 function Form() {
-    let title = useReadableStore((data) => data.title);
-    let setTitle = useWritableStore((data, value) => data.title = value);
+    let title = useStoreRead(App, (data) => data.title);
+    let setTitle = useStoreWrite(
+        App, // Scope
+        (data, value) => data.title = value // Writing function
+    );
 
     return (
         <input
