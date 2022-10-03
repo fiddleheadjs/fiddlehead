@@ -283,7 +283,7 @@ function App() {
 function Header() {
     let title = useStoreRead(
         App, // Scope
-        (data) => data.title // Reading function
+        (data) => data.title // Reader
     );
 
     return (
@@ -295,7 +295,7 @@ function Form() {
     let title = useStoreRead(App, (data) => data.title);
     let setTitle = useStoreWrite(
         App, // Scope
-        (data, value) => data.title = value // Writing function
+        (data, value) => data.title = value // Writer
     );
 
     return (
