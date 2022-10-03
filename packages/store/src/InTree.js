@@ -1,59 +1,72 @@
 import {resolveRootVNode} from 'core.pkg';
-import {createStore, useGlobalReadableStore, useGlobalWritableStore} from './Store';
+import {createStore, useGlobalStoreRead, useGlobalStoreWrite} from './Store';
 
 /**
- * @type {WeakMap<Store>}
+ * @type {WeakMap<VNode, WeakMap<object, Store>}
  */
-let storeMap = new WeakMap();
+let storesMap = new WeakMap();
 
 /**
  * 
+ * @param {object} scope
  * @param {{}} initialData 
  */
-export let applyStore = (initialData) => {
+export let useStoreInit = (scope, initialData) => {
     let rootVNode = resolveRootVNode();
-    if (storeMap.has(rootVNode)) {
+    let scoped = storesMap.get(rootVNode);
+    if (scoped === undefined) {
+        scoped = new WeakMap();
+        storesMap.set(rootVNode, scoped);
+    }
+    if (scoped.has(scope)) {
         if (__DEV__) {
-            console.error('Store already has been applied');
+            console.error('Store already has been initialized');
         }
     } else {
-        storeMap.set(rootVNode, createStore(initialData));
+        scoped.set(scope, createStore(initialData));
     }
 };
 
 /**
  * 
+ * @param {object} scope
  * @returns {Store}
  * @throws
  */
-export let useStore = () => {
+export let useStore = (scope) => {
+    let store;
     let rootVNode = resolveRootVNode();
-    let store = storeMap.get(rootVNode);
+    let scoped = storesMap.get(rootVNode);
+    if (scoped !== undefined) {
+        store = scoped.get(scope);
+    }
     if (store === undefined) {
-        throw new Error('Store has not been applied');
+        throw new Error('Store has not been initialized');
     }
     return store;
 };
 
 /**
  * 
+ * @param {object} scope
  * @param {function} readFn
  * @param {function?} compareFn
  * @returns {any}
  * @throws
  */
-export let useReadableStore = (readFn, compareFn) => {
-    let store = useStore();
-    return useGlobalReadableStore(store, readFn, compareFn);
+export let useStoreRead = (scope, readFn, compareFn) => {
+    let store = useStore(scope);
+    return useGlobalStoreRead(store, readFn, compareFn);
 };
 
 /**
  * 
+ * @param {object} scope
  * @param {function} writeFn
  * @returns {function}
  * @throws
  */
-export let useWritableStore = (writeFn) => {
-    let store = useStore();
-    return useGlobalWritableStore(store, writeFn);
+export let useStoreWrite = (scope, writeFn) => {
+    let store = useStore(scope);
+    return useGlobalStoreWrite(store, writeFn);
 };

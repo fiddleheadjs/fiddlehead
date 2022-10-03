@@ -1,4 +1,3 @@
-import {VNode} from './VNode';
 import {createVNodeFromContent} from './CreateVNode';
 
 /**

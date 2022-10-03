@@ -1,11 +1,11 @@
-import {createStore, useGlobalReadableStore, useGlobalWritableStore} from './src/Store';
-import {applyStore, useReadableStore, useWritableStore} from './src/InTree';
+import {createStore, useGlobalStoreRead, useGlobalStoreWrite} from './src/Store';
+import {useStoreInit, useStoreRead, useStoreWrite} from './src/InTree';
 
 export {
     createStore,
-    useGlobalReadableStore,
-    useGlobalWritableStore,
-    applyStore,
-    useReadableStore,
-    useWritableStore,
+    useGlobalStoreRead,
+    useGlobalStoreWrite,
+    useStoreInit,
+    useStoreRead,
+    useStoreWrite,
 };

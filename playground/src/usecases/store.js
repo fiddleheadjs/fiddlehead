@@ -1,14 +1,14 @@
 // It is required to use the same source with store
-import {jsx, render, useState, useEffect} from 'core.pkg';
-import {createStore, useReadableStore, useWritableStore} from 'store.pkg';
-
-const store = createStore({
-    ids: [],
-    byId: {}
-});
+import {jsx, render} from 'core.pkg';
+import {useStoreInit, useStoreRead, useStoreWrite} from 'store.pkg';
 
 function App() {
     console.log('render App');
+
+    useStoreInit(App, {
+        ids: [],
+        byId: {}
+    });
 
     return [<List/>, <A/>, <B/>];
 }
@@ -16,8 +16,8 @@ function App() {
 function List() {
     console.log('render List');
 
-    const productA1 = useReadableStore(store, data => data.byId['A1']);
-    const productB1 = useReadableStore(store, data => data.byId['B1']);
+    const productA1 = useStoreRead(App, data => data.byId['A1']);
+    const productB1 = useStoreRead(App, data => data.byId['B1']);
 
     return (
         <div class="List">
@@ -30,8 +30,8 @@ function List() {
 function A() {
     console.log('render A');
 
-    const productA1 = useReadableStore(store, data => data.byId['A1']);
-    const setProductA1 = useWritableStore(store, (data, value) => data.byId['A1'] = value);
+    const productA1 = useStoreRead(App, data => data.byId['A1']);
+    const setProductA1 = useStoreWrite(App, (data, value) => data.byId['A1'] = value);
 
     return (
         <div class="A">
@@ -43,8 +43,8 @@ function A() {
 function B() {
     console.log('render B');
     
-    const productB1 = useReadableStore(store, data => data.byId['B1']);
-    const setProductB1 = useWritableStore(store, (data, value) => data.byId['B1'] = value);
+    const productB1 = useStoreRead(App, data => data.byId['B1']);
+    const setProductB1 = useStoreWrite(App, (data, value) => data.byId['B1'] = value);
 
     return (
         <div class="B">

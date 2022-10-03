@@ -38,7 +38,7 @@ export let createStore = (initialData) => {
  * @param {function?} compareFn
  * @returns {any}
  */
-export let useGlobalReadableStore = (store, readFn, compareFn) => {
+export let useGlobalStoreRead = (store, readFn, compareFn) => {
     let datum = useState(readFn(store.data));
 
     useEffect(() => {
@@ -71,7 +71,7 @@ export let useGlobalReadableStore = (store, readFn, compareFn) => {
  * @param {function} writeFn
  * @returns {function}
  */
-export let useGlobalWritableStore = (store, writeFn) => {
+export let useGlobalStoreWrite = (store, writeFn) => {
     return (value) => {
         store.setData((data) => {
             writeFn(data, value);
