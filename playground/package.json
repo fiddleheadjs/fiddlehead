@@ -2,7 +2,7 @@
   "name": "playground",
   "version": "1.0.0",
   "scripts": {
-    "start": "http-server",
+    "start": "http-server -p 8081",
     "build": "webpack",
     "watch": "webpack -w"
   },
