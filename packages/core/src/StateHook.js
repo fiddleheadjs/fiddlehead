@@ -9,25 +9,25 @@ export const STATE_ERROR = 1;
 /**
  *
  * @param {number} tag
- * @param {any} initialValue
  * @param {VNode} context
+ * @param {any} initialValue
  * @constructor
  */
-export function StateHook(tag, initialValue, context) {
+export function StateHook(tag, context, initialValue) {
     this.tag_ = tag;
+    this.context_ = context;
     this.value_ = initialValue;
     this.setValue_ = _setState.bind(this);
     if (tag === STATE_ERROR) {
         this.resetValue_ = () => _setState.call(this, initialValue);
     }
-    this.context_ = context;
     this.next_ = null;
 }
 
 export let useState = (initialValue) => {
     return resolveCurrentStateHook(
         (currentVNode) => {
-            return new StateHook(STATE_NORMAL, initialValue, currentVNode);
+            return new StateHook(STATE_NORMAL, currentVNode, initialValue);
         },
         (currentHook) => {
             return [currentHook.value_, currentHook.setValue_];
@@ -48,7 +48,7 @@ export let useError = () => {
                     hook = hook.next_;
                 }
             }
-            return new StateHook(STATE_ERROR, null, currentVNode);
+            return new StateHook(STATE_ERROR, currentVNode, null);
         },
         (currentHook) => {
             return [currentHook.value_, currentHook.resetValue_];
