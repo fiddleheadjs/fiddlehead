@@ -8,9 +8,9 @@ export let catchError = (error, vnode) => {
         hook = parent.stateHook_;
         while (hook !== null) {
             if (hook.tag_ === STATE_ERROR) {
-                hook.setValue_((prevError) => {
-                    return prevError || error;
-                });
+                hook.setValue_((prevError) => (
+                    prevError != null ? prevError : error
+                ));
                 return;
             }
             hook = hook.next_;
@@ -19,7 +19,7 @@ export let catchError = (error, vnode) => {
     }
 
     if (__DEV__) {
-        console.info('You can catch the following error by implementing an error boundary with the useError hook');
+        console.info('You can catch the following exception by implementing an error boundary with the useError hook');
     }
 
     throw error;
