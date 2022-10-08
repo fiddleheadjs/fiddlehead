@@ -1,7 +1,7 @@
-import {jsx, useError, useState, useEffect} from 'core.pkg';
+import {jsx, useCatch, useState, useEffect} from 'core.pkg';
 
 function ErrorBoundary({children, errorType}) {
-    const [error, clearError] = useError(null);
+    const [error, clearError] = useCatch(null);
 
     if(errorType === 'Error Boundary Component executed fail') {
         let a = a + babel;

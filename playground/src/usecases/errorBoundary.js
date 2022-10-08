@@ -1,4 +1,4 @@
-import {jsx, render, useError, useEffect, useState, useRef, Fragment} from 'core.pkg';
+import {jsx, render, useCatch, useEffect, useState, useRef, Fragment} from 'core.pkg';
 
 render(<Root/>, document.getElementById('root'));
 
@@ -39,7 +39,7 @@ function Contents({setClicks}) {
 }
 
 function ErrorBoundary({children}) {
-    const [error, clearError] = useError();
+    const [error, clearError] = useCatch();
 
     useEffect(() => {
 

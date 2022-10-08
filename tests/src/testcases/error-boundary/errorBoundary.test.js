@@ -1,4 +1,4 @@
-import {jsx, useError} from 'core.pkg';
+import {jsx, useCatch} from 'core.pkg';
 import {screen, waitFor} from '@testing-library/dom';
 import {renderView, cleanupView} from '../../../testUtils';
 import {Root} from './errorBoundary';
@@ -12,7 +12,7 @@ describe('errorBoundary.test.js', () => {
     const getMockValue = jest.fn();
 
     it('Throw an error when Error hook called from outside of component', () => {
-        expect(useError).toThrowError(new Error('Cannot use hooks from outside of components'));
+        expect(useCatch).toThrowError(new Error('Cannot use hooks from outside of components'));
     });
 
     it('Rendering corrected children when Components didn\'t have any error', async () => {

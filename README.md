@@ -198,10 +198,10 @@ function App() {
 ### Error boundaries
 
 ```jsx
-import {jsx, useError} from 'hook';
+import {jsx, useCatch} from 'hook';
 
 function ErrorBoundary({children}) {
-    let [error, clearError] = useError();
+    let [error, clearError] = useCatch();
 
     if (error !== null) {
         return 'Oops... Something went wrong!';
@@ -211,7 +211,7 @@ function ErrorBoundary({children}) {
 }
 ```
 
-Error boundaries catch errors during rendering, in hooks and in the whole tree below them. Error boundaries allow only one `useError` inside.
+Error boundaries catch errors during rendering, in hooks and in the whole tree below them. Error boundaries allow only one `useCatch` inside.
 
 ### Portal
 

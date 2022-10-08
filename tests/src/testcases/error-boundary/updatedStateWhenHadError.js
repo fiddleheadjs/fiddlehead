@@ -1,4 +1,4 @@
-import {jsx, useError, useState} from "core.pkg";
+import {jsx, useCatch, useState} from "core.pkg";
 
 export default function Root() {
     const [clicks, setClicks] = useState(0);
@@ -15,7 +15,7 @@ export default function Root() {
 }
 
 function ErrorBoundary({children}) {
-    const [error, clearError] = useError();
+    const [error, clearError] = useCatch();
 
     if (error === null) {
         return children;

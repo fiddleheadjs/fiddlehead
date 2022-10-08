@@ -19,7 +19,7 @@ export let catchError = (error, vnode) => {
     }
 
     if (__DEV__) {
-        console.info('You can catch the following exception by implementing an error boundary with the useError hook');
+        console.info('You can catch the following exception by implementing an error boundary with the useCatch hook');
     }
 
     throw error;

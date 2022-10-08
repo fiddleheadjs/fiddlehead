@@ -34,8 +34,8 @@ export function useState<T>(initialValue: T): [
     setValue: (value: T | ((prevValue: T) => T)) => void
 ];
 
-export function useError(): [
-    error: Error | null,
+export function useCatch(): [
+    error: any | null,
     clearError: () => void
 ];
 
