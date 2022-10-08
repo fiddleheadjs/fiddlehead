@@ -17,6 +17,9 @@ export function StateHook(tag, initialValue, context) {
     this.tag_ = tag;
     this.value_ = initialValue;
     this.setValue_ = _setState.bind(this);
+    if (tag === STATE_ERROR) {
+        this.unsetValue_ = () => _setState.call(this, null);
+    }
     this.context_ = context;
     this.next_ = null;
 }
@@ -48,9 +51,7 @@ export let useError = () => {
             return new StateHook(STATE_ERROR, null, currentVNode);
         },
         (currentHook) => {
-            return [currentHook.value_, () => {
-                currentHook.setValue_(null);
-            }];
+            return [currentHook.value_, currentHook.unsetValue_];
         }
     );
 };

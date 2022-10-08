@@ -4,6 +4,10 @@ import {renderView, cleanupView} from '../../../testUtils';
 import {Root} from './errorBoundary';
 import userEvent from '@testing-library/user-event';
 
+async function sleep() {
+    return new Promise((resolve) => setTimeout(resolve, 50));
+}
+
 describe('errorBoundary.test.js', () => {
     const getMockValue = jest.fn();
 
@@ -73,8 +77,34 @@ describe('errorBoundary.test.js', () => {
                 screen.getByTestId('error-message').textContent
             )
             .toEqual('Error: Child component executed fail');
-            userEvent.click(screen.getByTestId('error-message'));
         });
+        userEvent.click(screen.getByTestId('error-message'));
+        await waitFor(async () => {
+            expect(screen.queryByTestId('error-message')).toBe(null);
+        });
+    });
+
+    it('clearError callback should not be changed', async () => {
+        getMockValue.mockReturnValue(true);
+        renderView(<Root getMockValue={getMockValue} />);
+        await sleep();
+        expect(parseInt(screen.getByTestId('count').textContent)).toBe(1);
+        getMockValue.mockReturnValue(false);
+        userEvent.click(screen.getByRole('main'));
+        await sleep();
+        expect(parseInt(screen.getByTestId('count').textContent)).toBe(1);
+        getMockValue.mockReturnValue(true);
+        userEvent.click(screen.getByRole('main'));
+        await sleep();
+        expect(parseInt(screen.getByTestId('count').textContent)).toBe(1);
+        getMockValue.mockReturnValue(false);
+        userEvent.click(screen.getByRole('main'));
+        await sleep();
+        expect(parseInt(screen.getByTestId('count').textContent)).toBe(1);
+        getMockValue.mockReturnValue(true);
+        userEvent.click(screen.getByRole('main'));
+        await sleep();
+        expect(parseInt(screen.getByTestId('count').textContent)).toBe(1);
     });
 
     afterEach(() => {

@@ -7,14 +7,25 @@ function ErrorBoundary({children, errorType}) {
         let a = a + babel;
     }
 
+    const [count, setCount] = useState(0);
+
+    useEffect(() => {
+        setCount(c => c + 1)
+    }, [setCount, clearError]);
+
     return (
-        error !== null ?
         <>
-            <div data-testid="error-message" onClick={() => clearError()}>
-                Error: {errorType}
-            </div>
-        </> : 
-        children
+        {
+            error !== null ?
+            <>
+                <div data-testid="error-message" onClick={() => clearError()}>
+                    Error: {errorType}
+                </div>
+            </> : 
+            children
+        }
+        <span data-testid="count">{count}</span>
+        </>
     );
 }
 
