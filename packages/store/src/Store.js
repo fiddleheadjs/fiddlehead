@@ -7,7 +7,7 @@ import {useEffect, useState} from 'core.pkg';
  */
 export let createStore = (initialData) => {
     if (!(
-        initialData != null && // is not nullish
+        initialData != null && // not nullish
         initialData.constructor === Object
     )) {
         throw new Error('Store data must be a plain object');
