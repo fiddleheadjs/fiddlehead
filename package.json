@@ -18,7 +18,7 @@
     }
   },
   "scripts": {
-    "dev": "concurrently \"npm run output:watch\" \"npm run playground:watch:dev\" \"npm run playground:start\" \"npm run bench:watch\" \"npm run bench:start\"",
+    "dev": "concurrently \"npm run output:watch\" \"npm run docs:watch:dev\" \"npm run docs:start\" \"npm run playground:watch:dev\" \"npm run playground:start\" \"npm run bench:watch\" \"npm run bench:start\"",
     "output:build": "cd output && npm run build",
     "output:watch": "cd output && npm run watch",
     "docs:start": "cd docs && npm run start",
