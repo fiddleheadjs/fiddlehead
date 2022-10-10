@@ -1,8 +1,8 @@
-import {resolveRootVNode} from 'core.pkg';
+import {useTreeId} from 'core.pkg';
 import {createStore, useGlobalStoreRead, useGlobalStoreWrite} from './Store';
 
 /**
- * @type {WeakMap<VNode, WeakMap<object, Store>}
+ * @type {WeakMap<object, WeakMap<object, Store>}
  */
 let storesMap = new WeakMap();
 
@@ -12,15 +12,15 @@ let storesMap = new WeakMap();
  * @param {{}} initialData 
  */
 export let useStoreInit = (scope, initialData) => {
-    let rootVNode = resolveRootVNode();
-    let scoped = storesMap.get(rootVNode);
+    let treeId = useTreeId();
+    let scoped = storesMap.get(treeId);
     if (scoped === undefined) {
         scoped = new WeakMap();
-        storesMap.set(rootVNode, scoped);
+        storesMap.set(treeId, scoped);
     }
     if (scoped.has(scope)) {
         if (__DEV__) {
-            console.error('Store already has been initialized');
+            console.warn('Store already has been initialized');
         }
     } else {
         scoped.set(scope, createStore(initialData));
@@ -35,8 +35,8 @@ export let useStoreInit = (scope, initialData) => {
  */
 export let useStore = (scope) => {
     let store;
-    let rootVNode = resolveRootVNode();
-    let scoped = storesMap.get(rootVNode);
+    let treeId = useTreeId();
+    let scoped = storesMap.get(treeId);
     if (scoped !== undefined) {
         store = scoped.get(scope);
     }

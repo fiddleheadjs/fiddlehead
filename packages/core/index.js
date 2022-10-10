@@ -20,5 +20,5 @@ export {
     useEffect,
     useLayoutEffect,
     useRef,
-    resolveRootVNode,
+    resolveRootVNode as useTreeId,
 };
