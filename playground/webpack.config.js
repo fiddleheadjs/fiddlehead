@@ -57,7 +57,7 @@ fs.readdirSync('./src/usecases').map(pathname => {
             new HtmlWebpackPlugin({
                 title: filename,
                 filename: `../${filename}.html`,
-                template: './src/index.html'
+                template: './src/template.html'
             }),
         ],
     });
