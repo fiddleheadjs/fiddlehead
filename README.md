@@ -1,12 +1,12 @@
-# Fiddlehead
+# FdH
 
-Fiddlehead is a UI library that allows you to develop web apps in the declarative style,
+FdH is a UI library that allows you to develop web apps in the declarative style,
 component-based - these make your lines of code more predictable and maintainable.
 
-If you are familiar with React before, using Fiddlehead is quite similar.
-Fiddlehead implements some of the main ideas of React: virtual DOM, functional components, and hooks.
+If you are familiar with React before, using FdH is quite similar.
+It implements some of the main ideas of React: virtual DOM, functional components, and hooks.
 
-Writing codes with Fiddlehead is nothing but JSX and hooks.
+Writing codes with FdH is nothing but JSX and hooks.
 It is aimed to be as simple as possible, while still providing an excellent development experience.
 With such criteria in mind, we made it some benefits:
 - Simple usage: only JSX and hooks
@@ -22,7 +22,7 @@ while the powerful supports of React ecosystem are not necessary.
 Install the library:
 
 ```
-npm install git+ssh://git@git.itim.vn:ads-frontend/fiddlehead.git
+npm install git+ssh://git@git.itim.vn:ads-frontend/fdH.git
 ```
 
 Install Babel's packages to use JSX syntax:
@@ -74,7 +74,7 @@ module.exports = {
 ### Basic usage
 
 ```jsx
-import {jsx, render} from 'fiddlehead';
+import {jsx, render} from 'fdH';
 
 // Declare your component
 function HelloWorld() {
@@ -92,7 +92,7 @@ render(<HelloWorld/>, document.getElementById('root'));
 ### useState
 
 ```jsx
-import {jsx, useState} from 'fiddlehead';
+import {jsx, useState} from 'fdH';
 
 function Counter() {
     let [count, setCount] = useState(0);
@@ -116,7 +116,7 @@ function Counter() {
 ### useEffect
 
 ```jsx
-import {jsx, useState, useEffect} from 'fiddlehead';
+import {jsx, useState, useEffect} from 'fdH';
 
 function UserInfo() {
     let [email, setEmail] = useState('');
@@ -162,7 +162,7 @@ Prefer the standard `useEffect` when possible to avoid blocking visual updates.
 ### useRef
 
 ```jsx
-import {jsx, useEffect, useRef} from 'fiddlehead';
+import {jsx, useEffect, useRef} from 'fdH';
 
 function Image() {
     let imageRef = useRef(null);
@@ -185,7 +185,7 @@ function Image() {
 Don't like React, `ref` property can be accessed inside the component. You also don't need `forwardRef()` at all.
 
 ```jsx
-import {jsx, useRef} from 'fiddlehead';
+import {jsx, useRef} from 'fdH';
 
 function TextInput({ref}) {
     return (
@@ -209,7 +209,7 @@ function App() {
 ### Error boundaries
 
 ```jsx
-import {jsx, useCatch} from 'fiddlehead';
+import {jsx, useCatch} from 'fdH';
 
 function ErrorBoundary({children}) {
     let [error, clearError] = useCatch();
@@ -228,7 +228,7 @@ Error boundaries allow only one `useCatch` inside.
 ### Portal
 
 ```jsx
-import {jsx, createPortal} from 'fiddlehead';
+import {jsx, createPortal} from 'fdH';
 
 function DocumentPortal({children}) {
     let elRef = useRef(document.createElement('div'));
@@ -274,8 +274,8 @@ Store is a separate package. It is helpful when we want to use some global state
 which can be read/written from anywhere in the DOM tree, with no need to pass props through all levels of elements. 
 
 ```jsx
-import {jsx} from 'fiddlehead';
-import {useStoreInit, useStoreRead, useStoreWrite} from 'fiddlehead/store';
+import {jsx} from 'fdH';
+import {useStoreInit, useStoreRead, useStoreWrite} from 'fdH/store';
 
 function App() {
     useStoreInit(
