@@ -1,19 +1,28 @@
-# Hook
+# Fiddlehead
 
-Hook is a lightweight UI library. It replicates some key features of React:
+Fiddlehead is a UI library that allows you to develop web apps in the declarative style,
+component-based - these make your lines of code more predictable and maintainable.
 
-- Declarative programming
-- One-way data binding
-- Reconciliation
-- Batch update
-- Error boundary
+If you are familiar with React before, using Fiddlehead is quite similar.
+Fiddlehead implements some of the main ideas of React: virtual DOM, functional components, and hooks.
+
+Writing codes with Fiddlehead is nothing but JSX and hooks.
+It is aimed to be as simple as possible, while still providing an excellent development experience.
+With such criteria in mind, we made it some benefits:
+- Simple usage: only JSX and hooks
+- Performant: significantly better memory usage, and slightly better CPU usage compared to React
+- Lightweight: only 8kb (or 3kb gzipped), compared to 132kb for React
+
+If such things are not really meaningful to your case, then let's start with React.
+We created this library for our special cases that require those criteria strictly,
+while the powerful supports of React ecosystem are not necessary.
 
 ## Install
 
 Install the library:
 
 ```
-npm install git+ssh://git@git.itim.vn:ads-frontend/hook.git
+npm install git+ssh://git@git.itim.vn:ads-frontend/fiddlehead.git
 ```
 
 Install Babel's packages to use JSX syntax:
@@ -65,7 +74,7 @@ module.exports = {
 ### Basic usage
 
 ```jsx
-import {jsx, render} from 'hook';
+import {jsx, render} from 'fiddlehead';
 
 // Declare your component
 function HelloWorld() {
@@ -83,7 +92,7 @@ render(<HelloWorld/>, document.getElementById('root'));
 ### useState
 
 ```jsx
-import {jsx, useState} from 'hook';
+import {jsx, useState} from 'fiddlehead';
 
 function Counter() {
     let [count, setCount] = useState(0);
@@ -107,7 +116,7 @@ function Counter() {
 ### useEffect
 
 ```jsx
-import {jsx, useState, useEffect} from 'hook';
+import {jsx, useState, useEffect} from 'fiddlehead';
 
 function UserInfo() {
     let [email, setEmail] = useState('');
@@ -144,14 +153,16 @@ function UserInfo() {
 
 ### useLayoutEffect
 
-The signature is identical to `useEffect`, but it fires synchronously after all DOM mutations. Use this to read layout from the DOM and synchronously re-render. Updates scheduled inside `useLayoutEffect` will be flushed synchronously, before the browser has a chance to paint.
+The signature is identical to `useEffect`, but it fires synchronously after all DOM mutations.
+Use this to read layout from the DOM and synchronously re-render.
+Updates scheduled inside `useLayoutEffect` will be flushed synchronously, before the browser has a chance to paint.
 
 Prefer the standard `useEffect` when possible to avoid blocking visual updates.
 
 ### useRef
 
 ```jsx
-import {jsx, useEffect, useRef} from 'hook';
+import {jsx, useEffect, useRef} from 'fiddlehead';
 
 function Image() {
     let imageRef = useRef(null);
@@ -174,7 +185,7 @@ function Image() {
 Don't like React, `ref` property can be accessed inside the component. You also don't need `forwardRef()` at all.
 
 ```jsx
-import {jsx, useRef} from 'hook';
+import {jsx, useRef} from 'fiddlehead';
 
 function TextInput({ref}) {
     return (
@@ -198,7 +209,7 @@ function App() {
 ### Error boundaries
 
 ```jsx
-import {jsx, useCatch} from 'hook';
+import {jsx, useCatch} from 'fiddlehead';
 
 function ErrorBoundary({children}) {
     let [error, clearError] = useCatch();
@@ -211,12 +222,13 @@ function ErrorBoundary({children}) {
 }
 ```
 
-Error boundaries catch errors during rendering, in hooks and in the whole tree below them. Error boundaries allow only one `useCatch` inside.
+Error boundaries catch errors during rendering, in hook callbacks and in the whole tree below them.
+Error boundaries allow only one `useCatch` inside.
 
 ### Portal
 
 ```jsx
-import {jsx, createPortal} from 'hook';
+import {jsx, createPortal} from 'fiddlehead';
 
 function DocumentPortal({children}) {
     let elRef = useRef(document.createElement('div'));
@@ -258,11 +270,12 @@ function App() {
 
 ### Store
 
-Store is a separate package. It is helpful when we want to use some global states, which can be read/written from anywhere in the DOM tree, with no need to pass props through all levels of elements. 
+Store is a separate package. It is helpful when we want to use some global states,
+which can be read/written from anywhere in the DOM tree, with no need to pass props through all levels of elements. 
 
 ```jsx
-import {jsx} from 'hook';
-import {useStoreInit, useStoreRead, useStoreWrite} from 'hook/store';
+import {jsx} from 'fiddlehead';
+import {useStoreInit, useStoreRead, useStoreWrite} from 'fiddlehead/store';
 
 function App() {
     useStoreInit(
