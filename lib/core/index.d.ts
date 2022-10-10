@@ -1,3 +1,5 @@
+type Props = Record<string, any>;
+
 interface JSXElement {
 };
 
@@ -17,8 +19,8 @@ export function render(children: any, target: Element): void;
 export function createPortal(children: any, target: Element): PortalElement;
 
 export function createElement(
-    type: string | ((props: Record<string, any>) => any),
-    props: Record<string, any>,
+    type: string | ((props: Props) => any),
+    props: Props,
     ...children: any[]
 ): JSXElement;
 
