@@ -1,15 +1,12 @@
 interface JSXElement {
-}
+};
 
 interface PortalElement {
-}
-
-interface VNode {
-}
+};
 
 export interface Ref<T> {
     current: T
-}
+};
 
 export const Fragment: string;
 
