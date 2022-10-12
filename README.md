@@ -327,29 +327,36 @@ function Form() {
 
 ### useMemo and useCallback
 
+Currently, we do not support `useMemo` and `useCallback` as built-in hooks while we are considering.
+There are some reasons:
+- These hooks can be implemented by your self, based on the `useRef` hook as the following example.
+- In most cases, you will not need them. Providing them as built-in hooks make it easier for us to overuse them.
+  (They do not come free, only use them when they can really help).
+- They increase the complexity of the codes, while we are trying to make things simpler.
+
 ```js
-function useMemo(create, deps = null) {
-    let ref = useRef({v: undefined, d: null});
-    if (mismatchDeps(deps, ref.current.d)) {
-        ref.current.v = create();
-        ref.current.d = deps;
+function useMemo(create, deps) {
+    let current = useRef({}).current;
+    if (mismatchDeps(deps, current.d)) {
+        current.v = create();
+        current.d = deps;
     }
-    return ref.current.v;
+    return current.v;
 }
 
-function useCallback(callback, deps = null) {
-    let ref = useRef({v: undefined, d: null});
-    if (mismatchDeps(deps, ref.current.d)) {
-        ref.current.v = callback;
-        ref.current.d = deps;
+function useCallback(callback, deps) {
+    let current = useRef({}).current;
+    if (mismatchDeps(deps, current.d)) {
+        current.v = callback;
+        current.d = deps;
     }
-    return ref.current.v;
+    return current.v;
 }
 
 function mismatchDeps(deps, lastDeps) {
-    if (deps === null) return true;
+    if (deps == null) return true;
     if (deps.length === 0) return false;
-    if (lastDeps === null) return true;
+    if (lastDeps == null) return true;
     if (arraysEqual(deps, lastDeps)) return false;
     return true;
 }
