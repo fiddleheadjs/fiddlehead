@@ -1,7 +1,9 @@
-import {isFunction} from './Util';
+import {compareObjects, isFunction} from './Util';
 import {createVNodeFromContent} from './CreateVNode';
 import {prepareCurrentlyProcessing, flushCurrentlyProcessing} from './CurrentlyProcessing';
 import {catchError} from './CatchError';
+
+export const SELF_ALTERNATE = 1;
 
 export let reconcileChildren = (current, isRenderRoot) => {
     if (isFunction(current.type_)) {
@@ -28,6 +30,13 @@ let _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
         // Transfer the update ID
         current.updateId_ = alternate.updateId_;
         alternate.updateId_ = null;
+
+        // Do not re-render if the props do not changed
+        if (compareObjects(current.props_, alternate.props_)) {
+            current.child_ = alternate.child_;
+            current.alternate_ = SELF_ALTERNATE;
+            return;
+        }
     }
 
     let newContent;
@@ -58,7 +67,7 @@ let _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
             newChild.type_ === oldChild.type_ &&
             newChild.key_ === oldChild.key_
         ) {
-            _markAlternate(newChild, oldChild);
+            newChild.alternate_ = oldChild;
         } else {
             _addDeletion(current, oldChild);
         }
@@ -74,16 +83,14 @@ let _reconcileChildrenOfStaticNode = (current, alternate) => {
     let newChild;
     oldChildren.forEach((oldChild, mapKey) => {
         newChild = newChildren.get(mapKey);
-        if (newChild !== undefined && newChild.type_ === oldChild.type_) {
-            _markAlternate(newChild, oldChild);
+        if (newChild !== undefined &&
+            newChild.type_ === oldChild.type_
+        ) {
+            newChild.alternate_ = oldChild;
         } else {
             _addDeletion(current, oldChild);
         }
     });
-};
-
-let _markAlternate = (newChild, oldChild) => {
-    newChild.alternate_ = oldChild;
 };
 
 let _addDeletion = (current, childToDelete) => {

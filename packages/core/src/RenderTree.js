@@ -2,7 +2,7 @@ import {insertView, updateView, deleteView} from './CommitView';
 import {destroyEffects, EFFECT_LAYOUT, EFFECT_NORMAL, mountEffects} from './EffectHook';
 import {hydrateView} from './HydrateView';
 import {resolveMountingPoint, walkNativeChildren} from './MountingPoint';
-import {reconcileChildren} from './ReconcileChildren';
+import {reconcileChildren, SELF_ALTERNATE} from './ReconcileChildren';
 import {Portal, VNode} from './VNode';
 
 /**
@@ -78,8 +78,10 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
             }
         } else {
             if (current.alternate_ !== null) {
-                if (current === current.alternate_) {
-                    // Stop walking deeper
+                if (current.alternate_ === SELF_ALTERNATE) {
+                    current.alternate_ = null;
+                    // This node does not changed,
+                    // stop walking deeper
                     return false;
                 }
                 updateView(current, current.alternate_);
