@@ -2,7 +2,7 @@ import {insertView, updateView, deleteView} from './CommitView';
 import {destroyEffects, EFFECT_LAYOUT, EFFECT_NORMAL, mountEffects} from './EffectHook';
 import {hydrateView} from './HydrateView';
 import {resolveMountingPoint, walkNativeChildren} from './MountingPoint';
-import {reconcileChildren, SELF_ALTERNATE} from './ReconcileChildren';
+import {reconcileChildren} from './ReconcileChildren';
 import {Portal, VNode} from './VNode';
 
 /**
@@ -69,6 +69,8 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
     // Reconcile current's direct children
     reconcileChildren(current, isRenderRoot);
 
+    let shouldWalkDeeper = true;
+
     // Portal nodes never change the view itself
     if (current.type_ !== Portal) {
         if (isRenderRoot) {
@@ -78,16 +80,17 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
             }
         } else {
             if (current.alternate_ !== null) {
-                if (current.alternate_ === SELF_ALTERNATE) {
-                    current.alternate_ = null;
+                if (current.alternate_ === current) {
+                    console.log('not walk deeper', current.type_.name);
                     // This node does not changed,
                     // stop walking deeper
-                    return false;
-                }
-                updateView(current, current.alternate_);
-                if (current.effectHook_ !== null) {
-                    effectDestroyNodes.set(current.alternate_, false);
-                    effectMountNodes.set(current, false);
+                    shouldWalkDeeper = false;
+                } else {
+                    updateView(current, current.alternate_);
+                    if (current.effectHook_ !== null) {
+                        effectDestroyNodes.set(current.alternate_, false);
+                        effectMountNodes.set(current, false);
+                    }
                 }
                 current.alternate_ = null;
             } else {
@@ -140,7 +143,7 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
         current.updateId_ = null;
     }
 
-    return true;
+    return shouldWalkDeeper;
 };
 
 // Callback called after walking through a node and all of its ascendants
@@ -161,9 +164,11 @@ let _workLoop = (performUnit, onReturn, root, D0, D1) => {
     let shouldWalkDeeper;
     while (true) {
         shouldWalkDeeper = performUnit(current, root, D0, D1);
-        if (shouldWalkDeeper && current.child_ !== null) {
-            current = current.child_;
-            continue;
+        if (shouldWalkDeeper) {
+            if (current.child_ !== null) {
+                current = current.child_;
+                continue;
+            }
         }
         if (current === root) {
             return;

@@ -48,10 +48,6 @@ function C({children}) {
 
     const [clicks, setClicks] = useState(0);
 
-    useEffect(() => {
-        console.log('effect C');
-    })
-
     return <b onClick={ev => setClicks(t => t + 1)}>.C {clicks}</b>
 }
 

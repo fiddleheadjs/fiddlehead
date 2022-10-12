@@ -3,8 +3,6 @@ import {createVNodeFromContent} from './CreateVNode';
 import {prepareCurrentlyProcessing, flushCurrentlyProcessing} from './CurrentlyProcessing';
 import {catchError} from './CatchError';
 
-export const SELF_ALTERNATE = 1;
-
 export let reconcileChildren = (current, isRenderRoot) => {
     if (isFunction(current.type_)) {
         _reconcileOnlyChildOfDynamicNode(current, current.alternate_, isRenderRoot);
@@ -29,13 +27,33 @@ let _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
 
         // Transfer the update ID
         current.updateId_ = alternate.updateId_;
-        alternate.updateId_ = null;
 
-        // Do not re-render if the props do not changed
-        if (compareObjects(current.props_, alternate.props_)) {
-            current.child_ = alternate.child_;
-            current.alternate_ = SELF_ALTERNATE;
-            return;
+        // If this node itself did not triggered the re-render,
+        // but a higher-level node re-rendered,
+        // so it should not re-render if its props did not changed
+        if (!isRenderRoot && current.updateId_ === null) {
+            if (compareObjects(current.props_, alternate.props_)) {
+                // Reuse the child if needed
+                if (current.child_ === null) {
+                    if (alternate.child_ === null) {
+                        // Do nothing here
+                        // The alternate does not have child to reuse
+                    } else {
+                        // Reuse the previous child
+                        current.child_ = alternate.child_;
+                        current.child_.parent_ = current;
+                    }
+                } else {
+                    // Do nothing here
+                    // The current already has its child
+                }
+
+                // Make itself the alternate
+                current.alternate_ = current;
+
+                // Finish this reconciliation
+                return;
+            }
         }
     }
 

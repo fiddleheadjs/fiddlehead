@@ -3,9 +3,11 @@ import {jsx, useCatch, useState, useEffect} from 'core.pkg';
 function ErrorBoundary({children, errorType}) {
     const [error, clearError] = useCatch(null);
 
-    if(errorType === 'Error Boundary Component executed fail') {
-        let a = a + babel;
-    }
+    // console.log('error', error);
+    
+    // if (errorType === 'Error Boundary Component executed fail') {
+    //     let a = a + babel;
+    // }
 
     const [count, setCount] = useState(0);
 
@@ -14,31 +16,32 @@ function ErrorBoundary({children, errorType}) {
     }, [setCount, clearError]);
 
     return (
-        <>
-        {
-            error !== null ?
-            <>
-                <div data-testid="error-message" onClick={() => clearError()}>
-                    Error: {errorType}
-                </div>
-            </> : 
-            children
-        }
-        <span data-testid="count">{count}</span>
-        </>
+        <error-boundary>
+            <div-before>hehe</div-before>
+            {
+                error !== null ?
+                    <>
+                        <div data-testid="error-message" onClick={() => clearError()}>
+                            Error: {errorType}
+                        </div>
+                    </> :
+                    children
+            }
+            <div-after><span data-testid="count">{count}</span></div-after>
+        </error-boundary>
     );
 }
 
 function Child({errorType}) {
-    if(errorType === 'Child component executed fail') {
-        throwError();    
-    } 
-    else if(errorType === 'Effect executed fail') {
+    if (errorType === 'Child component executed fail') {
+        throwError();
+    }
+    else if (errorType === 'Effect executed fail') {
         useEffect(() => {
             throwError();
         });
-    } 
-    else if(errorType === 'Unmounted callback executed fail') {
+    }
+    else if (errorType === 'Unmounted callback executed fail') {
         useEffect(() => {
             return () => {
                 throwError();
@@ -48,15 +51,15 @@ function Child({errorType}) {
 
     return <>
         <div data-testid="children">
-            Hello 
+            Hello
         </div>
     </>;
-} 
+}
 
 export function Root({getMockValue}) {
     const [show, setShow] = useState(true);
     const [errorType, setErrorType] = useState(getMockValue());
-    
+
     return (
         <>
             <main onClick={() => setShow(getMockValue())}>
