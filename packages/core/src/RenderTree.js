@@ -3,7 +3,7 @@ import {destroyEffects, EFFECT_LAYOUT, EFFECT_NORMAL, mountEffects} from './Effe
 import {hydrateView} from './HydrateView';
 import {resolveMountingPoint, walkNativeChildren} from './MountingPoint';
 import {reconcileChildren} from './ReconcileChildren';
-import {Portal} from './VNode';
+import {Portal, VNode} from './VNode';
 
 /**
  * 
@@ -55,10 +55,18 @@ export let renderTree = (current) => {
 const INSERT_ON_RETURN = 0;
 const INSERT_OFFSCREEN = 1;
 
+/**
+ * 
+ * @param {VNode} current 
+ * @param {VNode} root 
+ * @param {Map<VNode, boolean>} effectMountNodes 
+ * @param {Map<VNode, boolean>} effectDestroyNodes 
+ * @returns {boolean} shouldWalkDeeper
+ */
 let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) => {
     let isRenderRoot = current === root;
     
-    // Reconcile current's children
+    // Reconcile current's direct children
     reconcileChildren(current, isRenderRoot);
 
     // Portal nodes never change the view itself
@@ -70,6 +78,10 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
             }
         } else {
             if (current.alternate_ !== null) {
+                if (current === current.alternate_) {
+                    // Stop walking deeper
+                    return false;
+                }
                 updateView(current, current.alternate_);
                 if (current.effectHook_ !== null) {
                     effectDestroyNodes.set(current.alternate_, false);
@@ -125,6 +137,8 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
         clearTimeout(current.updateId_);
         current.updateId_ = null;
     }
+
+    return true;
 };
 
 // Callback called after walking through a node and all of its ascendants
@@ -142,9 +156,10 @@ let _onReturn = (current) => {
 // Reference: https://github.com/facebook/react/issues/7942
 let _workLoop = (performUnit, onReturn, root, D0, D1) => {
     let current = root;
+    let shouldWalkDeeper;
     while (true) {
-        performUnit(current, root, D0, D1);
-        if (current.child_ !== null) {
+        shouldWalkDeeper = performUnit(current, root, D0, D1);
+        if (shouldWalkDeeper && current.child_ !== null) {
             current = current.child_;
             continue;
         }
