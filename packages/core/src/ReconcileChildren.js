@@ -27,6 +27,10 @@ let _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
 
         // Transfer the update ID
         current.updateId_ = alternate.updateId_;
+        // Remove update ID of the alternate
+        // to avoid the old branch re-rendering.
+        // (I don't know exactly why, check playground/errorBoundary)
+        alternate.updateId_ = null;
 
         // Pure component:
         // If props did not change, and this reconciliation is caused by
