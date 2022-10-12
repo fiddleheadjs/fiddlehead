@@ -73,7 +73,7 @@ module.exports = {
 
 ### Basic usage
 
-```js;
+```jsx
 import {jsx, render} from 'fdH';
 
 // Declare your component
@@ -91,7 +91,7 @@ render(<HelloWorld/>, document.getElementById('root'));
 
 ### useState
 
-```js
+```jsx
 import {jsx, useState} from 'fdH';
 
 function Counter() {
@@ -115,7 +115,7 @@ function Counter() {
 
 ### useEffect
 
-```js
+```jsx
 import {jsx, useState, useEffect} from 'fdH';
 
 function UserInfo() {
@@ -161,7 +161,7 @@ Prefer the standard `useEffect` when possible to avoid blocking visual updates.
 
 ### useRef
 
-```js
+```jsx
 import {jsx, useEffect, useRef} from 'fdH';
 
 function Image() {
@@ -184,7 +184,7 @@ function Image() {
 
 Don't like React, `ref` property can be accessed inside the component. You also don't need `forwardRef()` at all.
 
-```js
+```jsx
 import {jsx, useRef} from 'fdH';
 
 function TextInput({ref}) {
@@ -208,7 +208,7 @@ function App() {
 
 ### Error boundaries
 
-```js
+```jsx
 import {jsx, useCatch} from 'fdH';
 
 function ErrorBoundary({children}) {
@@ -227,7 +227,7 @@ Error boundaries allow only one `useCatch` inside.
 
 ### Portal
 
-```js
+```jsx
 import {jsx, createPortal} from 'fdH';
 
 function DocumentPortal({children}) {
@@ -273,7 +273,7 @@ function App() {
 Store is a separate package. It is helpful when we want to use some global states,
 which can be read/written from anywhere in the DOM tree, with no need to pass props through all levels of elements. 
 
-```js
+```jsx
 import {jsx, useRef} from 'fdH';
 import {useStoreInit, useStoreRead, useStoreWrite} from 'fdH/store';
 
