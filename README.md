@@ -331,7 +331,7 @@ Currently, we do not support `useMemo` and `useCallback` as built-in hooks while
 There are some reasons:
 - These hooks can be implemented by your self, based on the `useRef` hook as the following example.
 - In most cases, you will not need them. Providing them as built-in hooks make it easier for us to overuse them.
-  (They do not come free, only use them when they can really help).
+  (They do not come free, only use them when you have noticable issues).
 - They increase the complexity of the codes, while we are trying to make things simpler.
 
 ```js
