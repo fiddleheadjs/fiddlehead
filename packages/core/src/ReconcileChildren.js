@@ -49,7 +49,8 @@ let _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
                     // The current already has its child
                 }
 
-                // Make itself the alternate
+                // Make itself the alternate to denote that it did not change,
+                // so the next process will skip walking deeper in its children
                 current.alternate_ = current;
 
                 // Finish this reconciliation

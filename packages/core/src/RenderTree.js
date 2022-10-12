@@ -81,7 +81,6 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
         } else {
             if (current.alternate_ !== null) {
                 if (current.alternate_ === current) {
-                    console.log('not walk deeper', current.type_.name);
                     // This node does not changed,
                     // stop walking deeper
                     shouldWalkDeeper = false;
