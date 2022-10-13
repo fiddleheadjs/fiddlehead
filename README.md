@@ -339,8 +339,8 @@ import {useStoreInit, useStoreRead, useStoreWrite} from 'fdH/store';
 
 function App() {
     useStoreInit(
-        App, // Scope must be an object
-        {title: 'Store usage example'} // Initial data must be a plain object
+        App, // Scope, must be an object
+        {title: 'Store usage example'} // Initial data, must be a plain object
     );
 
     return (
