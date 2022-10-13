@@ -231,21 +231,21 @@ Error boundaries allow only one `useCatch` inside.
 import {jsx, createPortal} from 'fdH';
 
 function DocumentPortal({children}) {
-    let elRef = useRef(document.createElement('div'));
-    elRef.current.style.display = 'contents';
+    let el = useRef(document.createElement('div')).current;
+    el.style.display = 'contents';
     
     useEffect(() => {
-        if (elRef.current.parentNode === null) {
-            document.body.appendChild(elRef.current);
+        if (el.parentNode === null) {
+            document.body.appendChild(el);
         }
         return () => {
-            if (elRef.current.parentNode !== null) {
-                elRef.current.parentNode.removeChild(elRef.current);
+            if (el.parentNode !== null) {
+                el.parentNode.removeChild(el);
             }
         };
     }, []);
 
-    return createPortal(children, elRef.current);
+    return createPortal(children, el);
 }
 
 function App() {
