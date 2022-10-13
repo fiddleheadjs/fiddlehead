@@ -361,12 +361,12 @@ function mismatchDeps(deps, lastDeps) {
     return true;
 }
 
-function arraysEqual(a, b) {
-    if (a.length !== b.length) {
+function arraysEqual(A, B) {
+    if (A.length !== B.length) {
         return false;
     }
-    for (let i = a.length - 1; i >= 0; --i) {
-        if (a[i] !== b[i]) {
+    for (let i = A.length - 1; i >= 0; --i) {
+        if (!Object.is(A[i], B[i])) {
             return false;
         }
     }

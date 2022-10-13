@@ -1,6 +1,6 @@
 import {resolveCurrentEffectHook} from './CurrentlyProcessing';
 import {catchError} from './CatchError';
-import {compareArrays} from './Util';
+import {arraysShallowEqual} from './Util';
 
 export const EFFECT_NORMAL = 0;
 export const EFFECT_LAYOUT = 1;
@@ -139,7 +139,7 @@ let _mismatchDeps = (deps, lastDeps) => {
         return false;
     }
     // 2. Two arrays are equal
-    if (compareArrays(deps, lastDeps)) {
+    if (arraysShallowEqual(deps, lastDeps)) {
         return false;
     }
 
