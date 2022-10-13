@@ -323,7 +323,7 @@ function Form() {
 }
 ```
 
-### Memo
+### Pure components
 
 Different from React, any components of FdH are "pure" without wrapping them with `memo` HOC.
 This means, components will not re-rendered without changes in their props or states,
