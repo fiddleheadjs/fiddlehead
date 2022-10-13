@@ -88,12 +88,12 @@ describe('errorBoundary.test.js', () => {
         getMockValue.mockReturnValue(true);
         renderView(<Root getMockValue={getMockValue} />);
         await sleep();
-        expect(parseInt(screen.getByTestId('count').textContent)).not.toBe(100);
+        expect(parseInt(screen.getByTestId('count').textContent)).toBe(1);
 
         getMockValue.mockReturnValue(false);
         userEvent.click(screen.getByRole('main'));
         await sleep();
-        expect(parseInt(screen.getByTestId('count').textContent)).not.toBe(100);
+        expect(parseInt(screen.getByTestId('count').textContent)).toBe(1);
 
         getMockValue.mockReturnValue(true);
         userEvent.click(screen.getByRole('main'));
