@@ -3,7 +3,7 @@ import {destroyEffects, EFFECT_LAYOUT, EFFECT_NORMAL, mountEffects} from './Effe
 import {hydrateView} from './HydrateView';
 import {resolveMountingPoint, walkNativeChildren} from './MountingPoint';
 import {reconcileChildren} from './ReconcileChildren';
-import {Portal, VNode} from './VNode';
+import {Portal} from './VNode';
 
 /**
  * 
