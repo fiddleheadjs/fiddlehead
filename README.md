@@ -268,61 +268,6 @@ function App() {
 }
 ```
 
-### Store
-
-Store is a separate package. It is helpful when we want to use some global states,
-which can be read/written from anywhere in the DOM tree, with no need to pass props through all levels of elements. 
-
-```jsx
-import {jsx, useRef} from 'fdH';
-import {useStoreInit, useStoreRead, useStoreWrite} from 'fdH/store';
-
-function App() {
-    useStoreInit(
-        App, // Scope
-        {title: 'Store usage example'} // Initial data
-    );
-
-    return (
-        <main>
-            <Header/>
-            <section>
-                <Form/>
-            </section>
-        </main>
-    );
-}
-
-function Header() {
-    let title = useStoreRead(
-        App, // Scope
-        (data) => data.title // Reader
-    );
-
-    return (
-        <h1>{title}</h1>
-    );
-}
-
-function Form() {
-    let title = useStoreRead(App, (data) => data.title);
-    let setTitle = useStoreWrite(
-        App, // Scope
-        (data, value) => data.title = value // Writer
-    );
-
-    let handleClickRef = useRef(ev => setTitle(ev.target.value));
-
-    return (
-        <input
-            type="text"
-            value={title}
-            onChange={handleClickRef.current}
-        />
-    );
-}
-```
-
 ### Components always are "pure"
 
 Different from React, any components of FdH are "pure" without wrapping them with `memo` HOC.
@@ -376,5 +321,60 @@ function arraysEqual(A, B) {
         }
     }
     return true;
+}
+```
+
+### Store
+
+Store is a separate package. It is helpful when we want to use some global states,
+which can be read/written from anywhere in the DOM tree, with no need to pass props through all levels of elements. 
+
+```jsx
+import {jsx, useRef} from 'fdH';
+import {useStoreInit, useStoreRead, useStoreWrite} from 'fdH/store';
+
+function App() {
+    useStoreInit(
+        App, // Scope
+        {title: 'Store usage example'} // Initial data
+    );
+
+    return (
+        <main>
+            <Header/>
+            <section>
+                <Form/>
+            </section>
+        </main>
+    );
+}
+
+function Header() {
+    let title = useStoreRead(
+        App, // Scope
+        (data) => data.title // Reader
+    );
+
+    return (
+        <h1>{title}</h1>
+    );
+}
+
+function Form() {
+    let title = useStoreRead(App, (data) => data.title);
+    let setTitle = useStoreWrite(
+        App, // Scope
+        (data, value) => data.title = value // Writer
+    );
+
+    let handleClickRef = useRef(ev => setTitle(ev.target.value));
+
+    return (
+        <input
+            type="text"
+            value={title}
+            onChange={handleClickRef.current}
+        />
+    );
 }
 ```
