@@ -270,7 +270,8 @@ function App() {
 
 ### Components always are "pure"
 
-Different from React, any components of FdH are "pure" without wrapping them with `memo` HOC.
+Pure components are components that always produce the same output (view) with the same input (props).
+Different from React, any components of FdH are pure without wrapping them with `memo` HOC.
 This means, components will not re-rendered without changes in their props or states,
 even when their parent components re-rendered.
 We use the shallow comparison to determine if props are changed or not.
