@@ -38,7 +38,7 @@ let _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
                 if (current.child_ === null) {
                     if (alternate.child_ === null) {
                         // Do nothing here
-                        // The alternate does not have child to reuse
+                        // The alternate does not have the child to reuse
                     } else {
                         // Reuse the previous child
                         current.child_ = alternate.child_;
