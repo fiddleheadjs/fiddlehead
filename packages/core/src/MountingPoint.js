@@ -1,6 +1,7 @@
-// The mounting point is a virtual node which has a native node (not null)
-// It means that a mounting point can contains native children
 /**
+ * 
+ * The mounting point is a virtual node which has a native node (not null)
+ * It means that a mounting point can contains native children
  * 
  * @param {VNode} current 
  * @returns {VNode}
@@ -17,8 +18,9 @@ export let resolveMountingPoint = (current) => {
     }
 };
 
-// Walk through native children of a parent
 /**
+ * 
+ * Walk through native children of a parent
  * 
  * @param {function} callback 
  * @param {VNode} parent 
