@@ -339,7 +339,7 @@ import {useStoreInit, useStoreRead, useStoreWrite} from 'fdH/store';
 
 function App() {
     useStoreInit(
-        App, // Scope, must be an object
+        App, // Scope, can be any object (reference) but not a primitive value
         {title: 'Store usage example'} // Initial data, must be a plain object
     );
 
