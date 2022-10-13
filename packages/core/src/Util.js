@@ -48,6 +48,7 @@ export let compareObjects = (A, B) => {
     }
     let keysA = Object.keys(A);
     let keysB = Object.keys(B);
+    // console.log({keysA, keysB})
     if (keysA.length !== keysB.length) {
         return false;
     }
@@ -72,6 +73,7 @@ export let compareObjects = (A, B) => {
  * @returns {boolean}
  */
 let _is = (x, y) => {
+    return x === y;
     // SameValue algorithm
     if (x === y) { // Steps 1-5, 7-10
         // Steps 6.b-6.e: +0 != -0

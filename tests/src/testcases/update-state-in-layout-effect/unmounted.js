@@ -16,7 +16,11 @@ export function Root({unmountedCb1, unmountedCb2}) {
 
             <div data-testid="mount-effect">
                 {show && 
-                    <ChildA setCount={setCount} unmountedCb1={unmountedCb1} unmountedCb2={unmountedCb2} />
+                    <ChildA 
+                        setCount={setCount} 
+                        unmountedCb1={unmountedCb1} 
+                        unmountedCb2={unmountedCb2} 
+                    />
                 }
             </div>
         </main>
@@ -34,7 +38,10 @@ function ChildA({setCount, unmountedCb1, unmountedCb2}) {
 
     return [
         <div>
-            <ChildB setCount2={setCount2} unmountedCb2={unmountedCb2} />
+            <ChildB 
+                setCount2={setCount2} 
+                unmountedCb2={unmountedCb2} 
+            />
         </div>, 
         <></>
     ];

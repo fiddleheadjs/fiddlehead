@@ -3,11 +3,9 @@ import {jsx, useCatch, useState, useEffect} from 'core.pkg';
 function ErrorBoundary({children, errorType}) {
     const [error, clearError] = useCatch(null);
 
-    // console.log('error', error);
-    
-    // if (errorType === 'Error Boundary Component executed fail') {
-    //     let a = a + babel;
-    // }
+    if (errorType === 'Error Boundary Component executed fail') {
+        let a = a + babel;
+    }
 
     const [count, setCount] = useState(0);
 

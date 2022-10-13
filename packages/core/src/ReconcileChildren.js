@@ -29,38 +29,39 @@ let _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
         current.updateId_ = alternate.updateId_;
         // Remove update ID of the alternate
         // to avoid the old branch re-rendering.
-        // (I don't know exactly why, check playground/errorBoundary)
+        // (I don't remember exactly why, check playground/errorBoundary)
         alternate.updateId_ = null;
 
         // Pure component:
         // If props did not change, and this reconciliation is caused by
         // the current itself updating or being marked to be updated (with updateId_),
         // but by an updating from a higher-level node, so it should NOT re-render
-        if (!isRenderRoot && current.updateId_ === null) {
-            if (compareObjects(current.props_, alternate.props_)) {
-                // Reuse the child if needed
-                if (current.child_ === null) {
-                    if (alternate.child_ === null) {
-                        // Do nothing here
-                        // The alternate does not have child to reuse
-                    } else {
-                        // Reuse the previous child
-                        current.child_ = alternate.child_;
-                        current.child_.parent_ = current;
-                    }
-                } else {
-                    // Do nothing here
-                    // The current already has its child
-                }
+        // if (!isRenderRoot && current.updateId_ === null) {
+        //     if (compareObjects(current.props_, alternate.props_)) {
+        //         console.log('resuse', current.type_);
+        //         // Reuse the child if needed
+        //         if (current.child_ === null) {
+        //             if (alternate.child_ === null) {
+        //                 // Do nothing here
+        //                 // The alternate does not have child to reuse
+        //             } else {
+        //                 // Reuse the previous child
+        //                 current.child_ = alternate.child_;
+        //                 current.child_.parent_ = current;
+        //             }
+        //         } else {
+        //             // Do nothing here
+        //             // The current already has its child
+        //         }
 
-                // Make itself the alternate to denote that it did not change,
-                // so the next process will skip walking deeper in its children
-                current.alternate_ = current;
+        //         // Make itself the alternate to denote that it did not change,
+        //         // so the next process will skip walking deeper in its children
+        //         current.alternate_ = current;
 
-                // Finish this reconciliation
-                return;
-            }
-        }
+        //         // Finish this reconciliation
+        //         return;
+        //     }
+        // }
     }
 
     let newContent;

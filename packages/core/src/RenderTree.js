@@ -80,17 +80,17 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
             }
         } else {
             if (current.alternate_ !== null) {
-                if (current.alternate_ === current) {
-                    // This node does not changed,
-                    // stop walking deeper
-                    shouldWalkDeeper = false;
-                } else {
+                // if (current.alternate_ === current) {
+                //     // This node does not changed,
+                //     // stop walking deeper
+                //     shouldWalkDeeper = false;
+                // } else {
                     updateView(current, current.alternate_);
                     if (current.effectHook_ !== null) {
                         effectDestroyNodes.set(current.alternate_, false);
                         effectMountNodes.set(current, false);
                     }
-                }
+                // }
                 current.alternate_ = null;
             } else {
                 hydrateView(current);
