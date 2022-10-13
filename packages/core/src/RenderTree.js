@@ -51,7 +51,7 @@ export let renderTree = (current) => {
     });
 };
 
-// Optimize insertion to reduce reflow number
+// Optimize the insertion to reduce the number of reflows
 const INSERT_ON_RETURN = 0;
 const INSERT_OFFSCREEN = 1;
 
