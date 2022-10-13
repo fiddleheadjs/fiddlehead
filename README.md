@@ -182,7 +182,10 @@ function Image() {
 
 ### Forward refs
 
-Don't like React, `ref` property can be accessed inside the component. You also don't need `forwardRef()` at all.
+Different from React, fdH does not prevent you from using `ref` as a normal prop.
+You are free to choose the name of the prop which forwards the ref.
+As you pass that prop to a built-in element, it requires you to provide an instance of Ref,
+which you will get by using the `createRef` function or `useRef` hook.
 
 ```jsx
 import {jsx, useRef} from 'fdH';
