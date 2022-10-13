@@ -330,7 +330,7 @@ function arraysEqual(A, B) {
 
 ### Store
 
-Store is a separate package. It is helpful when we want to use some global states,
+Store is a separated package. It is helpful when we want to use some global states,
 which can be read/written from anywhere in the DOM tree, with no need to pass props through all levels of elements. 
 
 ```jsx
