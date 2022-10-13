@@ -325,7 +325,7 @@ function Form() {
 
 ### Memo
 
-Different with React, any components of FdH are "pure".
+Different from React, any components of FdH are "pure".
 This means, components will not re-rendered without changes in their props or states,
 even when their parent components re-rendered.
 We use the shallow comparison to determine if props are changed or not.
