@@ -25,6 +25,9 @@ export let isArray = (value) => {
  * @returns {boolean}
  */
 export let arraysShallowEqual = (A, B) => {
+    if (A === B) {
+        return true;
+    }
     if (A.length !== B.length) {
         return false;
     }
@@ -46,7 +49,7 @@ export let arraysShallowEqual = (A, B) => {
  * @returns {boolean}
  */
 export let objectsShallowEqual = (A, B) => {
-    if (Object.is(A, B)) {
+    if (A === B) {
         return true;
     }
     let keysA = Object.keys(A);
