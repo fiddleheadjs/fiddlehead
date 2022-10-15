@@ -41,8 +41,8 @@ export let isArray = (value) => {
 
 /**
  * 
- * @param {Array} A
- * @param {Array} B 
+ * @param {[]} A
+ * @param {[]} B 
  * @returns {boolean}
  */
 export let arraysShallowEqual = (A, B) => {
