@@ -5,6 +5,7 @@ import {createPortal} from './src/PortalElement';
 import {useState, useCatch} from './src/StateHook';
 import {useEffect, useLayoutEffect} from './src/EffectHook';
 import {useRef, createRef} from './src/RefHook';
+import {useCallback, useMemo} from './src/MemoHook';
 import {resolveRootVNode} from './src/CurrentlyProcessing';
 
 export {
@@ -20,5 +21,7 @@ export {
     useEffect,
     useLayoutEffect,
     useRef,
+    useCallback,
+    useMemo,
     resolveRootVNode as useTreeId,
 };

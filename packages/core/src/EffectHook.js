@@ -1,6 +1,6 @@
 import {resolveCurrentEffectHook} from './CurrentlyProcessing';
 import {catchError} from './CatchError';
-import {arraysShallowEqual} from './Util';
+import {depsMismatch, warnIfDepsSizeChangedOnDEV} from './Dependencies';
 
 export const EFFECT_NORMAL = 0;
 export const EFFECT_LAYOUT = 1;
@@ -9,15 +9,15 @@ export const EFFECT_LAYOUT = 1;
  *
  * @param {number} tag
  * @param {function} callback
- * @param {[]|null} deps
+ * @param {[]|undefined} deps
  * @constructor
  */
 export function EffectHook(tag, callback, deps) {
     this.tag_ = tag;
     this.callback_ = callback;
     this.deps_ = deps;
-    this.destroy_ = null;
-    this.lastDeps_ = null;
+    this.destroy_ = undefined;
+    this.lastDeps_ = undefined;
     this.next_ = null;
 }
 
@@ -30,26 +30,13 @@ export let useLayoutEffect = (callback, deps) => {
 };
 
 let _useEffectImpl = (tag, callback, deps) => {
-    if (deps === undefined) {
-        deps = null;
-    }
-
     return resolveCurrentEffectHook(
         (currentVNode) => {
             return new EffectHook(tag, callback, deps);
         },
         (currentHook) => {
-            if (__DEV__) {
-                if (!(
-                    deps === null && currentHook.deps_ === null ||
-                    deps.length === currentHook.deps_.length
-                )) {
-                    throw new Error('Deps must be size-fixed');
-                }
-                // On the production, we accept the deps change its length
-                // and consider it is changed
-            }
-
+            warnIfDepsSizeChangedOnDEV(deps, currentHook.deps_);
+            
             currentHook.callback_ = callback;
             currentHook.deps_ = deps;
         }
@@ -66,7 +53,7 @@ export let mountEffects = (effectTag, vnode, isNewlyMounted) => {
     let hook = vnode.effectHook_;
     while (hook !== null) {
         if (hook.tag_ === effectTag) {
-            if (isNewlyMounted || _mismatchDeps(hook.deps_, hook.lastDeps_)) {
+            if (isNewlyMounted || depsMismatch(hook.deps_, hook.lastDeps_)) {
                 try {
                     _mountEffect(hook);
                 } catch (error) {
@@ -87,8 +74,8 @@ export let destroyEffects = (effectTag, vnode, isUnmounted) => {
     let hook = vnode.effectHook_;
     while (hook !== null) {
         if (hook.tag_ === effectTag) {
-            if (hook.destroy_ !== null) {
-                if (isUnmounted || _mismatchDeps(hook.deps_, hook.lastDeps_)) {
+            if (hook.destroy_ !== undefined) {
+                if (isUnmounted || depsMismatch(hook.deps_, hook.lastDeps_)) {
                     try {
                         hook.destroy_();
                     } catch (error) {
@@ -111,40 +98,4 @@ let _mountEffect = (hook) => {
     
     // Run the effect callback
     hook.destroy_ = hook.callback_();
-    if (hook.destroy_ === undefined) {
-        hook.destroy_ = null;
-    }
-};
-
-/**
- * 
- * @param {[]|null} deps 
- * @param {[]|null} lastDeps 
- * @returns {boolean}
- */
-let _mismatchDeps = (deps, lastDeps) => {
-    // Always
-    if (deps === null) {
-        return true;
-    }
-
-    // Lazy
-    if (deps.length === 0) {
-        return false;
-    }
-
-    // Deps
-    // 1. When init effect
-    if (lastDeps === null) {
-        return false;
-    }
-    // 2. Two arrays are equal
-    if (arraysShallowEqual(deps, lastDeps)) {
-        return false;
-    }
-
-    // DepsChanged
-    {
-        return true;
-    }
 };

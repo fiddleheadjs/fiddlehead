@@ -41,27 +41,6 @@ export let isArray = (value) => {
 
 /**
  * 
- * @param {[]} A
- * @param {[]} B 
- * @returns {boolean}
- */
-export let arraysShallowEqual = (A, B) => {
-    if (A === B) {
-        return true;
-    }
-    if (A.length !== B.length) {
-        return false;
-    }
-    for (let i = A.length - 1; i >= 0; --i) {
-        if (!theSame(A[i], B[i])) {
-            return false;
-        }
-    }
-    return true;
-};
-
-/**
- * 
  * @param {{}} A 
  * @param {{}} B 
  * @returns {boolean}
@@ -81,6 +60,27 @@ export let objectsShallowEqual = (A, B) => {
             hasOwnProperty.call(B, k) &&
             theSame(A[k], B[k])
         )) {
+            return false;
+        }
+    }
+    return true;
+};
+
+/**
+ * 
+ * @param {[]} A
+ * @param {[]} B 
+ * @returns {boolean}
+ */
+ export let arraysShallowEqual = (A, B) => {
+    if (A === B) {
+        return true;
+    }
+    if (A.length !== B.length) {
+        return false;
+    }
+    for (let i = A.length - 1; i >= 0; --i) {
+        if (!theSame(A[i], B[i])) {
             return false;
         }
     }
