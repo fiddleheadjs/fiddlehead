@@ -354,9 +354,9 @@ function App() {
 }
 
 function Header() {
-    let title = useStoreRead(
+    let title = useStoreSelector(
         App, // Scope
-        (data) => data.title // Reader
+        (data) => data.title // Selector
     );
 
     return (
@@ -365,10 +365,10 @@ function Header() {
 }
 
 function Form() {
-    let title = useStoreRead(App, (data) => data.title);
-    let setTitle = useStoreWrite(
+    let title = useSelect(App, (data) => data.title);
+    let setTitle = useDispatch(
         App, // Scope
-        (data, value) => data.title = value // Writer
+        (data, value) => data.title = value // Action
     );
 
     let handleClickRef = useRef(ev => setTitle(ev.target.value));

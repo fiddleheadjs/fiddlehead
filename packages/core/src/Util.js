@@ -3,11 +3,11 @@ export let hasOwnProperty = Object.prototype.hasOwnProperty;
 export let slice = Array.prototype.slice;
 
 export let isString = (value) => {
-    return typeof value === 'string'/* || value instanceof String*/;
+    return typeof value === 'string';
 };
 
 export let isNumber = (value) => {
-    return typeof value === 'number'/* || value instanceof Number*/;
+    return typeof value === 'number';
 };
 
 export let isFunction = (value) => {
@@ -32,7 +32,7 @@ export let arraysShallowEqual = (A, B) => {
         return false;
     }
     for (let i = A.length - 1; i >= 0; --i) {
-        if (!Object.is(A[i], B[i])) {
+        if (!theSame(A[i], B[i])) {
             return false;
         }
     }
@@ -40,9 +40,6 @@ export let arraysShallowEqual = (A, B) => {
 };
 
 /**
- * 
- * https://github.com/facebook/fbjs/blob/main/packages/fbjs/src/core/shallowEqual.js#L22
- * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
  * 
  * @param {{}} A 
  * @param {{}} B 
@@ -61,10 +58,31 @@ export let objectsShallowEqual = (A, B) => {
         k = kA[i];
         if (!(
             hasOwnProperty.call(B, k) &&
-            Object.is(A[k], B[k])
+            theSame(A[k], B[k])
         )) {
             return false;
         }
     }
     return true;
+};
+
+/**
+ * 
+ * Object.is equivalence.
+ * https://github.com/facebook/fbjs/blob/main/packages/fbjs/src/core/shallowEqual.js#L22
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
+ * 
+ * @param {any} x 
+ * @param {any} y 
+ * @returns {boolean}
+ */
+export let theSame = (x, y) => {
+    // SameValue algorithm
+    if (x === y) {
+        // +0 != -0
+        return x !== 0 || 1 / x === 1 / y;
+    } else {
+        // NaN == NaN
+        return x !== x && y !== y;
+    }
 };

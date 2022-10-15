@@ -1,7 +1,7 @@
 import {catchError} from './CatchError';
 import {resolveCurrentStateHook} from './CurrentlyProcessing';
 import {renderTree} from './RenderTree';
-import {isFunction} from './Util';
+import {theSame, isFunction} from './Util';
 
 export const STATE_NORMAL = 0;
 export const STATE_ERROR = 1;
@@ -70,7 +70,7 @@ let _setState = function (value) {
         newValue = value;
     }
 
-    if (this.value_ !== newValue) {
+    if (!theSame(this.value_, newValue)) {
         // Set value synchronously
         this.value_ = newValue;
 
