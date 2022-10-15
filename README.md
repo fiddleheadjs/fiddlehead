@@ -354,9 +354,9 @@ function App() {
 }
 
 function Header() {
-    let title = useStoreSelector(
+    let title = useStoreRead(
         App, // Scope
-        (data) => data.title // Selector
+        (data) => data.title // Reader
     );
 
     return (
@@ -365,19 +365,17 @@ function Header() {
 }
 
 function Form() {
-    let title = useSelect(App, (data) => data.title);
-    let setTitle = useDispatch(
+    let title = useStoreRead(App, (data) => data.title);
+    let setTitle = useStoreWrite(
         App, // Scope
-        (data, value) => data.title = value // Action
+        (data, value) => data.title = value // Writer
     );
-
-    let handleClickRef = useRef(ev => setTitle(ev.target.value));
 
     return (
         <input
             type="text"
             value={title}
-            onChange={handleClickRef.current}
+            onChange={ev => setTitle(ev.target.value)}
         />
     );
 }
