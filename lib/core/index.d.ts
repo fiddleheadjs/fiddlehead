@@ -50,14 +50,14 @@ export function useLayoutEffect(
 
 export function useRef<T>(initialValue: T): Ref<T>;
 
-export function useCallback(
-    callback: Function,
+export function useCallback<T>(
+    callback: T,
     deps?: any[]
-): void;
+): T;
 
-export function useMemo(
-    create: Function,
+export function useMemo<T>(
+    create: () => T,
     deps?: any[]
-): void;
+): T;
 
 export function useTreeId(): object;
