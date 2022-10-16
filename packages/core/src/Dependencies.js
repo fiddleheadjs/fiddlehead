@@ -3,17 +3,17 @@ import {arraysShallowEqual} from './Util';
 /**
  * 
  * @param {[]|undefined} deps 
- * @param {[]|undefined} lastDeps 
+ * @param {[]|undefined} prevDeps 
  * @returns {boolean}
  */
- export let depsMismatch = (deps, lastDeps) => {
+ export let depsMismatch = (deps, prevDeps) => {
     // Always
     if (deps === undefined) {
         return true;
     }
     
     // First time
-    if (lastDeps === undefined) {
+    if (prevDeps === undefined) {
         return true;
     }
 
@@ -23,7 +23,7 @@ import {arraysShallowEqual} from './Util';
     }
 
     // Two arrays are equal
-    if (arraysShallowEqual(deps, lastDeps)) {
+    if (arraysShallowEqual(deps, prevDeps)) {
         return false;
     }
 
@@ -36,15 +36,15 @@ import {arraysShallowEqual} from './Util';
 /**
  * 
  * @param {[]|undefined} deps 
- * @param {[]|undefined} lastDeps 
+ * @param {[]|undefined} prevDeps 
  * @returns {boolean}
  */
-export let warnIfDepsSizeChangedOnDEV = (deps, lastDeps) => {
+export let warnIfDepsSizeChangedOnDEV = (deps, prevDeps) => {
     if (__DEV__) {
         if (!(
-            deps === undefined && lastDeps === undefined ||
-            deps !== undefined && lastDeps === undefined ||
-            deps !== undefined && lastDeps !== undefined && deps.length === lastDeps.length
+            deps === undefined && prevDeps === undefined ||
+            deps !== undefined && prevDeps === undefined ||
+            deps !== undefined && prevDeps !== undefined && deps.length === prevDeps.length
         )) {
             throw new Error('Deps must be size-fixed');
         }

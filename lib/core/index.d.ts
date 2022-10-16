@@ -39,12 +39,12 @@ export function useCatch(): [
 ];
 
 export function useEffect(
-    callback: () => (() => void) | void,
+    mount: () => (() => void) | void,
     deps?: any[]
 ): void;
 
 export function useLayoutEffect(
-    callback: () => (() => void) | void,
+    mount: () => (() => void) | void,
     deps?: any[]
 ): void;
 
