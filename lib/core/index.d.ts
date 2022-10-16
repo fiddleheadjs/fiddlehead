@@ -14,9 +14,15 @@ export const Fragment: string;
 
 export const TextNode: string;
 
-export function render(children: any, target: Element): void;
+export function render(
+    children: any,
+    target: Element
+): void;
 
-export function createPortal(children: any, target: Element): PortalElement;
+export function createPortal(
+    children: any,
+    target: Element
+): PortalElement;
 
 export function createElement(
     type: string | ((props: Props) => any),
