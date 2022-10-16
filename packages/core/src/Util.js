@@ -19,7 +19,6 @@ export let isArray = (value) => {
 };
 
 /**
- * 
  * Object.is equivalence.
  * https://github.com/facebook/fbjs/blob/main/packages/fbjs/src/core/shallowEqual.js#L22
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is

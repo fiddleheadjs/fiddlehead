@@ -1,5 +1,4 @@
 /**
- * 
  * The mounting point is a virtual node which has a native node (not null)
  * It means that a mounting point can contains native children
  * 
@@ -19,7 +18,6 @@ export let resolveMountingPoint = (current) => {
 };
 
 /**
- * 
  * Walk through native children of a parent
  * 
  * @param {function} callback 
