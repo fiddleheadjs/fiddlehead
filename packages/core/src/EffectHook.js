@@ -8,8 +8,6 @@ export const EFFECT_LAYOUT = 1;
 /**
  *
  * @param {number} tag
- * @param {function} mount
- * @param {[]|undefined} deps
  * @constructor
  */
 export function EffectHook(tag) {
