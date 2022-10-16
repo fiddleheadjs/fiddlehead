@@ -35,15 +35,16 @@ import {arraysShallowEqual} from './Util';
 
 /**
  * 
- * @param {[]|undefined} depsA 
- * @param {[]|undefined} depsB 
+ * @param {[]|undefined} deps 
+ * @param {[]|undefined} lastDeps 
  * @returns {boolean}
  */
-export let warnIfDepsSizeChangedOnDEV = (depsA, depsB) => {
+export let warnIfDepsSizeChangedOnDEV = (deps, lastDeps) => {
     if (__DEV__) {
         if (!(
-            depsA === undefined && depsB === undefined ||
-            depsA.length === depsB.length
+            deps === undefined && lastDeps === undefined ||
+            deps !== undefined && lastDeps === undefined ||
+            deps !== undefined && lastDeps !== undefined && deps.length === lastDeps.length
         )) {
             throw new Error('Deps must be size-fixed');
         }
