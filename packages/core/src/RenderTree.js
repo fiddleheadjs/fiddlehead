@@ -51,15 +51,25 @@ export let renderTree = (current) => {
     });
 };
 
-// Optimize insertion to reduce reflow number
+// Optimize the insertion to reduce the number of reflows
 const INSERT_ON_RETURN = 0;
 const INSERT_OFFSCREEN = 1;
 
+/**
+ * 
+ * @param {VNode} current 
+ * @param {VNode} root 
+ * @param {Map<VNode, boolean>} effectMountNodes 
+ * @param {Map<VNode, boolean>} effectDestroyNodes 
+ * @returns {boolean} shouldWalkDeeper
+ */
 let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) => {
     let isRenderRoot = current === root;
     
-    // Reconcile current's children
+    // Reconcile current's direct children
     reconcileChildren(current, isRenderRoot);
+
+    let shouldWalkDeeper = true;
 
     // Portal nodes never change the view itself
     if (current.type_ !== Portal) {
@@ -70,10 +80,16 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
             }
         } else {
             if (current.alternate_ !== null) {
-                updateView(current, current.alternate_);
-                if (current.effectHook_ !== null) {
-                    effectDestroyNodes.set(current.alternate_, false);
-                    effectMountNodes.set(current, false);
+                if (current.alternate_ === current) {
+                    // This node does not changed,
+                    // stop walking deeper
+                    shouldWalkDeeper = false;
+                } else {
+                    updateView(current, current.alternate_);
+                    if (current.effectHook_ !== null) {
+                        effectDestroyNodes.set(current.alternate_, false);
+                        effectMountNodes.set(current, false);
+                    }
                 }
                 current.alternate_ = null;
             } else {
@@ -115,6 +131,9 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
                     clearTimeout(deleted.updateId_);
                     deleted.updateId_ = null;
                 }
+
+                // Always walk deeper with deletions
+                return true;
             }, null, current.deletions_[i]);
         }
         current.deletions_ = null;
@@ -125,6 +144,8 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
         clearTimeout(current.updateId_);
         current.updateId_ = null;
     }
+
+    return shouldWalkDeeper;
 };
 
 // Callback called after walking through a node and all of its ascendants
@@ -142,11 +163,14 @@ let _onReturn = (current) => {
 // Reference: https://github.com/facebook/react/issues/7942
 let _workLoop = (performUnit, onReturn, root, D0, D1) => {
     let current = root;
+    let shouldWalkDeeper;
     while (true) {
-        performUnit(current, root, D0, D1);
-        if (current.child_ !== null) {
-            current = current.child_;
-            continue;
+        shouldWalkDeeper = performUnit(current, root, D0, D1);
+        if (shouldWalkDeeper) {
+            if (current.child_ !== null) {
+                current = current.child_;
+                continue;
+            }
         }
         if (current === root) {
             return;

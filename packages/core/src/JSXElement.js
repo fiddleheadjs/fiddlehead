@@ -80,6 +80,7 @@ export let createVNodeFromJSXElement = (element) => {
         // Allow functional types to access ref normally
         if (isFunctionalType) {
             if (hasContent) {
+                props = Object.assign({}, props);
                 props.children = content;
             }
             Object.freeze(props);

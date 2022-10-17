@@ -28,7 +28,7 @@ export function Root({
             >
                 render {count}
             </button>
-            <ChildA mountedCb2={mountedCb2} mountedCb3={mountedCb3}/>
+            <ChildA mountedCb2={mountedCb2} mountedCb3={mountedCb3} onClick={() => {}}/>
         </main>
     );
 }
@@ -40,7 +40,7 @@ function ChildA({mountedCb2, mountedCb3}) {
 
     return <div data-testid="child-2">
         <div>Component Child 2</div>
-        <ChildrenB mountedCb3={mountedCb3} />
+        <ChildrenB mountedCb3={mountedCb3} onClick={() => {}}/>
     </div>;
 }
 

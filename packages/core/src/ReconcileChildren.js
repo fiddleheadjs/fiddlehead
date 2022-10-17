@@ -1,4 +1,4 @@
-import {isFunction} from './Util';
+import {objectsShallowEqual, isFunction, hasOwnProperty} from './Util';
 import {createVNodeFromContent} from './CreateVNode';
 import {prepareCurrentlyProcessing, flushCurrentlyProcessing} from './CurrentlyProcessing';
 import {catchError} from './CatchError';
@@ -12,6 +12,8 @@ export let reconcileChildren = (current, isRenderRoot) => {
 };
 
 let _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
+    // If the current has an alternate
+    // Important note: The alternate of the render root always is null
     if (alternate !== null) {
         // Copy hooks
         current.refHook_ = alternate.refHook_;
@@ -27,7 +29,48 @@ let _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
 
         // Transfer the update ID
         current.updateId_ = alternate.updateId_;
-        alternate.updateId_ = null;
+
+        // Pure component:
+        // If props did not change, and this reconciliation is caused by
+        // the current itself updating or being marked to be updated (with updateId_),
+        // but by an updating from a higher-level node, so it should NOT re-render
+        if (
+            // A render root never appears here because its alternate always is null
+            // do don't need to check if the current is not a render root
+
+            // Do not skip re-render if there is an update scheduled
+            current.updateId_ === null &&
+
+            // Compare current props vs previous props
+            // Here, props always is an object with a functional component
+            objectsShallowEqual(current.props_, alternate.props_)
+        ) {
+            // Reuse the child if needed
+            if (current.child_ === null) {
+                if (alternate.child_ === null) {
+                    // Do nothing here
+                    // The alternate does not have the child to reuse
+                } else {
+                    // Reuse the previous child
+                    current.child_ = alternate.child_;
+                    current.child_.parent_ = current;
+
+                    // This is unnecessary but added to keep
+                    // the data structure always being correct
+                    alternate.child_ = null;
+                }
+            } else {
+                // Do nothing here
+                // The current already has its child
+            }
+
+            // Make itself the alternate to denote that it did not change,
+            // so the next process will skip walking deeper in its children
+            current.alternate_ = current;
+
+            // Finish this reconciliation
+            return;
+        }
     }
 
     let newContent;
@@ -58,7 +101,7 @@ let _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
             newChild.type_ === oldChild.type_ &&
             newChild.key_ === oldChild.key_
         ) {
-            _markAlternate(newChild, oldChild);
+            newChild.alternate_ = oldChild;
         } else {
             _addDeletion(current, oldChild);
         }
@@ -74,16 +117,14 @@ let _reconcileChildrenOfStaticNode = (current, alternate) => {
     let newChild;
     oldChildren.forEach((oldChild, mapKey) => {
         newChild = newChildren.get(mapKey);
-        if (newChild !== undefined && newChild.type_ === oldChild.type_) {
-            _markAlternate(newChild, oldChild);
+        if (newChild !== undefined &&
+            newChild.type_ === oldChild.type_
+        ) {
+            newChild.alternate_ = oldChild;
         } else {
             _addDeletion(current, oldChild);
         }
     });
-};
-
-let _markAlternate = (newChild, oldChild) => {
-    newChild.alternate_ = oldChild;
 };
 
 let _addDeletion = (current, childToDelete) => {

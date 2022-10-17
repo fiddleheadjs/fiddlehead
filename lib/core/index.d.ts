@@ -14,9 +14,15 @@ export const Fragment: string;
 
 export const TextNode: string;
 
-export function render(children: any, target: Element): void;
+export function render(
+    children: any,
+    target: Element
+): void;
 
-export function createPortal(children: any, target: Element): PortalElement;
+export function createPortal(
+    children: any,
+    target: Element
+): PortalElement;
 
 export function createElement(
     type: string | ((props: Props) => any),
@@ -39,15 +45,25 @@ export function useCatch(): [
 ];
 
 export function useEffect(
-    callback: () => (() => void) | void,
+    mount: () => (() => void) | void,
     deps?: any[]
 ): void;
 
 export function useLayoutEffect(
-    callback: () => (() => void) | void,
+    mount: () => (() => void) | void,
     deps?: any[]
 ): void;
 
 export function useRef<T>(initialValue: T): Ref<T>;
+
+export function useCallback<T>(
+    callback: T,
+    deps?: any[]
+): T;
+
+export function useMemo<T>(
+    create: () => T,
+    deps?: any[]
+): T;
 
 export function useTreeId(): object;

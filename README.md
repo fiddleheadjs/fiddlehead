@@ -182,7 +182,10 @@ function Image() {
 
 ### Forward refs
 
-Don't like React, `ref` property can be accessed inside the component. You also don't need `forwardRef()` at all.
+Different from React, fdH does not prevent you from using `ref` as a normal prop.
+You are free to choose the name of the prop which forwards the ref.
+As you pass that prop to a built-in element, it requires you to provide an instance of Ref,
+which you will get by using the `createRef` function or `useRef` hook.
 
 ```jsx
 import {jsx, useRef} from 'fdH';
@@ -268,9 +271,79 @@ function App() {
 }
 ```
 
+### Components always are "pure"
+
+Pure components are components that always produce the same output (view) with the same input (props).
+Different from React, any components of FdH are pure without wrapping them with `memo` HOC.
+This means, components will not re-rendered without changes in their props or states,
+even when their parent components re-rendered.
+We use the shallow comparison to determine if props are changed or not.
+
+### useCallback
+
+When you pass an inline function to a child component, that child component will always re-render
+when the current component re-renders, because the inline function is always a different instance.
+
+Wrapping that function with the useCallback hook helps you access the existing instance instead of
+using the new instance of the function, thereby, the child component will not re-render unintentionally.
+
+In the following example, whenever the App component re-renders, the Form component also re-renders following
+unintentionally, because the function passed to onSubmit prop always is a different function.
+
+```jsx
+import {jsx, useState} from 'fdH';
+
+function App() {
+    let handleSubmit = () => {
+        // Submit values
+    };
+
+    return (
+        <div>
+            <Form onSubmit={handleSubmit} />
+        </div>
+    );
+}
+
+function Form({onSubmit}) {
+    // ...
+}
+```
+
+Wrap the inline function within `useCallback` to avoid this:
+
+```jsx
+import {jsx, useState, useCallback} from 'fdH';
+
+function App() {
+    let handleSubmit = useCallback(() => {
+        // Submit values
+    }, []);
+
+    // ...
+}
+```
+
+### useMemo
+
+This hook is used to avoid re-running a heavy calculation every time the component re-renders.
+
+```jsx
+import {jsx, useMemo} from 'fdH';
+
+function App() {
+    let result = useMemo(() => {
+        // Run heavy tasks
+        return result;
+    }, []);
+
+    // ...
+}
+```
+
 ### Store
 
-Store is a separate package. It is helpful when we want to use some global states,
+Store is a separated package. It is helpful when we want to use some global states,
 which can be read/written from anywhere in the DOM tree, with no need to pass props through all levels of elements. 
 
 ```jsx
@@ -279,8 +352,8 @@ import {useStoreInit, useStoreRead, useStoreWrite} from 'fdH/store';
 
 function App() {
     useStoreInit(
-        App, // Scope
-        {title: 'Store usage example'} // Initial data
+        App, // Scope, can be any object (reference) but not a primitive value
+        {title: 'Store usage example'} // Initial data, must be a plain object
     );
 
     return (
@@ -311,65 +384,12 @@ function Form() {
         (data, value) => data.title = value // Writer
     );
 
-    let handleClickRef = useRef(ev => setTitle(ev.target.value));
-
     return (
         <input
             type="text"
             value={title}
-            onChange={handleClickRef.current}
+            onChange={ev => setTitle(ev.target.value)}
         />
     );
-}
-```
-
-## Custom hooks
-
-### useMemo and useCallback
-
-Currently, we do not support `useMemo` and `useCallback` as built-in hooks while we are considering.
-There are some reasons:
-- These hooks can be implemented by your self, based on the `useRef` hook as the following example.
-- In most cases, you will not need them. Providing them as built-in hooks make it easier for us to overuse them.
-  (They do not come free, only use them when you have noticable issues).
-- They increase the complexity of the codes, while we are trying to make things simpler.
-
-```js
-function useMemo(create, deps) {
-    let current = useRef({}).current;
-    if (mismatchDeps(deps, current.d)) {
-        current.v = create();
-        current.d = deps;
-    }
-    return current.v;
-}
-
-function useCallback(callback, deps) {
-    let current = useRef({}).current;
-    if (mismatchDeps(deps, current.d)) {
-        current.v = callback;
-        current.d = deps;
-    }
-    return current.v;
-}
-
-function mismatchDeps(deps, lastDeps) {
-    if (deps == null) return true;
-    if (deps.length === 0) return false;
-    if (lastDeps == null) return true;
-    if (arraysEqual(deps, lastDeps)) return false;
-    return true;
-}
-
-function arraysEqual(a, b) {
-    if (a.length !== b.length) {
-        return false;
-    }
-    for (let i = a.length - 1; i >= 0; --i) {
-        if (a[i] !== b[i]) {
-            return false;
-        }
-    }
-    return true;
 }
 ```
