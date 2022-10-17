@@ -54,6 +54,10 @@ let _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
                     // Reuse the previous child
                     current.child_ = alternate.child_;
                     current.child_.parent_ = current;
+
+                    // This is unnecessary but added to keep
+                    // the data structure always being correct
+                    alternate.child_ = null;
                 }
             } else {
                 // Do nothing here

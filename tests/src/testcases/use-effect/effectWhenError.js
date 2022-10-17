@@ -1,15 +1,11 @@
-import {jsx, useCatch, useState, useEffect} from 'core.pkg';
+import {jsx, useCatch, useState, useEffect, useLayoutEffect} from 'core.pkg';
 
 function ErrorBoundary({children, errorType}) {
     const [error, clearError] = useCatch(null);
 
-    if (errorType === 'Error Boundary Component executed fail') {
-        let a = a + babel;
-    }
-
     const [count, setCount] = useState(0);
 
-    useEffect(() => {
+    useEffect(function mount() {
         setCount(c => c + 1);
     }, [setCount, clearError]);
 

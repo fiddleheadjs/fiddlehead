@@ -50,18 +50,27 @@ let _useEffectImpl = (tag, mount, deps) => {
 export let mountEffects = (effectTag, vnode, isNewlyMounted) => {
     let hook = vnode.effectHook_;
     while (hook !== null) {
-        if (hook.tag_ === effectTag && hook.mount_ !== undefined) {
-            if (isNewlyMounted || depsMismatch(hook.deps_, hook.prevDeps_)) {
-                // Save the previous deps
-                hook.prevDeps_ = hook.deps_;
-                hook.deps_ = undefined;
+        if (hook.tag_ === effectTag) {
+            // The mount callback can be undefined here if there is an action
+            // in the rendering stack leads to an synchronous update request.
+            // That update will be performed before the callback of the useEffect,
+            // then schedule another call for the same callback
+            if (hook.mount_ !== undefined) {
+                if (isNewlyMounted || depsMismatch(hook.deps_, hook.prevDeps_)) {
+                    // Update the previous deps
+                    hook.prevDeps_ = hook.deps_;
+                    hook.deps_ = undefined;
+    
+                    // Run the effect mount callback
+                    try {
+                        hook.destroy_ = hook.mount_();
+                    } catch (error) {
+                        catchError(error, vnode);
+                    }
 
-                // Run the effect mount
-                try {
-                    hook.destroy_ = hook.mount_();
+                    // Clear the mount callback to avoid duplicated calls,
+                    // even if the call throws an error
                     hook.mount_ = undefined;
-                } catch (error) {
-                    catchError(error, vnode);
                 }
             }
         }
@@ -77,13 +86,20 @@ export let mountEffects = (effectTag, vnode, isNewlyMounted) => {
 export let destroyEffects = (effectTag, vnode, isUnmounted) => {
     let hook = vnode.effectHook_;
     while (hook !== null) {
-        if (hook.tag_ === effectTag && hook.destroy_ !== undefined) {
-            if (isUnmounted || depsMismatch(hook.deps_, hook.prevDeps_)) {
-                try {
-                    hook.destroy_();
+        if (hook.tag_ === effectTag) {
+            // Check if the effect has a destroy callback
+            if (hook.destroy_ !== undefined) {
+                if (isUnmounted || depsMismatch(hook.deps_, hook.prevDeps_)) {
+                    // Run the effect destroy callback
+                    try {
+                        hook.destroy_();
+                    } catch (error) {
+                        catchError(error, vnode);
+                    }
+    
+                    // Clear the destroy callback to avoid duplicated calls,
+                    // even if the call throws an error
                     hook.destroy_ = undefined;
-                } catch (error) {
-                    catchError(error, vnode);
                 }
             }
         }
