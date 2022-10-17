@@ -279,52 +279,63 @@ This means, components will not re-rendered without changes in their props or st
 even when their parent components re-rendered.
 We use the shallow comparison to determine if props are changed or not.
 
-### useMemo and useCallback
+### useCallback
 
-Currently, we do not support `useMemo` and `useCallback` as built-in hooks while we are considering.
-There are some reasons:
-- These hooks can be implemented by your self, based on the `useRef` hook as the following example.
-- In most cases, you will not need them. Providing them as built-in hooks make it easier for us to overuse them.
-  (They do not come free, only use them when you have noticable issues).
-- They increase the complexity of the codes, while we are trying to make things simpler.
+When you pass an inline function to a child component, that child component will always re-render
+when the current component re-renders, because the inline function is always a different instance.
 
-```js
-function useMemo(create, deps) {
-    let current = useRef({}).current;
-    if (mismatchDeps(deps, current.d)) {
-        current.v = create();
-        current.d = deps;
-    }
-    return current.v;
+Wrapping that function with the useCallback hook helps you access the existing instance instead of
+using the new instance of the function, thereby, the child component will not re-render unintentionally.
+
+In the following example, whenever the App component re-renders, the Form component also re-renders following
+unintentionally, because the function passed to onSubmit prop always is a different function.
+
+```jsx
+import {jsx, useState} from 'fdH';
+
+function App() {
+    let handleSubmit = () => {
+        // Submit values
+    };
+
+    return (
+        <div>
+            <Form onSubmit={handleSubmit} />
+        </div>
+    );
 }
 
-function useCallback(callback, deps) {
-    let current = useRef({}).current;
-    if (mismatchDeps(deps, current.d)) {
-        current.v = callback;
-        current.d = deps;
-    }
-    return current.v;
+function Form({onSubmit}) {
+    // ...
 }
+```
 
-function mismatchDeps(deps, lastDeps) {
-    if (deps == null) return true;
-    if (deps.length === 0) return false;
-    if (lastDeps == null) return true;
-    if (arraysEqual(deps, lastDeps)) return false;
-    return true;
+Wrap the inline function within `useCallback` to avoid this:
+
+```jsx
+import {jsx, useState, useCallback} from 'fdH';
+
+function App() {
+    let handleSubmit = useCallback(() => {
+        // Submit values
+    }, []);
 }
+```
 
-function arraysEqual(A, B) {
-    if (A.length !== B.length) {
-        return false;
-    }
-    for (let i = A.length - 1; i >= 0; --i) {
-        if (!Object.is(A[i], B[i])) {
-            return false;
-        }
-    }
-    return true;
+### useMemo
+
+This hook is used to avoid re-running a heavy calculation every time the component re-renders.
+
+```jsx
+import {jsx, useMemo} from 'fdH';
+
+function App() {
+    let result = useMemo(() => {
+        // Run heavy tasks
+        return result;
+    }, []);
+
+    // ...
 }
 ```
 
