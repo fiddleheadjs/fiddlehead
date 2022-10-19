@@ -1,4 +1,4 @@
-import {hasOwnProperty, isFunction, isNumber, isString} from './Util';
+import {hasOwnProperty, isNumber, isString} from './Util';
 import {NAMESPACE_HTML, NAMESPACE_SVG} from './VNode';
 
 const MAY_BE_ATTR_OR_PROP = 0;
