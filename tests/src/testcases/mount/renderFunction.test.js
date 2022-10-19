@@ -50,7 +50,7 @@ describe('mount.test.js', () => {
         render(<p></p>, container);
 
         expect(error).toBeCalledTimes(1);
-        expect(error).toBeCalledWith('Target node must be empty');
+        expect(error).toBeCalledWith('The target node is not empty:', expect.anything());
     });
 
     it('Using `class` attribute on nodes', () => {

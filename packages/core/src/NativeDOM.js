@@ -5,13 +5,13 @@ export let createNativeTextNode = (text) => {
     return document.createTextNode(text);
 };
 
-export let createNativeElementWithNS = (ns, type, attributes) => {
-    let element = (ns === NAMESPACE_SVG
+export let createNativeElement = (namespace, type, attributes) => {
+    let element = (namespace === NAMESPACE_SVG
         ? document.createElementNS('http://www.w3.org/2000/svg', type)
         : document.createElement(type)
     );
 
-    updateNativeElementAttributes(element, attributes);
+    updateNativeElementAttributes(namespace, element, attributes);
     
     return element;
 };

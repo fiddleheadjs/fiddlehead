@@ -1,4 +1,9 @@
-import {hasOwnProperty, isNumber, isString} from './Util';
+import {hasOwnProperty, isFunction, isNumber, isString} from './Util';
+import {NAMESPACE_HTML, NAMESPACE_SVG} from './VNode';
+
+const MAY_BE_ATTR_OR_PROP = 0;
+const MUST_BE_ATTR = 1;
+const MUST_BE_PROP = 2;
 
 export let updateNativeTextContent = (node, newText, oldText) => {
     if (newText !== oldText) {
@@ -6,15 +11,15 @@ export let updateNativeTextContent = (node, newText, oldText) => {
     }
 };
 
-export let updateNativeElementAttributes = (element, newAttributes, oldAttributes) => {
+export let updateNativeElementAttributes = (namespace, element, newAttributes, oldAttributes) => {
     _updateKeyValues(
-        element, newAttributes, oldAttributes,
+        namespace, element, newAttributes, oldAttributes,
         _updateElementAttribute, _removeElementAttribute
     );
 };
 
-let _updateElementAttribute = (element, attrName, newAttrValue, oldAttrValue) => {
-    attrName = _normalizeElementAttributeName(attrName);
+let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAttrValue) => {
+    attrName = _normalizeElementAttributeName(namespace, attrName);
 
     if (attrName === '') {
         return;
@@ -29,22 +34,24 @@ let _updateElementAttribute = (element, attrName, newAttrValue, oldAttrValue) =>
         return;
     }
 
-    if (attrName in element) {
-        // Handles as properties first
+    let mayBe = _mayBeAttributeOrProperty(namespace, element, attrName, newAttrValue);
+
+    if (mayBe === MAY_BE_ATTR_OR_PROP || mayBe === MUST_BE_PROP) {
         try {
             element[attrName] = newAttrValue;
         } catch (x) {
             // Property may not writable
         }
     }
-    if (_canBeAttribute(attrName, newAttrValue)) {
+
+    if (mayBe === MAY_BE_ATTR_OR_PROP || mayBe === MUST_BE_ATTR) {
         element.setAttribute(attrName, newAttrValue);
     }
 };
 
-let _removeElementAttribute = (element, attrName, oldAttrValue) => {
-    attrName = _normalizeElementAttributeName(attrName);
-    
+let _removeElementAttribute = (namespace, element, attrName, oldAttrValue) => {
+    attrName = _normalizeElementAttributeName(namespace, attrName);
+
     if (attrName === '') {
         return;
     }
@@ -57,21 +64,23 @@ let _removeElementAttribute = (element, attrName, oldAttrValue) => {
         return;
     }
 
-    if (attrName in element) {
-        // Handles as properties first
+    let mayBe = _mayBeAttributeOrProperty(namespace, element, attrName, oldAttrValue);
+
+    if (mayBe === MAY_BE_ATTR_OR_PROP || mayBe === MUST_BE_PROP) {
         try {
             element[attrName] = null;
         } catch (x) {
             // Property may not writable
         }
     }
-    if (_canBeAttribute(attrName, oldAttrValue)) {
+
+    if (mayBe === MAY_BE_ATTR_OR_PROP || mayBe === MUST_BE_ATTR) {
         element.removeAttribute(attrName);
     }
 };
 
-let _normalizeElementAttributeName = (attrName) => {
-    // Support React className
+let _normalizeElementAttributeName = (namespace, attrName) => {
+    // Normalize className to class
     if (attrName === 'className') {
         return 'class';
     }
@@ -85,40 +94,68 @@ let _normalizeElementAttributeName = (attrName) => {
         return attrName.toLowerCase();
     }
 
+    if (__DEV__) {
+        if (namespace === NAMESPACE_SVG) {
+            if (attrName === 'xlink:href' || attrName === 'xlinkHref') {
+                console.error('SVG 2 removed the need for the xlink namespace, '
+                    + 'so instead of xlink:href you should use href.');
+            }
+        }
+    }
+
     return attrName;
 };
 
-let _canBeAttribute = (name, value) => {
-    if (name === 'innerHTML' ||
-        name === 'innerText' ||
-        name === 'textContent'
+let _mayBeAttributeOrProperty = (namespace, element, attrName, attrValue) => {
+    if (!(
+        isString(attrValue) ||
+        isNumber(attrValue)
+    )) {
+        return MUST_BE_PROP;
+    }
+
+    if (
+        attrName === 'innerHTML' ||
+        attrName === 'innerText' ||
+        attrName === 'textContent'
     ) {
-        return false;
+        return MUST_BE_PROP;
     }
 
-    if (!(isString(value) || isNumber(value))) {
-        return false;
-    }
+    if (namespace === NAMESPACE_HTML) {
+        if (
+            attrName === 'href' ||
+            attrName === 'list' ||
+            attrName === 'form' ||
+            attrName === 'download'
+        ) {
+            return MUST_BE_ATTR;
+        }
 
-    return true;
+        if (attrName in element) {
+            return MAY_BE_ATTR_OR_PROP;
+        }
+    }
+    
+    return MUST_BE_ATTR;
 };
 
 let _updateStyleProperties = (style, newProperties, oldProperties) => {
     _updateKeyValues(
-        style, newProperties, oldProperties,
+        null, style, newProperties, oldProperties,
         _updateStyleProperty, _removeStyleProperty
     );
 };
 
-let _updateStyleProperty = (style, propName, newPropValue) => {
+let _updateStyleProperty = (_, style, propName, newPropValue) => {
     style[propName] = newPropValue;
 };
 
-let _removeStyleProperty = (style, propName) => {
+let _removeStyleProperty = (_, style, propName) => {
     style[propName] = '';
 };
 
-let _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn) => {
+let _updateKeyValues = (namespace, target, newKeyValues, oldKeyValues, updateFn, removeFn) => {
     let oldEmpty = oldKeyValues == null; // is nullish
     let newEmpty = newKeyValues == null; // is nullish
 
@@ -130,14 +167,14 @@ let _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn) 
         } else {
             for (key in newKeyValues) {
                 if (_hasOwnNonEmpty(newKeyValues, key)) {
-                    updateFn(target, key, newKeyValues[key]);
+                    updateFn(namespace, target, key, newKeyValues[key]);
                 }
             }
         }
     } else if (newEmpty) {
         for (key in oldKeyValues) {
             if (_hasOwnNonEmpty(oldKeyValues, key)) {
-                removeFn(target, key, oldKeyValues[key]);
+                removeFn(namespace, target, key, oldKeyValues[key]);
             }
         }
     } else {
@@ -146,13 +183,13 @@ let _updateKeyValues = (target, newKeyValues, oldKeyValues, updateFn, removeFn) 
                 if (_hasOwnNonEmpty(newKeyValues, key)) {
                     // Do nothing here
                 } else {
-                    removeFn(target, key, oldKeyValues[key]);
+                    removeFn(namespace, target, key, oldKeyValues[key]);
                 }
             }
         }
         for (key in newKeyValues) {
             if (_hasOwnNonEmpty(newKeyValues, key)) {
-                updateFn(target, key, newKeyValues[key], oldKeyValues[key]);
+                updateFn(namespace, target, key, newKeyValues[key], oldKeyValues[key]);
             }
         }
     }

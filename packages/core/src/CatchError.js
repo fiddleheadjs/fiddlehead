@@ -33,7 +33,7 @@ export let catchError = (error, vnode) => {
     }
 
     if (__DEV__) {
-        console.info('You can catch the following exception by implementing an error boundary with the useCatch hook');
+        console.info('Let\'s try to implement an error boundary with useCatch hook to provide a better user experience.');
     }
 
     throw error;

@@ -17,7 +17,7 @@ export let render = (children, targetNativeNode) => {
         // Create a new root
         if (__DEV__) {
             if (targetNativeNode.firstChild) {
-                console.error('Target node must be empty');
+                console.error('The target node is not empty:', targetNativeNode);
             }
         }
         let portalElement = createPortal(children, targetNativeNode);

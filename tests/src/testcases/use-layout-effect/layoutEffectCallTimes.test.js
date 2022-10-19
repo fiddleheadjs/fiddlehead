@@ -24,7 +24,7 @@ describe('layoutEffectCallTimes.test.js', () => {
     });
 
     it('Throw an error when call effect hook from outside of the component', () => {
-        expect(useLayoutEffect).toThrowError(new Error('Cannot use hooks from outside of components'));
+        expect(useLayoutEffect).toThrowError(new Error('Hooks can only be called inside a component.'));
     });
 
     it('Layout effect callback always call when component mounted', async () => {

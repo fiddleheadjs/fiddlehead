@@ -69,12 +69,12 @@ describe('innerHtml.test.js', () => {
                     <svg data-testid="svg">
                         <foreignObject data-testid="foreignObject">
                             <svg data-testid="svg">
-                                <image data-testid="image" xlinkHref="http://i.imgur.com/w7GCRPb.png" />
+                                <image data-testid="image" href="http://i.imgur.com/w7GCRPb.png" />
                             </svg>
                             <div data-testid="div" />
                         </foreignObject>
                     </svg>
-                    <image data-testid="image" xlinkHref="http://i.imgur.com/w7GCRPb.png" />
+                    <image data-testid="image" href="http://i.imgur.com/w7GCRPb.png" />
                 </g>
             </svg>`;
         

@@ -43,7 +43,7 @@ export let useCatch = () => {
                 let hook = currentVNode.stateHook_;
                 while (hook !== null) {
                     if (hook.tag_ === STATE_ERROR) {
-                        console.error('A component accepts only one useCatch hook');
+                        console.error('A component accepts only one useCatch hook.');
                     }
                     hook = hook.next_;
                 }

@@ -12,7 +12,7 @@ describe('errorBoundary.test.js', () => {
     const getMockValue = jest.fn();
 
     it('Throw an error when Error hook called from outside of component', () => {
-        expect(useCatch).toThrowError(new Error('Cannot use hooks from outside of components'));
+        expect(useCatch).toThrowError(new Error('Hooks can only be called inside a component.'));
     });
 
     it('Rendering corrected children when Components didn\'t have any error', async () => {

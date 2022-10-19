@@ -10,7 +10,7 @@ export let createStore = (initialData) => {
         initialData != null && // not nullish
         initialData.constructor === Object
     )) {
-        throw new Error('Store data must be a plain object');
+        throw new TypeError('The store\'s data must be a plain object.');
     }
     
     let data = initialData;

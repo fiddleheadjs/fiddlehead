@@ -9,7 +9,7 @@ describe('ref.test.js', () => {
     const getMockValue = jest.fn();
 
     it('Should error when call ref hook from outside of the component', () => {
-        expect(useRef).toThrowError(new Error('Cannot use hooks from outside of components'));
+        expect(useRef).toThrowError(new Error('Hooks can only be called inside a component.'));
     });
 
     it('Ref current is not null', async () => {

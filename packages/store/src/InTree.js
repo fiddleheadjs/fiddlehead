@@ -20,7 +20,7 @@ export let useStoreInit = (scope, initialData) => {
     }
     if (scoped.has(scope)) {
         if (__DEV__) {
-            console.warn('Store already has been initialized');
+            console.warn('The store already has been initialized.');
         }
     } else {
         scoped.set(scope, createStore(initialData));
@@ -41,7 +41,7 @@ export let useStore = (scope) => {
         store = scoped.get(scope);
     }
     if (store === undefined) {
-        throw new Error('Store has not been initialized');
+        throw new ReferenceError('Cannot access a store before initialization.');
     }
     return store;
 };

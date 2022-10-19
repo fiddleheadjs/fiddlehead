@@ -17,7 +17,7 @@ describe('renderState.test.js', () => {
     });
 
     it('Throw an error when state hook called from outside of the component', () => {
-        expect(useState).toThrowError(new Error('Cannot use hooks from outside of components'));
+        expect(useState).toThrowError(new Error('Hooks can only be called inside a component.'));
     });
 
     it('The state updated when the set state function called', async () => {

@@ -70,6 +70,6 @@ let _resolveCurrentHookImpl = (createHookFn, currentHook, firstHookOfNode) => {
 
 let _throwIfCallInvalid = () => {
     if (currentVNode === null) {
-        throw new Error('Cannot use hooks from outside of components');
+        throw new ReferenceError('Hooks can only be called inside a component.');
     }
 };

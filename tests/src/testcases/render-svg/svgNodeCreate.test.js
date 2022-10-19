@@ -12,12 +12,12 @@ describe('svgNodeCreate.test', () => {
     it('SVG nodes create correctly', () => {
         render(
             <svg>
-                <image xlinkHref="http://i.imgur.com/w7GCRPb.png" />
+                <image href="http://i.imgur.com/w7GCRPb.png" />
             </svg>
         , container);
 
         const svgElement = container.firstElementChild;
-        expect(svgElement.innerHTML).toContain('xlinkHref="http://i.imgur.com/w7GCRPb.png"');
+        expect(svgElement.innerHTML).toContain('href="http://i.imgur.com/w7GCRPb.png"');
     });
 
     it('Nodes create correctly', () => {
@@ -27,12 +27,12 @@ describe('svgNodeCreate.test', () => {
                     <svg data-testid="svg">
                         <foreignObject data-testid="foreignObject">
                             <svg data-testid="svg">
-                                <image data-testid="image" xlinkHref="http://i.imgur.com/w7GCRPb.png" />
+                                <image data-testid="image" href="http://i.imgur.com/w7GCRPb.png" />
                             </svg>
                             <div data-testid="div" />
                         </foreignObject>
                     </svg>
-                    <image data-testid="image" xlinkHref="http://i.imgur.com/w7GCRPb.png" />
+                    <image data-testid="image" href="http://i.imgur.com/w7GCRPb.png" />
                 </g>
             </svg>,
         container);

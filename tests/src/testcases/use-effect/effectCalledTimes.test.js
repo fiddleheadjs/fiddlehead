@@ -66,7 +66,7 @@ describe('effectCallTimes.test.js', () => {
     });
 
     it('Throw an error when call effect hook from outside of the component', () => {
-        expect(useEffect).toThrowError(new Error('Cannot use hooks from outside of components'));
+        expect(useEffect).toThrowError(new Error('Hooks can only be called inside a component.'));
     });
 
     afterEach(() => {

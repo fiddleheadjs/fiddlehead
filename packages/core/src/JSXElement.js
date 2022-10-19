@@ -90,7 +90,7 @@ export let createVNodeFromJSXElement = (element) => {
                     ref = props.ref;
                 } else {
                     if (__DEV__) {
-                        console.error('The ref property is invalid');
+                        console.error('The value of the ref property is invalid:', props.ref);
                     }
                 }
                 delete props.ref;

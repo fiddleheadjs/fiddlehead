@@ -46,7 +46,7 @@ export let warnIfDepsSizeChangedOnDEV = (deps, prevDeps) => {
             deps !== undefined && prevDeps === undefined ||
             deps !== undefined && prevDeps !== undefined && deps.length === prevDeps.length
         )) {
-            throw new Error('Dependencies must be size-fixed');
+            throw new Error('The number of dependencies must be the same between renders.');
         }
         // On the production, we accept the deps change its length
         // and consider it is changed
