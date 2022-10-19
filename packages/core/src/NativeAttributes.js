@@ -1,9 +1,9 @@
-import {hasOwnProperty, isNumber, isString} from './Util';
+import {hasOwnProperty, isBoolean, isFunction, isNumber, isString} from './Util';
 import {NAMESPACE_HTML, NAMESPACE_SVG} from './VNode';
 
-const MAY_BE_ATTR_AND_PROP = 0;
-const MUST_BE_ATTR = 1;
-const MUST_BE_PROP = 2;
+const MAY_BE_PROP_AND_ATTR = 0;
+const MUST_BE_PROP = 1;
+const MUST_BE_ATTR = 2;
 
 export let updateNativeTextContent = (node, newText, oldText) => {
     if (newText !== oldText) {
@@ -18,6 +18,7 @@ export let updateNativeElementAttributes = (namespace, element, newAttributes, o
     );
 };
 
+// #StartBlock ElementAttributes
 let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(namespace, attrName);
 
@@ -34,9 +35,9 @@ let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAt
         return;
     }
 
-    let mayBe = _mayBeAttributeOrProperty(namespace, element, attrName, newAttrValue);
+    let mayBe = _mayBePropertyOrAttribute(namespace, element, attrName, newAttrValue);
 
-    if (mayBe === MUST_BE_PROP || mayBe === MAY_BE_ATTR_AND_PROP) {
+    if (mayBe === MUST_BE_PROP || mayBe === MAY_BE_PROP_AND_ATTR) {
         try {
             element[attrName] = newAttrValue;
         } catch (x) {
@@ -44,8 +45,14 @@ let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAt
         }
     }
 
-    if (mayBe === MUST_BE_ATTR || mayBe === MAY_BE_ATTR_AND_PROP) {
-        element.setAttribute(attrName, newAttrValue);
+    if (mayBe === MUST_BE_ATTR || mayBe === MAY_BE_PROP_AND_ATTR) {
+        if (newAttrValue === false) {
+            // To represent a boolean property as false, we need to remove the attribute
+            // instead of setting it as "false" (string)
+            element.removeAttribute(attrName);
+        } else {
+            element.setAttribute(attrName, newAttrValue);
+        }
     }
 };
 
@@ -64,9 +71,9 @@ let _removeElementAttribute = (namespace, element, attrName, oldAttrValue) => {
         return;
     }
 
-    let mayBe = _mayBeAttributeOrProperty(namespace, element, attrName, oldAttrValue);
+    let mayBe = _mayBePropertyOrAttribute(namespace, element, attrName, oldAttrValue);
 
-    if (mayBe === MUST_BE_PROP || mayBe === MAY_BE_ATTR_AND_PROP) {
+    if (mayBe === MUST_BE_PROP || mayBe === MAY_BE_PROP_AND_ATTR) {
         try {
             element[attrName] = null;
         } catch (x) {
@@ -74,7 +81,7 @@ let _removeElementAttribute = (namespace, element, attrName, oldAttrValue) => {
         }
     }
 
-    if (mayBe === MUST_BE_ATTR || mayBe === MAY_BE_ATTR_AND_PROP) {
+    if (mayBe === MUST_BE_ATTR || mayBe === MAY_BE_PROP_AND_ATTR) {
         element.removeAttribute(attrName);
     }
 };
@@ -106,11 +113,8 @@ let _normalizeElementAttributeName = (namespace, attrName) => {
     return attrName;
 };
 
-let _mayBeAttributeOrProperty = (namespace, element, attrName, attrValue) => {
-    if (!(
-        isString(attrValue) ||
-        isNumber(attrValue)
-    )) {
+let _mayBePropertyOrAttribute = (namespace, element, attrName, attrValue) => {
+    if (isFunction(attrValue)) {
         return MUST_BE_PROP;
     }
 
@@ -133,13 +137,15 @@ let _mayBeAttributeOrProperty = (namespace, element, attrName, attrValue) => {
         }
 
         if (attrName in element) {
-            return MAY_BE_ATTR_AND_PROP;
+            return MAY_BE_PROP_AND_ATTR;
         }
     }
     
     return MUST_BE_ATTR;
 };
+// #EndBlock ElementAttributes
 
+// #StartBlock StyleProperties
 let _updateStyleProperties = (style, newProperties, oldProperties) => {
     _updateKeyValues(
         null, style, newProperties, oldProperties,
@@ -154,6 +160,7 @@ let _updateStyleProperty = (_, style, propName, newPropValue) => {
 let _removeStyleProperty = (_, style, propName) => {
     style[propName] = '';
 };
+// #EndBlock StyleProperties
 
 let _updateKeyValues = (namespace, target, newKeyValues, oldKeyValues, updateFn, removeFn) => {
     let oldEmpty = oldKeyValues == null; // is nullish
