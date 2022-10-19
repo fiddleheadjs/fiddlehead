@@ -36,7 +36,7 @@ let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAt
 
     let mayBe = _mayBeAttributeOrProperty(namespace, element, attrName, newAttrValue);
 
-    if (mayBe === MAY_BE_ATTR_OR_PROP || mayBe === MUST_BE_PROP) {
+    if (mayBe === MUST_BE_PROP || mayBe === MAY_BE_ATTR_OR_PROP) {
         try {
             element[attrName] = newAttrValue;
         } catch (x) {
@@ -44,7 +44,7 @@ let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAt
         }
     }
 
-    if (mayBe === MAY_BE_ATTR_OR_PROP || mayBe === MUST_BE_ATTR) {
+    if (mayBe === MUST_BE_ATTR || mayBe === MAY_BE_ATTR_OR_PROP) {
         element.setAttribute(attrName, newAttrValue);
     }
 };
@@ -66,7 +66,7 @@ let _removeElementAttribute = (namespace, element, attrName, oldAttrValue) => {
 
     let mayBe = _mayBeAttributeOrProperty(namespace, element, attrName, oldAttrValue);
 
-    if (mayBe === MAY_BE_ATTR_OR_PROP || mayBe === MUST_BE_PROP) {
+    if (mayBe === MUST_BE_PROP || mayBe === MAY_BE_ATTR_OR_PROP) {
         try {
             element[attrName] = null;
         } catch (x) {
@@ -74,7 +74,7 @@ let _removeElementAttribute = (namespace, element, attrName, oldAttrValue) => {
         }
     }
 
-    if (mayBe === MAY_BE_ATTR_OR_PROP || mayBe === MUST_BE_ATTR) {
+    if (mayBe === MUST_BE_ATTR || mayBe === MAY_BE_ATTR_OR_PROP) {
         element.removeAttribute(attrName);
     }
 };
