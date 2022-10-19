@@ -1,7 +1,7 @@
 import {hasOwnProperty, isNumber, isString} from './Util';
 import {NAMESPACE_HTML, NAMESPACE_SVG} from './VNode';
 
-const MAY_BE_ATTR_OR_PROP = 0;
+const MAY_BE_ATTR_AND_PROP = 0;
 const MUST_BE_ATTR = 1;
 const MUST_BE_PROP = 2;
 
@@ -36,7 +36,7 @@ let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAt
 
     let mayBe = _mayBeAttributeOrProperty(namespace, element, attrName, newAttrValue);
 
-    if (mayBe === MUST_BE_PROP || mayBe === MAY_BE_ATTR_OR_PROP) {
+    if (mayBe === MUST_BE_PROP || mayBe === MAY_BE_ATTR_AND_PROP) {
         try {
             element[attrName] = newAttrValue;
         } catch (x) {
@@ -44,7 +44,7 @@ let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAt
         }
     }
 
-    if (mayBe === MUST_BE_ATTR || mayBe === MAY_BE_ATTR_OR_PROP) {
+    if (mayBe === MUST_BE_ATTR || mayBe === MAY_BE_ATTR_AND_PROP) {
         element.setAttribute(attrName, newAttrValue);
     }
 };
@@ -66,7 +66,7 @@ let _removeElementAttribute = (namespace, element, attrName, oldAttrValue) => {
 
     let mayBe = _mayBeAttributeOrProperty(namespace, element, attrName, oldAttrValue);
 
-    if (mayBe === MUST_BE_PROP || mayBe === MAY_BE_ATTR_OR_PROP) {
+    if (mayBe === MUST_BE_PROP || mayBe === MAY_BE_ATTR_AND_PROP) {
         try {
             element[attrName] = null;
         } catch (x) {
@@ -74,7 +74,7 @@ let _removeElementAttribute = (namespace, element, attrName, oldAttrValue) => {
         }
     }
 
-    if (mayBe === MUST_BE_ATTR || mayBe === MAY_BE_ATTR_OR_PROP) {
+    if (mayBe === MUST_BE_ATTR || mayBe === MAY_BE_ATTR_AND_PROP) {
         element.removeAttribute(attrName);
     }
 };
@@ -133,7 +133,7 @@ let _mayBeAttributeOrProperty = (namespace, element, attrName, attrValue) => {
         }
 
         if (attrName in element) {
-            return MAY_BE_ATTR_OR_PROP;
+            return MAY_BE_ATTR_AND_PROP;
         }
     }
     
