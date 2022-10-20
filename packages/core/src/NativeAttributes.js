@@ -8,7 +8,7 @@ export let updateNativeTextContent = (node, newText, oldText) => {
 };
 
 export let updateNativeElementAttributes = (namespace, element, newAttributes, oldAttributes) => {
-    _updateKeyValues(
+    _updateObjectByKVs(
         namespace, element, newAttributes, oldAttributes,
         _updateElementAttribute, _removeElementAttribute
     );
@@ -21,6 +21,15 @@ const MANIPULATE_AS_PROPERTY = 2;
 const MANIPULATE_AS_ATTRIBUTE = 3;
 const MANIPULATE_AS_PROPERTY_AND_ATTRIBUTE = 4;
 
+/**
+ * 
+ * @param {number} namespace 
+ * @param {Element} element 
+ * @param {string} attrName 
+ * @param {any} newAttrValue 
+ * @param {any} oldAttrValue 
+ * @returns {void}
+ */
 let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(namespace, attrName);
 
@@ -62,6 +71,14 @@ let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAt
     }
 };
 
+/**
+ * 
+ * @param {number} namespace 
+ * @param {Element} element 
+ * @param {string} attrName 
+ * @param {any} oldAttrValue 
+ * @returns {void}
+ */
 let _removeElementAttribute = (namespace, element, attrName, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(namespace, attrName);
 
@@ -95,8 +112,15 @@ let _removeElementAttribute = (namespace, element, attrName, oldAttrValue) => {
     }
 };
 
-// Should not depend on attribute values as it may lead
-// to different names with the old value and new value
+/**
+ * This should not depend on attribute values as it may lead to different names
+ * for the same attribute with the old and new values. It causes bugs when
+ * updating or removing an attribute.
+ * 
+ * @param {number} namespace 
+ * @param {string} attrName 
+ * @returns {string}
+ */
 let _normalizeElementAttributeName = (namespace, attrName) => {
     // Normalize className to class
     if (attrName === 'className') {
@@ -104,6 +128,7 @@ let _normalizeElementAttributeName = (namespace, attrName) => {
     }
 
     // Support camelcase event listener bindings
+    // This way runs faster than using RegExp
     if (attrName.length >= 4 &&                                      // at least 4 chars
         attrName.charCodeAt(0) === 111 &&                            // 1st char is o
         attrName.charCodeAt(1) === 110 &&                            // 2nd char is n
@@ -124,6 +149,14 @@ let _normalizeElementAttributeName = (namespace, attrName) => {
     return attrName;
 };
 
+/**
+ * 
+ * @param {number} namespace 
+ * @param {Element} element 
+ * @param {string} attrName 
+ * @param {any} attrValue 
+ * @returns {number}
+ */
 let _selectElementAttributeManipulation = (namespace, element, attrName, attrValue) => {
     if (attrName === 'style') {
         return MANIPULATE_AS_STYLE;
@@ -165,8 +198,14 @@ let _selectElementAttributeManipulation = (namespace, element, attrName, attrVal
 
 // #StartBlock StyleProperties
 
+/**
+ * 
+ * @param {CSSStyleDeclaration} style 
+ * @param {{}} newProperties 
+ * @param {{}} oldProperties 
+ */
 let _updateStyleProperties = (style, newProperties, oldProperties) => {
-    _updateKeyValues(
+    _updateObjectByKVs(
         null, style, newProperties, oldProperties,
         _updateStyleProperty, _removeStyleProperty
     );
@@ -182,9 +221,18 @@ let _removeStyleProperty = (_, style, propName) => {
 
 // #EndBlock StyleProperties
 
-let _updateKeyValues = (namespace, target, newKeyValues, oldKeyValues, updateFn, removeFn) => {
-    let oldEmpty = oldKeyValues == null; // is nullish
-    let newEmpty = newKeyValues == null; // is nullish
+/**
+ * 
+ * @param {number} namespace 
+ * @param {object} target 
+ * @param {{}} newKVs 
+ * @param {{}} oldKVs 
+ * @param {(namespace: number, target: object, key: string, newValue: any, oldValue?: any) => void} updateFn 
+ * @param {(namespace: number, target: object, key: string, oldValue: any) => void} removeFn 
+ */
+let _updateObjectByKVs = (namespace, target, newKVs, oldKVs, updateFn, removeFn) => {
+    let oldEmpty = oldKVs == null; // is nullish
+    let newEmpty = newKVs == null; // is nullish
 
     let key;
 
@@ -192,36 +240,42 @@ let _updateKeyValues = (namespace, target, newKeyValues, oldKeyValues, updateFn,
         if (newEmpty) {
             // Do nothing here
         } else {
-            for (key in newKeyValues) {
-                if (_hasOwnNonEmpty(newKeyValues, key)) {
-                    updateFn(namespace, target, key, newKeyValues[key]);
+            for (key in newKVs) {
+                if (_hasOwnNonEmpty(newKVs, key)) {
+                    updateFn(namespace, target, key, newKVs[key]);
                 }
             }
         }
     } else if (newEmpty) {
-        for (key in oldKeyValues) {
-            if (_hasOwnNonEmpty(oldKeyValues, key)) {
-                removeFn(namespace, target, key, oldKeyValues[key]);
+        for (key in oldKVs) {
+            if (_hasOwnNonEmpty(oldKVs, key)) {
+                removeFn(namespace, target, key, oldKVs[key]);
             }
         }
     } else {
-        for (key in oldKeyValues) {
-            if (_hasOwnNonEmpty(oldKeyValues, key)) {
-                if (_hasOwnNonEmpty(newKeyValues, key)) {
+        for (key in oldKVs) {
+            if (_hasOwnNonEmpty(oldKVs, key)) {
+                if (_hasOwnNonEmpty(newKVs, key)) {
                     // Do nothing here
                 } else {
-                    removeFn(namespace, target, key, oldKeyValues[key]);
+                    removeFn(namespace, target, key, oldKVs[key]);
                 }
             }
         }
-        for (key in newKeyValues) {
-            if (_hasOwnNonEmpty(newKeyValues, key)) {
-                updateFn(namespace, target, key, newKeyValues[key], oldKeyValues[key]);
+        for (key in newKVs) {
+            if (_hasOwnNonEmpty(newKVs, key)) {
+                updateFn(namespace, target, key, newKVs[key], oldKVs[key]);
             }
         }
     }
 };
 
+/**
+ * 
+ * @param {object} target 
+ * @param {string} prop 
+ * @returns {boolean}
+ */
 let _hasOwnNonEmpty = (target, prop) => {
     return (
         hasOwnProperty.call(target, prop)
