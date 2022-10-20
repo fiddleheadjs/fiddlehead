@@ -1,12 +1,25 @@
 import {hasOwnProperty, isFunction, theSame} from './Util';
 import {NAMESPACE_HTML, NAMESPACE_SVG} from './VNode';
 
+/**
+ * 
+ * @param {TextNode} node 
+ * @param {string} newText 
+ * @param {string} oldText 
+ */
 export let updateNativeTextContent = (node, newText, oldText) => {
     if (newText !== oldText) {
         node.textContent = newText;
     }
 };
 
+/**
+ * 
+ * @param {number} namespace 
+ * @param {Element} element 
+ * @param {{}} newAttributes 
+ * @param {{}} oldAttributes 
+ */
 export let updateNativeElementAttributes = (namespace, element, newAttributes, oldAttributes) => {
     _updateObjectByKVs(
         namespace, element, newAttributes, oldAttributes,
@@ -28,7 +41,6 @@ const MANIPULATE_AS_PROPERTY_AND_ATTRIBUTE = 4;
  * @param {string} attrName 
  * @param {any} newAttrValue 
  * @param {any} oldAttrValue 
- * @returns {void}
  */
 let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(namespace, attrName);
@@ -77,7 +89,6 @@ let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAt
  * @param {Element} element 
  * @param {string} attrName 
  * @param {any} oldAttrValue 
- * @returns {void}
  */
 let _removeElementAttribute = (namespace, element, attrName, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(namespace, attrName);
