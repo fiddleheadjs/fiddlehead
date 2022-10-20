@@ -1,9 +1,10 @@
 import {hasOwnProperty, isFunction} from './Util';
 import {NAMESPACE_HTML, NAMESPACE_SVG} from './VNode';
 
-const MAY_BE_PROP_AND_ATTR = 0;
-const MUST_BE_PROP = 1;
-const MUST_BE_ATTR = 2;
+const MANIPULATE_AS_STYLE = 1;
+const MANIPULATE_AS_PROP = 2;
+const MANIPULATE_AS_ATTR = 3;
+const MANIPULATE_AS_PROP_AND_ATTR = 4;
 
 export let updateNativeTextContent = (node, newText, oldText) => {
     if (newText !== oldText) {
@@ -22,22 +23,23 @@ export let updateNativeElementAttributes = (namespace, element, newAttributes, o
 let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(namespace, attrName);
 
-    if (attrName === '') {
-        return;
-    }
-
-    if (attrName === 'style') {
-        _updateStyleProperties(element[attrName], newAttrValue, oldAttrValue);
-        return;
-    }
-
     if (newAttrValue === oldAttrValue) {
         return;
     }
 
-    let mayBe = _mayBePropertyOrAttribute(namespace, element, attrName, newAttrValue);
+    let manipulation = _selectElementAttributeManipulation(
+        namespace, element, attrName, newAttrValue
+    );
 
-    if (mayBe === MUST_BE_PROP || mayBe === MAY_BE_PROP_AND_ATTR) {
+    if (manipulation === MANIPULATE_AS_STYLE) {
+        _updateStyleProperties(element[attrName], newAttrValue, oldAttrValue);
+        return;
+    }
+
+    if (
+        manipulation === MANIPULATE_AS_PROP ||
+        manipulation === MANIPULATE_AS_PROP_AND_ATTR
+    ) {
         try {
             element[attrName] = newAttrValue;
         } catch (x) {
@@ -45,7 +47,10 @@ let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAt
         }
     }
 
-    if (mayBe === MUST_BE_ATTR || mayBe === MAY_BE_PROP_AND_ATTR) {
+    if (
+        manipulation === MANIPULATE_AS_ATTR ||
+        manipulation === MANIPULATE_AS_PROP_AND_ATTR
+    ) {
         if (newAttrValue === false) {
             // To represent a boolean property as false, we need to remove the attribute
             // instead of setting it as "false" (string)
@@ -59,21 +64,21 @@ let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAt
 let _removeElementAttribute = (namespace, element, attrName, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(namespace, attrName);
 
-    if (attrName === '') {
-        return;
-    }
+    let manipulation = _selectElementAttributeManipulation(
+        namespace, element, attrName, oldAttrValue
+    );
 
-    if (attrName === 'style') {
+    if (manipulation === MANIPULATE_AS_STYLE) {
         _updateStyleProperties(element[attrName], null, oldAttrValue);
-
         // Clean up HTML code
         element.removeAttribute(attrName);
         return;
     }
 
-    let mayBe = _mayBePropertyOrAttribute(namespace, element, attrName, oldAttrValue);
-
-    if (mayBe === MUST_BE_PROP || mayBe === MAY_BE_PROP_AND_ATTR) {
+    if (
+        manipulation === MANIPULATE_AS_PROP ||
+        manipulation === MANIPULATE_AS_PROP_AND_ATTR
+    ) {
         try {
             element[attrName] = null;
         } catch (x) {
@@ -81,7 +86,10 @@ let _removeElementAttribute = (namespace, element, attrName, oldAttrValue) => {
         }
     }
 
-    if (mayBe === MUST_BE_ATTR || mayBe === MAY_BE_PROP_AND_ATTR) {
+    if (
+        manipulation === MANIPULATE_AS_ATTR ||
+        manipulation === MANIPULATE_AS_PROP_AND_ATTR
+    ) {
         element.removeAttribute(attrName);
     }
 };
@@ -113,9 +121,13 @@ let _normalizeElementAttributeName = (namespace, attrName) => {
     return attrName;
 };
 
-let _mayBePropertyOrAttribute = (namespace, element, attrName, attrValue) => {
+let _selectElementAttributeManipulation = (namespace, element, attrName, attrValue) => {
+    if (attrName === 'style') {
+        return MANIPULATE_AS_STYLE;
+    }
+
     if (isFunction(attrValue)) {
-        return MUST_BE_PROP;
+        return MANIPULATE_AS_PROP;
     }
 
     if (
@@ -123,7 +135,7 @@ let _mayBePropertyOrAttribute = (namespace, element, attrName, attrValue) => {
         attrName === 'innerText' ||
         attrName === 'textContent'
     ) {
-        return MUST_BE_PROP;
+        return MANIPULATE_AS_PROP;
     }
 
     if (namespace === NAMESPACE_HTML) {
@@ -135,15 +147,15 @@ let _mayBePropertyOrAttribute = (namespace, element, attrName, attrValue) => {
             attrName === 'list' ||
             attrName === 'form'
         ) {
-            return MUST_BE_ATTR;
+            return MANIPULATE_AS_ATTR;
         }
 
         if (attrName in element) {
-            return MAY_BE_PROP_AND_ATTR;
+            return MANIPULATE_AS_PROP_AND_ATTR;
         }
     }
     
-    return MUST_BE_ATTR;
+    return MANIPULATE_AS_ATTR;
 };
 // #EndBlock ElementAttributes
 
