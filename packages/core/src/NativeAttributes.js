@@ -1,11 +1,6 @@
 import {hasOwnProperty, isFunction} from './Util';
 import {NAMESPACE_HTML, NAMESPACE_SVG} from './VNode';
 
-const MANIPULATE_AS_STYLE = 1;
-const MANIPULATE_AS_PROP = 2;
-const MANIPULATE_AS_ATTR = 3;
-const MANIPULATE_AS_PROP_AND_ATTR = 4;
-
 export let updateNativeTextContent = (node, newText, oldText) => {
     if (newText !== oldText) {
         node.textContent = newText;
@@ -20,6 +15,12 @@ export let updateNativeElementAttributes = (namespace, element, newAttributes, o
 };
 
 // #StartBlock ElementAttributes
+
+const MANIPULATE_AS_STYLE = 1;
+const MANIPULATE_AS_PROP = 2;
+const MANIPULATE_AS_ATTR = 3;
+const MANIPULATE_AS_PROP_AND_ATTR = 4;
+
 let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(namespace, attrName);
 
@@ -157,9 +158,11 @@ let _selectElementAttributeManipulation = (namespace, element, attrName, attrVal
     
     return MANIPULATE_AS_ATTR;
 };
+
 // #EndBlock ElementAttributes
 
 // #StartBlock StyleProperties
+
 let _updateStyleProperties = (style, newProperties, oldProperties) => {
     _updateKeyValues(
         null, style, newProperties, oldProperties,
@@ -174,6 +177,7 @@ let _updateStyleProperty = (_, style, propName, newPropValue) => {
 let _removeStyleProperty = (_, style, propName) => {
     style[propName] = '';
 };
+
 // #EndBlock StyleProperties
 
 let _updateKeyValues = (namespace, target, newKeyValues, oldKeyValues, updateFn, removeFn) => {
