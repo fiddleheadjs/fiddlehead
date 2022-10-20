@@ -95,6 +95,9 @@ let _removeElementAttribute = (namespace, element, attrName, oldAttrValue) => {
     }
 };
 
+// Should not depend on attribute values,
+// as it may lead to different names
+// with the old value and new value
 let _normalizeElementAttributeName = (namespace, attrName) => {
     // Normalize className to class
     if (attrName === 'className') {
