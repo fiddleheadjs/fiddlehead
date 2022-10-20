@@ -1,4 +1,4 @@
-import {objectsShallowEqual, isFunction, hasOwnProperty} from './Util';
+import {objectsShallowEqual, isFunction} from './Util';
 import {createVNodeFromContent} from './CreateVNode';
 import {prepareCurrentlyProcessing, flushCurrentlyProcessing} from './CurrentlyProcessing';
 import {catchError} from './CatchError';
