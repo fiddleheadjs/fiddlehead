@@ -1,4 +1,4 @@
-import {hasOwnProperty, isFunction} from './Util';
+import {hasOwnProperty, isFunction, theSame} from './Util';
 import {NAMESPACE_HTML, NAMESPACE_SVG} from './VNode';
 
 export let updateNativeTextContent = (node, newText, oldText) => {
@@ -24,7 +24,7 @@ const MANIPULATE_AS_PROP_AND_ATTR = 4;
 let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(namespace, attrName);
 
-    if (newAttrValue === oldAttrValue) {
+    if (theSame(newAttrValue, oldAttrValue)) {
         return;
     }
 
