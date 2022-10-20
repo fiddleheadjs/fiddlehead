@@ -17,9 +17,9 @@ export let updateNativeElementAttributes = (namespace, element, newAttributes, o
 // #StartBlock ElementAttributes
 
 const MANIPULATE_AS_STYLE = 1;
-const MANIPULATE_AS_PROP = 2;
-const MANIPULATE_AS_ATTR = 3;
-const MANIPULATE_AS_PROP_AND_ATTR = 4;
+const MANIPULATE_AS_PROPERTY = 2;
+const MANIPULATE_AS_ATTRIBUTE = 3;
+const MANIPULATE_AS_PROPERTY_AND_ATTRIBUTE = 4;
 
 let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAttrValue) => {
     attrName = _normalizeElementAttributeName(namespace, attrName);
@@ -38,8 +38,8 @@ let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAt
     }
 
     if (
-        manipulation === MANIPULATE_AS_PROP ||
-        manipulation === MANIPULATE_AS_PROP_AND_ATTR
+        manipulation === MANIPULATE_AS_PROPERTY ||
+        manipulation === MANIPULATE_AS_PROPERTY_AND_ATTRIBUTE
     ) {
         try {
             element[attrName] = newAttrValue;
@@ -49,8 +49,8 @@ let _updateElementAttribute = (namespace, element, attrName, newAttrValue, oldAt
     }
 
     if (
-        manipulation === MANIPULATE_AS_ATTR ||
-        manipulation === MANIPULATE_AS_PROP_AND_ATTR
+        manipulation === MANIPULATE_AS_ATTRIBUTE ||
+        manipulation === MANIPULATE_AS_PROPERTY_AND_ATTRIBUTE
     ) {
         if (newAttrValue === false) {
             // To represent a boolean property as false, we need to remove the attribute
@@ -77,8 +77,8 @@ let _removeElementAttribute = (namespace, element, attrName, oldAttrValue) => {
     }
 
     if (
-        manipulation === MANIPULATE_AS_PROP ||
-        manipulation === MANIPULATE_AS_PROP_AND_ATTR
+        manipulation === MANIPULATE_AS_PROPERTY ||
+        manipulation === MANIPULATE_AS_PROPERTY_AND_ATTRIBUTE
     ) {
         try {
             element[attrName] = null;
@@ -88,8 +88,8 @@ let _removeElementAttribute = (namespace, element, attrName, oldAttrValue) => {
     }
 
     if (
-        manipulation === MANIPULATE_AS_ATTR ||
-        manipulation === MANIPULATE_AS_PROP_AND_ATTR
+        manipulation === MANIPULATE_AS_ATTRIBUTE ||
+        manipulation === MANIPULATE_AS_PROPERTY_AND_ATTRIBUTE
     ) {
         element.removeAttribute(attrName);
     }
@@ -128,7 +128,7 @@ let _selectElementAttributeManipulation = (namespace, element, attrName, attrVal
     }
 
     if (isFunction(attrValue)) {
-        return MANIPULATE_AS_PROP;
+        return MANIPULATE_AS_PROPERTY;
     }
 
     if (
@@ -136,7 +136,7 @@ let _selectElementAttributeManipulation = (namespace, element, attrName, attrVal
         attrName === 'innerText' ||
         attrName === 'textContent'
     ) {
-        return MANIPULATE_AS_PROP;
+        return MANIPULATE_AS_PROPERTY;
     }
 
     if (namespace === NAMESPACE_HTML) {
@@ -148,15 +148,15 @@ let _selectElementAttributeManipulation = (namespace, element, attrName, attrVal
             attrName === 'list' ||
             attrName === 'form'
         ) {
-            return MANIPULATE_AS_ATTR;
+            return MANIPULATE_AS_ATTRIBUTE;
         }
 
         if (attrName in element) {
-            return MANIPULATE_AS_PROP_AND_ATTR;
+            return MANIPULATE_AS_PROPERTY_AND_ATTRIBUTE;
         }
     }
     
-    return MANIPULATE_AS_ATTR;
+    return MANIPULATE_AS_ATTRIBUTE;
 };
 
 // #EndBlock ElementAttributes
