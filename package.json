@@ -1,7 +1,7 @@
 {
   "name": "hook",
   "version": "1.5.1",
-  "description": "A lightweight UI library",
+  "description": "A React-like library but with hooks only",
   "main": "index.js",
   "exports": {
     ".": {

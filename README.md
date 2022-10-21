@@ -1,12 +1,12 @@
-# FdH
+# Fiddlehead
 
-FdH is a UI library that allows you to develop web apps in the declarative style,
+Fiddlehead is a UI library that allows you to develop web apps in the declarative style,
 component-based - these make your lines of code more predictable and maintainable.
 
-If you are familiar with React before, using FdH is quite similar.
+If you are familiar with React before, using Fiddlehead is quite similar.
 It implements some of the main ideas of React: virtual DOM, functional components, and hooks.
 
-Writing codes with FdH is nothing but JSX and hooks.
+Writing codes with Fiddlehead is nothing but JSX and hooks.
 It is aimed to be as simple as possible, while still providing an excellent development experience.
 With such criteria in mind, we made it some benefits:
 - Simple usage: only JSX and hooks
@@ -17,12 +17,12 @@ If such things are not really meaningful to your case, then let's start with Rea
 We created this library for our special cases that require those criteria strictly,
 while the powerful supports of React ecosystem are not necessary.
 
-## Install
+## Installation
 
 Install the library:
 
 ```
-npm install git+ssh://git@git.itim.vn:ads-frontend/fdH.git
+npm install fiddlehead
 ```
 
 Install Babel's packages to use JSX syntax:
@@ -74,7 +74,7 @@ module.exports = {
 ### Basic usage
 
 ```jsx
-import {jsx, render} from 'fdH';
+import {jsx, render} from 'fiddlehead';
 
 // Declare your component
 function HelloWorld() {
@@ -92,7 +92,7 @@ render(<HelloWorld/>, document.getElementById('root'));
 ### useState
 
 ```jsx
-import {jsx, useState} from 'fdH';
+import {jsx, useState} from 'fiddlehead';
 
 function Counter() {
     let [count, setCount] = useState(0);
@@ -116,7 +116,7 @@ function Counter() {
 ### useEffect
 
 ```jsx
-import {jsx, useState, useEffect} from 'fdH';
+import {jsx, useState, useEffect} from 'fiddlehead';
 
 function UserInfo() {
     let [email, setEmail] = useState('');
@@ -162,7 +162,7 @@ Prefer the standard `useEffect` when possible to avoid blocking visual updates.
 ### useRef
 
 ```jsx
-import {jsx, useEffect, useRef} from 'fdH';
+import {jsx, useEffect, useRef} from 'fiddlehead';
 
 function Image() {
     let imageRef = useRef(null);
@@ -182,13 +182,13 @@ function Image() {
 
 ### Forward refs
 
-Different from React, fdH does not prevent you from using `ref` as a normal prop.
+Different from React, fiddlehead does not prevent you from using `ref` as a normal prop.
 You are free to choose the name of the prop which forwards the ref.
 As you pass that prop to a built-in element, it requires you to provide an instance of Ref,
 which you will get by using the `createRef` function or `useRef` hook.
 
 ```jsx
-import {jsx, useRef} from 'fdH';
+import {jsx, useRef} from 'fiddlehead';
 
 function TextInput({ref}) {
     return (
@@ -212,7 +212,7 @@ function App() {
 ### Error boundaries
 
 ```jsx
-import {jsx, useCatch} from 'fdH';
+import {jsx, useCatch} from 'fiddlehead';
 
 function ErrorBoundary({children}) {
     let [error, clearError] = useCatch();
@@ -231,7 +231,7 @@ Error boundaries allow only one `useCatch` inside.
 ### Portal
 
 ```jsx
-import {jsx, createPortal} from 'fdH';
+import {jsx, createPortal} from 'fiddlehead';
 
 function DocumentPortal({children}) {
     let el = useRef(document.createElement('div')).current;
@@ -274,7 +274,7 @@ function App() {
 ### Components always are "pure"
 
 Pure components are components that always produce the same output (view) with the same input (props).
-Different from React, any components of FdH are pure without wrapping them with `memo` HOC.
+Different from React, any components of Fiddlehead are pure without wrapping them with `memo` HOC.
 This means, components will not re-rendered without changes in their props or states,
 even when their parent components re-rendered.
 We use the shallow comparison to determine if props are changed or not.
@@ -291,7 +291,7 @@ In the following example, whenever the App component re-renders, the Form compon
 unintentionally, because the function passed to onSubmit prop always is a different function.
 
 ```jsx
-import {jsx, useState} from 'fdH';
+import {jsx, useState} from 'fiddlehead';
 
 function App() {
     let handleSubmit = () => {
@@ -313,7 +313,7 @@ function Form({onSubmit}) {
 Wrap the inline function within `useCallback` to avoid this:
 
 ```jsx
-import {jsx, useState, useCallback} from 'fdH';
+import {jsx, useState, useCallback} from 'fiddlehead';
 
 function App() {
     let handleSubmit = useCallback(() => {
@@ -329,7 +329,7 @@ function App() {
 This hook is used to avoid re-running a heavy calculation every time the component re-renders.
 
 ```jsx
-import {jsx, useMemo} from 'fdH';
+import {jsx, useMemo} from 'fiddlehead';
 
 function App() {
     let result = useMemo(() => {
@@ -347,8 +347,8 @@ Store is a separated package. It is helpful when we want to use some global stat
 which can be read/written from anywhere in the DOM tree, with no need to pass props through all levels of elements. 
 
 ```jsx
-import {jsx, useRef} from 'fdH';
-import {useStoreInit, useStoreRead, useStoreWrite} from 'fdH/store';
+import {jsx, useRef} from 'fiddlehead';
+import {useStoreInit, useStoreRead, useStoreWrite} from 'fiddlehead/store';
 
 function App() {
     useStoreInit(
