@@ -1,7 +1,14 @@
 {
   "name": "fiddlehead",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "A React-like library but with hooks only",
+  "keywords": [
+    "react",
+    "hooks",
+    "virtual dom",
+    "vdom",
+    "jsx"
+  ],
   "main": "index.js",
   "exports": {
     ".": {
