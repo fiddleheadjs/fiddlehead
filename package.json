@@ -1,5 +1,5 @@
 {
-  "name": "hook",
+  "name": "fiddlehead",
   "version": "1.5.1",
   "description": "A React-like library but with hooks only",
   "main": "index.js",
@@ -42,7 +42,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@git.itim.vn:ads-frontend/hook.git"
+    "url": "git@github.com:CocCoc-Ad-Platform/fiddlehead.git"
   },
   "author": "CocCoc Ad Platform",
   "license": "MIT",
@@ -52,7 +52,7 @@
     "core.pkg": "file:lib/core",
     "cross-env": "^7.0.3",
     "eslint": "^8.15.0",
-    "hook": "file:lib/core",
+    "fiddlehead": "file:lib/core",
     "store.pkg": "file:lib/store"
   }
 }
