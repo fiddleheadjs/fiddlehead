@@ -26,6 +26,7 @@
   },
   "scripts": {
     "dev": "concurrently \"npm run output:watch\" \"npm run docs:watch:dev\" \"npm run docs:start\" \"npm run playground:watch:dev\" \"npm run playground:start\" \"npm run bench:watch\" \"npm run bench:start\"",
+    "output:install": "cd output && npm install",
     "output:build": "cd output && npm run build",
     "output:watch": "cd output && npm run watch",
     "docs:start": "cd docs && npm run start",
@@ -43,6 +44,7 @@
     "bench:watch": "cd bench && cross-env NODE_ENV=production npm run watch",
     "bench:build:dev": "cd bench && cross-env NODE_ENV=development npm run build",
     "bench:watch:dev": "cd bench && cross-env NODE_ENV=development npm run watch",
+    "tests:install": "cd tests && npm install",
     "test": "cd tests && npm run test",
     "test:watch": "cd tests && npm run test:watch",
     "lint": "eslint ./packages --config .eslintrc"
