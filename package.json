@@ -44,6 +44,7 @@
     "bench:watch": "cd bench && cross-env NODE_ENV=production npm run watch",
     "bench:build:dev": "cd bench && cross-env NODE_ENV=development npm run build",
     "bench:watch:dev": "cd bench && cross-env NODE_ENV=development npm run watch",
+    "tests:install": "cd tests && npm install",
     "test": "cd tests && npm run test",
     "test:watch": "cd tests && npm run test:watch",
     "lint": "eslint ./packages --config .eslintrc"
