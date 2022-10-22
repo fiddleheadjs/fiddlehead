@@ -1,7 +1,7 @@
 {
   "name": "fiddlehead",
   "version": "1.5.2",
-  "description": "A React-like library but with hooks only",
+  "description": "A lightweight library to build user interfaces with JSX and hooks.",
   "keywords": [
     "react",
     "hooks",
