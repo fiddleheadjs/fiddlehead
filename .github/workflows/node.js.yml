@@ -29,5 +29,5 @@
      - run: npm ci
      - run: npm run output:install
      - run: npm run output:build
-     - run: npm tests:install
+     - run: npm run tests:install
      - run: npm test
