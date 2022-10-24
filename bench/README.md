@@ -14,18 +14,18 @@ npm start
 
 ### The Form test
 
-![Form Fiddlehead](reference_results/form_fiddlehead.png)
+![Form Fiddlehead](screenshots/form_fiddlehead.png)
 
-![Form React](reference_results/form_react.png)
+![Form React](screenshots/form_react.png)
 
 ### The Table test
 
-![Table Fiddlehead](reference_results/table_fiddlehead.png)
+![Table Fiddlehead](screenshots/table_fiddlehead.png)
 
-![Table React](reference_results/table_react.png)
+![Table React](screenshots/table_react.png)
 
 ### The SVG test
 
-![SVG Fiddlehead](reference_results/svg_fiddlehead.png)
+![SVG Fiddlehead](screenshots/svg_fiddlehead.png)
 
-![SVG React](reference_results/svg_react.png)
+![SVG React](screenshots/svg_react.png)
