@@ -29,21 +29,21 @@
     "output:build": "cd output && npm run build",
     "output:watch": "cd output && npm run watch",
 
-    "docs:install": "cd docs && npm run install",
+    "docs:install": "cd docs && npm install",
     "docs:start": "cd docs && npm run start",
     "docs:build": "cd docs && cross-env NODE_ENV=production npm run build",
     "docs:watch": "cd docs && cross-env NODE_ENV=production npm run watch",
     "docs:build:dev": "cd docs && cross-env NODE_ENV=development npm run build",
     "docs:watch:dev": "cd docs && cross-env NODE_ENV=development npm run watch",
     
-    "playground:install": "cd playground && npm run install",
+    "playground:install": "cd playground && npm install",
     "playground:start": "cd playground && npm run start",
     "playground:build": "cd playground && cross-env NODE_ENV=production npm run build",
     "playground:watch": "cd playground && cross-env NODE_ENV=production npm run watch",
     "playground:build:dev": "cd playground && cross-env NODE_ENV=development npm run build",
     "playground:watch:dev": "cd playground && cross-env NODE_ENV=development npm run watch",
     
-    "bench:install": "cd bench && npm run install",
+    "bench:install": "cd bench && npm install",
     "bench:start": "cd bench && npm run start",
     "bench:build": "cd bench && cross-env NODE_ENV=production npm run build",
     "bench:watch": "cd bench && cross-env NODE_ENV=production npm run watch",
@@ -54,8 +54,8 @@
     "test": "cd tests && npm run test",
     "lint": "eslint ./packages --config .eslintrc",
     
-    "get": "npm run output:install && npm run docs:install && npm run playground:install && npm run bench:install && npm run tests:install",
-    "dev": "concurrently \"npm run output:watch\" \"npm run docs:watch:dev\" \"npm run docs:start\" \"npm run playground:watch:dev\" \"npm run playground:start\" \"npm run bench:watch\" \"npm run bench:start\""
+    "all:install": "npm run output:install && npm run docs:install && npm run playground:install && npm run bench:install && npm run tests:install",
+    "all:dev": "concurrently \"npm run output:watch\" \"npm run docs:watch:dev\" \"npm run docs:start\" \"npm run playground:watch:dev\" \"npm run playground:start\" \"npm run bench:watch\" \"npm run bench:start\""
   },
   "repository": {
     "type": "git",
