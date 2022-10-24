@@ -1,9 +1,9 @@
-import * as Hook from 'core.pkg';
+import * as Fiddlehead from 'core.pkg';
 import * as React from 'react';
 
-const {jsx} = Hook;
+const {jsx} = Fiddlehead;
 
-const Lib = __LIB__ === 'hook' ? Hook : React;
+const Lib = __LIB__ === 'fiddlehead' ? Fiddlehead : React;
 
 function Cat({text, setText}) {
     //console.log('run Cat', text);
@@ -118,8 +118,6 @@ function YourAd({count, setCount}) {
     const [name, setName] = Lib.useState('unnamed');
     //console.log('name', name);
 
-    const selectRef = Lib.useRef(null);
-
     Lib.useLayoutEffect(() => {
         // //console.log('mount Lazy effect YourAd');
 
@@ -129,10 +127,10 @@ function YourAd({count, setCount}) {
     }, []);
 
     Lib.useLayoutEffect(() => {
-        //console.log('+ select_element', selectRef.current);
+        //console.log('+ select_element');
 
         return () => {
-            //console.log('- select_element', selectRef.current);
+            //console.log('- select_element');
         };
     });
 
@@ -150,7 +148,7 @@ function YourAd({count, setCount}) {
         </div>
         <br/>
         <div>
-            <select ref={selectRef} onChange={ev => setLayout(ev.target.value)}>
+            <select onChange={ev => setLayout(ev.target.value)}>
                 <option value="cat" selected={layout === 'cat'}>Layout Cat</option>
                 <option value="dog" selected={layout === 'dog'}>Layout Dog</option>
             </select>
@@ -209,13 +207,11 @@ function Wrapper({children}) {
 function MyAd() {
     const [count, setCount] = Lib.useState(1);
 
-    const adRef = Lib.useRef(null);
-
     Lib.useLayoutEffect(() => {
-        //console.log('+ ad_element', adRef.current);
+        //console.log('+ ad_element');
 
         return () => {
-            //console.log('- ad_element', adRef.current);
+            //console.log('- ad_element');
         };
     });
 
@@ -232,7 +228,7 @@ function MyAd() {
                                     <Wrapper>
                                         test
                                         <Wrapper>
-                                            <YourAd ref={adRef} count={count} setCount={setCount}/>
+                                            <YourAd count={count} setCount={setCount}/>
                                         </Wrapper>
                                     </Wrapper>
                                 </Wrapper>

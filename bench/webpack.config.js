@@ -14,10 +14,10 @@ function getJsLoaders(lib) {
                 plugins: [
                     [
                         "@babel/plugin-transform-react-jsx",
-                        lib === 'react' ? {} : {
-                            "pragma": "jsx",
-                            "pragmaFrag": "'['",
-                        }
+                        lib === 'fiddlehead' ? {
+                            'pragma': 'jsx',
+                            'pragmaFrag': "'['",
+                        } : {}
                     ],
                 ],
             }
@@ -33,10 +33,7 @@ fs.readdirSync('./src/tests').map(pathname => {
     const extension = path.extname(pathname);  
     const basename = path.basename(pathname);
     const filename = basename.substring(0, basename.length - extension.length);
-
-    console.log(filename);
-
-    const lib = filename.split('_')[1];
+    const lib = filename.split('_').pop();
 
     configs.push({
         mode: isDev ? 'development' : 'production',
