@@ -1,6 +1,6 @@
 # Bench
 
-This package contains the performance tests of the library
+This package contains the performance tests for Fiddlehead, and compare with React.
 
 ## Installation
 
