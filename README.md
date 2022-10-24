@@ -12,12 +12,8 @@ Writing codes with Fiddlehead is nothing but JSX and hooks.
 It is aimed to be as simple as possible, while still providing an excellent development experience.
 With such criteria in mind, we made it some benefits:
 - Simple usage: only JSX and hooks
-- Performant: significantly better memory usage, and slightly better CPU usage compared to React
+- Performant: use only 50% memory, and slightly better CPU usage compared to React
 - Lightweight: only 8kb (or 3kb gzipped), compared to 132kb for React
-
-If such things are not really meaningful to your case, then let's start with React.
-We created this library for our special cases that require those criteria strictly,
-while the powerful supports of React ecosystem are not necessary.
 
 ## Installation
 
