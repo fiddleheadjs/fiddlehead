@@ -3,8 +3,8 @@ export const NAMESPACE_HTML = 0;
 export const NAMESPACE_SVG = 1;
 
 // Special node types
-export const TextNode = '#';
 export const Fragment = '[';
+export const Text = '#';
 export const Portal = (props) => {
     return props.children;
 };

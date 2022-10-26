@@ -1,7 +1,7 @@
 import {createVNodeFromJSXElement, JSXElement} from './JSXElement';
 import {createVNodeFromPortalElement, PortalElement} from './PortalElement';
 import {isArray, isNumber, isString} from './Util';
-import {Fragment, TextNode, VNode} from './VNode';
+import {Fragment, Text, VNode} from './VNode';
 import {setChildrenFromContent} from './SetChildren';
 
 /**
@@ -15,11 +15,11 @@ export let createVNodeFromContent = (content) => {
     }
 
     if (isString(content)) {
-        return new VNode(TextNode, content);
+        return new VNode(Text, content);
     }
 
     if (isNumber(content)) {
-        return new VNode(TextNode, '' + content);
+        return new VNode(Text, '' + content);
     }
 
     if (isArray(content)) {

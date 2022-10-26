@@ -1,4 +1,4 @@
-import {Fragment, TextNode, NAMESPACE_HTML, NAMESPACE_SVG} from './VNode';
+import {Fragment, Text, NAMESPACE_HTML, NAMESPACE_SVG} from './VNode';
 import {linkNativeNodeWithVNode, attachVNodeToNativeNode} from './NodeToNode';
 import {isFunction} from './Util';
 import {
@@ -18,7 +18,7 @@ export let hydrateView = (vnode) => {
     }
 
     let nativeNode;
-    if (vnode.type_ === TextNode) {
+    if (vnode.type_ === Text) {
         nativeNode = createNativeTextNode(vnode.props_);
     } else {
         nativeNode = createNativeElement(
@@ -48,7 +48,7 @@ export let rehydrateView = (newVNode, oldVNode) => {
         attachVNodeToNativeNode(oldVNode.nativeNode_, newVNode);
     }
 
-    if (newVNode.type_ === TextNode) {
+    if (newVNode.type_ === Text) {
         updateNativeTextContent(
             newVNode.nativeNode_,
             newVNode.props_,
