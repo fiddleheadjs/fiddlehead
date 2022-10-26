@@ -1,4 +1,4 @@
-import {Fragment, TextNode} from './src/VNode';
+import {Fragment, Text} from './src/VNode';
 import {render} from './src/Render';
 import {createElement} from './src/JSXElement';
 import {createPortal} from './src/PortalElement';
@@ -10,7 +10,7 @@ import {resolveRootVNode} from './src/CurrentlyProcessing';
 
 export {
     Fragment,
-    TextNode,
+    Text,
     render,
     createElement,
     createElement as jsx,

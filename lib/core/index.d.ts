@@ -12,7 +12,7 @@ export interface Ref<T> {
 
 export const Fragment: string;
 
-export const TextNode: string;
+export const Text: string;
 
 export function render(
     children: any,

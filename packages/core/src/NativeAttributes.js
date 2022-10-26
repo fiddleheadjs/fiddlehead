@@ -3,7 +3,7 @@ import {NAMESPACE_HTML, NAMESPACE_SVG} from './VNode';
 
 /**
  * 
- * @param {TextNode} node 
+ * @param {Text} node 
  * @param {string} newText 
  * @param {string} oldText 
  */

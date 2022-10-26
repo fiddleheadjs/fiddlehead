@@ -1,5 +1,5 @@
 import {Ref} from './RefHook';
-import {TextNode, VNode} from './VNode';
+import {Text, VNode} from './VNode';
 import {setOnlyChildFromContent, setChildrenFromContent} from './SetChildren';
 import {isArray, isFunction, isNumber, isString, slice} from './Util';
 
@@ -109,7 +109,7 @@ export let createVNodeFromJSXElement = (element) => {
     if (hasContent) {
         if (isFunctionalType) {
             // Do nothing here 
-        } else if (type === TextNode) {
+        } else if (type === Text) {
             // Text nodes accept only one string as the child.
             // Everything else will be converted to string
             if (isString(content)) {

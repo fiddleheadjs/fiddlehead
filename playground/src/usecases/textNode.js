@@ -1,4 +1,4 @@
-import {jsx, render, useState, useEffect, useRef, TextNode} from 'core.pkg';
+import {jsx, render, useState, useEffect, useRef, Text} from 'core.pkg';
 
 render(<Root/>, document.getElementById('root'));
 
@@ -28,8 +28,8 @@ function Root() {
 
 function FullName({firstName, lastName, ref, inputRef}) {
     return (
-        <TextNode ref={ref}>
+        <Text ref={ref}>
             {firstName + ' ' + lastName}
-        </TextNode>
+        </Text>
     );
 }
