@@ -1,14 +1,14 @@
 type Props = Record<string, any>;
 
 interface JSXElement {
-};
+}
 
 interface PortalElement {
-};
+}
 
 export interface Ref<T> {
     current: T
-};
+}
 
 export const Fragment: string;
 
