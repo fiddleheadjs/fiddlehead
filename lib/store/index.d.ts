@@ -7,7 +7,7 @@ export interface Store {
     setData: (setFn: (data: Data) => void) => void,
     subscribe: (subscriber: Subscriber) => void,
     unsubscribe: (subscriber: Subscriber) => void,
-};
+}
 
 export function createStore(initialData: Data): Store;
 
