@@ -4,35 +4,36 @@ import {renderView, cleanupView} from '../../../testUtils';
 import Root from './updatedStateWhenHadError';
 import userEvent from '@testing-library/user-event';
 
+async function sleep() {
+    return new Promise((resolve) => setTimeout(resolve, 50));
+}
+
 describe('updatedStateWhenHadError.test.js', () => {
-    beforeAll(() => {
-        jest.useFakeTimers()
+    beforeEach(async () => {
         renderView(<Root />);
+        await sleep();
     });
 
     it('States updated correctly when Components hadn\'t errors', async () => {
         userEvent.click(screen.getByTestId('error-btn'));
-        
-        await waitFor(() => {
-            expect(screen.getByTestId('click-message').textContent).toBe('Clicks: 1');
-            expect(screen.getByTestId('show-message').textContent).toBe('Shows: 1');
-            expect(screen.getByTestId('count-message').textContent).toBe('Counts: 1');
-        });
+        await sleep();
+
+        expect(screen.getByTestId('click-message').textContent).toBe('Clicks: 1');
+        expect(screen.getByTestId('show-message').textContent).toBe('Shows: 1');
+        expect(screen.getByTestId('count-message').textContent).toBe('Counts: 1');
     });
 
-    it('States updated correctly when Components had errors', async () => {
+    it('The useCatch just once rendering', async () => {
         userEvent.click(screen.getByTestId('error-btn'));
-        jest.runAllTimers();
+        await sleep();
+        userEvent.click(screen.getByTestId('error-btn'));
+        await sleep();
         
-        await waitFor(() => {
-            expect(screen.getByTestId('click-message').textContent).toBe('Clicks: 2');
-            expect(screen.queryByTestId('show-message')).toBe(null);
-            expect(screen.queryAllByTestId('error-message').length).toEqual(1);
-        });
+        expect(screen.getByTestId('click-message').textContent).toBe('Clicks: 2');
+        expect(screen.queryAllByTestId('error-message').length).toEqual(1);
     });
 
-    afterAll(() => {
+    afterEach(() => {
         cleanupView();
-        jest.clearAllMocks();
     });
 });

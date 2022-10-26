@@ -8,7 +8,9 @@ export default function Root() {
             <div data-testid="click-message">Clicks: {clicks}</div>
             <button data-testid="click-btn" onClick={() => setClicks(clicks + 1)}></button>
             <ErrorBoundary>
-                <Contents setClicks={setClicks} />
+                <div>
+                    <Contents setClicks={setClicks} />
+                </div>
             </ErrorBoundary>
         </>
     );
@@ -26,7 +28,7 @@ function ErrorBoundary({children}) {
             {error !== null && (
                 <>
                     <div data-testid="error-message">Oops: {error.message}</div>
-                    <button onClick={() => clearError(null)}>
+                    <button data-testid="clear-error" onClick={() => clearError(null)}>
                         Clear error
                     </button>
                 </>
@@ -56,8 +58,8 @@ function Content2({setClicks, setShows}) {
                 data-testid="error-btn"
                 onClick={() => {
                     setCount((t) => count >= 1 ? (bug_count += 1) : count + 1);
-                    setShows((t) => t + 1);
                     setClicks((t) => t + 1);
+                    setShows((t) => t + 1);
                 }}
             ></button>
         </>
