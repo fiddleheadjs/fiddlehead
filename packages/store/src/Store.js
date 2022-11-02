@@ -2,18 +2,14 @@ import {useEffect, useState} from 'core.pkg';
 
 /**
  * 
- * @param {{}} initialData 
+ * @param {{}} data 
  * @returns {Store}
  */
-export let createStore = (initialData) => {
-    if (!(
-        initialData != null && // not nullish
-        initialData.constructor === Object
-    )) {
-        throw new TypeError('The store\'s data must be a plain object.');
+export let createStore = (data) => {
+    if (data !== Object(data)) {
+        throw new TypeError('The store data must be a reference type.');
     }
-    
-    let data = initialData;
+
     let subscribers = new Set();
 
     return {
@@ -56,7 +52,9 @@ export let useGlobalStoreRead = (store, readFn, compareFn) => {
                 });
             }
         };
+
         store.subscribe(subscriber);
+        
         return () => {
             store.unsubscribe(subscriber);
         };

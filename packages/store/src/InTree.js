@@ -12,6 +12,9 @@ let storesMap = new WeakMap();
  * @param {{}} initialData 
  */
 export let useStoreInit = (scope, initialData) => {
+    if (scope !== Object(scope)) {
+        throw new TypeError('The store scope must be a reference type.');
+    }
     let treeId = useTreeId();
     let scoped = storesMap.get(treeId);
     if (scoped === undefined) {
@@ -41,7 +44,7 @@ export let useStore = (scope) => {
         store = scoped.get(scope);
     }
     if (store === undefined) {
-        throw new ReferenceError('Cannot access a store before initialization.');
+        throw new ReferenceError('Attempting to access an uninitialized store.');
     }
     return store;
 };
