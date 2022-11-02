@@ -2,7 +2,7 @@ import {useEffect, useState} from 'core.pkg';
 
 /**
  * 
- * @param {{}} data 
+ * @param {object} data 
  * @returns {Store}
  */
 export let createStore = (data) => {
@@ -54,7 +54,7 @@ export let useGlobalStoreRead = (store, readFn, compareFn) => {
         };
 
         store.subscribe(subscriber);
-        
+
         return () => {
             store.unsubscribe(subscriber);
         };

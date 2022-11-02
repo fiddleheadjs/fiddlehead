@@ -9,9 +9,9 @@ let storesMap = new WeakMap();
 /**
  * 
  * @param {object} scope
- * @param {{}} initialData 
+ * @param {object} data 
  */
-export let useStoreInit = (scope, initialData) => {
+export let useStoreInit = (scope, data) => {
     if (scope !== Object(scope)) {
         throw new TypeError('The store scope must be a reference type.');
     }
@@ -26,7 +26,7 @@ export let useStoreInit = (scope, initialData) => {
             console.warn('The store already has been initialized.');
         }
     } else {
-        scoped.set(scope, createStore(initialData));
+        scoped.set(scope, createStore(data));
     }
 };
 
