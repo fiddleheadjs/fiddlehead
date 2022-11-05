@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'core.pkg';
+import {useEffect, useState, useCallback} from 'core.pkg';
 
 /**
  * 
@@ -58,7 +58,10 @@ export let useGlobalStoreRead = (store, readFn, compareFn) => {
         return () => {
             store.unsubscribe(subscriber);
         };
-    }, [store, readFn, compareFn]);
+
+        // readFn and compareFn must be pure functions
+        // we only accept ones was passed from the first call
+    }, [store]);
 
     return datum[0];
 };
@@ -70,9 +73,12 @@ export let useGlobalStoreRead = (store, readFn, compareFn) => {
  * @returns {function}
  */
 export let useGlobalStoreWrite = (store, writeFn) => {
-    return (value) => {
+    return useCallback((value) => {
         store.setData((data) => {
             writeFn(data, value);
         });
-    };
+
+        // writeFn must be a pure function
+        // we only accept one was passed from the first call
+    }, [store]);
 };
