@@ -339,8 +339,8 @@ import {useStoreInit, useStoreRead, useStoreWrite} from 'fiddlehead/store';
 
 function App() {
     useStoreInit(
-        App, // Scope, can be any object (reference) but not a primitive value
-        {title: 'Store usage example'} // Initial data, must be a plain object
+        App, // Scope, can be any reference-type value (object, function,...)
+        {title: 'Store usage example'} // Initial data, reference-type value
     );
 
     return (
