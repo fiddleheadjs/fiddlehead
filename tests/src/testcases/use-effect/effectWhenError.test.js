@@ -1,12 +1,8 @@
-import {jsx, useCatch} from 'core.pkg';
+import {jsx} from 'core.pkg';
 import {screen, waitFor} from '@testing-library/dom';
 import {renderView, cleanupView} from '../../../testUtils';
 import {Root} from './effectWhenError';
 import userEvent from '@testing-library/user-event';
-
-async function sleep() {
-    return new Promise((resolve) => setTimeout(resolve, 50));
-}
 
 describe('errorBoundary.test.js', () => {
     const getMockValue = jest.fn();

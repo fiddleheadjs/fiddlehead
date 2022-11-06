@@ -1,4 +1,4 @@
-import {createElement as jsx, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 export function Root({onUnmount}) {
     let [checked, setChecked] = useState(true);
@@ -7,7 +7,6 @@ export function Root({onUnmount}) {
 
     useEffect(() => {
         if (checked === false) {
-            console.log('--remove unmount');
             if (count % 2 === 0) {
                 return () => {};
             } else {
@@ -15,7 +14,6 @@ export function Root({onUnmount}) {
             }
         }
 
-        console.log('--add unmount');
         return () => {
             onUnmount();
         };
