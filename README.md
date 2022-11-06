@@ -61,7 +61,7 @@ module.exports = {
 ### Basic usage
 
 ```jsx
-import {jsx, render} from 'fiddlehead';
+import {render} from 'fiddlehead';
 
 // Declare your component
 function HelloWorld() {
@@ -79,7 +79,7 @@ render(<HelloWorld/>, document.getElementById('root'));
 ### useState
 
 ```jsx
-import {jsx, useState} from 'fiddlehead';
+import {useState} from 'fiddlehead';
 
 function Counter() {
     let [count, setCount] = useState(0);
@@ -103,7 +103,7 @@ function Counter() {
 ### useEffect
 
 ```jsx
-import {jsx, useState, useEffect} from 'fiddlehead';
+import {useState, useEffect} from 'fiddlehead';
 
 function UserInfo() {
     let [email, setEmail] = useState('');
@@ -149,7 +149,7 @@ Prefer the standard `useEffect` when possible to avoid blocking visual updates.
 ### useRef
 
 ```jsx
-import {jsx, useEffect, useRef} from 'fiddlehead';
+import {useEffect, useRef} from 'fiddlehead';
 
 function Image() {
     let imageRef = useRef(null);
@@ -175,7 +175,7 @@ As you pass that prop to a built-in element, it requires you to provide an insta
 which you will get by using the `createRef` function or `useRef` hook.
 
 ```jsx
-import {jsx, useRef} from 'fiddlehead';
+import {useRef} from 'fiddlehead';
 
 function TextInput({ref}) {
     return (
@@ -199,7 +199,7 @@ function App() {
 ### Error boundaries
 
 ```jsx
-import {jsx, useCatch} from 'fiddlehead';
+import {useCatch} from 'fiddlehead';
 
 function ErrorBoundary({children}) {
     let [error, clearError] = useCatch();
@@ -218,7 +218,7 @@ Error boundaries allow only one `useCatch` inside.
 ### Portal
 
 ```jsx
-import {jsx, createPortal} from 'fiddlehead';
+import {createPortal} from 'fiddlehead';
 
 function DocumentPortal({children}) {
     let el = useRef(document.createElement('div')).current;
@@ -278,7 +278,7 @@ In the following example, whenever the App component re-renders, the Form compon
 unintentionally, because the function passed to onSubmit prop always is a different function.
 
 ```jsx
-import {jsx, useState} from 'fiddlehead';
+import {useState} from 'fiddlehead';
 
 function App() {
     let handleSubmit = () => {
@@ -300,7 +300,7 @@ function Form({onSubmit}) {
 Wrap the inline function within `useCallback` to avoid this:
 
 ```jsx
-import {jsx, useState, useCallback} from 'fiddlehead';
+import {useState, useCallback} from 'fiddlehead';
 
 function App() {
     let handleSubmit = useCallback(() => {
@@ -316,7 +316,7 @@ function App() {
 This hook is used to avoid re-running a heavy calculation every time the component re-renders.
 
 ```jsx
-import {jsx, useMemo} from 'fiddlehead';
+import {useMemo} from 'fiddlehead';
 
 function App() {
     let result = useMemo(() => {
@@ -334,7 +334,7 @@ Store is a separated package. It is helpful when we want to use some global stat
 which can be read/written from anywhere in the DOM tree, with no need to pass props through all levels of elements. 
 
 ```jsx
-import {jsx, useRef} from 'fiddlehead';
+import {useRef} from 'fiddlehead';
 import {useStoreInit, useStoreRead, useStoreWrite} from 'fiddlehead/store';
 
 function App() {
