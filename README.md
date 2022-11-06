@@ -17,7 +17,7 @@ With such criteria in mind, we made it some benefits:
 
 ## Installation
 
-Install the library:
+Install Fiddlehead:
 
 ```bash
 npm install fiddlehead
@@ -31,7 +31,7 @@ npm install -D babel-preset-fiddlehead babel-loader
 
 ## Configuration
 
-### .babelrc
+`.babelrc`
 
 ```json
 {
@@ -39,7 +39,7 @@ npm install -D babel-preset-fiddlehead babel-loader
 }
 ```
 
-### webpack.config.js
+`webpack.config.js`
 
 ```js
 module.exports = {
