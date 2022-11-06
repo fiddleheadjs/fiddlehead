@@ -19,29 +19,23 @@ With such criteria in mind, we made it some benefits:
 
 Install the library:
 
-```
+```bash
 npm install fiddlehead
 ```
 
 Install Babel's packages to use JSX syntax:
 
-```
-npm install babel-loader @babel/core @babel/preset-env @babel/plugin-transform-react-jsx
+```bash
+npm install -D babel-preset-fiddlehead babel-loader
 ```
 
 ## Configuration
 
-### babel.config.json
+### .babelrc
 
 ```json
 {
-    "presets": ["@babel/preset-env"],
-    "plugins": [
-        ["@babel/plugin-transform-react-jsx", {
-            "pragma": "jsx",
-            "pragmaFrag": "'['"
-        }],
-    ],
+    "presets": ["babel-preset-fiddlehead"]
 }
 ```
 
@@ -54,12 +48,7 @@ module.exports = {
         rules: [
             {
                 test: /\.jsx?$/,
-                use: [
-                    {
-                        loader: 'babel-loader',
-                        options: require('./babel.config.json')
-                    }
-                ]
+                use: ['babel-loader']
             },
             //...
         ],
