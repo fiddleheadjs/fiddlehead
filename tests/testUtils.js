@@ -3,8 +3,7 @@ import {render} from 'core.pkg';
 import {createRoot} from 'react-dom/client';
 
 export function renderView(component) {
-    const container = document.createElement('div');
-    container.className = 'root'
+    const container = document.createElement('test-container');
     document.body.appendChild(container);
     render(component, container);
 
@@ -12,7 +11,7 @@ export function renderView(component) {
 }
 
 export async function React_renderViewAsync(component) {
-    const container = document.createElement('div');
+    const container = document.createElement('test-container');
     document.body.appendChild(container);
     createRoot(container).render(component);
 

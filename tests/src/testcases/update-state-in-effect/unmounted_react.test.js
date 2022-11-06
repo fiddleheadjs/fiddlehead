@@ -1,5 +1,5 @@
 import React from 'react';
-import {Root} from './unmounted.react';
+import {Root} from './unmounted_react';
 import {cleanupView, React_renderViewAsync} from '../../../testUtils';
 import {screen, waitFor} from '@testing-library/dom';
 import userEvent from '@testing-library/user-event'

@@ -11,7 +11,7 @@ export let reconcileChildren = (current, isRenderRoot) => {
     }
 };
 
-let _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {   
+let _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
     // If the current has an alternate
     // Important note: The alternate of the render root always is null
     if (alternate !== null) {

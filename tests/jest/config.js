@@ -20,7 +20,7 @@ module.exports = {
         '<rootDir>/tests/**/*.{spec,test}.{js,jsx,ts,tsx}',
     ],
     transform: {
-        '^.+\\.react(.test)?.(js|jsx|json)$': '<rootDir>/tests/jest/babelTransform.react.js',
+        '^.+\\_react(.test)?.(js|jsx|json)$': '<rootDir>/tests/jest/babelTransform_react.js',
         '^.+\\.(js|jsx|json)$': '<rootDir>/tests/jest/babelTransform.js',
     },
     transformIgnorePatterns: [
