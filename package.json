@@ -1,6 +1,6 @@
 {
   "name": "fiddlehead",
-  "version": "1.6.8",
+  "version": "1.6.9",
   "description": "A lightweight library to build user interfaces with JSX and hooks.",
   "keywords": [
     "react",
@@ -45,7 +45,7 @@
     
     "tests:install": "cd tests && npm install",
     "lint": "eslint ./packages --config .eslintrc",
-    
+
     "dev:install": "npm run output:install && npm run playground:install && npm run bench:install && npm run tests:install",
     "dev": "concurrently \"npm run output:watch\" \"npm run playground:watch:dev\" \"npm run playground:start\" \"npm run bench:watch\" \"npm run bench:start\"",
     
