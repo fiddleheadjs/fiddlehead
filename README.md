@@ -77,9 +77,6 @@ module.exports = {
 - [useCatch](#usecatch)
 - [createPortal](#createportal)
 - [/store](#store)
-  - `useStoreInit`
-  - `useStoreWrite`
-  - `useStoreRead`
 
 ### render
 
