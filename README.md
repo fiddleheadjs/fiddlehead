@@ -17,9 +17,9 @@ With such criteria in mind, we made it some benefits:
 
 [Try it on CodeSandbox](https://codesandbox.io/s/fiddlehead-stateful-component-d5pg76?from-embed)
 
-_Let's get started!_
+***Let's get started!***
 
-**In this document:**
+In this document:
 
 - [Installation](#installation)
 - [APIs](#apis)
