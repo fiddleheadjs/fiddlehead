@@ -15,6 +15,15 @@ With such criteria in mind, we made it some benefits:
 - Performant: use only 50% memory, and slightly better CPU usage compared to React
 - Lightweight: only 8kb (or 3kb gzipped), compared to 132kb for React
 
+[Try it on CodeSandbox](https://codesandbox.io/s/fiddlehead-stateful-component-d5pg76?from-embed)
+
+**In this document:**
+
+- [Installation](#installation)
+- [APIs](#apis)
+- [HTML attributes and properties](#html-attributes-and-properties)
+- [Some notes](#some-notes)
+
 ## Installation
 
 Install Fiddlehead:
@@ -29,7 +38,7 @@ Install Babel's packages to use JSX syntax:
 npm install -D babel-preset-fiddlehead babel-loader
 ```
 
-## Configuration
+Setup your project to support JSX syntax with Babel and Webpack:
 
 `.babelrc`
 
@@ -58,15 +67,19 @@ module.exports = {
 
 ## APIs
 
-- `render`
-- `useState`
-- `useEffect`
-- `useLayoutEffect`
-- `useRef`
-- `useCallback`
-- `useMemo`
-- `useCatch`
-- `createPortal`
+- [render](#render)
+- [useState](#usestate)
+- [useEffect](#useeffect)
+- [useLayoutEffect](#uselayouteffect)
+- [useRef](#useref)
+- [useCallback](#usecallback)
+- [useMemo](#usememo)
+- [useCatch](#usecatch)
+- [createPortal](#createportal)
+- [/store](#store)
+  - `useStoreInit`
+  - `useStoreWrite`
+  - `useStoreRead`
 
 ### render
 
@@ -309,7 +322,7 @@ function App() {
 }
 ```
 
-### Store
+### store
 
 Store is a separated package. It is helpful when we want to use some global states,
 which can be read/written from anywhere in the DOM tree, with no need to pass props through all levels of elements. 
@@ -361,7 +374,7 @@ function Form() {
 }
 ```
 
-## Working with HTML elements
+## HTML attributes and properties
 
 ### class and className
 
