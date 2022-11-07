@@ -35,13 +35,13 @@ export {createElement as jsx};
 export function createRef<T>(initialValue: T): Ref<T>;
 
 export function useState<T>(initialValue: T): [
-    value: T,
-    setValue: (value: T | ((prevValue: T) => T)) => void
+    T,
+    (value: T | ((prevValue: T) => T)) => void
 ];
 
 export function useCatch(): [
-    error: any | null,
-    clearError: () => void
+    any | null,
+    () => void
 ];
 
 export function useEffect(

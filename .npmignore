@@ -2,7 +2,5 @@
 !/LICENSE
 !/README.md
 !/lib
-!/index.js
-!/index.mjs
-!/store.js
-!/store.mjs
+!/index.*
+!/store.*
