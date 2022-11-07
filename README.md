@@ -56,7 +56,7 @@ module.exports = {
 };
 ```
 
-## API
+## APIs
 
 ### render
 
@@ -65,11 +65,7 @@ import {render} from 'fiddlehead';
 
 // Declare your component
 function HelloWorld() {
-    return (
-        <div>
-            <h1>Hello World!</h1>
-        </div>
-    );
+    return <h1>Hello World!</h1>;
 }
 
 // Render your component into a DOM element (#root)
@@ -395,27 +391,29 @@ Please make sure that you know what you do!
 <div innerHTML={markdown2html(content)} />
 ```
 
-### Event handlers
+### Event listeners
+
+Say, we want to do something when an user click on an element:
+
+```jsx
+let handleClick = (event) => {
+    event.preventDefault();
+    //...
+};
+```
 
 When we work with plain JavaScript, we can set an event listener like this:
 
 ```jsx
 let link = document.createElement('a');
 link.textContent = 'Homepage';
-
-link.onclick = (event) => {
-    event.preventDefault();
-    //...
-};
+link.onclick = handleClick;
 ```
 
 Setting an event listener in Fiddlehead is similar, except event names are written in camelCase style:
 
 ```jsx
-<a onClick={(event) => {
-    event.preventDefault();
-    //...
-}}>
+<a onClick={handleClick}>
     Homepage
 </a>
 ```
