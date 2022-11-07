@@ -56,9 +56,9 @@ module.exports = {
 };
 ```
 
-## Usage
+## API
 
-### Basic usage
+### render
 
 ```jsx
 import {render} from 'fiddlehead';
@@ -66,7 +66,7 @@ import {render} from 'fiddlehead';
 // Declare your component
 function HelloWorld() {
     return (
-        <div className="HelloWorld">
+        <div>
             <h1>Hello World!</h1>
         </div>
     );
@@ -85,7 +85,7 @@ function Counter() {
     let [count, setCount] = useState(0);
     
     return (
-        <div className="Counter">
+        <div>
             <div>Count: {count}</div>
             <div>
                 <button
@@ -123,7 +123,7 @@ function UserInfo() {
     }, [email]);
     
     return (
-        <div className="UserInfo">
+        <div>
             <input
                 type="text"
                 onChange={ev => {
@@ -167,36 +167,18 @@ function Image() {
 }
 ```
 
-### Forward refs
+### useCatch
 
-Different from React, fiddlehead does not prevent you from using `ref` as a normal prop.
-You are free to choose the name of the prop which forwards the ref.
-As you pass that prop to a built-in element, it requires you to provide an instance of Ref,
-which you will get by using the `createRef` function or `useRef` hook.
+You may want your application to handle unexpected errors in runtime,
+then show a user-friendly message instead of a blank screen,
+while reporting errors to a logging service in the background.
 
-```jsx
-import {useRef} from 'fiddlehead';
+To support that purpose, Fiddlehead provides you `useCatch` hook.
+`useCatch` catches errors during rendering, in hook callbacks, and in the whole subtree below.
+`useCatch` does not catch errors in event listeners, AJAX handlers,...
 
-function TextInput({ref}) {
-    return (
-        <input ref={ref}/>
-    );
-}
-
-function App() {
-    let inputRef = useRef(null);
-    
-    useEffect(() => {
-        console.log('Input element', inputRef.current);
-    }, []);
-
-    return (
-        <TextInput ref={inputRef}/>
-    );
-}
-```
-
-### Error boundaries
+The component implements `useCatch` hook works as an error boundary.
+Each error boundary allows only one `useCatch` inside.
 
 ```jsx
 import {useCatch} from 'fiddlehead';
@@ -212,20 +194,21 @@ function ErrorBoundary({children}) {
 }
 ```
 
-Error boundaries catch errors during rendering, in hook callbacks and in the whole tree below them.
-Error boundaries allow only one `useCatch` inside.
+### createPortal
 
-### Portal
+`createPortal` allows you to create a portal to split the subtree bellow from the native DOM tree to somewhere outside.
+
+It is helpful when you want to create components that appear above others like Modal, Popover, Dropdown, Tooltip, and so on.
 
 ```jsx
 import {createPortal} from 'fiddlehead';
 
 function DocumentPortal({children}) {
     let el = useRef(document.createElement('div')).current;
-    el.style.display = 'contents';
     
     useEffect(() => {
         if (el.parentNode === null) {
+            el.style.display = 'contents';
             document.body.appendChild(el);
         }
         return () => {
@@ -258,14 +241,6 @@ function App() {
 }
 ```
 
-### Components always are "pure"
-
-Pure components are components that always produce the same output (view) with the same input (props).
-Different from React, any components of Fiddlehead are pure without wrapping them with `memo` HOC.
-This means, components will not re-rendered without changes in their props or states,
-even when their parent components re-rendered.
-We use the shallow comparison to determine if props are changed or not.
-
 ### useCallback
 
 When you pass an inline function to a child component, that child component will always re-render
@@ -282,7 +257,7 @@ import {useState} from 'fiddlehead';
 
 function App() {
     let handleSubmit = () => {
-        // Submit values
+        // ...
     };
 
     return (
@@ -297,14 +272,14 @@ function Form({onSubmit}) {
 }
 ```
 
-Wrap the inline function within `useCallback` to avoid this:
+Wrap the inline function within `useCallback` to avoid re-rendering:
 
 ```jsx
 import {useState, useCallback} from 'fiddlehead';
 
 function App() {
     let handleSubmit = useCallback(() => {
-        // Submit values
+        // ...
     }, []);
 
     // ...
@@ -339,7 +314,7 @@ import {useStoreInit, useStoreRead, useStoreWrite} from 'fiddlehead/store';
 function App() {
     useStoreInit(
         App, // Scope, can be any reference-type value (object, function,...)
-        {title: 'Store usage example'} // Initial data, reference-type value
+        {title: 'Store usage example'} // Initial data, a reference-type value
     );
 
     return (
@@ -379,3 +354,107 @@ function Form() {
     );
 }
 ```
+
+## Working with HTML elements
+
+### class and className
+
+Fiddlehead supports both `class` and `className`, they are identity.
+
+- Why `class`? It makes your code more like HTML
+- Why `className`? It is an property of HTMLElement
+
+```jsx
+<div class="banner" />
+// equals to
+<div className="banner" />
+```
+
+### style
+
+Unlike writing CSS in HTML, you need to pass an object with keys are style properties (camelCase),
+instead of a string, to the `style` property.
+
+```jsx
+<div style={{
+    marginTop: '100px',
+    padding: '1em 2em',
+    fontWeight: 'bold',
+    zIndex: 100,
+}} />
+```
+
+### innerHTML
+
+You can set `innerHTML` normally as other properties.
+
+**Warning:** There are potential security vulnerabilities when you set `innerHTML` by a user-entered text without encoding special characters.
+Please make sure that you know what you do!
+
+```jsx
+<div innerHTML={markdown2html(content)} />
+```
+
+### Event handlers
+
+When we work with plain JavaScript, we can set an event listener like this:
+
+```jsx
+let link = document.createElement('a');
+link.textContent = 'Homepage';
+
+link.onclick = (event) => {
+    event.preventDefault();
+    //...
+};
+```
+
+Setting an event listener in Fiddlehead is similar, except event names are written in camelCase style:
+
+```jsx
+<a onClick={(event) => {
+    event.preventDefault();
+    //...
+}}>
+    Homepage
+</a>
+```
+
+## Some notes
+
+### Forwarding refs
+
+Different from React, Fiddlehead does not prevent you from using `ref` as a normal prop.
+You are free to choose the name of the prop which forwards the ref.
+As you pass that prop to a built-in element, it requires you to provide an instance of Ref,
+which you will get by using the `createRef` function or `useRef` hook.
+
+```jsx
+import {useRef} from 'fiddlehead';
+
+function TextInput({ref}) {
+    return (
+        <input ref={ref}/>
+    );
+}
+
+function App() {
+    let inputRef = useRef(null);
+    
+    useEffect(() => {
+        console.log('Input element', inputRef.current);
+    }, []);
+
+    return (
+        <TextInput ref={inputRef}/>
+    );
+}
+```
+
+### Fiddlehead components always are "pure"
+
+Pure components are components that always produce the same output (view) with the same input (props).
+Different from React, any components of Fiddlehead are pure without wrapping them with `memo` HOC.
+This means, components will not re-rendered without changes in their props or states,
+even when their parent components re-rendered.
+We use the shallow comparison to determine if props are changed or not.
