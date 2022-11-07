@@ -334,7 +334,6 @@ Store is a separated package. It is helpful when we want to use some global stat
 which can be read/written from anywhere in the DOM tree, with no need to pass props through all levels of elements. 
 
 ```jsx
-import {useRef} from 'fiddlehead';
 import {useStoreInit, useStoreRead, useStoreWrite} from 'fiddlehead/store';
 
 function App() {
