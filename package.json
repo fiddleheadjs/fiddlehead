@@ -1,6 +1,6 @@
 {
   "name": "fiddlehead",
-  "version": "1.6.10",
+  "version": "1.6.11",
   "description": "A lightweight library to build user interfaces with JSX and hooks.",
   "keywords": [
     "react",
@@ -50,7 +50,7 @@
     "dev": "concurrently \"npm run output:watch\" \"npm run playground:watch:dev\" \"npm run playground:start\" \"npm run bench:watch\" \"npm run bench:start\"",
     
     "test": "cd tests && npm run test",
-    "prepublishOnly": "npm run output:build"
+    "prepublishOnly": "npm run output:build && npm test"
   },
   "repository": {
     "type": "git",
