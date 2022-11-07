@@ -1,6 +1,4 @@
 node_modules
-.idea
-.DS_Store
-/docs/public/*.html
-/playground/public/*.html
-/bench/public/*.html
+/.DS_Store
+/playground/public/*
+/bench/public/*
