@@ -393,7 +393,7 @@ Please make sure that you know what you do!
 
 ### Event listeners
 
-Say, we want to do something when a user click on an element:
+Say, we want to do something when a user clicks on an element:
 
 ```jsx
 let handleClick = (event) => {
