@@ -58,6 +58,16 @@ module.exports = {
 
 ## APIs
 
+- `render`
+- `useState`
+- `useEffect`
+- `useLayoutEffect`
+- `useRef`
+- `useCallback`
+- `useMemo`
+- `useCatch`
+- `createPortal`
+
 ### render
 
 ```jsx
@@ -163,6 +173,68 @@ function Image() {
 }
 ```
 
+### useCallback
+
+When you pass an inline function to a child component, that child component will always re-render
+when the current component re-renders, because the inline function is always a different instance.
+
+Wrapping that function with the useCallback hook helps you access the existing instance instead of
+using the new instance of the function, thereby, the child component will not re-render unintentionally.
+
+In the following example, whenever the App component re-renders, the Form component also re-renders following
+unintentionally, because the function passed to onSubmit prop always is a different function.
+
+```jsx
+import {useState} from 'fiddlehead';
+
+function App() {
+    let handleSubmit = () => {
+        // ...
+    };
+
+    return (
+        <div>
+            <Form onSubmit={handleSubmit} />
+        </div>
+    );
+}
+
+function Form({onSubmit}) {
+    // ...
+}
+```
+
+Wrap the inline function within `useCallback` to avoid re-rendering:
+
+```jsx
+import {useState, useCallback} from 'fiddlehead';
+
+function App() {
+    let handleSubmit = useCallback(() => {
+        // ...
+    }, []);
+
+    // ...
+}
+```
+
+### useMemo
+
+This hook is used to avoid re-running a heavy calculation every time the component re-renders.
+
+```jsx
+import {useMemo} from 'fiddlehead';
+
+function App() {
+    let result = useMemo(() => {
+        // Run heavy tasks
+        return result;
+    }, []);
+
+    // ...
+}
+```
+
 ### useCatch
 
 You may want your application to handle unexpected errors in runtime,
@@ -234,68 +306,6 @@ function App() {
             )}
         </div>
     );
-}
-```
-
-### useCallback
-
-When you pass an inline function to a child component, that child component will always re-render
-when the current component re-renders, because the inline function is always a different instance.
-
-Wrapping that function with the useCallback hook helps you access the existing instance instead of
-using the new instance of the function, thereby, the child component will not re-render unintentionally.
-
-In the following example, whenever the App component re-renders, the Form component also re-renders following
-unintentionally, because the function passed to onSubmit prop always is a different function.
-
-```jsx
-import {useState} from 'fiddlehead';
-
-function App() {
-    let handleSubmit = () => {
-        // ...
-    };
-
-    return (
-        <div>
-            <Form onSubmit={handleSubmit} />
-        </div>
-    );
-}
-
-function Form({onSubmit}) {
-    // ...
-}
-```
-
-Wrap the inline function within `useCallback` to avoid re-rendering:
-
-```jsx
-import {useState, useCallback} from 'fiddlehead';
-
-function App() {
-    let handleSubmit = useCallback(() => {
-        // ...
-    }, []);
-
-    // ...
-}
-```
-
-### useMemo
-
-This hook is used to avoid re-running a heavy calculation every time the component re-renders.
-
-```jsx
-import {useMemo} from 'fiddlehead';
-
-function App() {
-    let result = useMemo(() => {
-        // Run heavy tasks
-        return result;
-    }, []);
-
-    // ...
 }
 ```
 
