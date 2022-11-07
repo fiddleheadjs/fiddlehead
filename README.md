@@ -43,14 +43,14 @@ npm install -D babel-preset-fiddlehead babel-loader
 
 ```js
 module.exports = {
-    //...
+    // ...
     module: {
         rules: [
             {
                 test: /\.jsx?$/,
                 use: ['babel-loader']
             },
-            //...
+            // ...
         ],
     },
 };
@@ -398,7 +398,7 @@ Say, we want to do something when a user clicks on an element:
 ```jsx
 let handleClick = (event) => {
     event.preventDefault();
-    //...
+    // ...
 };
 ```
 
