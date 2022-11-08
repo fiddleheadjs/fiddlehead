@@ -16,7 +16,7 @@ export const STATE_ERROR = 1;
 export function StateHook(tag, context, initialValue) {
     this.tag_ = tag;
     this.context_ = context;
-    this.value_ = initialValue;
+    this.value_ = isFunction(initialValue) ? initialValue() : initialValue;
     this.setValue_ = _setState.bind(this);
     if (tag === STATE_ERROR) {
         this.resetValue_ = () => _setState.call(this, initialValue);
@@ -58,7 +58,7 @@ export let useCatch = () => {
 
 let _setState = function (value) {
     let newValue;
-
+    
     if (isFunction(value)) {
         try {
             newValue = value(this.value_);
@@ -69,15 +69,13 @@ let _setState = function (value) {
     } else {
         newValue = value;
     }
-
+    
     if (!theSame(this.value_, newValue)) {
         // Set value synchronously
         this.value_ = newValue;
-
+        
         // Schedule a work to update the UI
-        if (this.context_.updateId_ === null) {
-            this.context_.updateId_ = setTimeout(_flushUpdates, 0, this);
-        }
+        this.context_.updateId_ = setTimeout(_flushUpdates, 0, this);
     }
 };
 
