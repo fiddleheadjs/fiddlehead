@@ -66,6 +66,14 @@ const INSERT_OFFSCREEN = 1;
 let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) => {
     let isRenderRoot = current === root;
     
+    // Cleanup the update scheduled on the current node.
+    // Do this before reconciliation because the current node can
+    // be scheduled for another update while the reconciliation
+    if (current.updateId_ !== null) {
+        clearTimeout(current.updateId_);
+        current.updateId_ = null;
+    }
+
     // Reconcile current's direct children
     reconcileChildren(current, isRenderRoot);
 
@@ -137,12 +145,6 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
             }, null, current.deletions_[i]);
         }
         current.deletions_ = null;
-    }
-
-    // Cancel the update schedule on the current node
-    if (current.updateId_ !== null) {
-        clearTimeout(current.updateId_);
-        current.updateId_ = null;
     }
 
     return shouldWalkDeeper;

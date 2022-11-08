@@ -34,7 +34,7 @@ export {createElement as jsx};
 
 export function createRef<T>(initialValue: T): Ref<T>;
 
-export function useState<T>(initialValue: T): [
+export function useState<T>(initialValue: T | (() => T)): [
     T,
     (value: T | ((prevValue: T) => T)) => void
 ];
