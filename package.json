@@ -1,6 +1,6 @@
 {
   "name": "fiddlehead",
-  "version": "1.6.12",
+  "version": "1.6.13",
   "description": "A lightweight library to build user interfaces with JSX and hooks.",
   "keywords": [
     "react",
