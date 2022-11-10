@@ -1,5 +1,5 @@
 import {insertView, updateView, deleteView} from './CommitView';
-import {destroyEffects, EFFECT_LAYOUT, EFFECT_NORMAL, mountEffects} from './EffectHook';
+import {mountEffects, destroyEffects, EFFECT_NORMAL, EFFECT_LAYOUT} from './EffectHook';
 import {hydrateView} from './HydrateView';
 import {resolveMountingPoint, walkNativeChildren} from './MountingPoint';
 import {reconcileChildren} from './ReconcileChildren';
