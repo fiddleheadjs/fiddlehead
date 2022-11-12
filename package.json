@@ -1,13 +1,18 @@
 {
   "name": "fiddlehead",
-  "version": "1.6.13",
+  "version": "1.6.14",
   "description": "A lightweight library to build user interfaces with JSX and hooks.",
   "keywords": [
-    "react",
+    "hook",
     "hooks",
     "virtual dom",
     "vdom",
-    "jsx"
+    "vdom library",
+    "jsx",
+    "reconciliation",
+    "vnode",
+    "virtual node",
+    "browser render"
   ],
   "main": "index.js",
   "exports": {
@@ -56,6 +61,7 @@
     "type": "git",
     "url": "git@github.com:CocCoc-Ad-Platform/fiddlehead.git"
   },
+  "homepage": "https://fiddleheadjs.com",
   "author": "CocCoc Ad Platform",
   "license": "MIT",
   "devDependencies": {
