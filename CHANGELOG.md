@@ -2,3 +2,4 @@
 
 - Add CHANGELOG.md
 - Add CODE_OF_CONDUCT.md
+- Add CONTRIBUTING.md
