@@ -49,4 +49,4 @@ Some helpful links to get started:
 
 ## License
 
-Fiddlehead is MIT-licensed open-source software.
+Fiddlehead is [MIT-licensed](./LICENSE) open-source software.
