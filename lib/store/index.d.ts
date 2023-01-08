@@ -17,7 +17,7 @@ export function useGlobalStoreRead<T>(
 
 export function useGlobalStoreWrite<T>(
     store: Store,
-    writeFn: (data: object, value: T) => void
+    writeFn: (value: T, data: object) => void
 ): (value: T) => void;
 
 export function useStoreInit(
@@ -33,5 +33,5 @@ export function useStoreRead<T>(
 
 export function useStoreWrite<T>(
     scope: object,
-    writeFn: (data: object, value: T) => void
+    writeFn: (value: T, data: object) => void
 ): (value: T) => void;

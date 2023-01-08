@@ -75,7 +75,7 @@ export let useGlobalStoreRead = (store, readFn, compareFn) => {
 export let useGlobalStoreWrite = (store, writeFn) => {
     return useCallback((value) => {
         store.setData((data) => {
-            writeFn(data, value);
+            writeFn(value, data);
         });
 
         // writeFn must be a pure function
