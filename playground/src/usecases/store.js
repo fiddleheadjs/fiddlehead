@@ -31,7 +31,7 @@ function A() {
     console.log('render A');
 
     const productA1 = useStoreRead(App, data => data.byId['A1']);
-    const setProductA1 = useStoreWrite(App, (data, value) => data.byId['A1'] = value);
+    const setProductA1 = useStoreWrite(App, (value, data) => data.byId['A1'] = value);
 
     return (
         <div class="A">
@@ -44,7 +44,7 @@ function B() {
     console.log('render B');
     
     const productB1 = useStoreRead(App, data => data.byId['B1']);
-    const setProductB1 = useStoreWrite(App, (data, value) => data.byId['B1'] = value);
+    const setProductB1 = useStoreWrite(App, (value, data) => data.byId['B1'] = value);
 
     return (
         <div class="B">

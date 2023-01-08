@@ -20,7 +20,7 @@ function Header({setMockValue}) {
 }
 
 function Menu({setMockValue}) {
-    const setHeaderTitle = useStoreWrite(Root, (data, value) => data.byId['header-title'] = value);
+    const setHeaderTitle = useStoreWrite(Root, (value, data) => data.byId['header-title'] = value);
 
     return [
         <button
@@ -39,8 +39,8 @@ function Main({setMockValue}) {
 }
 
 function Sidebar({setMockValue}) {
-    const setHeaderTitle = useStoreWrite(Root, (data, value) => data.byId['header-title'] = value);
-    const setNavList = useStoreWrite(Root, (data, value) => data.byId['nav-list'] = value);
+    const setHeaderTitle = useStoreWrite(Root, (value, data) => data.byId['header-title'] = value);
+    const setNavList = useStoreWrite(Root, (value, data) => data.byId['nav-list'] = value);
 
     const navList = useStoreRead(Root, (data) => data.byId['nav-list']);
 
@@ -73,7 +73,7 @@ function Nav({navList, setNavList, setMockValue}) {
 
 function NavItem({setMockValue}) {
     const navItem = useStoreRead(Root, (data) => data.byId['nav-item']);
-    const setNav = useStoreWrite(Root, (data, value) => data.byId['nav-item'] = value);
+    const setNav = useStoreWrite(Root, (value, data) => data.byId['nav-item'] = value);
 
     useEffect(() => {
         setNav('active');
@@ -97,7 +97,7 @@ function Footer() {
     const navList = useStoreRead(Root, (data) => data.byId['nav-list']);
     const navItem = useStoreRead(Root, (data) => data.byId['nav-item']);
 
-    const resetById = useStoreWrite(Root, (data, value) => data.byId = value);
+    const resetById = useStoreWrite(Root, (value, data) => data.byId = value);
 
     return (
         <footer>

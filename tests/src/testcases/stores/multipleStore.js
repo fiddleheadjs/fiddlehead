@@ -45,11 +45,11 @@ function Main({setMockValue1, setMockValue2}) {
 function Sidebar({setMockValue1, setMockValue2}) {
     const setColor = useGlobalStoreWrite(
         colorStore,
-        (data, value) => (data["color"] = value)
+        (value, data) => (data["color"] = value)
     );
     const setRouteName = useGlobalStoreWrite(
         routeStore,
-        (data, value) => (data["route-name"] = value)
+        (value, data) => (data["route-name"] = value)
     );
 
     const routeName = useGlobalStoreRead(
@@ -106,11 +106,11 @@ function Footer() {
 
     const resetColorStore = useGlobalStoreWrite(
         colorStore,
-        (data, value) => (data['color'] = value)
+        (value, data) => (data['color'] = value)
     );
     const resetRouteStore = useGlobalStoreWrite(
         routeStore,
-        (data, value) => (data['route-name'] = value)
+        (value, data) => (data['route-name'] = value)
     );
 
     return (
