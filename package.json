@@ -27,7 +27,8 @@
       "module": "./lib/store/index.mjs",
       "import": "./lib/store/index.mjs",
       "default": "./lib/store/index.js"
-    }
+    },
+    "./lib/*": "./lib/*"
   },
   "scripts": {
     "output:install": "cd output && npm install",
