@@ -1,3 +1,7 @@
+## 1.7.1 (Jan 20, 2023)
+
+- Export lib folder
+
 ## 1.7.0 (Jan 08, 2023)
 
 - Change the order of the arguments of the useGlobalStoreWrite and useStoreWrite callbacks
