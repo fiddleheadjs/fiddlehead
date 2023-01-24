@@ -153,7 +153,7 @@ let _onSkip = (current, root) => {
     let isRenderRoot = current === root;
     let isPortal = current.type_ === Portal;
 
-    if (!isRenderRoot && !isPortal) {
+    if (!(isRenderRoot || isPortal)) {
         touchView(current);
     }
 };
