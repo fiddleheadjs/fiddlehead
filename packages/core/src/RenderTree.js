@@ -154,7 +154,7 @@ let _onSkip = (current, root) => {
     let isPortal = current.type_ === Portal;
 
     if (isRenderRoot || isPortal) {
-        // Do nothing if the current is a render root or a portal
+        // Do nothing if the current is the render root or a portal
     } else {
         touchView(current);
     }
