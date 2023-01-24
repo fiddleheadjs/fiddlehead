@@ -1,3 +1,7 @@
+## 1.7.3 (Jan 25, 2023)
+
+- Update project information
+
 ## 1.7.2 (Jan 25, 2023)
 
 - Bugfix: native node insertion
