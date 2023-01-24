@@ -156,6 +156,9 @@ let _onSkip = (current, root) => {
     if (isRenderRoot || isPortal) {
         // Do nothing if the current is the render root or a portal
     } else {
+        // Though the current is skipped for reconciliation
+        // but we need to update the mounting ref
+        // so insertions after can work correctly
         touchView(current);
     }
 };
