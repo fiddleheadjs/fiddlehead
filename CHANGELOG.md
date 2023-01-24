@@ -1,3 +1,7 @@
+## 1.7.2 (Jan 25, 2023)
+
+- Bugfix: native node insertion
+
 ## 1.7.1 (Jan 20, 2023)
 
 - Export lib folder
