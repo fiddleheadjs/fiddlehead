@@ -1,11 +1,7 @@
 import React from 'react';
 import {Root} from './effectUnmount_react';
-import {cleanupView, React_renderViewAsync} from '../../../testUtils';
+import {cleanupView, React_renderViewAsync, sleep} from '../../../testUtils';
 import {screen} from '@testing-library/dom';
-
-async function sleep(timeout) {
-    return new Promise((resolve) => setTimeout(resolve, 50));
-}
 
 describe('effectUnmount.test.js', () => {
     jest.setTimeout(600000);

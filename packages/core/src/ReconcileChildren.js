@@ -42,7 +42,7 @@ let _reconcileOnlyChildOfDynamicNode = (current, alternate, isRenderRoot) => {
         // but by an updating from a higher-level node, so it should NOT re-render
         if (
             // A render root never appears here because its alternate always is null
-            // do don't need to check if the current is not a render root
+            // so don't need to check if the current is not a render root
 
             // Do not skip re-render if there is an update scheduled
             current.updateId_ === null &&

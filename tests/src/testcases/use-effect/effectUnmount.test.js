@@ -1,11 +1,7 @@
 import {jsx} from 'core.pkg';
 import {Root} from './effectUnmount';
-import {renderView, cleanupView} from '../../../testUtils';
+import {renderView, cleanupView, sleep} from '../../../testUtils';
 import {waitFor, screen} from '@testing-library/dom';
-
-async function sleep() {
-    return new Promise((resolve) => setTimeout(resolve, 50));
-}
 
 describe('effectUnmount.test.js', () => {
     const onUnmount = jest.fn();

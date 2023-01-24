@@ -16,6 +16,15 @@ export let updateView = (newVNode, oldVNode) => {
     }
 };
 
+export let touchView = (vnode) => {
+    if (vnode.nativeNode_ !== null) {
+        let mpt = resolveMountingPoint(vnode.parent_);
+        if (mpt !== null) {
+            mpt.mountingRef_ = vnode.nativeNode_;
+        }
+    }
+};
+
 export let insertView = (vnode) => {
     if (vnode.nativeNode_ !== null) {
         let mpt = resolveMountingPoint(vnode.parent_);

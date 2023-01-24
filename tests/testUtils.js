@@ -28,7 +28,7 @@ export function cleanupView() {
     }
 }
 
-export async function sleep(timeout = 50) {
+export async function sleep(timeout = 100) {
     return new Promise((resolve) => setTimeout(resolve, timeout));
 }
 
