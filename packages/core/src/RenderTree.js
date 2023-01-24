@@ -1,4 +1,4 @@
-import {insertView, updateView, deleteView} from './CommitView';
+import {insertView, updateView, deleteView, touchView} from './CommitView';
 import {mountEffects, destroyEffects, EFFECT_NORMAL, EFFECT_LAYOUT} from './EffectHook';
 import {hydrateView} from './HydrateView';
 import {resolveMountingPoint, walkNativeChildren} from './MountingPoint';
@@ -25,7 +25,8 @@ export let renderTree = (current) => {
 
     // Main work
     _workLoop(
-        _performUnitOfWork, _onReturn, current,
+        current, 
+        _performUnitOfWork, _onSkip, _onReturn,
         effectMountNodes, effectDestroyNodes
     );
     
@@ -61,10 +62,11 @@ const INSERT_OFFSCREEN = 1;
  * @param {VNode} root 
  * @param {Map<VNode, boolean>} effectMountNodes 
  * @param {Map<VNode, boolean>} effectDestroyNodes 
- * @returns {boolean} shouldWalkDeeper
+ * @returns {VNode|null} skipFrom
  */
 let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) => {
     let isRenderRoot = current === root;
+    let isPortal = current.type_ === Portal;
     
     // Cleanup the update scheduled on the current node.
     // Do this before reconciliation because the current node can
@@ -77,10 +79,10 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
     // Reconcile current's direct children
     reconcileChildren(current, isRenderRoot);
 
-    let shouldWalkDeeper = true;
+    let skipFrom = null;
 
     // Portal nodes never change the view itself
-    if (current.type_ !== Portal) {
+    if (!isPortal) {
         if (isRenderRoot) {
             if (current.effectHook_ !== null) {
                 effectDestroyNodes.set(current, false);
@@ -90,8 +92,8 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
             if (current.alternate_ !== null) {
                 if (current.alternate_ === current) {
                     // This node does not changed,
-                    // stop walking deeper
-                    shouldWalkDeeper = false;
+                    // so skip reconciliation for its subtree
+                    skipFrom = current;
                 } else {
                     updateView(current, current.alternate_);
                     if (current.effectHook_ !== null) {
@@ -128,7 +130,7 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
     if (current.deletions_ !== null) {
         for (let i = 0; i < current.deletions_.length; ++i) {
             deleteView(current.deletions_[i]);
-            _workLoop((deleted) => {
+            _workLoop(current.deletions_[i], (deleted) => {
                 if (deleted.effectHook_ !== null) {
                     effectDestroyNodes.set(deleted, true);
                 }
@@ -139,15 +141,26 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
                     clearTimeout(deleted.updateId_);
                     deleted.updateId_ = null;
                 }
-
-                // Always walk deeper with deletions
-                return true;
-            }, null, current.deletions_[i]);
+            });
         }
         current.deletions_ = null;
     }
 
-    return shouldWalkDeeper;
+    return skipFrom;
+};
+
+let _onSkip = (current, root) => {
+    let isRenderRoot = current === root;
+    let isPortal = current.type_ === Portal;
+
+    if (isRenderRoot || isPortal) {
+        // Do nothing if the current is the render root or a portal
+    } else {
+        // Though the current is skipped for reconciliation
+        // but we need to update the mounting ref
+        // so insertions after can work correctly
+        touchView(current);
+    }
 };
 
 // Callback called after walking through a node and all of its ascendants
@@ -163,16 +176,20 @@ let _onReturn = (current) => {
 };
 
 // Reference: https://github.com/facebook/react/issues/7942
-let _workLoop = (performUnit, onReturn, root, D0, D1) => {
+let _workLoop = (root, performUnit, onSkip, onReturn, D0, D1) => {
     let current = root;
-    let shouldWalkDeeper;
+    let skipFrom = null;
     while (true) {
-        shouldWalkDeeper = performUnit(current, root, D0, D1);
-        if (shouldWalkDeeper) {
-            if (current.child_ !== null) {
-                current = current.child_;
-                continue;
+        if (skipFrom == null) {
+            skipFrom = performUnit(current, root, D0, D1);
+        } else {
+            if (onSkip != null) {
+                onSkip(current, root);
             }
+        }
+        if (current.child_ !== null) {
+            current = current.child_;
+            continue;
         }
         if (current === root) {
             return;
@@ -182,7 +199,10 @@ let _workLoop = (performUnit, onReturn, root, D0, D1) => {
                 return;
             }
             current = current.parent_;
-            if (onReturn !== null) {
+            if (skipFrom === current) {
+                skipFrom = null;
+            }
+            if (onReturn != null) {
                 onReturn(current);
             }
         }

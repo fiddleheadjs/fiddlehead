@@ -1,12 +1,8 @@
 import {jsx} from 'core.pkg';
 import {screen, waitFor} from '@testing-library/dom';
-import {renderView, cleanupView} from '../../../testUtils';
+import {renderView, cleanupView, sleep} from '../../../testUtils';
 import Root from './updatedStateWhenHadError';
 import userEvent from '@testing-library/user-event';
-
-async function sleep() {
-    return new Promise((resolve) => setTimeout(resolve, 50));
-}
 
 describe('updatedStateWhenHadError.test.js', () => {
     beforeEach(async () => {
