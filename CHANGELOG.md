@@ -1,6 +1,7 @@
 ## 1.7.2 (Jan 25, 2023)
 
 - Bugfix: native node insertion
+- Lib: export min variants
 
 ## 1.7.1 (Jan 20, 2023)
 
