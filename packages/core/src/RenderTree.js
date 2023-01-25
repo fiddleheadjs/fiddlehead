@@ -12,7 +12,7 @@ import {Portal} from './VNode';
 export let renderTree = (current) => {
     let effectMountNodes = new Map();
     let effectDestroyNodes = new Map();
-    
+
     // The mounting point of the current
     let mpt = resolveMountingPoint(current);
 
@@ -25,11 +25,11 @@ export let renderTree = (current) => {
 
     // Main work
     _workLoop(
-        current, 
-        _performUnitOfWork, _onSkip, _onReturn,
+        current, _performUnitOfWork,
+        _onSkip, _onReturn,
         effectMountNodes, effectDestroyNodes
     );
-    
+
     // Cleanup
     mpt.mountingRef_ = null;
 
@@ -67,7 +67,7 @@ const INSERT_OFFSCREEN = 1;
 let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) => {
     let isRenderRoot = current === root;
     let isPortal = current.type_ === Portal;
-    
+
     // Cleanup the update scheduled on the current node.
     // Do this before reconciliation because the current node can
     // be scheduled for another update while the reconciliation
@@ -79,6 +79,7 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
     // Reconcile current's direct children
     reconcileChildren(current, isRenderRoot);
 
+    // Indicate that whether the work loop should skip the subtree under the current
     let skipFrom = null;
 
     // Portal nodes never change the view itself
@@ -125,7 +126,7 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
             }
         }
     }
-    
+
     // Delete subtrees that no longer exist
     if (current.deletions_ !== null) {
         for (let i = 0; i < current.deletions_.length; ++i) {
@@ -134,13 +135,14 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
                 if (deleted.effectHook_ !== null) {
                     effectDestroyNodes.set(deleted, true);
                 }
-                
                 // Important!!!
                 // Cancel the update schedule on the deleted nodes
                 if (deleted.updateId_ !== null) {
                     clearTimeout(deleted.updateId_);
                     deleted.updateId_ = null;
                 }
+                // Never skip any subtrees when handling deletions
+                return null;
             });
         }
         current.deletions_ = null;
@@ -180,7 +182,7 @@ let _workLoop = (root, performUnit, onSkip, onReturn, D0, D1) => {
     let current = root;
     let skipFrom = null;
     while (true) {
-        if (skipFrom == null) {
+        if (skipFrom === null) {
             skipFrom = performUnit(current, root, D0, D1);
         } else {
             if (onSkip != null) {
