@@ -1,3 +1,7 @@
+## 1.7.4 (Jan 25, 2023)
+
+- Improve code readability
+
 ## 1.7.3 (Jan 25, 2023)
 
 - Update project information
