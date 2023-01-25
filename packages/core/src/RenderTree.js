@@ -141,7 +141,7 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
                     clearTimeout(deleted.updateId_);
                     deleted.updateId_ = null;
                 }
-                // Never skip any subtrees when handling deletions
+                // Never skip any node when handling deletions
                 return null;
             });
         }
