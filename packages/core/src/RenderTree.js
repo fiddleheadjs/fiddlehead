@@ -10,8 +10,8 @@ import {Portal} from './VNode';
  * @param {VNode} current
  */
 export let renderTree = (current) => {
-    let effectMountNodes = new Map();
-    let effectDestroyNodes = new Map();
+    // Initialize an effect queue
+    let effectQueue = [];
 
     // The mounting point of the current
     let mpt = resolveMountingPoint(current);
@@ -26,30 +26,35 @@ export let renderTree = (current) => {
     // Main work
     _workLoop(
         current, _performUnitOfWork,
-        _onSkip, _onReturn,
-        effectMountNodes, effectDestroyNodes
+        _onSkip, _onReturn, effectQueue
     );
 
     // Cleanup
     mpt.mountingRef_ = null;
 
-    // Layout effects
-    effectDestroyNodes.forEach((isUnmounted, vnode) => {
-        destroyEffects(EFFECT_LAYOUT, vnode, isUnmounted);
-    });
-    effectMountNodes.forEach((isNewlyMounted, vnode) => {
-        mountEffects(EFFECT_LAYOUT, vnode, isNewlyMounted);
-    });
+    // Run useLayoutEffect callbacks
+    runEffectQueue(EFFECT_LAYOUT, effectQueue);
 
-    // Effects
-    setTimeout(() => {
-        effectDestroyNodes.forEach((isUnmounted, vnode) => {
-            destroyEffects(EFFECT_NORMAL, vnode, isUnmounted);
-        });
-        effectMountNodes.forEach((isNewlyMounted, vnode) => {
-            mountEffects(EFFECT_NORMAL, vnode, isNewlyMounted);
-        });
-    });
+    // Schedule to run useEffect callbacks
+    setTimeout(runEffectQueue, 0, EFFECT_NORMAL, effectQueue);
+};
+
+// Effect flags
+const MOUNT_PLACEMENT = 0;
+const MOUNT_UPDATE = 1;
+const DESTROY_PLACEMENT = 2;
+const DESTROY_UPDATE = 3;
+
+let runEffectQueue = (effectType, effectQueue) => {
+    for (let i = 0, flag; i < effectQueue.length; i += 2) {
+        flag = effectQueue[i + 1];
+
+        if (flag === MOUNT_PLACEMENT || flag === MOUNT_UPDATE) {
+            mountEffects(effectType, effectQueue[i], flag === MOUNT_PLACEMENT);
+        } else {
+            destroyEffects(effectType, effectQueue[i], flag === DESTROY_PLACEMENT);
+        }
+    }
 };
 
 // Optimize the insertion to reduce the number of reflows
@@ -60,11 +65,10 @@ const INSERT_OFFSCREEN = 1;
  * 
  * @param {VNode} current 
  * @param {VNode} root 
- * @param {Map<VNode, boolean>} effectMountNodes 
- * @param {Map<VNode, boolean>} effectDestroyNodes 
+ * @param {Array<VNode|number>} effectQueue 
  * @returns {VNode|null} skipFrom
  */
-let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) => {
+let _performUnitOfWork = (current, root, effectQueue) => {
     let isRenderRoot = current === root;
     let isPortal = current.type_ === Portal;
 
@@ -86,8 +90,10 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
     if (!isPortal) {
         if (isRenderRoot) {
             if (current.effectHook_ !== null) {
-                effectDestroyNodes.set(current, false);
-                effectMountNodes.set(current, false);
+                effectQueue.push(
+                    current, DESTROY_UPDATE,
+                    current, MOUNT_UPDATE
+                );
             }
         } else {
             if (current.alternate_ !== null) {
@@ -98,8 +104,8 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
                 } else {
                     updateView(current, current.alternate_);
                     if (current.effectHook_ !== null) {
-                        effectDestroyNodes.set(current.alternate_, false);
-                        effectMountNodes.set(current, false);
+                        effectQueue.push(current.alternate_, DESTROY_UPDATE);
+                        effectQueue.push(current, MOUNT_UPDATE);
                     }
                 }
                 current.alternate_ = null;
@@ -121,7 +127,7 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
                     insertView(current);
                 }
                 if (current.effectHook_ !== null) {
-                    effectMountNodes.set(current, true);
+                    effectQueue.push(current, MOUNT_PLACEMENT);
                 }
             }
         }
@@ -133,7 +139,7 @@ let _performUnitOfWork = (current, root, effectMountNodes, effectDestroyNodes) =
             deleteView(current.deletions_[i]);
             _workLoop(current.deletions_[i], (deleted) => {
                 if (deleted.effectHook_ !== null) {
-                    effectDestroyNodes.set(deleted, true);
+                    effectQueue.push(deleted, DESTROY_PLACEMENT);
                 }
                 // Important!!!
                 // Cancel the update schedule on the deleted nodes
@@ -155,9 +161,7 @@ let _onSkip = (current, root) => {
     let isRenderRoot = current === root;
     let isPortal = current.type_ === Portal;
 
-    if (isRenderRoot || isPortal) {
-        // Do nothing if the current is the render root or a portal
-    } else {
+    if (isRenderRoot || isPortal); else {
         // Though the current is skipped for reconciliation
         // but we need to update the mounting ref
         // so insertions after can work correctly
@@ -178,12 +182,12 @@ let _onReturn = (current) => {
 };
 
 // Reference: https://github.com/facebook/react/issues/7942
-let _workLoop = (root, performUnit, onSkip, onReturn, D0, D1) => {
+let _workLoop = (root, performUnit, onSkip, onReturn, reference) => {
     let current = root;
     let skipFrom = null;
     while (true) {
         if (skipFrom === null) {
-            skipFrom = performUnit(current, root, D0, D1);
+            skipFrom = performUnit(current, root, reference);
         } else {
             if (onSkip != null) {
                 onSkip(current, root);

@@ -1,6 +1,6 @@
-import {jsx} from 'core.pkg';
-import {Root} from './mountedAndUpdated';
-import {renderView, cleanupView, sleep} from '../../../testUtils';
+import {Root} from './mountedAndUpdated_react';
+import React from 'react';
+import {React_renderViewAsync, cleanupView, sleep} from '../../../testUtils';
 import {screen, waitFor} from '@testing-library/dom';
 import userEvent from '@testing-library/user-event'
 
@@ -17,12 +17,12 @@ describe('mountedAndUpdated.test.js', () => {
 
     let stateMock;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         stateMock = {a:{b: 1}, c: 3};
         
         getMockValue.mockReturnValue(stateMock);
 
-        renderView(
+        await React_renderViewAsync(
             <Root 
                 stateMock={stateMock}
                 getMockValue={getMockValue}
@@ -66,10 +66,12 @@ describe('mountedAndUpdated.test.js', () => {
         expect(updatedCallback3).toBeCalledTimes(2);
         await sleep();
         userEvent.click(screen.getByTestId('state-button'));
-        await sleep();
-        expect(updatedCallback1).toBeCalledTimes(2);
-        expect(updatedCallback2).toBeCalledTimes(2);
-        expect(updatedCallback3).toBeCalledTimes(3);
+        await waitFor(() => {
+            //change object state 
+            expect(updatedCallback1).toBeCalledTimes(2);
+            expect(updatedCallback2).toBeCalledTimes(2);
+            expect(updatedCallback3).toBeCalledTimes(3);
+        });
     });
 
     it('Effect did not call when object param in dependency changed',async () => {

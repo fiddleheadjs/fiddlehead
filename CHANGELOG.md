@@ -1,3 +1,7 @@
+## 1.7.5 (Jan 29, 2023)
+
+- Bugfix: Missing effect calls in case of non-rerendering
+
 ## 1.7.4 (Jan 25, 2023)
 
 - Improve code readability

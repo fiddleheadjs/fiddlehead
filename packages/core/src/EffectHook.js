@@ -73,9 +73,10 @@ export let mountEffects = (effectTag, vnode, isNewlyMounted) => {
                 catchError(error, vnode);
             }
 
-            // Clear the mount callback to avoid duplicated calls,
-            // even if the call throws an error
-            hook.mount_ = undefined;
+            // Do NOT clear the mount callback (to avoid duplicated calls, for instance).
+            // There is a case, the effect mount/destroy can be called without
+            // a component re-rendering which re-initializes the hooks.
+            // TODO: Add tests for this case
         }
         hook = hook.next_;
     }
@@ -106,7 +107,9 @@ export let destroyEffects = (effectTag, vnode, isUnmounted) => {
             }
 
             // Clear the destroy callback to avoid duplicated calls,
-            // even if the call throws an error
+            // even if the call throws an error.
+            // Whenever the mount is called, the destroy will be re-initialized.
+            // TODO: Add tests for this case
             hook.destroy_ = undefined;
         }
         hook = hook.next_;
