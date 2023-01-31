@@ -1,3 +1,7 @@
+## 1.7.6 (Jan 31, 2023)
+
+- Bugfix: Effect dependencies undefined when re-run the callback without re-rendering
+
 ## 1.7.5 (Jan 29, 2023)
 
 - Bugfix: Missing effect calls in case of non-rerendering
