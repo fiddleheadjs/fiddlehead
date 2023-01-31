@@ -1,6 +1,6 @@
 {
   "name": "fiddlehead",
-  "version": "1.7.5",
+  "version": "1.7.6",
   "description": "A lightweight library to build user interfaces with JSX and hooks.",
   "keywords": [
     "vdom",

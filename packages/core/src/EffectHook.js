@@ -64,8 +64,7 @@ export let mountEffects = (effectTag, vnode, isNewlyMounted) => {
         ) {
             // Update the previous deps
             hook.prevDeps_ = hook.deps_;
-            hook.deps_ = undefined;
-
+            
             // Run the effect mount callback
             try {
                 hook.destroy_ = hook.mount_();
@@ -73,7 +72,7 @@ export let mountEffects = (effectTag, vnode, isNewlyMounted) => {
                 catchError(error, vnode);
             }
 
-            // Do NOT clear the mount callback (to avoid duplicated calls, for instance).
+            // Do NOT clear hook.mount_ and hook.deps_ (to avoid duplicated calls, for instance).
             // There is a case, the effect mount/destroy can be called without
             // a component re-rendering which re-initializes the hooks.
             // TODO: Add tests for this case
