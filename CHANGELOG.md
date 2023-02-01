@@ -1,3 +1,7 @@
+## 1.7.7 (Feb 01, 2023)
+
+- Bugfix: Miss flushing currently processing info on error, that leads to lost of tracking of the current hook
+
 ## 1.7.6 (Jan 31, 2023)
 
 - Bugfix: Effect dependencies undefined when re-run the callback without re-rendering
