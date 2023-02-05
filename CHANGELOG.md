@@ -1,3 +1,7 @@
+## 1.7.8 (Feb 06, 2023)
+
+- Update README
+
 ## 1.7.7 (Feb 01, 2023)
 
 - Bugfix: Miss flushing currently processing info on error, that leads to lost of tracking of the current hook

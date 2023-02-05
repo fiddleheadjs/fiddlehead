@@ -2,20 +2,20 @@
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-green.svg?logo=github)](https://github.com/CocCoc-Ad-Platform/fiddlehead/blob/master/LICENSE) [![npm version](https://img.shields.io/npm/v/fiddlehead.svg?color=green&logo=npm)](https://www.npmjs.com/package/fiddlehead) [![bundle size](https://img.shields.io/github/size/CocCoc-Ad-Platform/fiddlehead/lib/core/esm.production.min.js?color=green)](https://github.com/CocCoc-Ad-Platform/fiddlehead/blob/master/lib/core/esm.production.min.js)
 
-Fiddlehead is a UI library that allows you to develop web apps in the declarative style,
-component-based - these make your lines of code more predictable and maintainable.
+[![Fiddlehead](./logo.png)](https://fiddleheadjs.com)
 
-If you are familiar with React before, using Fiddlehead is quite similar.
-It implements some of the main ideas of React: virtual DOM, functional components, and hooks.
+Transform your web development experience with Fiddlehead, the streamlined UI library!
+Say goodbye to complex code, and hello to predictable and maintainable solutions.
 
-Writing codes with Fiddlehead is nothing but JSX and hooks.
-It is aimed to be as simple as possible, while still providing an excellent development experience.
-With such criteria in mind, we made it some benefits:
-- Simple usage: only JSX and hooks
-- Performant: use only 50% memory, and slightly better CPU usage compared to React
-- Lightweight: only 8kb (or 3kb gzipped), compared to 132kb for React
+Fiddlehead offers a familiar experience for those who have used React,
+providing a simple, performant, and lightweight solution for developing web apps.
+All you need to write code is JSX and hooks - no extra hassle.
 
-[Try it on CodeSandbox](https://codesandbox.io/s/fiddlehead-stateful-component-d5pg76?from-embed)
+And the best part? Fiddlehead is not only simple, but also incredibly efficient.
+Expect up to 50% less memory usage and slightly better CPU performance compared to React,
+all in a lightweight package of just 8kb (or 3kb gzipped).
+
+Embrace the simplicity and power of Fiddlehead!
 
 ## Documentation
 
@@ -27,25 +27,17 @@ Some helpful links to get started:
 - [APIs](https://fiddleheadjs.com/API)
 - [Writing HTML in JSX](https://fiddleheadjs.com/Guides/Writing-HTML-in-JSX)
 
-## Why this project exists?
+## Why Choose Fiddlehead?
 
-### Motivation
+- Tiny: Fiddlehead is one of the smallest libraries for building user interfaces, making it perfect for projects that require a lightweight solution.
+- Performant: Fiddlehead is designed to be fast and efficient, consuming less memory than other libraries.
+- Familiar API: Fiddlehead's API is heavily inspired by React, making it easy for developers who are already familiar with React to get started.
+- No HOCs: With Fiddlehead, there's no need to use higher-order components (HOCs) like forwardRef and memo.
+- Store: Fiddlehead includes a simple store API that makes it easy to manage global state.
 
-- We love React APIs, especially, hooks
-- But we cannot use React for some projects as they are required to be very lightweight
-- We planned to build a simple library that is similar in usage to React
-- Then, after many challenges, it is done
-- The result is much better than our first expectation
-- It is not only much smaller in size, but faster and saves more memory than React
+With its small size, fast performance, and familiar API, Fiddlehead is the perfect choice for developers who need a simple and intuitive solution for building user interfaces.
 
-### Why to choose Fiddlehead
-
-- Tiny: only 8kb (or 3k gzipped)
-- Performant: faster and less memory usage
-- Only JSX and hooks. No class components.
-- Very similar usage to React.
-- No need to use HOCs: `forwardRef`, `memo`
-- Store: Global state management
+[Try it on CodeSandbox](https://codesandbox.io/s/fiddlehead-stateful-component-d5pg76?from-embed)
 
 ## License
 
