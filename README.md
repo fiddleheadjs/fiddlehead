@@ -32,11 +32,11 @@ Some helpful links to get started:
 
 ## Why Choose Fiddlehead?
 
-- Tiny: Fiddlehead is one of the smallest libraries for building user interfaces, making it perfect for projects that require a lightweight solution.
-- Performant: Fiddlehead is designed to be fast and efficient, consuming less memory than other libraries.
-- Familiar API: Fiddlehead's API is heavily inspired by React, making it easy for developers who are already familiar with React to get started.
-- No HOCs: With Fiddlehead, there's no need to use higher-order components (HOCs) like forwardRef and memo.
-- Store: Fiddlehead includes a simple store API that makes it easy to manage global state.
+- **Tiny**: Fiddlehead is one of the smallest libraries for building user interfaces, making it perfect for projects that require a lightweight solution.
+- **Performant**: Fiddlehead is designed to be fast and efficient, consuming less memory than other libraries.
+- **Familiar API**: Fiddlehead's API is heavily inspired by React, making it easy for developers who are already familiar with React to get started.
+- **No HOCs**: With Fiddlehead, there's no need to use higher-order components (HOCs) like forwardRef and memo.
+- **Store**: Fiddlehead includes a simple store API that makes it easy to manage global state.
 
 With its small size, fast performance, and familiar API, Fiddlehead is the perfect choice for developers who need a simple and intuitive solution for building user interfaces.
 
