@@ -2,7 +2,7 @@
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-green.svg?logo=github)](https://github.com/CocCoc-Ad-Platform/fiddlehead/blob/master/LICENSE) [![npm version](https://img.shields.io/npm/v/fiddlehead.svg?color=green&logo=npm)](https://www.npmjs.com/package/fiddlehead) [![bundle size](https://img.shields.io/github/size/CocCoc-Ad-Platform/fiddlehead/lib/core/esm.production.min.js?color=green)](https://github.com/CocCoc-Ad-Platform/fiddlehead/blob/master/lib/core/esm.production.min.js)
 
-[![Fiddlehead](./logo.png)](https://fiddleheadjs.com)
+<img src="./logo.png" alt="Fiddlehead" style="max-width: 100%; width: 350px; height: 97px; display: block; margin: auto;"/>
 
 Transform your web development experience with Fiddlehead, the streamlined UI library!
 Say goodbye to complex code, and hello to predictable and maintainable solutions.
@@ -19,7 +19,7 @@ Embrace the simplicity and power of Fiddlehead!
 
 ## Documentation
 
-**[➡️ Go to the Fiddlehead documentation website (Beta)](https://fiddleheadjs.com)**
+[Fiddlehead docs (beta)](https://fiddleheadjs.com)
 
 Some helpful links to get started:
 
