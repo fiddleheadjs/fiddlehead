@@ -2,10 +2,11 @@
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-green.svg?logo=github)](https://github.com/CocCoc-Ad-Platform/fiddlehead/blob/master/LICENSE) [![npm version](https://img.shields.io/npm/v/fiddlehead.svg?color=green&logo=npm)](https://www.npmjs.com/package/fiddlehead) [![bundle size](https://img.shields.io/github/size/CocCoc-Ad-Platform/fiddlehead/lib/core/esm.production.min.js?color=green)](https://github.com/CocCoc-Ad-Platform/fiddlehead/blob/master/lib/core/esm.production.min.js)
 
-<img src="./logo.png" alt="Fiddlehead" style="max-width: 100%; width: 350px; height: 97px; display: block; margin: auto;"/>
+<p align="center">
+<img src="./logo.png" alt="Fiddlehead" style="max-width: 100%; width: 350px; height: 97px"/>
+</p>
 
 Transform your web development experience with Fiddlehead, the streamlined UI library!
-Say goodbye to complex code, and hello to predictable and maintainable solutions.
 
 Fiddlehead offers a familiar experience for those who have used React,
 providing a simple, performant, and lightweight solution for developing web apps.
@@ -15,11 +16,11 @@ And the best part? Fiddlehead is not only simple, but also incredibly efficient.
 Expect up to 50% less memory usage and slightly better CPU performance compared to React,
 all in a lightweight package of just 8kb (or 3kb gzipped).
 
+_Discover its features now: https://fiddleheadjs.com_
+
 Embrace the simplicity and power of Fiddlehead!
 
 ## Documentation
-
-[Fiddlehead docs (beta)](https://fiddleheadjs.com)
 
 Some helpful links to get started:
 
