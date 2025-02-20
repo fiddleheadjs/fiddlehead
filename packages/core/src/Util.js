@@ -1,3 +1,7 @@
+export let scheduleTimeout = setTimeout;
+
+export let cancelTimeout = clearTimeout;
+
 export let hasOwnProperty = Object.prototype.hasOwnProperty;
 
 export let slice = Array.prototype.slice;

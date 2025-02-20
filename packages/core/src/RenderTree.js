@@ -3,6 +3,7 @@ import {mountEffects, destroyEffects, EFFECT_NORMAL, EFFECT_LAYOUT} from './Effe
 import {hydrateView} from './HydrateView';
 import {resolveMountingPoint, walkNativeChildren} from './MountingPoint';
 import {reconcileChildren} from './ReconcileChildren';
+import {cancelTimeout, scheduleTimeout} from './Util';
 import {Portal} from './VNode';
 
 /**
@@ -36,7 +37,7 @@ export let renderTree = (current) => {
     runEffectQueue(EFFECT_LAYOUT, effectQueue);
 
     // Schedule to run useEffect callbacks
-    setTimeout(runEffectQueue, 0, EFFECT_NORMAL, effectQueue);
+    scheduleTimeout(runEffectQueue, 0, EFFECT_NORMAL, effectQueue);
 };
 
 // Effect flags
@@ -76,7 +77,7 @@ let _performUnitOfWork = (current, root, effectQueue) => {
     // Do this before reconciliation because the current node can
     // be scheduled for another update while the reconciliation
     if (current.updateId_ !== null) {
-        clearTimeout(current.updateId_);
+        cancelTimeout(current.updateId_);
         current.updateId_ = null;
     }
 
@@ -144,7 +145,7 @@ let _performUnitOfWork = (current, root, effectQueue) => {
                 // Important!!!
                 // Cancel the update schedule on the deleted nodes
                 if (deleted.updateId_ !== null) {
-                    clearTimeout(deleted.updateId_);
+                    cancelTimeout(deleted.updateId_);
                     deleted.updateId_ = null;
                 }
                 // Never skip any node when handling deletions

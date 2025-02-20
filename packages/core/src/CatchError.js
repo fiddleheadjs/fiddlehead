@@ -1,4 +1,5 @@
 import {STATE_ERROR} from './StateHook';
+import {scheduleTimeout} from './Util';
 
 export let catchError = (error, vnode) => {
     let parent = vnode.parent_;
@@ -10,7 +11,7 @@ export let catchError = (error, vnode) => {
             if (hook.tag_ === STATE_ERROR) {
                 // Throw the error asynchorously
                 // to avoid blocking effect callbacks
-                setTimeout(() => {
+                scheduleTimeout(() => {
                     hook.setValue_((prevError) => {
                         if (prevError != null) {
                             return prevError;

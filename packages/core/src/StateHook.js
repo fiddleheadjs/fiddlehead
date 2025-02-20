@@ -1,7 +1,7 @@
 import {catchError} from './CatchError';
 import {resolveCurrentStateHook} from './CurrentlyProcessing';
 import {renderTree} from './RenderTree';
-import {theSame, isFunction} from './Util';
+import {theSame, isFunction, scheduleTimeout} from './Util';
 
 export const STATE_NORMAL = 0;
 export const STATE_ERROR = 1;
@@ -75,7 +75,7 @@ let _setState = function (value) {
         this.value_ = newValue;
 
         // Schedule a work to update the UI
-        this.context_.updateId_ = setTimeout(_flushUpdates, 0, this);
+        this.context_.updateId_ = scheduleTimeout(_flushUpdates, 0, this);
     }
 };
 
