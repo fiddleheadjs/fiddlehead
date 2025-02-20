@@ -8,14 +8,12 @@ describe('store.test.js', () => {
     const setMockValue = jest.fn();
 
     beforeEach(() => {
-        jest.useFakeTimers();
         renderView(<Root setMockValue={setMockValue}/>);
     });
 
     it('Components rendered correct when store updated',async () => {
         expect(screen.getByTestId('header').textContent).toBe('Header: ');
         expect(screen.getByTestId('footer-title').textContent).toBe('Footer: ');
-        jest.runAllTimers();
         setMockValue.mockReturnValue('Menu');
         userEvent.click(screen.getByTestId('header-btn'));
 
@@ -28,7 +26,6 @@ describe('store.test.js', () => {
     it('Components rendered correct when Children Components updated updated store',async () => {
         expect(screen.getByTestId('nav-list').textContent).toBe('Nav List: ');
         expect(screen.getByTestId('footer-nav-list').textContent).toBe('Nav list: ');
-        jest.runAllTimers();
         setMockValue.mockReturnValue(1);
         userEvent.click(screen.getByTestId('nav-list-btn'));
 
@@ -41,7 +38,6 @@ describe('store.test.js', () => {
     it('Components rendered correct when store update functions called together', async () => {
         expect(screen.getByTestId('header').textContent).toBe('Header: ');
         expect(screen.getByTestId('nav-list').textContent).toBe('Nav List: ');
-        jest.runAllTimers();
         setMockValue.mockReturnValue('Updated');
         userEvent.click(screen.getByTestId('set-multiple-btn'));
 
@@ -54,7 +50,6 @@ describe('store.test.js', () => {
     });
 
     it('Store update functions call in effect hook', async () => {
-        jest.runAllTimers();
         setMockValue.mockReturnValue(3);
         userEvent.click(screen.getByTestId('nav-list-btn'));
         await waitFor(() => {
@@ -64,7 +59,6 @@ describe('store.test.js', () => {
 
     // TODO: check this
     // it('Store updated when component destroy functions called store update',async () => {
-    //     jest.runAllTimers();
     //     setMockValue.mockReturnValue(1);
     //     userEvent.click(screen.getByTestId('nav-list-btn'));
     //     await waitFor(() => {
@@ -86,6 +80,5 @@ describe('store.test.js', () => {
         await resetView();
         cleanupView();
         jest.resetAllMocks();
-        jest.useRealTimers();
     });
 });

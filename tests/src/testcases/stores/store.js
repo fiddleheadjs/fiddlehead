@@ -85,7 +85,7 @@ function NavItem({setMockValue}) {
 
     return [
         <button
-            data-testid="nav-list-btn"
+            data-testid="nav-item-btn"
             onClick={(ev) => setNav(setMockValue())}
         />,
         <div data-testid="nav-item">Nav Item: {navItem}</div>,

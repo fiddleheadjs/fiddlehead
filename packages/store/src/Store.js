@@ -1,4 +1,4 @@
-import {useEffect, useState, useCallback} from 'core.pkg';
+import {useLayoutEffect, useState, useCallback} from 'core.pkg';
 
 /**
  * 
@@ -37,7 +37,7 @@ export let createStore = (data) => {
 export let useGlobalStoreRead = (store, readFn, compareFn) => {
     let datum = useState(readFn(store.data));
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         let subscriber = (data) => {
             if (compareFn === undefined) {
                 datum[1](readFn(data));
@@ -60,7 +60,7 @@ export let useGlobalStoreRead = (store, readFn, compareFn) => {
         };
 
         // readFn and compareFn must be pure functions
-        // we only accept ones was passed from the first call
+        // we only accept ones have been passed from the first call
     }, [store]);
 
     return datum[0];
