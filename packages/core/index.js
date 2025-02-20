@@ -1,4 +1,3 @@
-import {scheduleTimeout, cancelTimeout} from './src/Util';
 import {Fragment, Text} from './src/VNode';
 import {render} from './src/Render';
 import {createElement} from './src/JSXElement';
@@ -10,8 +9,6 @@ import {useCallback, useMemo} from './src/MemoHook';
 import {resolveRootVNode} from './src/CurrentlyProcessing';
 
 export {
-    scheduleTimeout,
-    cancelTimeout,
     Fragment,
     Text,
     render,

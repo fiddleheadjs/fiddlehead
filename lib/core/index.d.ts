@@ -1,8 +1,3 @@
-export {
-    setTimeout as scheduleTimeout,
-    clearTimeout as cancelTimeout
-};
-
 type Props = Record<string, any>;
 
 interface JSXElement {
